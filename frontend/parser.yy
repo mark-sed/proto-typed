@@ -60,46 +60,73 @@
 %token <double> FLOAT "float"
 %token <std::string> STRING "string"
 %token <bool> BOOL "bool"
-%token <std::string> VOID "void"
 
 /* Operators */
-%token <std::string> LPAR "("
-%token <std::string> RPAR ")"
-%token <std::string> LSQ "["
-%token <std::string> RSQ "]"
-%token <std::string> LBR "{"
-%token <std::string> RBR "}"
-%token <std::string> PLUS "+"
-%token <std::string> MUL "*"
-%token <std::string> MINUS "-"
-%token <std::string> DIV "/"
-%token <std::string> MOD "%"
-%token <std::string> POW "**"
+%token LPAR "("
+%token RPAR ")"
+%token LSQ "["
+%token RSQ "]"
+%token LBR "{"
+%token RBR "}"
+%token PLUS "+"
+%token MUL "*"
+%token MINUS "-"
+%token DIV "/"
+%token MOD "%"
+%token POW "**"
+%token CONCAT "++"
 
-%token <std::string> LAND "and"
-%token <std::string> LOR "or"
-%token <std::string> LNOT "not"
-%token <std::string> IN "in"
+%token LAND "and"
+%token LOR "or"
+%token LNOT "not"
+%token IN "in"
 
-%token <std::string> BAND "&"
-%token <std::string> BOR "|"
-%token <std::string> BXOR "^"
-%token <std::string> BNOT "~"
-%token <std::string> BLSHFT "<<"
-%token <std::string> BRSHFT ">>"
+%token BAND "&"
+%token BOR "|"
+%token BXOR "^"
+%token BNOT "~"
+%token BLSHFT "<<"
+%token BRSHFT ">>"
 
-%token <std::string> EQ "=="
-%token <std::string> NEQ "!="
-%token <std::string> BT ">"
-%token <std::string> LT "<"
-%token <std::string> BEQ ">="
-%token <std::string> LEQ "<="
+%token EQ "=="
+%token NEQ "!="
+%token BT ">"
+%token LT "<"
+%token BEQ ">="
+%token LEQ "<="
+
+%token RANGE ".."
+
+%token DOT "."
+%token COMMA ","
+%token COLON ":"
+
+%token SET "="
+// TODO: Add more op - +=, -=...
 
 /* Keywords */
-%token <std::string> VAR "var"
-%token <std::string>  ""
+%token KWVAR "var"
+%token KWIMPORT "import"
+%token KWAS "as"
+%token KWFROM "from"
+%token KWIF "if"
+%token KWELIF "elif"
+%token KWELSE "else"
+%token KWFOR "for"
+%token KWWHILE "while"
+%token KWDO "do"
+%token KWINT "\"int\""
+%token KWFLOAT "\"float\""
+%token KWSTRING "\"string\""
+%token KWBOOL "\"bool\""
+%token KWVOID "\"void\""
+%token KWSTRUCT "\"struct\""
+
+/* Identifiers */
+%token <std::string> ID "identifier"
 
 /* Associativity and precedence */
+%right SET
 %left LOR
 %left LAND
 %left IN
@@ -108,12 +135,14 @@
 %left BAND
 %left EQ NEQ
 %left BT BEQ LT LEQ
+%left RANGE
 %left BLSHFT BRSHFT
 %left PLUS MINUS
 %left MUL DIV MOD
 %right POW
+%left CONCAT
 %right LNOT BNOT
-
+%left DOT
 
 %precedence INT
 %precedence FLOAT
@@ -124,9 +153,21 @@
 
 %%
 
-start : END_FILE
-      | END start
+start : stmt
+
+stmt : stmt stmts
+     | END
+     |
+     ;
+
+stmts : type ID SET ID
       ;
+
+type : KWINT
+     | KWFLOAT
+     | KWSTRING
+     | KWBOOL
+     ;
 
 %%
 

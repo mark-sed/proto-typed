@@ -192,33 +192,7 @@ namespace  ptc  {
         break;
 
       case symbol_kind::S_STRING: // "string"
-      case symbol_kind::S_LPAR: // "("
-      case symbol_kind::S_RPAR: // ")"
-      case symbol_kind::S_LBR: // "["
-      case symbol_kind::S_RBR: // "]"
-      case symbol_kind::S_PLUS: // "+"
-      case symbol_kind::S_MUL: // "*"
-      case symbol_kind::S_MINUS: // "-"
-      case symbol_kind::S_DIV: // "/"
-      case symbol_kind::S_MOD: // "%"
-      case symbol_kind::S_POW: // "**"
-      case symbol_kind::S_LAND: // "and"
-      case symbol_kind::S_LOR: // "or"
-      case symbol_kind::S_LNOT: // "not"
-      case symbol_kind::S_IN: // "in"
-      case symbol_kind::S_BAND: // "&"
-      case symbol_kind::S_BOR: // "|"
-      case symbol_kind::S_BXOR: // "^"
-      case symbol_kind::S_BNOT: // "~"
-      case symbol_kind::S_BLSHFT: // "<<"
-      case symbol_kind::S_BRSHFT: // ">>"
-      case symbol_kind::S_EQ: // "=="
-      case symbol_kind::S_NEQ: // "!="
-      case symbol_kind::S_BT: // ">"
-      case symbol_kind::S_LT: // "<"
-      case symbol_kind::S_BEQ: // ">="
-      case symbol_kind::S_LEQ: // "<="
-      case symbol_kind::S_QUOTE: // "\""
+      case symbol_kind::S_ID: // "identifier"
         value.copy< std::string > (YY_MOVE (that.value));
         break;
 
@@ -266,33 +240,7 @@ namespace  ptc  {
         break;
 
       case symbol_kind::S_STRING: // "string"
-      case symbol_kind::S_LPAR: // "("
-      case symbol_kind::S_RPAR: // ")"
-      case symbol_kind::S_LBR: // "["
-      case symbol_kind::S_RBR: // "]"
-      case symbol_kind::S_PLUS: // "+"
-      case symbol_kind::S_MUL: // "*"
-      case symbol_kind::S_MINUS: // "-"
-      case symbol_kind::S_DIV: // "/"
-      case symbol_kind::S_MOD: // "%"
-      case symbol_kind::S_POW: // "**"
-      case symbol_kind::S_LAND: // "and"
-      case symbol_kind::S_LOR: // "or"
-      case symbol_kind::S_LNOT: // "not"
-      case symbol_kind::S_IN: // "in"
-      case symbol_kind::S_BAND: // "&"
-      case symbol_kind::S_BOR: // "|"
-      case symbol_kind::S_BXOR: // "^"
-      case symbol_kind::S_BNOT: // "~"
-      case symbol_kind::S_BLSHFT: // "<<"
-      case symbol_kind::S_BRSHFT: // ">>"
-      case symbol_kind::S_EQ: // "=="
-      case symbol_kind::S_NEQ: // "!="
-      case symbol_kind::S_BT: // ">"
-      case symbol_kind::S_LT: // "<"
-      case symbol_kind::S_BEQ: // ">="
-      case symbol_kind::S_LEQ: // "<="
-      case symbol_kind::S_QUOTE: // "\""
+      case symbol_kind::S_ID: // "identifier"
         value.move< std::string > (YY_MOVE (s.value));
         break;
 
@@ -410,33 +358,7 @@ namespace  ptc  {
         break;
 
       case symbol_kind::S_STRING: // "string"
-      case symbol_kind::S_LPAR: // "("
-      case symbol_kind::S_RPAR: // ")"
-      case symbol_kind::S_LBR: // "["
-      case symbol_kind::S_RBR: // "]"
-      case symbol_kind::S_PLUS: // "+"
-      case symbol_kind::S_MUL: // "*"
-      case symbol_kind::S_MINUS: // "-"
-      case symbol_kind::S_DIV: // "/"
-      case symbol_kind::S_MOD: // "%"
-      case symbol_kind::S_POW: // "**"
-      case symbol_kind::S_LAND: // "and"
-      case symbol_kind::S_LOR: // "or"
-      case symbol_kind::S_LNOT: // "not"
-      case symbol_kind::S_IN: // "in"
-      case symbol_kind::S_BAND: // "&"
-      case symbol_kind::S_BOR: // "|"
-      case symbol_kind::S_BXOR: // "^"
-      case symbol_kind::S_BNOT: // "~"
-      case symbol_kind::S_BLSHFT: // "<<"
-      case symbol_kind::S_BRSHFT: // ">>"
-      case symbol_kind::S_EQ: // "=="
-      case symbol_kind::S_NEQ: // "!="
-      case symbol_kind::S_BT: // ">"
-      case symbol_kind::S_LT: // "<"
-      case symbol_kind::S_BEQ: // ">="
-      case symbol_kind::S_LEQ: // "<="
-      case symbol_kind::S_QUOTE: // "\""
+      case symbol_kind::S_ID: // "identifier"
         value.YY_MOVE_OR_COPY< std::string > (YY_MOVE (that.value));
         break;
 
@@ -468,33 +390,7 @@ namespace  ptc  {
         break;
 
       case symbol_kind::S_STRING: // "string"
-      case symbol_kind::S_LPAR: // "("
-      case symbol_kind::S_RPAR: // ")"
-      case symbol_kind::S_LBR: // "["
-      case symbol_kind::S_RBR: // "]"
-      case symbol_kind::S_PLUS: // "+"
-      case symbol_kind::S_MUL: // "*"
-      case symbol_kind::S_MINUS: // "-"
-      case symbol_kind::S_DIV: // "/"
-      case symbol_kind::S_MOD: // "%"
-      case symbol_kind::S_POW: // "**"
-      case symbol_kind::S_LAND: // "and"
-      case symbol_kind::S_LOR: // "or"
-      case symbol_kind::S_LNOT: // "not"
-      case symbol_kind::S_IN: // "in"
-      case symbol_kind::S_BAND: // "&"
-      case symbol_kind::S_BOR: // "|"
-      case symbol_kind::S_BXOR: // "^"
-      case symbol_kind::S_BNOT: // "~"
-      case symbol_kind::S_BLSHFT: // "<<"
-      case symbol_kind::S_BRSHFT: // ">>"
-      case symbol_kind::S_EQ: // "=="
-      case symbol_kind::S_NEQ: // "!="
-      case symbol_kind::S_BT: // ">"
-      case symbol_kind::S_LT: // "<"
-      case symbol_kind::S_BEQ: // ">="
-      case symbol_kind::S_LEQ: // "<="
-      case symbol_kind::S_QUOTE: // "\""
+      case symbol_kind::S_ID: // "identifier"
         value.move< std::string > (YY_MOVE (that.value));
         break;
 
@@ -526,33 +422,7 @@ namespace  ptc  {
         break;
 
       case symbol_kind::S_STRING: // "string"
-      case symbol_kind::S_LPAR: // "("
-      case symbol_kind::S_RPAR: // ")"
-      case symbol_kind::S_LBR: // "["
-      case symbol_kind::S_RBR: // "]"
-      case symbol_kind::S_PLUS: // "+"
-      case symbol_kind::S_MUL: // "*"
-      case symbol_kind::S_MINUS: // "-"
-      case symbol_kind::S_DIV: // "/"
-      case symbol_kind::S_MOD: // "%"
-      case symbol_kind::S_POW: // "**"
-      case symbol_kind::S_LAND: // "and"
-      case symbol_kind::S_LOR: // "or"
-      case symbol_kind::S_LNOT: // "not"
-      case symbol_kind::S_IN: // "in"
-      case symbol_kind::S_BAND: // "&"
-      case symbol_kind::S_BOR: // "|"
-      case symbol_kind::S_BXOR: // "^"
-      case symbol_kind::S_BNOT: // "~"
-      case symbol_kind::S_BLSHFT: // "<<"
-      case symbol_kind::S_BRSHFT: // ">>"
-      case symbol_kind::S_EQ: // "=="
-      case symbol_kind::S_NEQ: // "!="
-      case symbol_kind::S_BT: // ">"
-      case symbol_kind::S_LT: // "<"
-      case symbol_kind::S_BEQ: // ">="
-      case symbol_kind::S_LEQ: // "<="
-      case symbol_kind::S_QUOTE: // "\""
+      case symbol_kind::S_ID: // "identifier"
         value.copy< std::string > (that.value);
         break;
 
@@ -583,33 +453,7 @@ namespace  ptc  {
         break;
 
       case symbol_kind::S_STRING: // "string"
-      case symbol_kind::S_LPAR: // "("
-      case symbol_kind::S_RPAR: // ")"
-      case symbol_kind::S_LBR: // "["
-      case symbol_kind::S_RBR: // "]"
-      case symbol_kind::S_PLUS: // "+"
-      case symbol_kind::S_MUL: // "*"
-      case symbol_kind::S_MINUS: // "-"
-      case symbol_kind::S_DIV: // "/"
-      case symbol_kind::S_MOD: // "%"
-      case symbol_kind::S_POW: // "**"
-      case symbol_kind::S_LAND: // "and"
-      case symbol_kind::S_LOR: // "or"
-      case symbol_kind::S_LNOT: // "not"
-      case symbol_kind::S_IN: // "in"
-      case symbol_kind::S_BAND: // "&"
-      case symbol_kind::S_BOR: // "|"
-      case symbol_kind::S_BXOR: // "^"
-      case symbol_kind::S_BNOT: // "~"
-      case symbol_kind::S_BLSHFT: // "<<"
-      case symbol_kind::S_BRSHFT: // ">>"
-      case symbol_kind::S_EQ: // "=="
-      case symbol_kind::S_NEQ: // "!="
-      case symbol_kind::S_BT: // ">"
-      case symbol_kind::S_LT: // "<"
-      case symbol_kind::S_BEQ: // ">="
-      case symbol_kind::S_LEQ: // "<="
-      case symbol_kind::S_QUOTE: // "\""
+      case symbol_kind::S_ID: // "identifier"
         value.move< std::string > (that.value);
         break;
 
@@ -884,33 +728,7 @@ namespace  ptc  {
         break;
 
       case symbol_kind::S_STRING: // "string"
-      case symbol_kind::S_LPAR: // "("
-      case symbol_kind::S_RPAR: // ")"
-      case symbol_kind::S_LBR: // "["
-      case symbol_kind::S_RBR: // "]"
-      case symbol_kind::S_PLUS: // "+"
-      case symbol_kind::S_MUL: // "*"
-      case symbol_kind::S_MINUS: // "-"
-      case symbol_kind::S_DIV: // "/"
-      case symbol_kind::S_MOD: // "%"
-      case symbol_kind::S_POW: // "**"
-      case symbol_kind::S_LAND: // "and"
-      case symbol_kind::S_LOR: // "or"
-      case symbol_kind::S_LNOT: // "not"
-      case symbol_kind::S_IN: // "in"
-      case symbol_kind::S_BAND: // "&"
-      case symbol_kind::S_BOR: // "|"
-      case symbol_kind::S_BXOR: // "^"
-      case symbol_kind::S_BNOT: // "~"
-      case symbol_kind::S_BLSHFT: // "<<"
-      case symbol_kind::S_BRSHFT: // ">>"
-      case symbol_kind::S_EQ: // "=="
-      case symbol_kind::S_NEQ: // "!="
-      case symbol_kind::S_BT: // ">"
-      case symbol_kind::S_LT: // "<"
-      case symbol_kind::S_BEQ: // ">="
-      case symbol_kind::S_LEQ: // "<="
-      case symbol_kind::S_QUOTE: // "\""
+      case symbol_kind::S_ID: // "identifier"
         yylhs.value.emplace< std::string > ();
         break;
 
@@ -935,7 +753,7 @@ namespace  ptc  {
           switch (yyn)
             {
 
-#line 939 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+#line 757 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
 
             default:
               break;
@@ -1287,62 +1105,67 @@ namespace  ptc  {
   }
 
 
-  const signed char  Parser ::yypact_ninf_ = -1;
+  const signed char  Parser ::yypact_ninf_ = -53;
 
   const signed char  Parser ::yytable_ninf_ = -1;
 
   const signed char
    Parser ::yypact_[] =
   {
-       0,    -1,     0,     1,    -1,    -1
+       1,   -53,     5,   -52,   -53,   -53,   -53,   -53,   -53,   -53,
+     -51,   -35,   -50,   -53
   };
 
   const signed char
    Parser ::yydefact_[] =
   {
-       0,     2,     0,     0,     3,     1
+       5,     4,     0,     2,     1,     7,     8,     9,    10,     3,
+       0,     0,     0,     6
   };
 
   const signed char
    Parser ::yypgoto_[] =
   {
-      -1,     2
+     -53,   -53,   -53,   -53,   -53
   };
 
   const signed char
    Parser ::yydefgoto_[] =
   {
-       0,     3
+       0,     2,     3,     9,    10
   };
 
   const signed char
    Parser ::yytable_[] =
   {
-       1,     5,     0,     2,     4
+       5,     6,     7,     8,     1,     4,    12,    11,    13
   };
 
   const signed char
    Parser ::yycheck_[] =
   {
-       0,     0,    -1,     3,     2
+      52,    53,    54,    55,     3,     0,    41,    58,    58
   };
 
   const signed char
    Parser ::yystos_[] =
   {
-       0,     0,     3,    37,    37,     0
+       0,     3,    61,    62,     0,    52,    53,    54,    55,    63,
+      64,    58,    41,    58
   };
 
   const signed char
    Parser ::yyr1_[] =
   {
-       0,    36,    37,    37
+       0,    60,    61,    62,    62,    62,    63,    64,    64,    64,
+      64
   };
 
   const signed char
    Parser ::yyr2_[] =
   {
-       0,     2,     1,     2
+       0,     2,     1,     2,     1,     0,     4,     1,     1,     1,
+       1
   };
 
 
@@ -1354,20 +1177,26 @@ namespace  ptc  {
   {
   "\"end of file\"", "error", "\"invalid token\"",
   "\"terminator (\\\\n or ;)\"", "\"int\"", "\"float\"", "\"string\"",
-  "\"bool\"", "\"(\"", "\")\"", "\"[\"", "\"]\"", "\"+\"", "\"*\"",
-  "\"-\"", "\"/\"", "\"%\"", "\"**\"", "\"and\"", "\"or\"", "\"not\"",
-  "\"in\"", "\"&\"", "\"|\"", "\"^\"", "\"~\"", "\"<<\"", "\">>\"",
-  "\"==\"", "\"!=\"", "\">\"", "\"<\"", "\">=\"", "\"<=\"", "\"\\\"\"",
-  "NEG", "$accept", "start", YY_NULLPTR
+  "\"bool\"", "\"(\"", "\")\"", "\"[\"", "\"]\"", "\"{\"", "\"}\"",
+  "\"+\"", "\"*\"", "\"-\"", "\"/\"", "\"%\"", "\"**\"", "\"++\"",
+  "\"and\"", "\"or\"", "\"not\"", "\"in\"", "\"&\"", "\"|\"", "\"^\"",
+  "\"~\"", "\"<<\"", "\">>\"", "\"==\"", "\"!=\"", "\">\"", "\"<\"",
+  "\">=\"", "\"<=\"", "\"..\"", "\".\"", "\",\"", "\":\"", "\"=\"",
+  "\"var\"", "\"import\"", "\"as\"", "\"from\"", "\"if\"", "\"elif\"",
+  "\"else\"", "\"for\"", "\"while\"", "\"do\"", "\"\\\"int\\\"\"",
+  "\"\\\"float\\\"\"", "\"\\\"string\\\"\"", "\"\\\"bool\\\"\"",
+  "\"\\\"void\\\"\"", "\"\\\"struct\\\"\"", "\"identifier\"", "NEG",
+  "$accept", "start", "stmt", "stmts", "type", YY_NULLPTR
   };
 #endif
 
 
 #if YYDEBUG
-  const signed char
+  const unsigned char
    Parser ::yyrline_[] =
   {
-       0,   123,   123,   124
+       0,   156,   156,   158,   159,   160,   163,   166,   167,   168,
+     169
   };
 
   void
@@ -1435,10 +1264,12 @@ namespace  ptc  {
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
       25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
-      35
+      35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
+      45,    46,    47,    48,    49,    50,    51,    52,    53,    54,
+      55,    56,    57,    58,    59
     };
     // Last valid token kind.
-    const int code_max = 290;
+    const int code_max = 314;
 
     if (t <= 0)
       return symbol_kind::S_YYEOF;
@@ -1450,9 +1281,9 @@ namespace  ptc  {
 
 #line 13 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
 } //  ptc 
-#line 1454 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+#line 1285 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
 
-#line 127 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+#line 172 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
 
 
 /* Error method */
