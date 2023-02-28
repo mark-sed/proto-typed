@@ -69,8 +69,8 @@
 %token LBR "{"
 %token RBR "}"
 %token PLUS "+"
-%token MUL "*"
 %token MINUS "-"
+%token MUL "*"
 %token DIV "/"
 %token MOD "%"
 %token POW "**"
@@ -115,12 +115,18 @@
 %token KWFOR "for"
 %token KWWHILE "while"
 %token KWDO "do"
+%token KWRETURN "return"
+%token KWBREAK "break"
+%token KWCONTINUE "continue"
+%token KWCONST "const"
 %token KWINT "\"int\""
 %token KWFLOAT "\"float\""
 %token KWSTRING "\"string\""
 %token KWBOOL "\"bool\""
-%token KWVOID "\"void\""
 %token KWSTRUCT "\"struct\""
+%token KWVOID "\"void\""
+
+//%token NIL "nil"
 
 /* Identifiers */
 %token <std::string> ID "identifier"
@@ -149,20 +155,95 @@
 
 %precedence NEG
 
+// Terminal types
+%type <long> expr_int
+%type <double> expr_float
+%type <std::string> expr_str
+%type <bool> expr_bool
+
 %locations
 
 %%
 
-start : stmt
-
-stmt : stmt stmts
-     | END
-     |
-     ;
-
-stmts : type ID SET ID
+start : END_FILE
+      | stmt END_FILE
       ;
 
+stmt : stmts END
+     | stmt stmts
+     ;
+
+// Statements
+stmts : END
+      | val
+      ;
+
+val : expr_int { std::cout << "=" << $1 << std::endl; }
+    | expr_float { std::cout << "=" << $1 << std::endl; }
+    | expr_str { std::cout << "=" << $1 << std::endl; }
+    | expr_bool { std::cout << "=" << $1 << std::endl; }
+    ;
+
+expr_int : INT { $$ = $1; }
+         | MINUS expr_int %prec NEG { $$ = -$2; }
+         | LPAR expr_int RPAR { $$ = $2; }
+         | expr_int MUL expr_int { $$ = $1 * $3; }
+         | expr_int DIV expr_int { $$ = $1 / $3; }
+         | expr_int MOD expr_int { $$ = $1 % $3; }
+         | expr_int MINUS expr_int { $$ = $1 - $3; }
+         | expr_int PLUS expr_int { $$ = $1 + $3; }
+         | expr_int BAND expr_int { $$ = $1 & $3; }
+         | expr_int BOR expr_int { $$ = $1 | $3; }
+         | expr_int BXOR expr_int { $$ = $1 ^ $3; }
+         | BNOT expr_int { $$ = ~$2; }
+         | expr_int BLSHFT expr_int { $$ = $1 << $3; }
+         | expr_int BRSHFT expr_int { $$ = $1 >> $3; }
+         ;
+
+expr_float : FLOAT { $$ = $1; }
+           | MINUS expr_float %prec NEG { $$ = -$2; }
+           | LPAR expr_float RPAR { $$ = $2; }
+           | expr_float POW expr_float { $$ = std::pow($1, $3); }
+           | expr_float MUL expr_float { $$ = $1 * $3; }
+           | expr_float DIV expr_float { $$ = $1 / $3; }
+           | expr_float MOD expr_float { $$ = std::fmod($1, $3); }
+           | expr_float MINUS expr_float { $$ = $1 - $3; }
+           | expr_float PLUS expr_float { $$ = $1 + $3; }
+           ;
+
+expr_str : STRING { $$ = $1; }
+         | LPAR expr_str RPAR { $$ = $2; }
+         | expr_str CONCAT expr_str { $$ = $1 + $3; }
+         ;
+
+expr_bool : BOOL { $$ = $1; }
+          | LPAR expr_bool RPAR { $$ = $2; }
+          | LNOT expr_bool { $$ = !$2; }
+          | expr_bool LOR expr_bool { $$ = $1 || $3; }
+          | expr_bool LAND expr_bool { $$ = $1 && $3; }
+          | expr_bool EQ expr_bool { $$ = $1 == $3; }
+          | expr_int EQ expr_int { $$ = $1 == $3; }
+          | expr_float EQ expr_float { $$ = $1 == $3; }
+          | expr_str EQ expr_str { $$ = $1 == $3; }
+          | expr_bool NEQ expr_bool { $$ = $1 != $3; }
+          | expr_int NEQ expr_int { $$ = $1 != $3; }
+          | expr_float NEQ expr_float { $$ = $1 != $3; }
+          | expr_str NEQ expr_str { $$ = $1 != $3; }
+          | expr_int BT expr_int { $$ = $1 > $3; }
+          | expr_float BT expr_float { $$ = $1 > $3; }
+          | expr_str BT expr_str { $$ = $1 > $3; }
+          | expr_int LT expr_int { $$ = $1 < $3; }
+          | expr_float LT expr_float { $$ = $1 < $3; }
+          | expr_str LT expr_str { $$ = $1 < $3; }
+          | expr_int BEQ expr_int { $$ = $1 >= $3; }
+          | expr_float BEQ expr_float { $$ = $1 >= $3; }
+          | expr_str BEQ expr_str { $$ = $1 >= $3; }
+          | expr_int LEQ expr_int { $$ = $1 <= $3; }
+          | expr_float LEQ expr_float { $$ = $1 <= $3; }
+          | expr_str LEQ expr_str { $$ = $1 <= $3; }
+          ;
+
+// Variable types
 type : KWINT
      | KWFLOAT
      | KWSTRING

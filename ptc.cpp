@@ -21,6 +21,7 @@ int main(int argc, char *argv[]) {
     auto code = &std::cin;
     if(argc > 1) {
         std::istringstream cdss(argv[1]);
+        std::cout << cdss.str() << std::endl;
         code = &cdss;
     }
 

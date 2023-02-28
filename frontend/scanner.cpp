@@ -1,4 +1,5 @@
 #include "scanner.hpp"
+#include <cstring>
 
 using namespace ptc;
 
@@ -16,4 +17,11 @@ void Scanner::parse(std::istream *code) {
         std::cerr << "ERROR!" << std::endl;
         exit(1);
     }
+}
+
+void Scanner::remove_quotes(char **str) {
+    // Remove first quote
+    *str = &(*str)[1];
+    // Remove last quote
+    (*str)[std::strlen(*str)-1] = '\0';
 }

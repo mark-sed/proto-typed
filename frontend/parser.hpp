@@ -661,16 +661,20 @@ namespace  ptc  {
     union union_type
     {
       // "bool"
+      // expr_bool
       char dummy1[sizeof (bool)];
 
       // "float"
+      // expr_float
       char dummy2[sizeof (double)];
 
       // "int"
+      // expr_int
       char dummy3[sizeof (long)];
 
       // "string"
       // "identifier"
+      // expr_str
       char dummy4[sizeof (std::string)];
     };
 
@@ -736,8 +740,8 @@ namespace  ptc  {
     LBR = 267,                     // "{"
     RBR = 268,                     // "}"
     PLUS = 269,                    // "+"
-    MUL = 270,                     // "*"
-    MINUS = 271,                   // "-"
+    MINUS = 270,                   // "-"
+    MUL = 271,                     // "*"
     DIV = 272,                     // "/"
     MOD = 273,                     // "%"
     POW = 274,                     // "**"
@@ -773,14 +777,18 @@ namespace  ptc  {
     KWFOR = 304,                   // "for"
     KWWHILE = 305,                 // "while"
     KWDO = 306,                    // "do"
-    KWINT = 307,                   // "\"int\""
-    KWFLOAT = 308,                 // "\"float\""
-    KWSTRING = 309,                // "\"string\""
-    KWBOOL = 310,                  // "\"bool\""
-    KWVOID = 311,                  // "\"void\""
-    KWSTRUCT = 312,                // "\"struct\""
-    ID = 313,                      // "identifier"
-    NEG = 314                      // NEG
+    KWRETURN = 307,                // "return"
+    KWBREAK = 308,                 // "break"
+    KWCONTINUE = 309,              // "continue"
+    KWCONST = 310,                 // "const"
+    KWINT = 311,                   // "\"int\""
+    KWFLOAT = 312,                 // "\"float\""
+    KWSTRING = 313,                // "\"string\""
+    KWBOOL = 314,                  // "\"bool\""
+    KWSTRUCT = 315,                // "\"struct\""
+    KWVOID = 316,                  // "\"void\""
+    ID = 317,                      // "identifier"
+    NEG = 318                      // NEG
       };
       /// Backward compatibility alias (Bison 3.6).
       typedef token_kind_type yytokentype;
@@ -797,7 +805,7 @@ namespace  ptc  {
     {
       enum symbol_kind_type
       {
-        YYNTOKENS = 60, ///< Number of tokens.
+        YYNTOKENS = 64, ///< Number of tokens.
         S_YYEMPTY = -2,
         S_YYEOF = 0,                             // "end of file"
         S_YYerror = 1,                           // error
@@ -814,8 +822,8 @@ namespace  ptc  {
         S_LBR = 12,                              // "{"
         S_RBR = 13,                              // "}"
         S_PLUS = 14,                             // "+"
-        S_MUL = 15,                              // "*"
-        S_MINUS = 16,                            // "-"
+        S_MINUS = 15,                            // "-"
+        S_MUL = 16,                              // "*"
         S_DIV = 17,                              // "/"
         S_MOD = 18,                              // "%"
         S_POW = 19,                              // "**"
@@ -851,19 +859,27 @@ namespace  ptc  {
         S_KWFOR = 49,                            // "for"
         S_KWWHILE = 50,                          // "while"
         S_KWDO = 51,                             // "do"
-        S_KWINT = 52,                            // "\"int\""
-        S_KWFLOAT = 53,                          // "\"float\""
-        S_KWSTRING = 54,                         // "\"string\""
-        S_KWBOOL = 55,                           // "\"bool\""
-        S_KWVOID = 56,                           // "\"void\""
-        S_KWSTRUCT = 57,                         // "\"struct\""
-        S_ID = 58,                               // "identifier"
-        S_NEG = 59,                              // NEG
-        S_YYACCEPT = 60,                         // $accept
-        S_start = 61,                            // start
-        S_stmt = 62,                             // stmt
-        S_stmts = 63,                            // stmts
-        S_type = 64                              // type
+        S_KWRETURN = 52,                         // "return"
+        S_KWBREAK = 53,                          // "break"
+        S_KWCONTINUE = 54,                       // "continue"
+        S_KWCONST = 55,                          // "const"
+        S_KWINT = 56,                            // "\"int\""
+        S_KWFLOAT = 57,                          // "\"float\""
+        S_KWSTRING = 58,                         // "\"string\""
+        S_KWBOOL = 59,                           // "\"bool\""
+        S_KWSTRUCT = 60,                         // "\"struct\""
+        S_KWVOID = 61,                           // "\"void\""
+        S_ID = 62,                               // "identifier"
+        S_NEG = 63,                              // NEG
+        S_YYACCEPT = 64,                         // $accept
+        S_start = 65,                            // start
+        S_stmt = 66,                             // stmt
+        S_stmts = 67,                            // stmts
+        S_val = 68,                              // val
+        S_expr_int = 69,                         // expr_int
+        S_expr_float = 70,                       // expr_float
+        S_expr_str = 71,                         // expr_str
+        S_expr_bool = 72                         // expr_bool
       };
     };
 
@@ -901,19 +917,23 @@ namespace  ptc  {
         switch (this->kind ())
     {
       case symbol_kind::S_BOOL: // "bool"
+      case symbol_kind::S_expr_bool: // expr_bool
         value.move< bool > (std::move (that.value));
         break;
 
       case symbol_kind::S_FLOAT: // "float"
+      case symbol_kind::S_expr_float: // expr_float
         value.move< double > (std::move (that.value));
         break;
 
       case symbol_kind::S_INT: // "int"
+      case symbol_kind::S_expr_int: // expr_int
         value.move< long > (std::move (that.value));
         break;
 
       case symbol_kind::S_STRING: // "string"
       case symbol_kind::S_ID: // "identifier"
+      case symbol_kind::S_expr_str: // expr_str
         value.move< std::string > (std::move (that.value));
         break;
 
@@ -1021,19 +1041,23 @@ namespace  ptc  {
 switch (yykind)
     {
       case symbol_kind::S_BOOL: // "bool"
+      case symbol_kind::S_expr_bool: // expr_bool
         value.template destroy< bool > ();
         break;
 
       case symbol_kind::S_FLOAT: // "float"
+      case symbol_kind::S_expr_float: // expr_float
         value.template destroy< double > ();
         break;
 
       case symbol_kind::S_INT: // "int"
+      case symbol_kind::S_expr_int: // expr_int
         value.template destroy< long > ();
         break;
 
       case symbol_kind::S_STRING: // "string"
       case symbol_kind::S_ID: // "identifier"
+      case symbol_kind::S_expr_str: // expr_str
         value.template destroy< std::string > ();
         break;
 
@@ -1136,7 +1160,7 @@ switch (yykind)
 #if !defined _MSC_VER || defined __clang__
         YY_ASSERT (tok == token::END_FILE
                    || (token::YYerror <= tok && tok <= token::END)
-                   || (token::LPAR <= tok && tok <= token::KWSTRUCT)
+                   || (token::LPAR <= tok && tok <= token::KWVOID)
                    || tok == token::NEG);
 #endif
       }
@@ -1465,21 +1489,6 @@ switch (yykind)
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
-      make_MUL (location_type l)
-      {
-        return symbol_type (token::MUL, std::move (l));
-      }
-#else
-      static
-      symbol_type
-      make_MUL (const location_type& l)
-      {
-        return symbol_type (token::MUL, l);
-      }
-#endif
-#if 201103L <= YY_CPLUSPLUS
-      static
-      symbol_type
       make_MINUS (location_type l)
       {
         return symbol_type (token::MINUS, std::move (l));
@@ -1490,6 +1499,21 @@ switch (yykind)
       make_MINUS (const location_type& l)
       {
         return symbol_type (token::MINUS, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_MUL (location_type l)
+      {
+        return symbol_type (token::MUL, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_MUL (const location_type& l)
+      {
+        return symbol_type (token::MUL, l);
       }
 #endif
 #if 201103L <= YY_CPLUSPLUS
@@ -2020,6 +2044,66 @@ switch (yykind)
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
+      make_KWRETURN (location_type l)
+      {
+        return symbol_type (token::KWRETURN, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_KWRETURN (const location_type& l)
+      {
+        return symbol_type (token::KWRETURN, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_KWBREAK (location_type l)
+      {
+        return symbol_type (token::KWBREAK, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_KWBREAK (const location_type& l)
+      {
+        return symbol_type (token::KWBREAK, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_KWCONTINUE (location_type l)
+      {
+        return symbol_type (token::KWCONTINUE, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_KWCONTINUE (const location_type& l)
+      {
+        return symbol_type (token::KWCONTINUE, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_KWCONST (location_type l)
+      {
+        return symbol_type (token::KWCONST, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_KWCONST (const location_type& l)
+      {
+        return symbol_type (token::KWCONST, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
       make_KWINT (location_type l)
       {
         return symbol_type (token::KWINT, std::move (l));
@@ -2080,21 +2164,6 @@ switch (yykind)
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
-      make_KWVOID (location_type l)
-      {
-        return symbol_type (token::KWVOID, std::move (l));
-      }
-#else
-      static
-      symbol_type
-      make_KWVOID (const location_type& l)
-      {
-        return symbol_type (token::KWVOID, l);
-      }
-#endif
-#if 201103L <= YY_CPLUSPLUS
-      static
-      symbol_type
       make_KWSTRUCT (location_type l)
       {
         return symbol_type (token::KWSTRUCT, std::move (l));
@@ -2105,6 +2174,21 @@ switch (yykind)
       make_KWSTRUCT (const location_type& l)
       {
         return symbol_type (token::KWSTRUCT, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_KWVOID (location_type l)
+      {
+        return symbol_type (token::KWVOID, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_KWVOID (const location_type& l)
+      {
+        return symbol_type (token::KWVOID, l);
       }
 #endif
 #if 201103L <= YY_CPLUSPLUS
@@ -2207,7 +2291,7 @@ switch (yykind)
     // Tables.
     // YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
     // STATE-NUM.
-    static const signed char yypact_[];
+    static const short yypact_[];
 
     // YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
     // Performed when YYTABLE does not specify something else to do.  Zero
@@ -2467,9 +2551,9 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 8,     ///< Last index in yytable_.
-      yynnts_ = 5,  ///< Number of nonterminal symbols.
-      yyfinal_ = 4 ///< Termination state number.
+      yylast_ = 317,     ///< Last index in yytable_.
+      yynnts_ = 9,  ///< Number of nonterminal symbols.
+      yyfinal_ = 33 ///< Termination state number.
     };
 
 
@@ -2481,7 +2565,7 @@ switch (yykind)
 
 #line 13 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
 } //  ptc 
-#line 2485 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
+#line 2569 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
 
 
 

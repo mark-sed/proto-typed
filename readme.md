@@ -90,11 +90,11 @@ int foo(int x) {
     return x*42
 }
 
-void bar(int[4] a) {
+nil bar(int[4] a) {
     a *= [42, 42, 42, 42]
 }
 
-void baz(int[] a, int v=42) {
+nil baz(int[] a, int v=42) {
     a *= matrix([len(a)], v)
 }
 
@@ -121,6 +121,12 @@ for(i : [1..x]) {
 }
 
 for(i : a) print(i)
+```
+
+### Constants
+```
+const a = "Hello"
+const b = true
 ```
 
 ### While/Do loop
@@ -152,6 +158,3 @@ int b = 8
 
 print(a + b)
 ```
-
-## Qs
-* Add pointer? Since int[1] is a pointer and dereference is with a[0]

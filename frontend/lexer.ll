@@ -32,8 +32,9 @@ using token = ptc::Parser::token;
 %option yyclass="ptc::Scanner"
 
 ws      [ \t]
-string	\"[^\n"]+\"
+string	\"[^\n"]*\"
 id      [a-zA-Z_][a-zA-Z0-9_]*
+hex     0[Xx][0-9A-Fa-f]+
 
 %%
 %{
@@ -60,6 +61,7 @@ id      [a-zA-Z_][a-zA-Z0-9_]*
                   loc->lines();
                   return token::END;
                 }
+";"             { return token::END; }
 
 "("             { return token::LPAR; }
 ")"             { return token::RPAR; }
@@ -67,12 +69,13 @@ id      [a-zA-Z_][a-zA-Z0-9_]*
 "]"             { return token::RSQ; }
 "{"             { return token::LBR; }
 "}"             { return token::RBR; }
+"++"            { return token::CONCAT; }
+"**"            { return token::POW; }
 "+"             { return token::PLUS; }
 "-"             { return token::MINUS; }
 "/"             { return token::DIV; }
+"*"             { return token::MUL; }
 "%"             { return token::MOD; }
-"**"            { return token::POW; }
-"++"            { return token::CONCAT; }
 
 "and"           { return token::LAND; }
 "or"            { return token::LOR; }
@@ -110,20 +113,52 @@ id      [a-zA-Z_][a-zA-Z0-9_]*
 "for"           { return token::KWFOR; }
 "while"         { return token::KWWHILE; }
 "do"            { return token::KWDO; }
+"return"        { return token::KWRETURN; }
+"break"         { return token::KWBREAK; }
+"continue"      { return token::KWCONTINUE; }
+"const"         { return token::KWCONST; }
 "int"           { return token::KWINT; }
 "float"         { return token::KWFLOAT; }
 "string"        { return token::KWSTRING; }
 "bool"          { return token::KWBOOL; }
-"void"          { return token::KWVOID; }
 "struct"        { return token::KWSTRUCT; }
+"void"          { return token::KWVOID; }
 
-{string}        { 
-                    yylval->build<std::string>(yytext);
-                    return token::STRING;
+"true"          { 
+                  yylval->emplace<bool>(true);
+                  return token::BOOL; 
+                }
+"false"         { 
+                  yylval->emplace<bool>(false);
+                  return token::BOOL; 
+                }
+
+{string}        { /* String */
+                  remove_quotes(&yytext);
+                  yylval->build<std::string>(yytext);
+                  return token::STRING;
+                }
+[-]?[0-9]+      { /* Integer (long) */
+                  // atol can be used since syntactical analysis was done here
+                  yylval->emplace<long>(atol(yytext));
+                  return token::INT;
+                }
+[-]?{hex}       { /* Hex Integer (long) */
+                  // atol can be used since syntactical analysis was done here
+                  yylval->emplace<long>(std::strtol(yytext, nullptr, 16));
+                  return token::INT;
+                }
+[-]?[0-9]+\.[0-9]+[eE][+-]?[0-9]+ {   // Float in scientific notation
+                  yylval->build<double>(std::stod(yytext)); 
+                  return token::FLOAT;
+                }
+[-]?[0-9]+\.[0-9]+ {   // Float
+                  yylval->build<double>(std::stod(yytext)); 
+                  return token::FLOAT;
                 }
 {id}            {
                     yylval->build<std::string>(yytext);
                     return token::ID;
                 }
-.               { std::cout << "ERROR" << std::endl; }
+.               { std::cout << "ERROR: Unknown token '" << yytext << "'" << std::endl; }
 %%

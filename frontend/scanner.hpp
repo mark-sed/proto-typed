@@ -23,6 +23,7 @@ public:
                       ptc::Parser::location_type *location);
 
     void parse(std::istream *code);
+    void remove_quotes(char **str);
 };
 
 

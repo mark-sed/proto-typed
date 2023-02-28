@@ -180,19 +180,23 @@ namespace  ptc  {
     switch (this->kind ())
     {
       case symbol_kind::S_BOOL: // "bool"
+      case symbol_kind::S_expr_bool: // expr_bool
         value.copy< bool > (YY_MOVE (that.value));
         break;
 
       case symbol_kind::S_FLOAT: // "float"
+      case symbol_kind::S_expr_float: // expr_float
         value.copy< double > (YY_MOVE (that.value));
         break;
 
       case symbol_kind::S_INT: // "int"
+      case symbol_kind::S_expr_int: // expr_int
         value.copy< long > (YY_MOVE (that.value));
         break;
 
       case symbol_kind::S_STRING: // "string"
       case symbol_kind::S_ID: // "identifier"
+      case symbol_kind::S_expr_str: // expr_str
         value.copy< std::string > (YY_MOVE (that.value));
         break;
 
@@ -228,19 +232,23 @@ namespace  ptc  {
     switch (this->kind ())
     {
       case symbol_kind::S_BOOL: // "bool"
+      case symbol_kind::S_expr_bool: // expr_bool
         value.move< bool > (YY_MOVE (s.value));
         break;
 
       case symbol_kind::S_FLOAT: // "float"
+      case symbol_kind::S_expr_float: // expr_float
         value.move< double > (YY_MOVE (s.value));
         break;
 
       case symbol_kind::S_INT: // "int"
+      case symbol_kind::S_expr_int: // expr_int
         value.move< long > (YY_MOVE (s.value));
         break;
 
       case symbol_kind::S_STRING: // "string"
       case symbol_kind::S_ID: // "identifier"
+      case symbol_kind::S_expr_str: // expr_str
         value.move< std::string > (YY_MOVE (s.value));
         break;
 
@@ -346,19 +354,23 @@ namespace  ptc  {
     switch (that.kind ())
     {
       case symbol_kind::S_BOOL: // "bool"
+      case symbol_kind::S_expr_bool: // expr_bool
         value.YY_MOVE_OR_COPY< bool > (YY_MOVE (that.value));
         break;
 
       case symbol_kind::S_FLOAT: // "float"
+      case symbol_kind::S_expr_float: // expr_float
         value.YY_MOVE_OR_COPY< double > (YY_MOVE (that.value));
         break;
 
       case symbol_kind::S_INT: // "int"
+      case symbol_kind::S_expr_int: // expr_int
         value.YY_MOVE_OR_COPY< long > (YY_MOVE (that.value));
         break;
 
       case symbol_kind::S_STRING: // "string"
       case symbol_kind::S_ID: // "identifier"
+      case symbol_kind::S_expr_str: // expr_str
         value.YY_MOVE_OR_COPY< std::string > (YY_MOVE (that.value));
         break;
 
@@ -378,19 +390,23 @@ namespace  ptc  {
     switch (that.kind ())
     {
       case symbol_kind::S_BOOL: // "bool"
+      case symbol_kind::S_expr_bool: // expr_bool
         value.move< bool > (YY_MOVE (that.value));
         break;
 
       case symbol_kind::S_FLOAT: // "float"
+      case symbol_kind::S_expr_float: // expr_float
         value.move< double > (YY_MOVE (that.value));
         break;
 
       case symbol_kind::S_INT: // "int"
+      case symbol_kind::S_expr_int: // expr_int
         value.move< long > (YY_MOVE (that.value));
         break;
 
       case symbol_kind::S_STRING: // "string"
       case symbol_kind::S_ID: // "identifier"
+      case symbol_kind::S_expr_str: // expr_str
         value.move< std::string > (YY_MOVE (that.value));
         break;
 
@@ -410,19 +426,23 @@ namespace  ptc  {
     switch (that.kind ())
     {
       case symbol_kind::S_BOOL: // "bool"
+      case symbol_kind::S_expr_bool: // expr_bool
         value.copy< bool > (that.value);
         break;
 
       case symbol_kind::S_FLOAT: // "float"
+      case symbol_kind::S_expr_float: // expr_float
         value.copy< double > (that.value);
         break;
 
       case symbol_kind::S_INT: // "int"
+      case symbol_kind::S_expr_int: // expr_int
         value.copy< long > (that.value);
         break;
 
       case symbol_kind::S_STRING: // "string"
       case symbol_kind::S_ID: // "identifier"
+      case symbol_kind::S_expr_str: // expr_str
         value.copy< std::string > (that.value);
         break;
 
@@ -441,19 +461,23 @@ namespace  ptc  {
     switch (that.kind ())
     {
       case symbol_kind::S_BOOL: // "bool"
+      case symbol_kind::S_expr_bool: // expr_bool
         value.move< bool > (that.value);
         break;
 
       case symbol_kind::S_FLOAT: // "float"
+      case symbol_kind::S_expr_float: // expr_float
         value.move< double > (that.value);
         break;
 
       case symbol_kind::S_INT: // "int"
+      case symbol_kind::S_expr_int: // expr_int
         value.move< long > (that.value);
         break;
 
       case symbol_kind::S_STRING: // "string"
       case symbol_kind::S_ID: // "identifier"
+      case symbol_kind::S_expr_str: // expr_str
         value.move< std::string > (that.value);
         break;
 
@@ -716,19 +740,23 @@ namespace  ptc  {
       switch (yyr1_[yyn])
     {
       case symbol_kind::S_BOOL: // "bool"
+      case symbol_kind::S_expr_bool: // expr_bool
         yylhs.value.emplace< bool > ();
         break;
 
       case symbol_kind::S_FLOAT: // "float"
+      case symbol_kind::S_expr_float: // expr_float
         yylhs.value.emplace< double > ();
         break;
 
       case symbol_kind::S_INT: // "int"
+      case symbol_kind::S_expr_int: // expr_int
         yylhs.value.emplace< long > ();
         break;
 
       case symbol_kind::S_STRING: // "string"
       case symbol_kind::S_ID: // "identifier"
+      case symbol_kind::S_expr_str: // expr_str
         yylhs.value.emplace< std::string > ();
         break;
 
@@ -752,8 +780,338 @@ namespace  ptc  {
         {
           switch (yyn)
             {
+  case 8: // val: expr_int
+#line 181 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+               { std::cout << "=" << yystack_[0].value.as < long > () << std::endl; }
+#line 787 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
 
-#line 757 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+  case 9: // val: expr_float
+#line 182 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                 { std::cout << "=" << yystack_[0].value.as < double > () << std::endl; }
+#line 793 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 10: // val: expr_str
+#line 183 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+               { std::cout << "=" << yystack_[0].value.as < std::string > () << std::endl; }
+#line 799 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 11: // val: expr_bool
+#line 184 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                { std::cout << "=" << yystack_[0].value.as < bool > () << std::endl; }
+#line 805 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 12: // expr_int: "int"
+#line 187 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+               { yylhs.value.as < long > () = yystack_[0].value.as < long > (); }
+#line 811 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 13: // expr_int: "-" expr_int
+#line 188 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                    { yylhs.value.as < long > () = -yystack_[0].value.as < long > (); }
+#line 817 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 14: // expr_int: "(" expr_int ")"
+#line 189 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                              { yylhs.value.as < long > () = yystack_[1].value.as < long > (); }
+#line 823 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 15: // expr_int: expr_int "*" expr_int
+#line 190 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                 { yylhs.value.as < long > () = yystack_[2].value.as < long > () * yystack_[0].value.as < long > (); }
+#line 829 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 16: // expr_int: expr_int "/" expr_int
+#line 191 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                 { yylhs.value.as < long > () = yystack_[2].value.as < long > () / yystack_[0].value.as < long > (); }
+#line 835 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 17: // expr_int: expr_int "%" expr_int
+#line 192 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                 { yylhs.value.as < long > () = yystack_[2].value.as < long > () % yystack_[0].value.as < long > (); }
+#line 841 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 18: // expr_int: expr_int "-" expr_int
+#line 193 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                   { yylhs.value.as < long > () = yystack_[2].value.as < long > () - yystack_[0].value.as < long > (); }
+#line 847 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 19: // expr_int: expr_int "+" expr_int
+#line 194 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                  { yylhs.value.as < long > () = yystack_[2].value.as < long > () + yystack_[0].value.as < long > (); }
+#line 853 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 20: // expr_int: expr_int "&" expr_int
+#line 195 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                  { yylhs.value.as < long > () = yystack_[2].value.as < long > () & yystack_[0].value.as < long > (); }
+#line 859 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 21: // expr_int: expr_int "|" expr_int
+#line 196 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                 { yylhs.value.as < long > () = yystack_[2].value.as < long > () | yystack_[0].value.as < long > (); }
+#line 865 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 22: // expr_int: expr_int "^" expr_int
+#line 197 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                  { yylhs.value.as < long > () = yystack_[2].value.as < long > () ^ yystack_[0].value.as < long > (); }
+#line 871 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 23: // expr_int: "~" expr_int
+#line 198 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                         { yylhs.value.as < long > () = ~yystack_[0].value.as < long > (); }
+#line 877 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 24: // expr_int: expr_int "<<" expr_int
+#line 199 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                    { yylhs.value.as < long > () = yystack_[2].value.as < long > () << yystack_[0].value.as < long > (); }
+#line 883 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 25: // expr_int: expr_int ">>" expr_int
+#line 200 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                    { yylhs.value.as < long > () = yystack_[2].value.as < long > () >> yystack_[0].value.as < long > (); }
+#line 889 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 26: // expr_float: "float"
+#line 203 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                   { yylhs.value.as < double > () = yystack_[0].value.as < double > (); }
+#line 895 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 27: // expr_float: "-" expr_float
+#line 204 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                        { yylhs.value.as < double > () = -yystack_[0].value.as < double > (); }
+#line 901 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 28: // expr_float: "(" expr_float ")"
+#line 205 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                  { yylhs.value.as < double > () = yystack_[1].value.as < double > (); }
+#line 907 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 29: // expr_float: expr_float "**" expr_float
+#line 206 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                       { yylhs.value.as < double > () = std::pow(yystack_[2].value.as < double > (), yystack_[0].value.as < double > ()); }
+#line 913 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 30: // expr_float: expr_float "*" expr_float
+#line 207 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                       { yylhs.value.as < double > () = yystack_[2].value.as < double > () * yystack_[0].value.as < double > (); }
+#line 919 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 31: // expr_float: expr_float "/" expr_float
+#line 208 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                       { yylhs.value.as < double > () = yystack_[2].value.as < double > () / yystack_[0].value.as < double > (); }
+#line 925 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 32: // expr_float: expr_float "%" expr_float
+#line 209 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                       { yylhs.value.as < double > () = std::fmod(yystack_[2].value.as < double > (), yystack_[0].value.as < double > ()); }
+#line 931 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 33: // expr_float: expr_float "-" expr_float
+#line 210 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                         { yylhs.value.as < double > () = yystack_[2].value.as < double > () - yystack_[0].value.as < double > (); }
+#line 937 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 34: // expr_float: expr_float "+" expr_float
+#line 211 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                        { yylhs.value.as < double > () = yystack_[2].value.as < double > () + yystack_[0].value.as < double > (); }
+#line 943 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 35: // expr_str: "string"
+#line 214 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                  { yylhs.value.as < std::string > () = yystack_[0].value.as < std::string > (); }
+#line 949 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 36: // expr_str: "(" expr_str ")"
+#line 215 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                              { yylhs.value.as < std::string > () = yystack_[1].value.as < std::string > (); }
+#line 955 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 37: // expr_str: expr_str "++" expr_str
+#line 216 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                    { yylhs.value.as < std::string > () = yystack_[2].value.as < std::string > () + yystack_[0].value.as < std::string > (); }
+#line 961 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 38: // expr_bool: "bool"
+#line 219 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                 { yylhs.value.as < bool > () = yystack_[0].value.as < bool > (); }
+#line 967 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 39: // expr_bool: "(" expr_bool ")"
+#line 220 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                { yylhs.value.as < bool > () = yystack_[1].value.as < bool > (); }
+#line 973 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 40: // expr_bool: "not" expr_bool
+#line 221 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                           { yylhs.value.as < bool > () = !yystack_[0].value.as < bool > (); }
+#line 979 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 41: // expr_bool: expr_bool "or" expr_bool
+#line 222 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                    { yylhs.value.as < bool > () = yystack_[2].value.as < bool > () || yystack_[0].value.as < bool > (); }
+#line 985 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 42: // expr_bool: expr_bool "and" expr_bool
+#line 223 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                     { yylhs.value.as < bool > () = yystack_[2].value.as < bool > () && yystack_[0].value.as < bool > (); }
+#line 991 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 43: // expr_bool: expr_bool "==" expr_bool
+#line 224 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                   { yylhs.value.as < bool > () = yystack_[2].value.as < bool > () == yystack_[0].value.as < bool > (); }
+#line 997 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 44: // expr_bool: expr_int "==" expr_int
+#line 225 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                 { yylhs.value.as < bool > () = yystack_[2].value.as < long > () == yystack_[0].value.as < long > (); }
+#line 1003 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 45: // expr_bool: expr_float "==" expr_float
+#line 226 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                     { yylhs.value.as < bool > () = yystack_[2].value.as < double > () == yystack_[0].value.as < double > (); }
+#line 1009 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 46: // expr_bool: expr_str "==" expr_str
+#line 227 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                 { yylhs.value.as < bool > () = yystack_[2].value.as < std::string > () == yystack_[0].value.as < std::string > (); }
+#line 1015 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 47: // expr_bool: expr_bool "!=" expr_bool
+#line 228 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                    { yylhs.value.as < bool > () = yystack_[2].value.as < bool > () != yystack_[0].value.as < bool > (); }
+#line 1021 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 48: // expr_bool: expr_int "!=" expr_int
+#line 229 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                  { yylhs.value.as < bool > () = yystack_[2].value.as < long > () != yystack_[0].value.as < long > (); }
+#line 1027 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 49: // expr_bool: expr_float "!=" expr_float
+#line 230 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                      { yylhs.value.as < bool > () = yystack_[2].value.as < double > () != yystack_[0].value.as < double > (); }
+#line 1033 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 50: // expr_bool: expr_str "!=" expr_str
+#line 231 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                  { yylhs.value.as < bool > () = yystack_[2].value.as < std::string > () != yystack_[0].value.as < std::string > (); }
+#line 1039 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 51: // expr_bool: expr_int ">" expr_int
+#line 232 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                 { yylhs.value.as < bool > () = yystack_[2].value.as < long > () > yystack_[0].value.as < long > (); }
+#line 1045 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 52: // expr_bool: expr_float ">" expr_float
+#line 233 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                     { yylhs.value.as < bool > () = yystack_[2].value.as < double > () > yystack_[0].value.as < double > (); }
+#line 1051 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 53: // expr_bool: expr_str ">" expr_str
+#line 234 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                 { yylhs.value.as < bool > () = yystack_[2].value.as < std::string > () > yystack_[0].value.as < std::string > (); }
+#line 1057 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 54: // expr_bool: expr_int "<" expr_int
+#line 235 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                 { yylhs.value.as < bool > () = yystack_[2].value.as < long > () < yystack_[0].value.as < long > (); }
+#line 1063 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 55: // expr_bool: expr_float "<" expr_float
+#line 236 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                     { yylhs.value.as < bool > () = yystack_[2].value.as < double > () < yystack_[0].value.as < double > (); }
+#line 1069 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 56: // expr_bool: expr_str "<" expr_str
+#line 237 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                 { yylhs.value.as < bool > () = yystack_[2].value.as < std::string > () < yystack_[0].value.as < std::string > (); }
+#line 1075 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 57: // expr_bool: expr_int ">=" expr_int
+#line 238 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                  { yylhs.value.as < bool > () = yystack_[2].value.as < long > () >= yystack_[0].value.as < long > (); }
+#line 1081 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 58: // expr_bool: expr_float ">=" expr_float
+#line 239 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                      { yylhs.value.as < bool > () = yystack_[2].value.as < double > () >= yystack_[0].value.as < double > (); }
+#line 1087 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 59: // expr_bool: expr_str ">=" expr_str
+#line 240 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                  { yylhs.value.as < bool > () = yystack_[2].value.as < std::string > () >= yystack_[0].value.as < std::string > (); }
+#line 1093 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 60: // expr_bool: expr_int "<=" expr_int
+#line 241 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                  { yylhs.value.as < bool > () = yystack_[2].value.as < long > () <= yystack_[0].value.as < long > (); }
+#line 1099 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 61: // expr_bool: expr_float "<=" expr_float
+#line 242 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                      { yylhs.value.as < bool > () = yystack_[2].value.as < double > () <= yystack_[0].value.as < double > (); }
+#line 1105 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+  case 62: // expr_bool: expr_str "<=" expr_str
+#line 243 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+                                  { yylhs.value.as < bool > () = yystack_[2].value.as < std::string > () <= yystack_[0].value.as < std::string > (); }
+#line 1111 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+    break;
+
+
+#line 1115 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
 
             default:
               break;
@@ -1105,67 +1463,172 @@ namespace  ptc  {
   }
 
 
-  const signed char  Parser ::yypact_ninf_ = -53;
+  const signed char  Parser ::yypact_ninf_ = -24;
 
   const signed char  Parser ::yytable_ninf_ = -1;
 
-  const signed char
+  const short
    Parser ::yypact_[] =
   {
-       1,   -53,     5,   -52,   -53,   -53,   -53,   -53,   -53,   -53,
-     -51,   -35,   -50,   -53
+      91,   -24,   -24,   -24,   -24,   -24,   -24,   185,    85,   185,
+     101,     5,   120,    14,   -24,   189,   212,   265,   100,   124,
+     152,   143,     2,    85,   -24,   -24,   189,   212,   265,   -24,
+     101,   101,   -24,   -24,   -24,   -24,   -24,   101,   101,   101,
+     101,   101,   101,   101,   101,   101,   101,   101,   101,   101,
+     101,   101,   101,    96,    96,    96,    96,    96,    96,    96,
+      96,    96,    96,    96,    96,    24,    24,    24,    24,    24,
+      24,    24,   185,   185,   185,   185,   -24,   -24,   -24,   -24,
+     224,   293,   -15,   -15,   -24,   -24,   -24,   180,   247,   264,
+     299,   299,   241,   241,   241,   241,   241,   241,    96,    96,
+     128,   128,    -9,    -9,    -9,    -9,    45,    45,    45,    45,
+      45,    45,    24,   -24,     1,     1,     1,     1,     1,     1,
+     -23,     7,   -24,   -24,    -5
   };
 
   const signed char
    Parser ::yydefact_[] =
   {
-       5,     4,     0,     2,     1,     7,     8,     9,    10,     3,
-       0,     0,     0,     6
+       0,     2,     6,    12,    26,    35,    38,     0,     0,     0,
+       0,     0,     0,     0,     7,     8,     9,    10,    11,     0,
+       0,     0,     0,     0,    13,    27,     0,     0,     0,    40,
+       0,     0,    23,     1,     3,     5,     4,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,    14,    28,    36,    39,
+       0,     0,    19,    18,    15,    16,    17,    20,    21,    22,
+      24,    25,    44,    48,    51,    54,    57,    60,     0,     0,
+      34,    33,    30,    31,    32,    29,    45,    49,    52,    55,
+      58,    61,     0,    37,    46,    50,    53,    56,    59,    62,
+      42,    41,    43,    47,     0
   };
 
   const signed char
    Parser ::yypgoto_[] =
   {
-     -53,   -53,   -53,   -53,   -53
+     -24,   -24,   -24,    23,   -24,     6,    19,     0,    13
   };
 
   const signed char
    Parser ::yydefgoto_[] =
   {
-       0,     2,     3,     9,    10
+       0,    11,    12,    13,    14,    26,    27,    28,    18
   };
 
   const signed char
    Parser ::yytable_[] =
   {
-       5,     6,     7,     8,     1,     4,    12,    11,    13
+      17,    39,    40,    41,    78,    33,    15,    21,    74,    75,
+      58,    79,    17,    19,    24,    65,    32,    36,    15,    16,
+      22,    65,    29,    72,    73,     0,    20,    25,    72,    80,
+       5,    16,   112,    74,    75,    35,    80,    24,    74,    75,
+       0,     0,    81,    82,    83,    84,    85,    86,    87,    88,
+      89,    90,    91,    92,    93,    94,    95,    96,    97,    53,
+      54,    55,    56,    57,    58,   113,   114,   115,   116,   117,
+     118,   119,   100,   101,   102,   103,   104,   105,   106,   107,
+     108,   109,   110,   111,     0,   120,   121,   122,   123,     3,
+       4,     1,     0,    23,     2,     3,     4,     5,     6,     7,
+       8,     4,     0,     0,    98,     3,     8,     0,     0,    30,
+       0,    99,   124,    10,     9,     0,    31,    81,    25,    10,
+      34,    72,    73,     2,     3,     4,     5,     6,     7,    10,
+       0,    74,    75,    76,     0,     8,     0,     0,    37,    38,
+      39,    40,    41,     9,    55,    56,    57,    58,    10,    42,
+      43,    44,    78,    45,    46,    47,    48,    49,    50,    51,
+      52,    77,     0,    65,     0,     0,    53,    54,    55,    56,
+      57,    58,     0,     0,    66,    67,    68,    69,    70,    71,
+       0,     0,     0,    59,    60,    61,    62,    63,    64,     3,
+       4,     5,     6,     7,    37,    38,    39,    40,    41,     0,
+       8,     0,     0,    37,    38,    39,    40,    41,     9,    45,
+      46,     0,     0,    10,    42,    43,    44,     0,    45,    46,
+      47,    48,    49,    50,    51,    52,    53,    54,    55,    56,
+      57,    58,     0,    76,     0,     0,     0,     0,    37,    38,
+      39,    40,    41,    59,    60,    61,    62,    63,    64,    42,
+      43,    44,     0,    45,    46,    37,    38,    39,    40,    41,
+       0,    37,    38,    39,    40,    41,    42,    43,    44,     0,
+      45,    46,    42,     0,    44,     0,    45,    46,    37,    38,
+      39,    40,    41,     0,     0,    65,     0,     0,     0,    42,
+       0,     0,     0,    45,    46,     0,    66,    67,    68,    69,
+      70,    71,    77,     0,     0,     0,     0,    53,    54,    55,
+      56,    57,    58,    37,    38,    39,    40,    41
   };
 
   const signed char
    Parser ::yycheck_[] =
   {
-      52,    53,    54,    55,     3,     0,    41,    58,    58
+       0,    16,    17,    18,     9,     0,     0,     7,    31,    32,
+      19,     9,    12,     7,     8,    20,    10,     3,    12,     0,
+       7,    20,     9,    21,    22,    -1,     7,     8,    21,    23,
+       6,    12,     8,    31,    32,    12,    30,    31,    31,    32,
+      -1,    -1,    23,    37,    38,    39,    40,    41,    42,    43,
+      44,    45,    46,    47,    48,    49,    50,    51,    52,    14,
+      15,    16,    17,    18,    19,    65,    66,    67,    68,    69,
+      70,    71,    53,    54,    55,    56,    57,    58,    59,    60,
+      61,    62,    63,    64,    -1,    72,    73,    74,    75,     4,
+       5,     0,    -1,     8,     3,     4,     5,     6,     7,     8,
+      15,     5,    -1,    -1,     8,     4,    15,    -1,    -1,     8,
+      -1,    15,   112,    28,    23,    -1,    15,    98,    99,    28,
+       0,    21,    22,     3,     4,     5,     6,     7,     8,    28,
+      -1,    31,    32,     9,    -1,    15,    -1,    -1,    14,    15,
+      16,    17,    18,    23,    16,    17,    18,    19,    28,    25,
+      26,    27,     9,    29,    30,    31,    32,    33,    34,    35,
+      36,     9,    -1,    20,    -1,    -1,    14,    15,    16,    17,
+      18,    19,    -1,    -1,    31,    32,    33,    34,    35,    36,
+      -1,    -1,    -1,    31,    32,    33,    34,    35,    36,     4,
+       5,     6,     7,     8,    14,    15,    16,    17,    18,    -1,
+      15,    -1,    -1,    14,    15,    16,    17,    18,    23,    29,
+      30,    -1,    -1,    28,    25,    26,    27,    -1,    29,    30,
+      31,    32,    33,    34,    35,    36,    14,    15,    16,    17,
+      18,    19,    -1,     9,    -1,    -1,    -1,    -1,    14,    15,
+      16,    17,    18,    31,    32,    33,    34,    35,    36,    25,
+      26,    27,    -1,    29,    30,    14,    15,    16,    17,    18,
+      -1,    14,    15,    16,    17,    18,    25,    26,    27,    -1,
+      29,    30,    25,    -1,    27,    -1,    29,    30,    14,    15,
+      16,    17,    18,    -1,    -1,    20,    -1,    -1,    -1,    25,
+      -1,    -1,    -1,    29,    30,    -1,    31,    32,    33,    34,
+      35,    36,     9,    -1,    -1,    -1,    -1,    14,    15,    16,
+      17,    18,    19,    14,    15,    16,    17,    18
   };
 
   const signed char
    Parser ::yystos_[] =
   {
-       0,     3,    61,    62,     0,    52,    53,    54,    55,    63,
-      64,    58,    41,    58
+       0,     0,     3,     4,     5,     6,     7,     8,    15,    23,
+      28,    65,    66,    67,    68,    69,    70,    71,    72,    69,
+      70,    71,    72,     8,    69,    70,    69,    70,    71,    72,
+       8,    15,    69,     0,     0,    67,     3,    14,    15,    16,
+      17,    18,    25,    26,    27,    29,    30,    31,    32,    33,
+      34,    35,    36,    14,    15,    16,    17,    18,    19,    31,
+      32,    33,    34,    35,    36,    20,    31,    32,    33,    34,
+      35,    36,    21,    22,    31,    32,     9,     9,     9,     9,
+      69,    70,    69,    69,    69,    69,    69,    69,    69,    69,
+      69,    69,    69,    69,    69,    69,    69,    69,     8,    15,
+      70,    70,    70,    70,    70,    70,    70,    70,    70,    70,
+      70,    70,     8,    71,    71,    71,    71,    71,    71,    71,
+      72,    72,    72,    72,    71
   };
 
   const signed char
    Parser ::yyr1_[] =
   {
-       0,    60,    61,    62,    62,    62,    63,    64,    64,    64,
-      64
+       0,    64,    65,    65,    66,    66,    67,    67,    68,    68,
+      68,    68,    69,    69,    69,    69,    69,    69,    69,    69,
+      69,    69,    69,    69,    69,    69,    70,    70,    70,    70,
+      70,    70,    70,    70,    70,    71,    71,    71,    72,    72,
+      72,    72,    72,    72,    72,    72,    72,    72,    72,    72,
+      72,    72,    72,    72,    72,    72,    72,    72,    72,    72,
+      72,    72,    72
   };
 
   const signed char
    Parser ::yyr2_[] =
   {
-       0,     2,     1,     2,     1,     0,     4,     1,     1,     1,
-       1
+       0,     2,     1,     2,     2,     2,     1,     1,     1,     1,
+       1,     1,     1,     2,     3,     3,     3,     3,     3,     3,
+       3,     3,     3,     2,     3,     3,     1,     2,     3,     3,
+       3,     3,     3,     3,     3,     1,     3,     3,     1,     3,
+       2,     3,     3,     3,     3,     3,     3,     3,     3,     3,
+       3,     3,     3,     3,     3,     3,     3,     3,     3,     3,
+       3,     3,     3
   };
 
 
@@ -1178,15 +1641,16 @@ namespace  ptc  {
   "\"end of file\"", "error", "\"invalid token\"",
   "\"terminator (\\\\n or ;)\"", "\"int\"", "\"float\"", "\"string\"",
   "\"bool\"", "\"(\"", "\")\"", "\"[\"", "\"]\"", "\"{\"", "\"}\"",
-  "\"+\"", "\"*\"", "\"-\"", "\"/\"", "\"%\"", "\"**\"", "\"++\"",
+  "\"+\"", "\"-\"", "\"*\"", "\"/\"", "\"%\"", "\"**\"", "\"++\"",
   "\"and\"", "\"or\"", "\"not\"", "\"in\"", "\"&\"", "\"|\"", "\"^\"",
   "\"~\"", "\"<<\"", "\">>\"", "\"==\"", "\"!=\"", "\">\"", "\"<\"",
   "\">=\"", "\"<=\"", "\"..\"", "\".\"", "\",\"", "\":\"", "\"=\"",
   "\"var\"", "\"import\"", "\"as\"", "\"from\"", "\"if\"", "\"elif\"",
-  "\"else\"", "\"for\"", "\"while\"", "\"do\"", "\"\\\"int\\\"\"",
-  "\"\\\"float\\\"\"", "\"\\\"string\\\"\"", "\"\\\"bool\\\"\"",
-  "\"\\\"void\\\"\"", "\"\\\"struct\\\"\"", "\"identifier\"", "NEG",
-  "$accept", "start", "stmt", "stmts", "type", YY_NULLPTR
+  "\"else\"", "\"for\"", "\"while\"", "\"do\"", "\"return\"", "\"break\"",
+  "\"continue\"", "\"const\"", "\"\\\"int\\\"\"", "\"\\\"float\\\"\"",
+  "\"\\\"string\\\"\"", "\"\\\"bool\\\"\"", "\"\\\"struct\\\"\"",
+  "\"\\\"void\\\"\"", "\"identifier\"", "NEG", "$accept", "start", "stmt",
+  "stmts", "val", "expr_int", "expr_float", "expr_str", "expr_bool", YY_NULLPTR
   };
 #endif
 
@@ -1195,8 +1659,13 @@ namespace  ptc  {
   const unsigned char
    Parser ::yyrline_[] =
   {
-       0,   156,   156,   158,   159,   160,   163,   166,   167,   168,
-     169
+       0,   168,   168,   169,   172,   173,   177,   178,   181,   182,
+     183,   184,   187,   188,   189,   190,   191,   192,   193,   194,
+     195,   196,   197,   198,   199,   200,   203,   204,   205,   206,
+     207,   208,   209,   210,   211,   214,   215,   216,   219,   220,
+     221,   222,   223,   224,   225,   226,   227,   228,   229,   230,
+     231,   232,   233,   234,   235,   236,   237,   238,   239,   240,
+     241,   242,   243
   };
 
   void
@@ -1266,10 +1735,10 @@ namespace  ptc  {
       25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
       35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
       45,    46,    47,    48,    49,    50,    51,    52,    53,    54,
-      55,    56,    57,    58,    59
+      55,    56,    57,    58,    59,    60,    61,    62,    63
     };
     // Last valid token kind.
-    const int code_max = 314;
+    const int code_max = 318;
 
     if (t <= 0)
       return symbol_kind::S_YYEOF;
@@ -1281,9 +1750,9 @@ namespace  ptc  {
 
 #line 13 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
 } //  ptc 
-#line 1285 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+#line 1754 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
 
-#line 172 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+#line 253 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
 
 
 /* Error method */
