@@ -875,11 +875,15 @@ namespace  ptc  {
         S_start = 65,                            // start
         S_stmt = 66,                             // stmt
         S_stmts = 67,                            // stmts
-        S_val = 68,                              // val
-        S_expr_int = 69,                         // expr_int
-        S_expr_float = 70,                       // expr_float
-        S_expr_str = 71,                         // expr_str
-        S_expr_bool = 72                         // expr_bool
+        S_vardecl = 68,                          // vardecl
+        S_vardef = 69,                           // vardef
+        S_set = 70,                              // set
+        S_val = 71,                              // val
+        S_expr_int = 72,                         // expr_int
+        S_expr_float = 73,                       // expr_float
+        S_expr_str = 74,                         // expr_str
+        S_expr_bool = 75,                        // expr_bool
+        S_type = 76                              // type
       };
     };
 
@@ -2251,7 +2255,7 @@ switch (yykind)
 
 
     /// Stored state numbers (used for stacks).
-    typedef signed char state_type;
+    typedef unsigned char state_type;
 
     /// The arguments of the error message.
     int yy_syntax_error_arguments_ (const context& yyctx,
@@ -2299,17 +2303,17 @@ switch (yykind)
     static const signed char yydefact_[];
 
     // YYPGOTO[NTERM-NUM].
-    static const signed char yypgoto_[];
+    static const short yypgoto_[];
 
     // YYDEFGOTO[NTERM-NUM].
-    static const signed char yydefgoto_[];
+    static const unsigned char yydefgoto_[];
 
     // YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
     // positive, shift that token.  If negative, reduce the rule whose
     // number is the opposite.  If YYTABLE_NINF, syntax error.
-    static const signed char yytable_[];
+    static const unsigned char yytable_[];
 
-    static const signed char yycheck_[];
+    static const short yycheck_[];
 
     // YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
     // state STATE-NUM.
@@ -2324,7 +2328,7 @@ switch (yykind)
 
 #if YYDEBUG
     // YYRLINE[YYN] -- Source line where rule number YYN was defined.
-    static const unsigned char yyrline_[];
+    static const short yyrline_[];
     /// Report on the debug stream that the rule \a r is going to be reduced.
     virtual void yy_reduce_print_ (int r) const;
     /// Print the state stack on the debug stream.
@@ -2551,9 +2555,9 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 317,     ///< Last index in yytable_.
-      yynnts_ = 9,  ///< Number of nonterminal symbols.
-      yyfinal_ = 33 ///< Termination state number.
+      yylast_ = 514,     ///< Last index in yytable_.
+      yynnts_ = 13,  ///< Number of nonterminal symbols.
+      yyfinal_ = 43 ///< Termination state number.
     };
 
 
@@ -2565,7 +2569,7 @@ switch (yykind)
 
 #line 13 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
 } //  ptc 
-#line 2569 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
+#line 2573 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
 
 
 

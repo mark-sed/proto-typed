@@ -175,15 +175,34 @@ stmt : stmts END
 
 // Statements
 stmts : END
+      | set
       | val
+      | vardecl
+      | vardef
       ;
 
+// Variable declaration
+vardecl : type ID
+        ;
+
+// Definition
+vardef : type ID SET ID
+       | type ID SET val
+       ;
+
+// Assignment
+set : ID SET val
+    | ID SET ID
+    ;
+
+// Constant values
 val : expr_int { std::cout << "=" << $1 << std::endl; }
     | expr_float { std::cout << "=" << $1 << std::endl; }
     | expr_str { std::cout << "=" << $1 << std::endl; }
     | expr_bool { std::cout << "=" << $1 << std::endl; }
     ;
 
+// Integer expression
 expr_int : INT { $$ = $1; }
          | MINUS expr_int %prec NEG { $$ = -$2; }
          | LPAR expr_int RPAR { $$ = $2; }
@@ -200,22 +219,52 @@ expr_int : INT { $$ = $1; }
          | expr_int BRSHFT expr_int { $$ = $1 >> $3; }
          ;
 
+// Float expression
 expr_float : FLOAT { $$ = $1; }
            | MINUS expr_float %prec NEG { $$ = -$2; }
            | LPAR expr_float RPAR { $$ = $2; }
            | expr_float POW expr_float { $$ = std::pow($1, $3); }
+           | expr_float POW expr_int { $$ = std::pow($1, $3); }
+           | expr_int POW expr_float { $$ = std::pow($1, $3); }
            | expr_float MUL expr_float { $$ = $1 * $3; }
+           | expr_float MUL expr_int { $$ = $1 * $3; }
+           | expr_int MUL expr_float { $$ = $1 * $3; }
            | expr_float DIV expr_float { $$ = $1 / $3; }
+           | expr_float DIV expr_int { $$ = $1 / $3; }
+           | expr_int DIV expr_float { $$ = $1 / $3; }
            | expr_float MOD expr_float { $$ = std::fmod($1, $3); }
+           | expr_float MOD expr_int { $$ = std::fmod($1, $3); }
+           | expr_int MOD expr_float { $$ = std::fmod($1, $3); }
            | expr_float MINUS expr_float { $$ = $1 - $3; }
+           | expr_float MINUS expr_int { $$ = $1 - $3; }
+           | expr_int MINUS expr_float { $$ = $1 - $3; }
            | expr_float PLUS expr_float { $$ = $1 + $3; }
+           | expr_float PLUS expr_int { $$ = $1 + $3; }
+           | expr_int PLUS expr_float { $$ = $1 + $3; }
            ;
 
+// String expression
 expr_str : STRING { $$ = $1; }
          | LPAR expr_str RPAR { $$ = $2; }
          | expr_str CONCAT expr_str { $$ = $1 + $3; }
+         | expr_str CONCAT expr_int { $$ = $1 + std::to_string($3); }
+         | expr_str CONCAT expr_float { $$ = $1 + std::to_string($3); }
+         | expr_str CONCAT expr_bool { $$ = $1 + ($3 ? "true" : "false"); }
+         | expr_int CONCAT expr_str { $$ = std::to_string($1) + $3; }
+         | expr_int CONCAT expr_int { $$ = std::to_string($1) + std::to_string($3); }
+         | expr_int CONCAT expr_float { $$ = std::to_string($1) + std::to_string($3); }
+         | expr_int CONCAT expr_bool { $$ = std::to_string($1) + ($3 ? "true" : "false"); }
+         | expr_float CONCAT expr_str { $$ = std::to_string($1) + $3; }
+         | expr_float CONCAT expr_int { $$ = std::to_string($1) + std::to_string($3); }
+         | expr_float CONCAT expr_float { $$ = std::to_string($1) + std::to_string($3); }
+         | expr_float CONCAT expr_bool { $$ = std::to_string($1) + ($3 ? "true" : "false"); }
+         | expr_bool CONCAT expr_str { $$ = ($1 ? "true" : "false") + $3; }
+         | expr_bool CONCAT expr_int { $$ = ($1 ? "true" : "false") + std::to_string($3); }
+         | expr_bool CONCAT expr_float { $$ = ($1 ? "true" : "false") + std::to_string($3); }
+         | expr_bool CONCAT expr_bool { $$ = ($1 ? std::string("true") : std::string("false")) + ($3 ? "true" : "false"); }
          ;
 
+// Boolean expression
 expr_bool : BOOL { $$ = $1; }
           | LPAR expr_bool RPAR { $$ = $2; }
           | LNOT expr_bool { $$ = !$2; }
