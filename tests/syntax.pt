@@ -1,0 +1,38 @@
+/**
+ * Nonsense program for testing
+ * correct syntax analysis
+ */
+
+
+import math
+import m, ab
+
+;;;;;
+;
+
+int a     = 4
+string b = "hello"; float b = 4.0e-45
+
+float f = 4.
+float f2 = .45e-2
+float f3 = 50.e-2
+float f4 = 5.0e2
+float f5 = 55.22e+5
+float f6 = .22e-5
+float f7 = 42.e+5
+
+// Comment
+
+for(i : a) a = 4
+
+for(i : b) {} /* comment * / on multi lines */
+
+for(i: c  ) {
+    a = 4
+}
+
+for(i : "Hello") {
+    42; a = 43; }
+
+for(i : v) {;}
+

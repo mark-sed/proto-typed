@@ -107,8 +107,6 @@
 /* Keywords */
 %token KWVAR "var"
 %token KWIMPORT "import"
-%token KWAS "as"
-%token KWFROM "from"
 %token KWIF "if"
 %token KWELIF "elif"
 %token KWELSE "else"
@@ -165,21 +163,46 @@
 
 %%
 
+// Start
 start : END_FILE
       | stmt END_FILE
       ;
-
-stmt : stmts END
+stmt : stmts
      | stmt stmts
      ;
 
 // Statements
 stmts : END
-      | set
-      | val
-      | vardecl
-      | vardef
+      | stmts_ne END
       ;
+stmts_ne : set
+         | val
+         | vardecl
+         | vardef
+         | import
+         | for
+         ;
+
+// Code block     
+block : LBR RBR
+      | LBR stmt RBR
+      ;
+// Code block or single statement
+body : stmts_ne
+     | block
+     ;
+
+// Import
+import : KWIMPORT id_list
+       ;
+id_list : ID
+        | id_list COMMA ID
+        ;
+
+// For loop
+for : KWFOR LPAR ID COLON ID RPAR body
+    | KWFOR LPAR ID COLON expr_str RPAR body
+    ;
 
 // Variable declaration
 vardecl : type ID
@@ -196,10 +219,10 @@ set : ID SET val
     ;
 
 // Constant values
-val : expr_int { std::cout << "=" << $1 << std::endl; }
-    | expr_float { std::cout << "=" << $1 << std::endl; }
-    | expr_str { std::cout << "=" << $1 << std::endl; }
-    | expr_bool { std::cout << "=" << $1 << std::endl; }
+val : expr_int //{ std::cout << "=" << $1 << std::endl; }
+    | expr_float //{ std::cout << "=" << $1 << std::endl; }
+    | expr_str //{ std::cout << "=" << $1 << std::endl; }
+    | expr_bool //{ std::cout << "=" << $1 << std::endl; }
     ;
 
 // Integer expression

@@ -769,26 +769,24 @@ namespace  ptc  {
     SET = 296,                     // "="
     KWVAR = 297,                   // "var"
     KWIMPORT = 298,                // "import"
-    KWAS = 299,                    // "as"
-    KWFROM = 300,                  // "from"
-    KWIF = 301,                    // "if"
-    KWELIF = 302,                  // "elif"
-    KWELSE = 303,                  // "else"
-    KWFOR = 304,                   // "for"
-    KWWHILE = 305,                 // "while"
-    KWDO = 306,                    // "do"
-    KWRETURN = 307,                // "return"
-    KWBREAK = 308,                 // "break"
-    KWCONTINUE = 309,              // "continue"
-    KWCONST = 310,                 // "const"
-    KWINT = 311,                   // "\"int\""
-    KWFLOAT = 312,                 // "\"float\""
-    KWSTRING = 313,                // "\"string\""
-    KWBOOL = 314,                  // "\"bool\""
-    KWSTRUCT = 315,                // "\"struct\""
-    KWVOID = 316,                  // "\"void\""
-    ID = 317,                      // "identifier"
-    NEG = 318                      // NEG
+    KWIF = 299,                    // "if"
+    KWELIF = 300,                  // "elif"
+    KWELSE = 301,                  // "else"
+    KWFOR = 302,                   // "for"
+    KWWHILE = 303,                 // "while"
+    KWDO = 304,                    // "do"
+    KWRETURN = 305,                // "return"
+    KWBREAK = 306,                 // "break"
+    KWCONTINUE = 307,              // "continue"
+    KWCONST = 308,                 // "const"
+    KWINT = 309,                   // "\"int\""
+    KWFLOAT = 310,                 // "\"float\""
+    KWSTRING = 311,                // "\"string\""
+    KWBOOL = 312,                  // "\"bool\""
+    KWSTRUCT = 313,                // "\"struct\""
+    KWVOID = 314,                  // "\"void\""
+    ID = 315,                      // "identifier"
+    NEG = 316                      // NEG
       };
       /// Backward compatibility alias (Bison 3.6).
       typedef token_kind_type yytokentype;
@@ -805,7 +803,7 @@ namespace  ptc  {
     {
       enum symbol_kind_type
       {
-        YYNTOKENS = 64, ///< Number of tokens.
+        YYNTOKENS = 62, ///< Number of tokens.
         S_YYEMPTY = -2,
         S_YYEOF = 0,                             // "end of file"
         S_YYerror = 1,                           // error
@@ -851,39 +849,43 @@ namespace  ptc  {
         S_SET = 41,                              // "="
         S_KWVAR = 42,                            // "var"
         S_KWIMPORT = 43,                         // "import"
-        S_KWAS = 44,                             // "as"
-        S_KWFROM = 45,                           // "from"
-        S_KWIF = 46,                             // "if"
-        S_KWELIF = 47,                           // "elif"
-        S_KWELSE = 48,                           // "else"
-        S_KWFOR = 49,                            // "for"
-        S_KWWHILE = 50,                          // "while"
-        S_KWDO = 51,                             // "do"
-        S_KWRETURN = 52,                         // "return"
-        S_KWBREAK = 53,                          // "break"
-        S_KWCONTINUE = 54,                       // "continue"
-        S_KWCONST = 55,                          // "const"
-        S_KWINT = 56,                            // "\"int\""
-        S_KWFLOAT = 57,                          // "\"float\""
-        S_KWSTRING = 58,                         // "\"string\""
-        S_KWBOOL = 59,                           // "\"bool\""
-        S_KWSTRUCT = 60,                         // "\"struct\""
-        S_KWVOID = 61,                           // "\"void\""
-        S_ID = 62,                               // "identifier"
-        S_NEG = 63,                              // NEG
-        S_YYACCEPT = 64,                         // $accept
-        S_start = 65,                            // start
-        S_stmt = 66,                             // stmt
-        S_stmts = 67,                            // stmts
-        S_vardecl = 68,                          // vardecl
-        S_vardef = 69,                           // vardef
-        S_set = 70,                              // set
-        S_val = 71,                              // val
-        S_expr_int = 72,                         // expr_int
-        S_expr_float = 73,                       // expr_float
-        S_expr_str = 74,                         // expr_str
-        S_expr_bool = 75,                        // expr_bool
-        S_type = 76                              // type
+        S_KWIF = 44,                             // "if"
+        S_KWELIF = 45,                           // "elif"
+        S_KWELSE = 46,                           // "else"
+        S_KWFOR = 47,                            // "for"
+        S_KWWHILE = 48,                          // "while"
+        S_KWDO = 49,                             // "do"
+        S_KWRETURN = 50,                         // "return"
+        S_KWBREAK = 51,                          // "break"
+        S_KWCONTINUE = 52,                       // "continue"
+        S_KWCONST = 53,                          // "const"
+        S_KWINT = 54,                            // "\"int\""
+        S_KWFLOAT = 55,                          // "\"float\""
+        S_KWSTRING = 56,                         // "\"string\""
+        S_KWBOOL = 57,                           // "\"bool\""
+        S_KWSTRUCT = 58,                         // "\"struct\""
+        S_KWVOID = 59,                           // "\"void\""
+        S_ID = 60,                               // "identifier"
+        S_NEG = 61,                              // NEG
+        S_YYACCEPT = 62,                         // $accept
+        S_start = 63,                            // start
+        S_stmt = 64,                             // stmt
+        S_stmts = 65,                            // stmts
+        S_stmts_ne = 66,                         // stmts_ne
+        S_block = 67,                            // block
+        S_body = 68,                             // body
+        S_import = 69,                           // import
+        S_id_list = 70,                          // id_list
+        S_for = 71,                              // for
+        S_vardecl = 72,                          // vardecl
+        S_vardef = 73,                           // vardef
+        S_set = 74,                              // set
+        S_val = 75,                              // val
+        S_expr_int = 76,                         // expr_int
+        S_expr_float = 77,                       // expr_float
+        S_expr_str = 78,                         // expr_str
+        S_expr_bool = 79,                        // expr_bool
+        S_type = 80                              // type
       };
     };
 
@@ -1928,36 +1930,6 @@ switch (yykind)
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
-      make_KWAS (location_type l)
-      {
-        return symbol_type (token::KWAS, std::move (l));
-      }
-#else
-      static
-      symbol_type
-      make_KWAS (const location_type& l)
-      {
-        return symbol_type (token::KWAS, l);
-      }
-#endif
-#if 201103L <= YY_CPLUSPLUS
-      static
-      symbol_type
-      make_KWFROM (location_type l)
-      {
-        return symbol_type (token::KWFROM, std::move (l));
-      }
-#else
-      static
-      symbol_type
-      make_KWFROM (const location_type& l)
-      {
-        return symbol_type (token::KWFROM, l);
-      }
-#endif
-#if 201103L <= YY_CPLUSPLUS
-      static
-      symbol_type
       make_KWIF (location_type l)
       {
         return symbol_type (token::KWIF, std::move (l));
@@ -2277,7 +2249,7 @@ switch (yykind)
     /// \param yyvalue   the value to check
     static bool yy_table_value_is_error_ (int yyvalue) YY_NOEXCEPT;
 
-    static const signed char yypact_ninf_;
+    static const short yypact_ninf_;
     static const signed char yytable_ninf_;
 
     /// Convert a scanner token kind \a t to a symbol kind.
@@ -2555,9 +2527,9 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 514,     ///< Last index in yytable_.
-      yynnts_ = 13,  ///< Number of nonterminal symbols.
-      yyfinal_ = 43 ///< Termination state number.
+      yylast_ = 624,     ///< Last index in yytable_.
+      yynnts_ = 19,  ///< Number of nonterminal symbols.
+      yyfinal_ = 51 ///< Termination state number.
     };
 
 
@@ -2569,7 +2541,7 @@ switch (yykind)
 
 #line 13 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
 } //  ptc 
-#line 2573 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
+#line 2545 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
 
 
 

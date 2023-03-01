@@ -105,8 +105,6 @@ hex     0[Xx][0-9A-Fa-f]+
 
 "var"           { return token::KWVAR; }
 "import"        { return token::KWIMPORT; }
-"as"            { return token::KWAS; }
-"from"          { return token::KWFROM; }
 "if"            { return token::KWIF; }
 "elif"          { return token::KWELIF; }
 "else"          { return token::KWELSE; }
@@ -148,11 +146,19 @@ hex     0[Xx][0-9A-Fa-f]+
                   yylval->emplace<long>(std::strtol(yytext, nullptr, 16));
                   return token::INT;
                 }
-[-]?[0-9]+\.[0-9]+[eE][+-]?[0-9]+ {   // Float in scientific notation
+[-]?[0-9]+\.?[0-9]*[eE][+-]?[0-9]+ {   // Float in scientific notation
                   yylval->build<double>(std::stod(yytext)); 
                   return token::FLOAT;
                 }
-[-]?[0-9]+\.[0-9]+ {   // Float
+[-]?[0-9]*\.?[0-9]+[eE][+-]?[0-9]+ {   // Float in scientific notation
+                  yylval->build<double>(std::stod(yytext)); 
+                  return token::FLOAT;
+                }
+[-]?[0-9]*\.[0-9]+ {   // Float
+                  yylval->build<double>(std::stod(yytext)); 
+                  return token::FLOAT;
+                }
+[-]?[0-9]+\.[0-9]* {   // Float
                   yylval->build<double>(std::stod(yytext)); 
                   return token::FLOAT;
                 }
