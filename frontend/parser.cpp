@@ -780,470 +780,470 @@ namespace  ptc  {
         {
           switch (yyn)
             {
-  case 32: // expr_int: "int"
-#line 229 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 44: // expr_int: "int"
+#line 247 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                { yylhs.value.as < long > () = yystack_[0].value.as < long > (); }
 #line 787 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 33: // expr_int: "-" expr_int
-#line 230 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 45: // expr_int: "-" expr_int
+#line 248 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                     { yylhs.value.as < long > () = -yystack_[0].value.as < long > (); }
 #line 793 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 34: // expr_int: "(" expr_int ")"
-#line 231 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 46: // expr_int: "(" expr_int ")"
+#line 249 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                               { yylhs.value.as < long > () = yystack_[1].value.as < long > (); }
 #line 799 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 35: // expr_int: expr_int "*" expr_int
-#line 232 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 47: // expr_int: expr_int "*" expr_int
+#line 250 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                  { yylhs.value.as < long > () = yystack_[2].value.as < long > () * yystack_[0].value.as < long > (); }
 #line 805 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 36: // expr_int: expr_int "/" expr_int
-#line 233 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 48: // expr_int: expr_int "/" expr_int
+#line 251 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                  { yylhs.value.as < long > () = yystack_[2].value.as < long > () / yystack_[0].value.as < long > (); }
 #line 811 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 37: // expr_int: expr_int "%" expr_int
-#line 234 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 49: // expr_int: expr_int "%" expr_int
+#line 252 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                  { yylhs.value.as < long > () = yystack_[2].value.as < long > () % yystack_[0].value.as < long > (); }
 #line 817 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 38: // expr_int: expr_int "-" expr_int
-#line 235 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 50: // expr_int: expr_int "-" expr_int
+#line 253 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                    { yylhs.value.as < long > () = yystack_[2].value.as < long > () - yystack_[0].value.as < long > (); }
 #line 823 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 39: // expr_int: expr_int "+" expr_int
-#line 236 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 51: // expr_int: expr_int "+" expr_int
+#line 254 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                   { yylhs.value.as < long > () = yystack_[2].value.as < long > () + yystack_[0].value.as < long > (); }
 #line 829 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 40: // expr_int: expr_int "&" expr_int
-#line 237 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 52: // expr_int: expr_int "&" expr_int
+#line 255 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                   { yylhs.value.as < long > () = yystack_[2].value.as < long > () & yystack_[0].value.as < long > (); }
 #line 835 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 41: // expr_int: expr_int "|" expr_int
-#line 238 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 53: // expr_int: expr_int "|" expr_int
+#line 256 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                  { yylhs.value.as < long > () = yystack_[2].value.as < long > () | yystack_[0].value.as < long > (); }
 #line 841 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 42: // expr_int: expr_int "^" expr_int
-#line 239 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 54: // expr_int: expr_int "^" expr_int
+#line 257 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                   { yylhs.value.as < long > () = yystack_[2].value.as < long > () ^ yystack_[0].value.as < long > (); }
 #line 847 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 43: // expr_int: "~" expr_int
-#line 240 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 55: // expr_int: "~" expr_int
+#line 258 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                          { yylhs.value.as < long > () = ~yystack_[0].value.as < long > (); }
 #line 853 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 44: // expr_int: expr_int "<<" expr_int
-#line 241 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 56: // expr_int: expr_int "<<" expr_int
+#line 259 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                     { yylhs.value.as < long > () = yystack_[2].value.as < long > () << yystack_[0].value.as < long > (); }
 #line 859 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 45: // expr_int: expr_int ">>" expr_int
-#line 242 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 57: // expr_int: expr_int ">>" expr_int
+#line 260 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                     { yylhs.value.as < long > () = yystack_[2].value.as < long > () >> yystack_[0].value.as < long > (); }
 #line 865 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 46: // expr_float: "float"
-#line 246 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 58: // expr_float: "float"
+#line 264 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                    { yylhs.value.as < double > () = yystack_[0].value.as < double > (); }
 #line 871 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 47: // expr_float: "-" expr_float
-#line 247 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 59: // expr_float: "-" expr_float
+#line 265 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                         { yylhs.value.as < double > () = -yystack_[0].value.as < double > (); }
 #line 877 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 48: // expr_float: "(" expr_float ")"
-#line 248 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 60: // expr_float: "(" expr_float ")"
+#line 266 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                   { yylhs.value.as < double > () = yystack_[1].value.as < double > (); }
 #line 883 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 49: // expr_float: expr_float "**" expr_float
-#line 249 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 61: // expr_float: expr_float "**" expr_float
+#line 267 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                        { yylhs.value.as < double > () = std::pow(yystack_[2].value.as < double > (), yystack_[0].value.as < double > ()); }
 #line 889 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 50: // expr_float: expr_float "**" expr_int
-#line 250 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 62: // expr_float: expr_float "**" expr_int
+#line 268 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                      { yylhs.value.as < double > () = std::pow(yystack_[2].value.as < double > (), yystack_[0].value.as < long > ()); }
 #line 895 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 51: // expr_float: expr_int "**" expr_float
-#line 251 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 63: // expr_float: expr_int "**" expr_float
+#line 269 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                      { yylhs.value.as < double > () = std::pow(yystack_[2].value.as < long > (), yystack_[0].value.as < double > ()); }
 #line 901 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 52: // expr_float: expr_float "*" expr_float
-#line 252 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 64: // expr_float: expr_float "*" expr_float
+#line 270 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                        { yylhs.value.as < double > () = yystack_[2].value.as < double > () * yystack_[0].value.as < double > (); }
 #line 907 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 53: // expr_float: expr_float "*" expr_int
-#line 253 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 65: // expr_float: expr_float "*" expr_int
+#line 271 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                      { yylhs.value.as < double > () = yystack_[2].value.as < double > () * yystack_[0].value.as < long > (); }
 #line 913 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 54: // expr_float: expr_int "*" expr_float
-#line 254 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 66: // expr_float: expr_int "*" expr_float
+#line 272 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                      { yylhs.value.as < double > () = yystack_[2].value.as < long > () * yystack_[0].value.as < double > (); }
 #line 919 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 55: // expr_float: expr_float "/" expr_float
-#line 255 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 67: // expr_float: expr_float "/" expr_float
+#line 273 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                        { yylhs.value.as < double > () = yystack_[2].value.as < double > () / yystack_[0].value.as < double > (); }
 #line 925 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 56: // expr_float: expr_float "/" expr_int
-#line 256 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 68: // expr_float: expr_float "/" expr_int
+#line 274 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                      { yylhs.value.as < double > () = yystack_[2].value.as < double > () / yystack_[0].value.as < long > (); }
 #line 931 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 57: // expr_float: expr_int "/" expr_float
-#line 257 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 69: // expr_float: expr_int "/" expr_float
+#line 275 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                      { yylhs.value.as < double > () = yystack_[2].value.as < long > () / yystack_[0].value.as < double > (); }
 #line 937 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 58: // expr_float: expr_float "%" expr_float
-#line 258 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 70: // expr_float: expr_float "%" expr_float
+#line 276 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                        { yylhs.value.as < double > () = std::fmod(yystack_[2].value.as < double > (), yystack_[0].value.as < double > ()); }
 #line 943 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 59: // expr_float: expr_float "%" expr_int
-#line 259 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 71: // expr_float: expr_float "%" expr_int
+#line 277 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                      { yylhs.value.as < double > () = std::fmod(yystack_[2].value.as < double > (), yystack_[0].value.as < long > ()); }
 #line 949 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 60: // expr_float: expr_int "%" expr_float
-#line 260 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 72: // expr_float: expr_int "%" expr_float
+#line 278 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                      { yylhs.value.as < double > () = std::fmod(yystack_[2].value.as < long > (), yystack_[0].value.as < double > ()); }
 #line 955 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 61: // expr_float: expr_float "-" expr_float
-#line 261 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 73: // expr_float: expr_float "-" expr_float
+#line 279 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                          { yylhs.value.as < double > () = yystack_[2].value.as < double > () - yystack_[0].value.as < double > (); }
 #line 961 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 62: // expr_float: expr_float "-" expr_int
-#line 262 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 74: // expr_float: expr_float "-" expr_int
+#line 280 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                        { yylhs.value.as < double > () = yystack_[2].value.as < double > () - yystack_[0].value.as < long > (); }
 #line 967 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 63: // expr_float: expr_int "-" expr_float
-#line 263 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 75: // expr_float: expr_int "-" expr_float
+#line 281 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                        { yylhs.value.as < double > () = yystack_[2].value.as < long > () - yystack_[0].value.as < double > (); }
 #line 973 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 64: // expr_float: expr_float "+" expr_float
-#line 264 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 76: // expr_float: expr_float "+" expr_float
+#line 282 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                         { yylhs.value.as < double > () = yystack_[2].value.as < double > () + yystack_[0].value.as < double > (); }
 #line 979 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 65: // expr_float: expr_float "+" expr_int
-#line 265 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 77: // expr_float: expr_float "+" expr_int
+#line 283 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                       { yylhs.value.as < double > () = yystack_[2].value.as < double > () + yystack_[0].value.as < long > (); }
 #line 985 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 66: // expr_float: expr_int "+" expr_float
-#line 266 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 78: // expr_float: expr_int "+" expr_float
+#line 284 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                       { yylhs.value.as < double > () = yystack_[2].value.as < long > () + yystack_[0].value.as < double > (); }
 #line 991 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 67: // expr_str: "string"
-#line 270 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 79: // expr_str: "string"
+#line 288 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                   { yylhs.value.as < std::string > () = yystack_[0].value.as < std::string > (); }
 #line 997 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 68: // expr_str: "(" expr_str ")"
-#line 271 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 80: // expr_str: "(" expr_str ")"
+#line 289 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                               { yylhs.value.as < std::string > () = yystack_[1].value.as < std::string > (); }
 #line 1003 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 69: // expr_str: expr_str "++" expr_str
-#line 272 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 81: // expr_str: expr_str "++" expr_str
+#line 290 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                     { yylhs.value.as < std::string > () = yystack_[2].value.as < std::string > () + yystack_[0].value.as < std::string > (); }
 #line 1009 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 70: // expr_str: expr_str "++" expr_int
-#line 273 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 82: // expr_str: expr_str "++" expr_int
+#line 291 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                     { yylhs.value.as < std::string > () = yystack_[2].value.as < std::string > () + std::to_string(yystack_[0].value.as < long > ()); }
 #line 1015 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 71: // expr_str: expr_str "++" expr_float
-#line 274 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 83: // expr_str: expr_str "++" expr_float
+#line 292 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                       { yylhs.value.as < std::string > () = yystack_[2].value.as < std::string > () + std::to_string(yystack_[0].value.as < double > ()); }
 #line 1021 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 72: // expr_str: expr_str "++" expr_bool
-#line 275 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 84: // expr_str: expr_str "++" expr_bool
+#line 293 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                      { yylhs.value.as < std::string > () = yystack_[2].value.as < std::string > () + (yystack_[0].value.as < bool > () ? "true" : "false"); }
 #line 1027 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 73: // expr_str: expr_int "++" expr_str
-#line 276 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 85: // expr_str: expr_int "++" expr_str
+#line 294 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                     { yylhs.value.as < std::string > () = std::to_string(yystack_[2].value.as < long > ()) + yystack_[0].value.as < std::string > (); }
 #line 1033 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 74: // expr_str: expr_int "++" expr_int
-#line 277 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 86: // expr_str: expr_int "++" expr_int
+#line 295 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                     { yylhs.value.as < std::string > () = std::to_string(yystack_[2].value.as < long > ()) + std::to_string(yystack_[0].value.as < long > ()); }
 #line 1039 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 75: // expr_str: expr_int "++" expr_float
-#line 278 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 87: // expr_str: expr_int "++" expr_float
+#line 296 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                       { yylhs.value.as < std::string > () = std::to_string(yystack_[2].value.as < long > ()) + std::to_string(yystack_[0].value.as < double > ()); }
 #line 1045 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 76: // expr_str: expr_int "++" expr_bool
-#line 279 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 88: // expr_str: expr_int "++" expr_bool
+#line 297 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                      { yylhs.value.as < std::string > () = std::to_string(yystack_[2].value.as < long > ()) + (yystack_[0].value.as < bool > () ? "true" : "false"); }
 #line 1051 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 77: // expr_str: expr_float "++" expr_str
-#line 280 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 89: // expr_str: expr_float "++" expr_str
+#line 298 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                       { yylhs.value.as < std::string > () = std::to_string(yystack_[2].value.as < double > ()) + yystack_[0].value.as < std::string > (); }
 #line 1057 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 78: // expr_str: expr_float "++" expr_int
-#line 281 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 90: // expr_str: expr_float "++" expr_int
+#line 299 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                       { yylhs.value.as < std::string > () = std::to_string(yystack_[2].value.as < double > ()) + std::to_string(yystack_[0].value.as < long > ()); }
 #line 1063 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 79: // expr_str: expr_float "++" expr_float
-#line 282 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 91: // expr_str: expr_float "++" expr_float
+#line 300 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                         { yylhs.value.as < std::string > () = std::to_string(yystack_[2].value.as < double > ()) + std::to_string(yystack_[0].value.as < double > ()); }
 #line 1069 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 80: // expr_str: expr_float "++" expr_bool
-#line 283 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 92: // expr_str: expr_float "++" expr_bool
+#line 301 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                        { yylhs.value.as < std::string > () = std::to_string(yystack_[2].value.as < double > ()) + (yystack_[0].value.as < bool > () ? "true" : "false"); }
 #line 1075 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 81: // expr_str: expr_bool "++" expr_str
-#line 284 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 93: // expr_str: expr_bool "++" expr_str
+#line 302 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                      { yylhs.value.as < std::string > () = (yystack_[2].value.as < bool > () ? "true" : "false") + yystack_[0].value.as < std::string > (); }
 #line 1081 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 82: // expr_str: expr_bool "++" expr_int
-#line 285 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 94: // expr_str: expr_bool "++" expr_int
+#line 303 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                      { yylhs.value.as < std::string > () = (yystack_[2].value.as < bool > () ? "true" : "false") + std::to_string(yystack_[0].value.as < long > ()); }
 #line 1087 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 83: // expr_str: expr_bool "++" expr_float
-#line 286 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 95: // expr_str: expr_bool "++" expr_float
+#line 304 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                        { yylhs.value.as < std::string > () = (yystack_[2].value.as < bool > () ? "true" : "false") + std::to_string(yystack_[0].value.as < double > ()); }
 #line 1093 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 84: // expr_str: expr_bool "++" expr_bool
-#line 287 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 96: // expr_str: expr_bool "++" expr_bool
+#line 305 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                       { yylhs.value.as < std::string > () = (yystack_[2].value.as < bool > () ? std::string("true") : std::string("false")) + (yystack_[0].value.as < bool > () ? "true" : "false"); }
 #line 1099 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 85: // expr_bool: "bool"
-#line 291 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 97: // expr_bool: "bool"
+#line 309 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                  { yylhs.value.as < bool > () = yystack_[0].value.as < bool > (); }
 #line 1105 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 86: // expr_bool: "(" expr_bool ")"
-#line 292 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 98: // expr_bool: "(" expr_bool ")"
+#line 310 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                 { yylhs.value.as < bool > () = yystack_[1].value.as < bool > (); }
 #line 1111 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 87: // expr_bool: "not" expr_bool
-#line 293 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 99: // expr_bool: "not" expr_bool
+#line 311 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                            { yylhs.value.as < bool > () = !yystack_[0].value.as < bool > (); }
 #line 1117 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 88: // expr_bool: expr_bool "or" expr_bool
-#line 294 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 100: // expr_bool: expr_bool "or" expr_bool
+#line 312 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                     { yylhs.value.as < bool > () = yystack_[2].value.as < bool > () || yystack_[0].value.as < bool > (); }
 #line 1123 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 89: // expr_bool: expr_bool "and" expr_bool
-#line 295 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 101: // expr_bool: expr_bool "and" expr_bool
+#line 313 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                      { yylhs.value.as < bool > () = yystack_[2].value.as < bool > () && yystack_[0].value.as < bool > (); }
 #line 1129 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 90: // expr_bool: expr_bool "==" expr_bool
-#line 296 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 102: // expr_bool: expr_bool "==" expr_bool
+#line 314 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                    { yylhs.value.as < bool > () = yystack_[2].value.as < bool > () == yystack_[0].value.as < bool > (); }
 #line 1135 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 91: // expr_bool: expr_int "==" expr_int
-#line 297 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 103: // expr_bool: expr_int "==" expr_int
+#line 315 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                  { yylhs.value.as < bool > () = yystack_[2].value.as < long > () == yystack_[0].value.as < long > (); }
 #line 1141 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 92: // expr_bool: expr_float "==" expr_float
-#line 298 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 104: // expr_bool: expr_float "==" expr_float
+#line 316 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                      { yylhs.value.as < bool > () = yystack_[2].value.as < double > () == yystack_[0].value.as < double > (); }
 #line 1147 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 93: // expr_bool: expr_str "==" expr_str
-#line 299 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 105: // expr_bool: expr_str "==" expr_str
+#line 317 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                  { yylhs.value.as < bool > () = yystack_[2].value.as < std::string > () == yystack_[0].value.as < std::string > (); }
 #line 1153 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 94: // expr_bool: expr_bool "!=" expr_bool
-#line 300 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 106: // expr_bool: expr_bool "!=" expr_bool
+#line 318 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                     { yylhs.value.as < bool > () = yystack_[2].value.as < bool > () != yystack_[0].value.as < bool > (); }
 #line 1159 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 95: // expr_bool: expr_int "!=" expr_int
-#line 301 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 107: // expr_bool: expr_int "!=" expr_int
+#line 319 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                   { yylhs.value.as < bool > () = yystack_[2].value.as < long > () != yystack_[0].value.as < long > (); }
 #line 1165 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 96: // expr_bool: expr_float "!=" expr_float
-#line 302 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 108: // expr_bool: expr_float "!=" expr_float
+#line 320 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                       { yylhs.value.as < bool > () = yystack_[2].value.as < double > () != yystack_[0].value.as < double > (); }
 #line 1171 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 97: // expr_bool: expr_str "!=" expr_str
-#line 303 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 109: // expr_bool: expr_str "!=" expr_str
+#line 321 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                   { yylhs.value.as < bool > () = yystack_[2].value.as < std::string > () != yystack_[0].value.as < std::string > (); }
 #line 1177 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 98: // expr_bool: expr_int ">" expr_int
-#line 304 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 110: // expr_bool: expr_int ">" expr_int
+#line 322 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                  { yylhs.value.as < bool > () = yystack_[2].value.as < long > () > yystack_[0].value.as < long > (); }
 #line 1183 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 99: // expr_bool: expr_float ">" expr_float
-#line 305 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 111: // expr_bool: expr_float ">" expr_float
+#line 323 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                      { yylhs.value.as < bool > () = yystack_[2].value.as < double > () > yystack_[0].value.as < double > (); }
 #line 1189 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 100: // expr_bool: expr_str ">" expr_str
-#line 306 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 112: // expr_bool: expr_str ">" expr_str
+#line 324 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                  { yylhs.value.as < bool > () = yystack_[2].value.as < std::string > () > yystack_[0].value.as < std::string > (); }
 #line 1195 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 101: // expr_bool: expr_int "<" expr_int
-#line 307 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 113: // expr_bool: expr_int "<" expr_int
+#line 325 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                  { yylhs.value.as < bool > () = yystack_[2].value.as < long > () < yystack_[0].value.as < long > (); }
 #line 1201 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 102: // expr_bool: expr_float "<" expr_float
-#line 308 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 114: // expr_bool: expr_float "<" expr_float
+#line 326 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                      { yylhs.value.as < bool > () = yystack_[2].value.as < double > () < yystack_[0].value.as < double > (); }
 #line 1207 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 103: // expr_bool: expr_str "<" expr_str
-#line 309 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 115: // expr_bool: expr_str "<" expr_str
+#line 327 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                  { yylhs.value.as < bool > () = yystack_[2].value.as < std::string > () < yystack_[0].value.as < std::string > (); }
 #line 1213 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 104: // expr_bool: expr_int ">=" expr_int
-#line 310 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 116: // expr_bool: expr_int ">=" expr_int
+#line 328 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                   { yylhs.value.as < bool > () = yystack_[2].value.as < long > () >= yystack_[0].value.as < long > (); }
 #line 1219 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 105: // expr_bool: expr_float ">=" expr_float
-#line 311 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 117: // expr_bool: expr_float ">=" expr_float
+#line 329 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                       { yylhs.value.as < bool > () = yystack_[2].value.as < double > () >= yystack_[0].value.as < double > (); }
 #line 1225 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 106: // expr_bool: expr_str ">=" expr_str
-#line 312 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 118: // expr_bool: expr_str ">=" expr_str
+#line 330 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                   { yylhs.value.as < bool > () = yystack_[2].value.as < std::string > () >= yystack_[0].value.as < std::string > (); }
 #line 1231 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 107: // expr_bool: expr_int "<=" expr_int
-#line 313 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 119: // expr_bool: expr_int "<=" expr_int
+#line 331 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                   { yylhs.value.as < bool > () = yystack_[2].value.as < long > () <= yystack_[0].value.as < long > (); }
 #line 1237 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 108: // expr_bool: expr_float "<=" expr_float
-#line 314 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 120: // expr_bool: expr_float "<=" expr_float
+#line 332 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                       { yylhs.value.as < bool > () = yystack_[2].value.as < double > () <= yystack_[0].value.as < double > (); }
 #line 1243 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
 
-  case 109: // expr_bool: expr_str "<=" expr_str
-#line 315 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+  case 121: // expr_bool: expr_str "<=" expr_str
+#line 333 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
                                   { yylhs.value.as < bool > () = yystack_[2].value.as < std::string > () <= yystack_[0].value.as < std::string > (); }
 #line 1249 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
     break;
@@ -1601,270 +1601,301 @@ namespace  ptc  {
   }
 
 
-  const short  Parser ::yypact_ninf_ = -163;
+  const short  Parser ::yypact_ninf_ = -202;
 
   const signed char  Parser ::yytable_ninf_ = -1;
 
   const short
    Parser ::yypact_[] =
   {
-     232,  -163,  -163,  -163,  -163,  -163,  -163,   238,   173,   238,
-     175,   -42,    17,  -163,  -163,  -163,  -163,    -5,    43,   290,
-    -163,    44,  -163,  -163,  -163,  -163,  -163,  -163,   503,   526,
-     121,   242,    -8,    -3,   480,    81,   307,   173,  -163,  -163,
-     503,   526,   121,  -163,   175,   175,  -163,  -163,    49,    31,
-     244,  -163,  -163,  -163,  -163,   173,   173,   173,   173,   173,
-     173,   238,   175,   175,   175,   175,   175,   175,   175,   175,
-     175,   175,   175,   173,   173,   173,   173,   173,   173,   238,
-     173,   173,   173,   173,   173,   173,   238,   238,   238,   238,
-     238,   238,   238,   238,   238,   238,   238,   238,    51,  -163,
-    -163,  -163,  -163,   554,   408,   573,  -163,   175,   175,   175,
-     175,   175,    89,   110,  -163,  -163,    80,   324,    80,   324,
-     132,   139,   132,   139,   132,   139,   454,   139,   454,   382,
-    -163,  -163,   285,    24,   364,   105,   105,   579,   579,   579,
-     579,   579,   579,   594,   324,   594,   324,   251,   139,   251,
-     139,   251,   139,   251,   139,   454,   382,  -163,  -163,   382,
-     382,   382,   382,   382,   382,   454,   382,  -163,  -163,    69,
-     242,    69,   154,   154,   154,   154,   454,   382,  -163,  -163,
-     -11,   174,   155,   155,   302,   -14,   -14,  -163,  -163,  -163,
-    -163,   360,  -163,  -163,   150,   180,   431,   431,   348,  -163,
-    -163,  -163,  -163,  -163,   406,  -163
+     234,  -202,  -202,  -202,  -202,  -202,  -202,   396,     2,   396,
+     246,   -49,     5,     7,  -202,  -202,  -202,  -202,   -10,    43,
+     264,  -202,  -202,  -202,  -202,  -202,  -202,  -202,  -202,  -202,
+     570,   515,   123,   356,   -16,   547,   184,     3,   224,     2,
+    -202,  -202,   570,   515,   123,  -202,   246,   246,  -202,  -202,
+       8,    93,   -11,   308,  -202,  -202,  -202,     2,     2,     2,
+       2,     2,     2,   396,   246,   246,   246,   246,   246,   246,
+     246,   246,   246,   246,   246,     2,     2,     2,     2,     2,
+       2,   396,     2,     2,     2,     2,     2,     2,   396,   396,
+     396,   396,   396,   396,   396,   396,   396,   396,   396,   396,
+       9,  -202,  -202,  -202,  -202,   598,   691,   617,  -202,   246,
+     246,   246,   246,   246,    54,  -202,   106,  -202,    82,  -202,
+    -202,   316,   367,   316,   367,   104,   120,   104,   120,   104,
+     120,   634,   120,   651,   418,  -202,  -202,    95,   470,   674,
+     311,   311,   657,   657,   657,   657,   657,   657,   433,   367,
+     433,   367,   611,   120,   611,   120,   611,   120,   611,   120,
+     651,   418,  -202,  -202,   193,   193,   193,   193,   193,   193,
+     651,   418,  -202,  -202,   -15,   356,   -15,   121,   121,   121,
+     121,   651,   418,  -202,  -202,   174,   408,   131,   131,   338,
+     101,   101,  -202,  -202,  -202,  -202,   294,   366,  -202,  -202,
+     140,   352,   158,  -202,   142,   181,   411,   498,  -202,   410,
+    -202,   205,   -17,   294,   294,   468,   189,    93,   227,   294,
+    -202,  -202,  -202,   240,  -202,   242,    93,  -202,  -202,   294,
+     243,  -202,   294,  -202
   };
 
   const signed char
    Parser ::yydefact_[] =
   {
-       0,     2,     6,    32,    46,    67,    85,     0,     0,     0,
-       0,     0,     0,   110,   111,   112,   113,     0,     0,     0,
-       4,     0,    12,    13,    10,    11,     8,     9,    28,    29,
-      30,    31,     0,     0,     0,     0,     0,     0,    33,    47,
-       0,     0,     0,    87,     0,     0,    43,    19,    18,     0,
-       0,     1,     3,     5,     7,     0,     0,     0,     0,     0,
+       0,     2,     6,    44,    58,    79,    97,     0,     0,     0,
+       0,     0,     0,     0,   122,   123,   124,   125,     0,     0,
+       0,     4,     7,    12,    13,    14,    10,    11,     8,     9,
+      40,    41,    42,    43,     0,     0,     0,     0,     0,     0,
+      45,    59,     0,     0,     0,    99,     0,     0,    55,    23,
+      22,     0,     0,     0,     1,     3,     5,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,    23,    34,
-      48,    68,    86,     0,     0,     0,    33,     0,     0,     0,
-       0,     0,     0,     0,    27,    26,    39,    66,    38,    63,
-      35,    54,    36,    57,    37,    60,     0,    51,    74,    75,
-      73,    76,    40,    41,    42,    44,    45,    91,    95,    98,
-     101,   104,   107,    65,    64,    62,    61,    53,    52,    56,
-      55,    59,    58,    50,    49,    78,    79,    77,    80,    92,
-      96,    99,   102,   105,   108,    70,    71,    69,    72,    93,
-       0,    97,   100,   103,   106,   109,    82,    83,    81,    84,
-      89,    88,    90,    94,     0,    39,    38,    35,    36,    37,
-      20,     0,    24,    25,     0,     0,     0,     0,     0,    16,
-      17,    21,    22,    14,     0,    15
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+      35,    46,    60,    80,    98,     0,     0,     0,    45,     0,
+       0,     0,     0,     0,     0,    25,     0,    26,     0,    39,
+      38,    51,    78,    50,    75,    47,    66,    48,    69,    49,
+      72,     0,    63,    86,    87,    85,    88,    52,    53,    54,
+      56,    57,   103,   107,   110,   113,   116,   119,    77,    76,
+      74,    73,    65,    64,    68,    67,    71,    70,    62,    61,
+      90,    91,    89,    92,   104,   108,   111,   114,   117,   120,
+      82,    83,    81,    84,   105,     0,   109,   112,   115,   118,
+     121,    94,    95,    93,    96,   101,   100,   102,   106,     0,
+      51,    50,    47,    48,    49,    24,     0,     0,    36,    37,
+       0,     0,     0,    21,    32,     0,     0,     0,    15,     0,
+      20,     0,    34,     0,     0,     0,    16,     0,     0,     0,
+      29,    27,    28,    17,    18,     0,     0,    33,    19,     0,
+       0,    30,     0,    31
   };
 
   const short
    Parser ::yypgoto_[] =
   {
-    -163,  -163,   -22,   -18,  -162,  -163,   -15,  -163,  -163,  -163,
-    -163,  -163,  -163,   -45,     0,    87,    39,   131,  -163
+    -202,  -202,  -193,   -20,  -187,  -202,    34,  -202,  -202,  -201,
+    -202,  -202,  -202,  -202,  -202,  -202,  -202,   -29,    -6,    87,
+      39,   133,  -202
   };
 
   const unsigned char
    Parser ::yydefgoto_[] =
   {
-       0,    18,    19,    20,    21,   200,   201,    22,    48,    23,
-      24,    25,    26,    27,    40,    41,    30,    31,    32
+       0,    19,    20,    21,    22,   203,   204,    23,    50,   116,
+      24,    25,   212,   220,    26,    27,    28,    29,    30,    31,
+      32,    33,    34
   };
 
   const unsigned char
    Parser ::yytable_[] =
   {
-      28,    53,   109,   110,   111,   115,    99,    33,    38,    93,
-      46,    55,    56,    57,    58,    59,    60,    61,    47,    28,
-      96,    97,    62,    63,    64,    49,    65,    66,    67,    68,
-      69,    70,    71,    72,   199,   199,    50,   103,   107,   108,
-     109,   110,   111,    51,   105,   106,    35,    54,    42,    62,
-      28,    64,    98,    65,    66,   116,   118,   120,   122,   124,
-     126,   128,   132,   133,   134,   135,   136,   137,   138,   139,
-     140,   141,   142,   143,   145,   147,   149,   151,   153,   155,
-     126,   126,   126,   126,   126,   126,   165,    29,   112,    86,
-     101,   113,   184,   176,    34,    39,    57,    58,    59,    60,
-     130,    86,    89,    90,    91,    92,    29,   185,   186,   187,
-     188,   189,    87,    88,    89,    90,    91,    92,   157,   107,
-     108,   109,   110,   111,   104,   167,   169,   171,   172,   173,
-     174,   175,   178,    42,    42,    42,    42,    29,    36,   193,
-      43,    86,   117,   119,   121,   123,   125,   127,   129,   190,
-     191,    60,    87,    88,    89,    90,    91,    92,    78,   196,
-     144,   146,   148,   150,   152,   154,   156,   159,   160,   161,
-     162,   163,   164,   166,    86,    93,   204,     3,     4,     3,
-     177,    37,   202,    44,    28,     0,    53,     0,     8,   197,
-      45,     0,   131,     0,    93,    94,    28,    28,    28,     0,
-      86,    10,     0,    10,    28,    96,    97,     0,     0,     0,
-     158,    87,    88,    89,    90,    91,    92,   168,   170,   170,
-     170,   170,   170,   170,   179,   180,   181,   182,   183,     0,
-     195,     0,     1,     0,     0,     2,     3,     4,     5,     6,
-       7,     0,     3,     4,     5,     6,     7,     8,     3,     4,
-       5,     6,     7,     8,     0,     9,     0,     0,     0,     8,
-      10,     9,    93,    94,    95,     0,    10,     9,     0,     0,
-      60,    29,    10,    96,    97,    11,    62,    63,    64,    12,
-      65,    66,     0,    29,    29,    29,    13,    14,    15,    16,
-      52,    29,    17,     2,     3,     4,     5,     6,     7,   107,
-     108,   109,   110,   111,   114,     8,     3,     4,     5,     6,
-       7,     0,     0,     9,    65,    66,   102,     8,    10,     0,
-       0,     0,   170,     0,     0,     9,     0,    93,    94,    95,
-      10,     0,     0,    11,     0,     0,     0,    12,    96,    97,
-      75,    76,    77,    78,    13,    14,    15,    16,     0,     0,
-      17,     2,     3,     4,     5,     6,     7,     0,     0,     0,
-       0,   203,   192,     8,     3,     4,     5,     6,     7,     0,
-       0,     9,     0,     0,     0,     8,    10,     0,   107,   108,
-     109,   110,   111,     9,     0,     0,     0,     0,    10,    62,
-       0,    11,     0,    65,    66,    12,    73,    74,    75,    76,
-      77,    78,    13,    14,    15,    16,     0,     0,    17,     2,
-       3,     4,     5,     6,     7,     0,     0,   100,     0,   205,
-     194,     8,    73,    74,    75,    76,    77,    78,     0,     9,
-       0,     0,     0,     0,    10,     3,     4,     5,     6,     7,
-       0,     0,     0,   198,     0,     0,     8,     0,     0,    11,
-       0,     0,     0,    12,     9,     0,     0,     0,     0,    10,
-      13,    14,    15,    16,     0,     0,    17,     0,    55,    56,
-      57,    58,    59,    60,    11,     0,     0,     0,    12,    62,
-      63,    64,     0,    65,    66,    13,    14,    15,    16,   100,
-       0,    17,     0,     0,    73,    74,    75,    76,    77,    78,
-      79,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,    80,    81,    82,    83,    84,    85,    55,    56,    57,
-      58,    59,    60,    61,     0,     0,     0,     0,    62,    63,
-      64,     0,    65,    66,    67,    68,    69,    70,    71,    72,
-      73,    74,    75,    76,    77,    78,    79,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,    80,    81,    82,
-      83,    84,    85,    99,     0,     0,     0,     0,    55,    56,
-      57,    58,    59,    60,     0,     0,     0,     0,     0,    62,
-      63,    64,    99,    65,    66,     0,     0,   107,   108,   109,
-     110,   111,     0,   107,   108,   109,   110,   111,    62,    63,
-      64,     0,    65,    66,    62,    63,    64,     0,    65,    66,
-      57,    58,    59,    60,     0,     0,     0,     0,     0,    62,
-      63,    64,     0,    65,    66
+      56,    35,    40,    42,    48,    88,     3,     4,   209,   202,
+      39,    49,   103,    51,   215,    52,   225,     8,    91,    92,
+      93,    94,   117,    88,   120,   230,   202,   202,   218,   219,
+      10,    53,   202,   105,    89,    90,    91,    92,    93,    94,
+     107,   108,   202,    54,   100,   202,    37,   114,    44,   118,
+     189,   121,   123,   125,   127,   129,   131,   133,   137,   138,
+     139,   140,   141,   142,   143,   144,   145,   146,   147,   148,
+     150,   152,   154,   156,   158,   160,   131,   131,   131,   131,
+     131,   131,   170,    42,    42,    42,    42,    42,    42,   181,
+      42,    42,    42,    42,    36,    41,    43,     3,     4,     5,
+       6,     7,   135,   190,   191,   192,   193,   194,     8,   109,
+     110,   111,   112,   113,   195,   196,     9,   111,   112,   113,
+     162,    10,   197,    62,    67,    68,   106,   172,   174,   176,
+     177,   178,   179,   180,   183,    44,    44,    44,    44,    80,
+      38,    88,    45,    88,   122,   124,   126,   128,   130,   132,
+     134,    95,   207,   115,    89,    90,    91,    92,    93,    94,
+     199,   210,   149,   151,   153,   155,   157,   159,   161,   164,
+     165,   166,   167,   168,   169,   171,    43,    43,    43,    43,
+      43,    43,   182,    43,    43,    43,    43,   211,   117,    56,
+     213,    42,   224,   102,    95,    56,   136,   117,    75,    76,
+      77,    78,    79,    80,    81,    98,    99,    75,    76,    77,
+      78,    79,    80,   217,   163,    82,    83,    84,    85,    86,
+      87,   173,   175,   175,   175,   175,   175,   175,   184,   185,
+     186,   187,   188,   104,     1,   226,   206,     2,     3,     4,
+       5,     6,     7,   228,    95,    96,    97,   221,   222,     8,
+       3,   229,   232,   227,    46,    98,    99,     9,     0,     0,
+       0,    47,    10,   231,    55,     0,   233,     2,     3,     4,
+       5,     6,     7,     0,    10,     0,     0,    11,    12,     8,
+       0,    13,     0,     0,    43,     0,     0,     9,    14,    15,
+      16,    17,    10,     0,    18,     0,     0,   200,     3,     4,
+       5,     6,     7,     0,     0,     0,   201,    11,    12,     8,
+       0,    13,     3,     4,     5,     6,     7,     9,    14,    15,
+      16,    17,    10,     8,    18,   109,   110,   111,   112,   113,
+     175,     9,    59,    60,    61,    62,    10,    11,    12,     0,
+       0,    13,     3,     4,     5,     6,     7,     0,    14,    15,
+      16,    17,     0,     8,    18,     2,     3,     4,     5,     6,
+       7,     9,     0,     0,     0,   208,    10,     8,   119,     0,
+       3,     4,     5,     6,     7,     9,    95,    96,    97,     0,
+      10,     8,     0,    77,    78,    79,    80,    98,    99,     9,
+       0,     0,     0,     0,    10,    11,    12,     0,   198,    13,
+       3,     4,     5,     6,     7,     0,    14,    15,    16,    17,
+       0,     8,    18,     2,     3,     4,     5,     6,     7,     9,
+     214,     0,     0,   216,    10,     8,   205,     0,    95,    96,
+       0,    88,    75,     9,    77,    78,    79,    80,    10,    98,
+      99,     0,    89,    90,    91,    92,    93,    94,     0,    59,
+      60,    61,    62,    11,    12,     0,     0,    13,    64,    65,
+      66,     0,    67,    68,    14,    15,    16,    17,     0,     0,
+      18,     2,     3,     4,     5,     6,     7,     0,     0,     0,
+       0,   223,     0,     8,   109,   110,   111,   112,   113,     0,
+       0,     9,     0,     0,     0,    64,    10,    66,     0,    67,
+      68,     2,     3,     4,     5,     6,     7,     0,     0,     0,
+       0,    11,    12,     8,     0,    13,     0,     0,     0,     0,
+       0,     9,    14,    15,    16,    17,    10,     0,    18,    75,
+      76,    77,    78,    79,    80,    81,     0,     0,     0,     0,
+       0,    11,    12,     0,     0,    13,    82,    83,    84,    85,
+      86,    87,    14,    15,    16,    17,   101,     0,    18,     0,
+       0,    57,    58,    59,    60,    61,    62,    63,     0,     0,
+       0,     0,    64,    65,    66,     0,    67,    68,    69,    70,
+      71,    72,    73,    74,    57,    58,    59,    60,    61,    62,
+      63,     0,     0,     0,     0,    64,    65,    66,     0,    67,
+      68,    69,    70,    71,    72,    73,    74,   101,     0,     0,
+       0,     0,    57,    58,    59,    60,    61,    62,     0,     0,
+       0,     0,     0,    64,    65,    66,   101,    67,    68,     0,
+      62,   109,   110,   111,   112,   113,    64,    65,    66,     0,
+      67,    68,    64,    65,    66,     0,    67,    68,    57,    58,
+      59,    60,    61,    62,     0,     0,     0,     0,     0,    64,
+      65,    66,     0,    67,    68,    57,     0,    59,    60,    61,
+      62,   109,   110,   111,   112,   113,    64,    65,    66,     0,
+      67,    68,    64,    65,    66,     0,    67,    68,   109,   110,
+     111,   112,   113,     0,     0,     0,     0,     0,     0,    64,
+     102,     0,     0,    67,    68,    75,    76,    77,    78,    79,
+      80
   };
 
   const short
    Parser ::yycheck_[] =
   {
-       0,    19,    16,    17,    18,    50,     9,     7,     8,    20,
-      10,    14,    15,    16,    17,    18,    19,    20,    60,    19,
-      31,    32,    25,    26,    27,     8,    29,    30,    31,    32,
-      33,    34,    35,    36,   196,   197,    41,    37,    14,    15,
-      16,    17,    18,     0,    44,    45,     7,     3,     9,    25,
-      50,    27,    60,    29,    30,    55,    56,    57,    58,    59,
-      60,    61,    62,    63,    64,    65,    66,    67,    68,    69,
-      70,    71,    72,    73,    74,    75,    76,    77,    78,    79,
-      80,    81,    82,    83,    84,    85,    86,     0,    39,    20,
-       9,    60,    41,    93,     7,     8,    16,    17,    18,    19,
-      61,    20,    33,    34,    35,    36,    19,   107,   108,   109,
-     110,   111,    31,    32,    33,    34,    35,    36,    79,    14,
-      15,    16,    17,    18,    37,    86,    87,    88,    89,    90,
-      91,    92,    93,    94,    95,    96,    97,    50,     7,   184,
-       9,    20,    55,    56,    57,    58,    59,    60,    61,    60,
-      40,    19,    31,    32,    33,    34,    35,    36,    19,     9,
-      73,    74,    75,    76,    77,    78,    79,    80,    81,    82,
-      83,    84,    85,    86,    20,    20,   198,     4,     5,     4,
-      93,     8,   197,     8,   184,    -1,   204,    -1,    15,     9,
-      15,    -1,    61,    -1,    20,    21,   196,   197,   198,    -1,
-      20,    28,    -1,    28,   204,    31,    32,    -1,    -1,    -1,
-      79,    31,    32,    33,    34,    35,    36,    86,    87,    88,
-      89,    90,    91,    92,    93,    94,    95,    96,    97,    -1,
-     191,    -1,     0,    -1,    -1,     3,     4,     5,     6,     7,
-       8,    -1,     4,     5,     6,     7,     8,    15,     4,     5,
-       6,     7,     8,    15,    -1,    23,    -1,    -1,    -1,    15,
-      28,    23,    20,    21,    22,    -1,    28,    23,    -1,    -1,
-      19,   184,    28,    31,    32,    43,    25,    26,    27,    47,
-      29,    30,    -1,   196,   197,   198,    54,    55,    56,    57,
-       0,   204,    60,     3,     4,     5,     6,     7,     8,    14,
-      15,    16,    17,    18,    60,    15,     4,     5,     6,     7,
-       8,    -1,    -1,    23,    29,    30,     9,    15,    28,    -1,
-      -1,    -1,   191,    -1,    -1,    23,    -1,    20,    21,    22,
-      28,    -1,    -1,    43,    -1,    -1,    -1,    47,    31,    32,
-      16,    17,    18,    19,    54,    55,    56,    57,    -1,    -1,
+      20,     7,     8,     9,    10,    20,     4,     5,   201,   196,
+       8,    60,     9,     8,   207,     8,   217,    15,    33,    34,
+      35,    36,    51,    20,    53,   226,   213,   214,    45,    46,
+      28,    41,   219,    39,    31,    32,    33,    34,    35,    36,
+      46,    47,   229,     0,    60,   232,     7,    39,     9,    60,
+      41,    57,    58,    59,    60,    61,    62,    63,    64,    65,
+      66,    67,    68,    69,    70,    71,    72,    73,    74,    75,
+      76,    77,    78,    79,    80,    81,    82,    83,    84,    85,
+      86,    87,    88,    89,    90,    91,    92,    93,    94,    95,
+      96,    97,    98,    99,     7,     8,     9,     4,     5,     6,
+       7,     8,    63,   109,   110,   111,   112,   113,    15,    14,
+      15,    16,    17,    18,    60,     9,    23,    16,    17,    18,
+      81,    28,    40,    19,    29,    30,    39,    88,    89,    90,
+      91,    92,    93,    94,    95,    96,    97,    98,    99,    19,
+       7,    20,     9,    20,    57,    58,    59,    60,    61,    62,
+      63,    20,    12,    60,    31,    32,    33,    34,    35,    36,
+     189,     3,    75,    76,    77,    78,    79,    80,    81,    82,
+      83,    84,    85,    86,    87,    88,    89,    90,    91,    92,
+      93,    94,    95,    96,    97,    98,    99,    45,   217,   209,
+       9,   197,     3,     9,    20,   215,    63,   226,    14,    15,
+      16,    17,    18,    19,    20,    31,    32,    14,    15,    16,
+      17,    18,    19,     8,    81,    31,    32,    33,    34,    35,
+      36,    88,    89,    90,    91,    92,    93,    94,    95,    96,
+      97,    98,    99,     9,     0,     8,   197,     3,     4,     5,
+       6,     7,     8,     3,    20,    21,    22,   213,   214,    15,
+       4,     9,     9,   219,     8,    31,    32,    23,    -1,    -1,
+      -1,    15,    28,   229,     0,    -1,   232,     3,     4,     5,
+       6,     7,     8,    -1,    28,    -1,    -1,    43,    44,    15,
+      -1,    47,    -1,    -1,   197,    -1,    -1,    23,    54,    55,
+      56,    57,    28,    -1,    60,    -1,    -1,     3,     4,     5,
+       6,     7,     8,    -1,    -1,    -1,    12,    43,    44,    15,
+      -1,    47,     4,     5,     6,     7,     8,    23,    54,    55,
+      56,    57,    28,    15,    60,    14,    15,    16,    17,    18,
+     197,    23,    16,    17,    18,    19,    28,    43,    44,    -1,
+      -1,    47,     4,     5,     6,     7,     8,    -1,    54,    55,
+      56,    57,    -1,    15,    60,     3,     4,     5,     6,     7,
+       8,    23,    -1,    -1,    -1,    13,    28,    15,    60,    -1,
+       4,     5,     6,     7,     8,    23,    20,    21,    22,    -1,
+      28,    15,    -1,    16,    17,    18,    19,    31,    32,    23,
+      -1,    -1,    -1,    -1,    28,    43,    44,    -1,    60,    47,
+       4,     5,     6,     7,     8,    -1,    54,    55,    56,    57,
+      -1,    15,    60,     3,     4,     5,     6,     7,     8,    23,
+       9,    -1,    -1,    13,    28,    15,    60,    -1,    20,    21,
+      -1,    20,    14,    23,    16,    17,    18,    19,    28,    31,
+      32,    -1,    31,    32,    33,    34,    35,    36,    -1,    16,
+      17,    18,    19,    43,    44,    -1,    -1,    47,    25,    26,
+      27,    -1,    29,    30,    54,    55,    56,    57,    -1,    -1,
       60,     3,     4,     5,     6,     7,     8,    -1,    -1,    -1,
-      -1,    13,    60,    15,     4,     5,     6,     7,     8,    -1,
-      -1,    23,    -1,    -1,    -1,    15,    28,    -1,    14,    15,
-      16,    17,    18,    23,    -1,    -1,    -1,    -1,    28,    25,
-      -1,    43,    -1,    29,    30,    47,    14,    15,    16,    17,
-      18,    19,    54,    55,    56,    57,    -1,    -1,    60,     3,
-       4,     5,     6,     7,     8,    -1,    -1,     9,    -1,    13,
-      60,    15,    14,    15,    16,    17,    18,    19,    -1,    23,
-      -1,    -1,    -1,    -1,    28,     4,     5,     6,     7,     8,
-      -1,    -1,    -1,    12,    -1,    -1,    15,    -1,    -1,    43,
-      -1,    -1,    -1,    47,    23,    -1,    -1,    -1,    -1,    28,
-      54,    55,    56,    57,    -1,    -1,    60,    -1,    14,    15,
-      16,    17,    18,    19,    43,    -1,    -1,    -1,    47,    25,
-      26,    27,    -1,    29,    30,    54,    55,    56,    57,     9,
-      -1,    60,    -1,    -1,    14,    15,    16,    17,    18,    19,
-      20,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-      -1,    31,    32,    33,    34,    35,    36,    14,    15,    16,
-      17,    18,    19,    20,    -1,    -1,    -1,    -1,    25,    26,
-      27,    -1,    29,    30,    31,    32,    33,    34,    35,    36,
-      14,    15,    16,    17,    18,    19,    20,    -1,    -1,    -1,
-      -1,    -1,    -1,    -1,    -1,    -1,    -1,    31,    32,    33,
-      34,    35,    36,     9,    -1,    -1,    -1,    -1,    14,    15,
+      -1,    13,    -1,    15,    14,    15,    16,    17,    18,    -1,
+      -1,    23,    -1,    -1,    -1,    25,    28,    27,    -1,    29,
+      30,     3,     4,     5,     6,     7,     8,    -1,    -1,    -1,
+      -1,    43,    44,    15,    -1,    47,    -1,    -1,    -1,    -1,
+      -1,    23,    54,    55,    56,    57,    28,    -1,    60,    14,
+      15,    16,    17,    18,    19,    20,    -1,    -1,    -1,    -1,
+      -1,    43,    44,    -1,    -1,    47,    31,    32,    33,    34,
+      35,    36,    54,    55,    56,    57,     9,    -1,    60,    -1,
+      -1,    14,    15,    16,    17,    18,    19,    20,    -1,    -1,
+      -1,    -1,    25,    26,    27,    -1,    29,    30,    31,    32,
+      33,    34,    35,    36,    14,    15,    16,    17,    18,    19,
+      20,    -1,    -1,    -1,    -1,    25,    26,    27,    -1,    29,
+      30,    31,    32,    33,    34,    35,    36,     9,    -1,    -1,
+      -1,    -1,    14,    15,    16,    17,    18,    19,    -1,    -1,
+      -1,    -1,    -1,    25,    26,    27,     9,    29,    30,    -1,
+      19,    14,    15,    16,    17,    18,    25,    26,    27,    -1,
+      29,    30,    25,    26,    27,    -1,    29,    30,    14,    15,
       16,    17,    18,    19,    -1,    -1,    -1,    -1,    -1,    25,
-      26,    27,     9,    29,    30,    -1,    -1,    14,    15,    16,
-      17,    18,    -1,    14,    15,    16,    17,    18,    25,    26,
-      27,    -1,    29,    30,    25,    26,    27,    -1,    29,    30,
-      16,    17,    18,    19,    -1,    -1,    -1,    -1,    -1,    25,
-      26,    27,    -1,    29,    30
+      26,    27,    -1,    29,    30,    14,    -1,    16,    17,    18,
+      19,    14,    15,    16,    17,    18,    25,    26,    27,    -1,
+      29,    30,    25,    26,    27,    -1,    29,    30,    14,    15,
+      16,    17,    18,    -1,    -1,    -1,    -1,    -1,    -1,    25,
+       9,    -1,    -1,    29,    30,    14,    15,    16,    17,    18,
+      19
   };
 
   const signed char
    Parser ::yystos_[] =
   {
        0,     0,     3,     4,     5,     6,     7,     8,    15,    23,
-      28,    43,    47,    54,    55,    56,    57,    60,    63,    64,
-      65,    66,    69,    71,    72,    73,    74,    75,    76,    77,
-      78,    79,    80,    76,    77,    78,    79,     8,    76,    77,
-      76,    77,    78,    79,     8,    15,    76,    60,    70,     8,
-      41,     0,     0,    65,     3,    14,    15,    16,    17,    18,
-      19,    20,    25,    26,    27,    29,    30,    31,    32,    33,
-      34,    35,    36,    14,    15,    16,    17,    18,    19,    20,
-      31,    32,    33,    34,    35,    36,    20,    31,    32,    33,
-      34,    35,    36,    20,    21,    22,    31,    32,    60,     9,
-       9,     9,     9,    76,    77,    76,    76,    14,    15,    16,
-      17,    18,    39,    60,    60,    75,    76,    77,    76,    77,
-      76,    77,    76,    77,    76,    77,    76,    77,    76,    77,
-      78,    79,    76,    76,    76,    76,    76,    76,    76,    76,
-      76,    76,    76,    76,    77,    76,    77,    76,    77,    76,
-      77,    76,    77,    76,    77,    76,    77,    78,    79,    77,
-      77,    77,    77,    77,    77,    76,    77,    78,    79,    78,
-      79,    78,    78,    78,    78,    78,    76,    77,    78,    79,
-      79,    79,    79,    79,    41,    76,    76,    76,    76,    76,
-      60,    40,    60,    75,    60,    78,     9,     9,    12,    66,
-      67,    68,    68,    13,    64,    13
+      28,    43,    44,    47,    54,    55,    56,    57,    60,    63,
+      64,    65,    66,    69,    72,    73,    76,    77,    78,    79,
+      80,    81,    82,    83,    84,    80,    81,    82,    83,     8,
+      80,    81,    80,    81,    82,    83,     8,    15,    80,    60,
+      70,     8,     8,    41,     0,     0,    65,    14,    15,    16,
+      17,    18,    19,    20,    25,    26,    27,    29,    30,    31,
+      32,    33,    34,    35,    36,    14,    15,    16,    17,    18,
+      19,    20,    31,    32,    33,    34,    35,    36,    20,    31,
+      32,    33,    34,    35,    36,    20,    21,    22,    31,    32,
+      60,     9,     9,     9,     9,    80,    81,    80,    80,    14,
+      15,    16,    17,    18,    39,    60,    71,    79,    60,    60,
+      79,    80,    81,    80,    81,    80,    81,    80,    81,    80,
+      81,    80,    81,    80,    81,    82,    83,    80,    80,    80,
+      80,    80,    80,    80,    80,    80,    80,    80,    80,    81,
+      80,    81,    80,    81,    80,    81,    80,    81,    80,    81,
+      80,    81,    82,    83,    81,    81,    81,    81,    81,    81,
+      80,    81,    82,    83,    82,    83,    82,    82,    82,    82,
+      82,    80,    81,    82,    83,    83,    83,    83,    83,    41,
+      80,    80,    80,    80,    80,    60,     9,    40,    60,    79,
+       3,    12,    66,    67,    68,    60,    82,    12,    13,    64,
+       3,    45,    74,     9,     9,    64,    13,     8,    45,    46,
+      75,    68,    68,    13,     3,    71,     8,    68,     3,     9,
+      71,    68,     9,    68
   };
 
   const signed char
    Parser ::yyr1_[] =
   {
        0,    62,    63,    63,    64,    64,    65,    65,    66,    66,
-      66,    66,    66,    66,    67,    67,    68,    68,    69,    70,
-      70,    71,    71,    72,    73,    73,    74,    74,    75,    75,
-      75,    75,    76,    76,    76,    76,    76,    76,    76,    76,
-      76,    76,    76,    76,    76,    76,    77,    77,    77,    77,
-      77,    77,    77,    77,    77,    77,    77,    77,    77,    77,
-      77,    77,    77,    77,    77,    77,    77,    78,    78,    78,
-      78,    78,    78,    78,    78,    78,    78,    78,    78,    78,
-      78,    78,    78,    78,    78,    79,    79,    79,    79,    79,
-      79,    79,    79,    79,    79,    79,    79,    79,    79,    79,
-      79,    79,    79,    79,    79,    79,    79,    79,    79,    79,
-      80,    80,    80,    80
+      66,    66,    66,    66,    66,    67,    67,    67,    67,    67,
+      68,    68,    69,    70,    70,    71,    71,    72,    72,    73,
+      74,    74,    74,    75,    75,    76,    77,    77,    78,    78,
+      79,    79,    79,    79,    80,    80,    80,    80,    80,    80,
+      80,    80,    80,    80,    80,    80,    80,    80,    81,    81,
+      81,    81,    81,    81,    81,    81,    81,    81,    81,    81,
+      81,    81,    81,    81,    81,    81,    81,    81,    81,    82,
+      82,    82,    82,    82,    82,    82,    82,    82,    82,    82,
+      82,    82,    82,    82,    82,    82,    82,    83,    83,    83,
+      83,    83,    83,    83,    83,    83,    83,    83,    83,    83,
+      83,    83,    83,    83,    83,    83,    83,    83,    83,    83,
+      83,    83,    84,    84,    84,    84
   };
 
   const signed char
    Parser ::yyr2_[] =
   {
-       0,     2,     1,     2,     1,     2,     1,     2,     1,     1,
-       1,     1,     1,     1,     2,     3,     1,     1,     2,     1,
-       3,     7,     7,     2,     4,     4,     3,     3,     1,     1,
-       1,     1,     1,     2,     3,     3,     3,     3,     3,     3,
-       3,     3,     3,     2,     3,     3,     1,     2,     3,     3,
+       0,     2,     1,     2,     1,     2,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     2,     3,     4,     4,     5,
+       2,     1,     2,     1,     3,     1,     1,     7,     7,     7,
+       5,     6,     0,     2,     0,     2,     4,     4,     3,     3,
+       1,     1,     1,     1,     1,     2,     3,     3,     3,     3,
+       3,     3,     3,     3,     3,     2,     3,     3,     1,     2,
        3,     3,     3,     3,     3,     3,     3,     3,     3,     3,
-       3,     3,     3,     3,     3,     3,     3,     1,     3,     3,
+       3,     3,     3,     3,     3,     3,     3,     3,     3,     1,
        3,     3,     3,     3,     3,     3,     3,     3,     3,     3,
-       3,     3,     3,     3,     3,     1,     3,     2,     3,     3,
+       3,     3,     3,     3,     3,     3,     3,     1,     3,     2,
        3,     3,     3,     3,     3,     3,     3,     3,     3,     3,
        3,     3,     3,     3,     3,     3,     3,     3,     3,     3,
-       1,     1,     1,     1
+       3,     3,     1,     1,     1,     1
   };
 
 
@@ -1886,9 +1917,9 @@ namespace  ptc  {
   "\"const\"", "\"\\\"int\\\"\"", "\"\\\"float\\\"\"",
   "\"\\\"string\\\"\"", "\"\\\"bool\\\"\"", "\"\\\"struct\\\"\"",
   "\"\\\"void\\\"\"", "\"identifier\"", "NEG", "$accept", "start", "stmt",
-  "stmts", "stmts_ne", "block", "body", "import", "id_list", "for",
-  "vardecl", "vardef", "set", "val", "expr_int", "expr_float", "expr_str",
-  "expr_bool", "type", YY_NULLPTR
+  "stmts", "stmts_ne", "block", "body", "import", "id_list", "cond", "for",
+  "if", "elif", "else", "vardecl", "vardef", "set", "val", "expr_int",
+  "expr_float", "expr_str", "expr_bool", "type", YY_NULLPTR
   };
 #endif
 
@@ -1898,17 +1929,18 @@ namespace  ptc  {
    Parser ::yyrline_[] =
   {
        0,   167,   167,   168,   170,   171,   175,   176,   178,   179,
-     180,   181,   182,   183,   187,   188,   191,   192,   196,   198,
-     199,   203,   204,   208,   212,   213,   217,   218,   222,   223,
-     224,   225,   229,   230,   231,   232,   233,   234,   235,   236,
-     237,   238,   239,   240,   241,   242,   246,   247,   248,   249,
-     250,   251,   252,   253,   254,   255,   256,   257,   258,   259,
-     260,   261,   262,   263,   264,   265,   266,   270,   271,   272,
-     273,   274,   275,   276,   277,   278,   279,   280,   281,   282,
-     283,   284,   285,   286,   287,   291,   292,   293,   294,   295,
-     296,   297,   298,   299,   300,   301,   302,   303,   304,   305,
-     306,   307,   308,   309,   310,   311,   312,   313,   314,   315,
-     319,   320,   321,   322
+     180,   181,   182,   183,   184,   188,   189,   190,   191,   192,
+     195,   196,   200,   202,   203,   207,   208,   211,   212,   215,
+     217,   218,   219,   221,   222,   226,   230,   231,   235,   236,
+     240,   241,   242,   243,   247,   248,   249,   250,   251,   252,
+     253,   254,   255,   256,   257,   258,   259,   260,   264,   265,
+     266,   267,   268,   269,   270,   271,   272,   273,   274,   275,
+     276,   277,   278,   279,   280,   281,   282,   283,   284,   288,
+     289,   290,   291,   292,   293,   294,   295,   296,   297,   298,
+     299,   300,   301,   302,   303,   304,   305,   309,   310,   311,
+     312,   313,   314,   315,   316,   317,   318,   319,   320,   321,
+     322,   323,   324,   325,   326,   327,   328,   329,   330,   331,
+     332,   333,   337,   338,   339,   340
   };
 
   void
@@ -1993,9 +2025,9 @@ namespace  ptc  {
 
 #line 13 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
 } //  ptc 
-#line 1997 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
+#line 2029 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.cpp"
 
-#line 325 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+#line 343 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
 
 
 /* Error method */

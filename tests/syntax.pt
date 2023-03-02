@@ -34,5 +34,69 @@ for(i: c  ) {
 for(i : "Hello") {
     42; a = 43; }
 
+for(i : "Hello") 
+{
+42; a = 43; 
+
+
+}
+
 for(i : v) {;}
+
+if(false) a = 4
+
+a = 4
+
+if(true) 
+{
+    a = 4
+}
+
+if("r" < "r") {
+
+}else {
+
+}
+
+if("r" == "r") {
+
+}
+else {
+
+}
+
+if(true) {
+
+}
+elif(42 == 42) {
+
+}
+elif(4 > 5) {
+
+}
+
+if(true) {
+
+}
+elif(42 == 42) {
+
+}
+elif(4 > 5) {
+
+}
+else {
+
+}
+
+if(a) a = 4
+elif(b) a = 5
+else c = 4
+
+if(a) a = 5;
+if(a) a = 4; elif(b) a = 5; else c = 4;
+
+if(a) a = 5; if(a) a = 4; elif(b) a = 5; else c = 4;
+
+if(a) { a = 4; } elif(b) {a = 5;} else {c = 4;}
+
 

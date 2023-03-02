@@ -173,7 +173,7 @@ stmt : stmts
 
 // Statements
 stmts : END
-      | stmts_ne END
+      | stmts_ne
       ;
 stmts_ne : set
          | val
@@ -181,14 +181,18 @@ stmts_ne : set
          | vardef
          | import
          | for
+         | if
          ;
 
 // Code block     
 block : LBR RBR
       | LBR stmt RBR
+      | END LBR stmt RBR
+      | LBR stmt RBR END
+      | END LBR stmt RBR END
       ;
 // Code block or single statement
-body : stmts_ne
+body : stmts_ne END
      | block
      ;
 
@@ -199,10 +203,24 @@ id_list : ID
         | id_list COMMA ID
         ;
 
+// Condition
+cond : ID
+     | val
+
 // For loop
 for : KWFOR LPAR ID COLON ID RPAR body
     | KWFOR LPAR ID COLON expr_str RPAR body
     ;
+
+if : KWIF LPAR cond RPAR body elif else
+   ;
+elif : KWELIF LPAR cond RPAR body
+     | elif KWELIF LPAR cond RPAR body
+     |
+     ;
+else : KWELSE body
+     |
+     ;
 
 // Variable declaration
 vardecl : type ID
