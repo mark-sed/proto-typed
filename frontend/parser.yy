@@ -169,6 +169,7 @@ start : END_FILE
       ;
 stmt : stmts
      | stmt stmts
+     | stmt error stmts
      ;
 
 // Statements
@@ -182,6 +183,9 @@ stmts_ne : set
          | import
          | for
          | if
+         | while
+         | dowhile
+         | funcall
          ;
 
 // Code block     
@@ -204,14 +208,23 @@ id_list : ID
         ;
 
 // Condition
-cond : ID
+cond : scope
      | val
+     ;
 
 // For loop
 for : KWFOR LPAR ID COLON ID RPAR body
     | KWFOR LPAR ID COLON expr_str RPAR body
     ;
 
+// While loop
+while : KWWHILE LPAR cond RPAR body
+      ;
+// Do while
+dowhile : KWDO body KWWHILE LPAR cond RPAR
+        ;
+
+// If-elif-else statement
 if : KWIF LPAR cond RPAR body elif else
    ;
 elif : KWELIF LPAR cond RPAR body
@@ -232,9 +245,40 @@ vardef : type ID SET ID
        ;
 
 // Assignment
-set : ID SET val
-    | ID SET ID
+set : scope SET val
+    | scope SET scope
     ;
+
+// Function call
+funcall : scope LPAR RPAR
+        | scope LPAR callarglist RPAR
+        ;
+callarglist : callarg
+            | callargnamed
+            | callarg COMMA callarglist
+            ;
+callarg : val
+        | scope
+        ;
+callargnamed : ID SET val
+             | ID SET scope
+             | callargnamed COMMA callargnamed
+             ;
+
+// Index
+index : val
+      | scope
+      ;
+
+select : LSQ index RSQ
+       | LSQ index RSQ select
+
+// Scope - Complex id
+scope : ID
+      | funcall
+      | ID select
+      | scope DOT scope
+      ;
 
 // Constant values
 val : expr_int //{ std::cout << "=" << $1 << std::endl; }
@@ -333,11 +377,22 @@ expr_bool : BOOL { $$ = $1; }
           | expr_str LEQ expr_str { $$ = $1 <= $3; }
           ;
 
+// Function signature (as a type)
+funtype : type LPAR typelist RPAR
+        | type LPAR RPAR
+        ;
+
+typelist : type
+         | type COMMA typelist
+         ;
+
 // Variable types
 type : KWINT
      | KWFLOAT
      | KWSTRING
      | KWBOOL
+     | ID
+     | funtype
      ;
 
 %%

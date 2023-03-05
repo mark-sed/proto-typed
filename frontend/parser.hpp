@@ -878,18 +878,29 @@ namespace  ptc  {
         S_id_list = 70,                          // id_list
         S_cond = 71,                             // cond
         S_for = 72,                              // for
-        S_if = 73,                               // if
-        S_elif = 74,                             // elif
-        S_else = 75,                             // else
-        S_vardecl = 76,                          // vardecl
-        S_vardef = 77,                           // vardef
-        S_set = 78,                              // set
-        S_val = 79,                              // val
-        S_expr_int = 80,                         // expr_int
-        S_expr_float = 81,                       // expr_float
-        S_expr_str = 82,                         // expr_str
-        S_expr_bool = 83,                        // expr_bool
-        S_type = 84                              // type
+        S_while = 73,                            // while
+        S_dowhile = 74,                          // dowhile
+        S_if = 75,                               // if
+        S_elif = 76,                             // elif
+        S_else = 77,                             // else
+        S_vardecl = 78,                          // vardecl
+        S_vardef = 79,                           // vardef
+        S_set = 80,                              // set
+        S_funcall = 81,                          // funcall
+        S_callarglist = 82,                      // callarglist
+        S_callarg = 83,                          // callarg
+        S_callargnamed = 84,                     // callargnamed
+        S_index = 85,                            // index
+        S_select = 86,                           // select
+        S_scope = 87,                            // scope
+        S_val = 88,                              // val
+        S_expr_int = 89,                         // expr_int
+        S_expr_float = 90,                       // expr_float
+        S_expr_str = 91,                         // expr_str
+        S_expr_bool = 92,                        // expr_bool
+        S_funtype = 93,                          // funtype
+        S_typelist = 94,                         // typelist
+        S_type = 95                              // type
       };
     };
 
@@ -2231,7 +2242,7 @@ switch (yykind)
 
 
     /// Stored state numbers (used for stacks).
-    typedef unsigned char state_type;
+    typedef short state_type;
 
     /// The arguments of the error message.
     int yy_syntax_error_arguments_ (const context& yyctx,
@@ -2253,8 +2264,8 @@ switch (yykind)
     /// \param yyvalue   the value to check
     static bool yy_table_value_is_error_ (int yyvalue) YY_NOEXCEPT;
 
-    static const short yypact_ninf_;
-    static const signed char yytable_ninf_;
+    static const signed char yypact_ninf_;
+    static const short yytable_ninf_;
 
     /// Convert a scanner token kind \a t to a symbol kind.
     /// In theory \a t should be a token_kind_type, but character literals
@@ -2276,18 +2287,18 @@ switch (yykind)
     // YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
     // Performed when YYTABLE does not specify something else to do.  Zero
     // means the default is an error.
-    static const signed char yydefact_[];
+    static const unsigned char yydefact_[];
 
     // YYPGOTO[NTERM-NUM].
     static const short yypgoto_[];
 
     // YYDEFGOTO[NTERM-NUM].
-    static const unsigned char yydefgoto_[];
+    static const short yydefgoto_[];
 
     // YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
     // positive, shift that token.  If negative, reduce the rule whose
     // number is the opposite.  If YYTABLE_NINF, syntax error.
-    static const unsigned char yytable_[];
+    static const short yytable_[];
 
     static const short yycheck_[];
 
@@ -2531,9 +2542,9 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 710,     ///< Last index in yytable_.
-      yynnts_ = 23,  ///< Number of nonterminal symbols.
-      yyfinal_ = 54 ///< Termination state number.
+      yylast_ = 867,     ///< Last index in yytable_.
+      yynnts_ = 34,  ///< Number of nonterminal symbols.
+      yyfinal_ = 68 ///< Termination state number.
     };
 
 
@@ -2545,7 +2556,7 @@ switch (yykind)
 
 #line 13 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
 } //  ptc 
-#line 2549 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
+#line 2560 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
 
 
 

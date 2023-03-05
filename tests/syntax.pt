@@ -99,4 +99,50 @@ if(a) a = 5; if(a) a = 4; elif(b) a = 5; else c = 4;
 
 if(a) { a = 4; } elif(b) {a = 5;} else {c = 4;}
 
+while(a) a = false
+while(5 > 4) {
+    while(8 < 0) a = 4
+}
 
+while(a.b[4]){}
+while(false)
+{
+
+}
+
+do {
+
+} while ( true );
+
+do a = 4; while(4 > 5)
+do {} while(true)
+do a = 4
+while(true)
+
+a.b.hello.a = 42
+a[a.b] = 5
+a.b[a[4]].c = 42
+a.b[4][5] = 4
+
+int(int, int) fbaz = baz
+int() fbaz = bar
+
+int(bool)(string) fgetf = getf
+
+foo(42)
+bar(true, a, a.b[0], baz(a))
+biz();
+f1(4, false, b=4)
+f2(c = true, a=4)
+f3(d = f())
+f8(d = a)
+f9(0)
+
+
+int(bool) getf(string name) {
+    return funcs[name];
+}
+
+int(bool) getf(float name) {
+    return funcs[name];
+}
