@@ -876,31 +876,40 @@ namespace  ptc  {
         S_body = 68,                             // body
         S_import = 69,                           // import
         S_id_list = 70,                          // id_list
-        S_cond = 71,                             // cond
-        S_for = 72,                              // for
-        S_while = 73,                            // while
-        S_dowhile = 74,                          // dowhile
-        S_if = 75,                               // if
-        S_elif = 76,                             // elif
-        S_else = 77,                             // else
-        S_vardecl = 78,                          // vardecl
-        S_vardef = 79,                           // vardef
-        S_set = 80,                              // set
-        S_funcall = 81,                          // funcall
-        S_callarglist = 82,                      // callarglist
-        S_callarg = 83,                          // callarg
-        S_callargnamed = 84,                     // callargnamed
-        S_index = 85,                            // index
-        S_select = 86,                           // select
-        S_scope = 87,                            // scope
-        S_val = 88,                              // val
-        S_expr_int = 89,                         // expr_int
-        S_expr_float = 90,                       // expr_float
-        S_expr_str = 91,                         // expr_str
-        S_expr_bool = 92,                        // expr_bool
-        S_funtype = 93,                          // funtype
-        S_typelist = 94,                         // typelist
-        S_type = 95                              // type
+        S_flowctl = 71,                          // flowctl
+        S_return = 72,                           // return
+        S_cond = 73,                             // cond
+        S_for = 74,                              // for
+        S_while = 75,                            // while
+        S_dowhile = 76,                          // dowhile
+        S_if = 77,                               // if
+        S_elif = 78,                             // elif
+        S_else = 79,                             // else
+        S_struct = 80,                           // struct
+        S_decllist = 81,                         // decllist
+        S_declistval = 82,                       // declistval
+        S_function = 83,                         // function
+        S_funargs = 84,                          // funargs
+        S_funargdef = 85,                        // funargdef
+        S_vardecl = 86,                          // vardecl
+        S_vardef = 87,                           // vardef
+        S_set = 88,                              // set
+        S_funcall = 89,                          // funcall
+        S_callarglist = 90,                      // callarglist
+        S_callarg = 91,                          // callarg
+        S_index = 92,                            // index
+        S_select = 93,                           // select
+        S_scope = 94,                            // scope
+        S_val = 95,                              // val
+        S_expr_int = 96,                         // expr_int
+        S_expr_float = 97,                       // expr_float
+        S_expr_str = 98,                         // expr_str
+        S_expr_bool = 99,                        // expr_bool
+        S_funtype = 100,                         // funtype
+        S_typelist = 101,                        // typelist
+        S_mattype = 102,                         // mattype
+        S_matsize = 103,                         // matsize
+        S_type = 104                             // type
       };
     };
 
@@ -2264,8 +2273,8 @@ switch (yykind)
     /// \param yyvalue   the value to check
     static bool yy_table_value_is_error_ (int yyvalue) YY_NOEXCEPT;
 
-    static const signed char yypact_ninf_;
-    static const short yytable_ninf_;
+    static const short yypact_ninf_;
+    static const signed char yytable_ninf_;
 
     /// Convert a scanner token kind \a t to a symbol kind.
     /// In theory \a t should be a token_kind_type, but character literals
@@ -2542,9 +2551,9 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 867,     ///< Last index in yytable_.
-      yynnts_ = 34,  ///< Number of nonterminal symbols.
-      yyfinal_ = 68 ///< Termination state number.
+      yylast_ = 1060,     ///< Last index in yytable_.
+      yynnts_ = 43,  ///< Number of nonterminal symbols.
+      yyfinal_ = 91 ///< Termination state number.
     };
 
 
@@ -2556,7 +2565,7 @@ switch (yykind)
 
 #line 13 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
 } //  ptc 
-#line 2560 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
+#line 2569 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
 
 
 

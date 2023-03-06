@@ -132,12 +132,53 @@ int(bool)(string) fgetf = getf
 foo(42)
 bar(true, a, a.b[0], baz(a))
 biz();
-f1(4, false, b=4)
-f2(c = true, a=4)
-f3(d = f())
-f8(d = a)
+f1(4, false, b)
+f2(true, 4)
+f3(f())
+f8(a)
 f9(0)
 
+h[0][1][0](4, 5)
+
+h[1].a[1][0].a = 5
+h[2][10].a[0]()
+a[0]
+a[42][58](8, "4")
+
+int[] m1;
+int[1, 2] m2;
+int[a, f(), a.b, 2] m3;
+MyType[] m5;
+MyType2[1, 1] m6;
+float[a.b.a[4]()] m7;
+bool[1] m8;
+string[8, a] m9;
+
+struct MyData {
+    int x
+    int y
+    string name
+}
+
+struct m {}
+struct m
+{
+
+}
+struct n { int a; }
+struct t {int a
+float b
+}
+struct c 
+{int a = B2; bool a;}
+struct y {
+    int a = 42
+    bool b
+}
+struct p{;}
+struct s {
+    var a = 42;
+}
 
 int(bool) getf(string name) {
     return funcs[name];
@@ -146,3 +187,22 @@ int(bool) getf(string name) {
 int(bool) getf(float name) {
     return funcs[name];
 }
+
+int foo(int x) {
+    return 0
+}
+
+void bar(int[4] a) {
+}
+
+int f(int a, bool b, float c) {}
+
+bool f2(bool b=true, bool c = e[0]()) {
+    
+}
+
+void baz(int[] a, int v=42) {
+    return
+}
+
+int i() {return 1;}

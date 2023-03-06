@@ -185,7 +185,10 @@ stmts_ne : set
          | if
          | while
          | dowhile
-         | funcall
+         | scope
+         | struct
+         | function
+         | flowctl
          ;
 
 // Code block     
@@ -206,6 +209,16 @@ import : KWIMPORT id_list
 id_list : ID
         | id_list COMMA ID
         ;
+
+// Flow controll
+flowctl : KWBREAK
+        | KWCONTINUE
+        | return
+        ;
+return : KWRETURN
+       | KWRETURN scope
+       | KWRETURN val
+       ;
 
 // Condition
 cond : scope
@@ -235,13 +248,49 @@ else : KWELSE body
      |
      ;
 
+// Struct definition
+struct : KWSTRUCT ID LBR RBR
+       | KWSTRUCT ID LBR decllist RBR
+       | KWSTRUCT ID END LBR decllist RBR
+       ;
+decllist : END
+         | END decllist
+         | declistval END
+         | declistval END decllist
+         ;
+declistval : vardecl
+           | type ID SET val
+           | type ID SET scope
+           | KWVAR ID SET val
+           | KWVAR ID SET scope
+           ;
+
+// Function definition
+function : type ID LPAR RPAR block
+         | type ID LPAR funargs RPAR block
+         | KWVOID ID LPAR RPAR block
+         | KWVOID ID LPAR funargs RPAR block
+         ;
+funargs : type ID
+        | funargdef
+        | funargs COMMA funargs
+        ;
+funargdef : type ID SET val
+          | type ID SET scope
+          | funargdef COMMA funargdef
+          ;
+
 // Variable declaration
 vardecl : type ID
         ;
 
 // Definition
-vardef : type ID SET ID
+vardef : type ID SET scope
        | type ID SET val
+       | KWCONST ID SET scope
+       | KWCONST ID SET val
+       | KWVAR ID SET scope
+       | KWVAR ID SET val
        ;
 
 // Assignment
@@ -254,29 +303,32 @@ funcall : scope LPAR RPAR
         | scope LPAR callarglist RPAR
         ;
 callarglist : callarg
-            | callargnamed
+            //| callargnamed
             | callarg COMMA callarglist
             ;
 callarg : val
         | scope
         ;
-callargnamed : ID SET val
-             | ID SET scope
-             | callargnamed COMMA callargnamed
-             ;
+//callargnamed : ID SET val
+//             | ID SET scope
+//             | callargnamed COMMA callargnamed
+//             ;
 
 // Index
 index : val
       | scope
       ;
 
+// Matrix selection
 select : LSQ index RSQ
        | LSQ index RSQ select
+       ;
 
 // Scope - Complex id
 scope : ID
       | funcall
       | ID select
+      | ID select DOT scope
       | scope DOT scope
       ;
 
@@ -381,10 +433,27 @@ expr_bool : BOOL { $$ = $1; }
 funtype : type LPAR typelist RPAR
         | type LPAR RPAR
         ;
-
 typelist : type
          | type COMMA typelist
          ;
+
+// Matrix type
+mattype : ID LSQ matsize RSQ
+        | ID LSQ RSQ
+        | KWINT LSQ matsize RSQ
+        | KWINT LSQ RSQ
+        | KWFLOAT LSQ matsize RSQ
+        | KWFLOAT LSQ RSQ
+        | KWSTRING LSQ matsize RSQ
+        | KWSTRING LSQ RSQ
+        | KWBOOL LSQ matsize RSQ
+        | KWBOOL LSQ RSQ
+        ;
+matsize : scope
+        | val
+        | scope COMMA matsize
+        | val COMMA matsize
+        ;
 
 // Variable types
 type : KWINT
@@ -393,6 +462,7 @@ type : KWINT
      | KWBOOL
      | ID
      | funtype
+     | mattype
      ;
 
 %%

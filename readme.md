@@ -45,13 +45,16 @@ string a = r"\n\n Still one line \t\n"
 
 ### Matrix (1D-nD)
 ```
-int[4, 2] m = [[1, 1, 0, 1], 
-              [1, 1, 1, 0]]
+int[4, 3] m = [[1, 1, 0, 1], 
+              [1, 1, 1, 0],
+              [1, 1, 1, 1]]
 float[] n = [0.0, 1.0]
 string[4] = ["hello", ", ", "world", "!"]
 
 int[WIDTH, HEIGHT] screen
 screen[x][y] = 1
+
+int[,] subm = m[:1][1:2] // [[1, 0],[1, 1]]
 ```
 
 ### Struct
@@ -90,17 +93,25 @@ int foo(int x) {
     return x*42
 }
 
-nil bar(int[4] a) {
+void bar(int[4] a) {
     a *= [42, 42, 42, 42]
 }
 
-nil baz(int[] a, int v=42) {
+void baz(int[] a, int v=42) {
     a *= matrix([len(a)], v)
 }
 
 print(foo(1))
 bar(m1)
 baz(a, v=0)
+
+int(int[4], int) fbaz = baz
+
+int(bool) getf(string name) {
+    return funcs[name];
+}
+
+int(bool)(string) fgetf = getf
 ```
 
 ### Ifs
