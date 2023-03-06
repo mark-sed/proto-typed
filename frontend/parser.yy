@@ -177,7 +177,7 @@ stmts : END
       | stmts_ne
       ;
 stmts_ne : set
-         | val
+         | expr
          | vardecl
          | vardef
          | import
@@ -217,12 +217,12 @@ flowctl : KWBREAK
         ;
 return : KWRETURN
        | KWRETURN scope
-       | KWRETURN val
+       | KWRETURN expr
        ;
 
 // Condition
 cond : scope
-     | val
+     | expr
      ;
 
 // For loop
@@ -259,9 +259,9 @@ decllist : END
          | declistval END decllist
          ;
 declistval : vardecl
-           | type ID SET val
+           | type ID SET expr
            | type ID SET scope
-           | KWVAR ID SET val
+           | KWVAR ID SET expr
            | KWVAR ID SET scope
            ;
 
@@ -275,7 +275,7 @@ funargs : type ID
         | funargdef
         | funargs COMMA funargs
         ;
-funargdef : type ID SET val
+funargdef : type ID SET expr
           | type ID SET scope
           | funargdef COMMA funargdef
           ;
@@ -286,15 +286,15 @@ vardecl : type ID
 
 // Definition
 vardef : type ID SET scope
-       | type ID SET val
+       | type ID SET expr
        | KWCONST ID SET scope
-       | KWCONST ID SET val
+       | KWCONST ID SET expr
        | KWVAR ID SET scope
-       | KWVAR ID SET val
+       | KWVAR ID SET expr
        ;
 
 // Assignment
-set : scope SET val
+set : scope SET expr
     | scope SET scope
     ;
 
@@ -306,7 +306,7 @@ callarglist : callarg
             //| callargnamed
             | callarg COMMA callarglist
             ;
-callarg : val
+callarg : expr
         | scope
         ;
 //callargnamed : ID SET val
@@ -315,7 +315,7 @@ callarg : val
 //             ;
 
 // Index
-index : val
+index : expr
       | scope
       ;
 
@@ -332,12 +332,32 @@ scope : ID
       | scope DOT scope
       ;
 
+// Expressions
+expr : val
+     | expr_mat
+     ;
+
 // Constant values
 val : expr_int //{ std::cout << "=" << $1 << std::endl; }
     | expr_float //{ std::cout << "=" << $1 << std::endl; }
     | expr_str //{ std::cout << "=" << $1 << std::endl; }
     | expr_bool //{ std::cout << "=" << $1 << std::endl; }
     ;
+
+// Matrix value
+expr_mat : LSQ RSQ
+         | LSQ matvals RSQ
+         | LSQ END matvals RSQ
+         | LSQ matvals END RSQ
+         | LSQ END matvals END RSQ
+         ;
+matvals : expr
+        | scope
+        | expr COMMA matvals
+        | scope COMMA matvals
+        | expr COMMA END matvals
+        | scope COMMA END matvals
+        ;
 
 // Integer expression
 expr_int : INT { $$ = $1; }
@@ -450,9 +470,9 @@ mattype : ID LSQ matsize RSQ
         | KWBOOL LSQ RSQ
         ;
 matsize : scope
-        | val
+        | expr
         | scope COMMA matsize
-        | val COMMA matsize
+        | expr COMMA matsize
         ;
 
 // Variable types

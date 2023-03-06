@@ -206,3 +206,25 @@ void baz(int[] a, int v=42) {
 }
 
 int i() {return 1;}
+
+const a = 42
+const b = a
+
+var intv = 42
+var f = 0.8e-8
+var s = "string"
+var b = false
+
+float[] n = [0.0, 1.0]
+string[4] s = ["hello", ", ", "world", "!"]
+int[4, 3] m = [[1, 1, 0, 1],
+              [1, 1, 1, 0],
+              [1, 1, 1, 1]]
+int[4, 3] m = [
+[1, 1, 0, 1],
+[1, 1, 1, 0],
+[1, 1, 1, 1]
+]
+
+int[4, 3] m = [[1, 1, 0, 1],[1, 1, 1, 0],[1, 1, 1, 1]
+]

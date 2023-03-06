@@ -49,7 +49,7 @@ int[4, 3] m = [[1, 1, 0, 1],
               [1, 1, 1, 0],
               [1, 1, 1, 1]]
 float[] n = [0.0, 1.0]
-string[4] = ["hello", ", ", "world", "!"]
+string[4] s = ["hello", ", ", "world", "!"]
 
 int[WIDTH, HEIGHT] screen
 screen[x][y] = 1

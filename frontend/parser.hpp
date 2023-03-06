@@ -900,16 +900,19 @@ namespace  ptc  {
         S_index = 92,                            // index
         S_select = 93,                           // select
         S_scope = 94,                            // scope
-        S_val = 95,                              // val
-        S_expr_int = 96,                         // expr_int
-        S_expr_float = 97,                       // expr_float
-        S_expr_str = 98,                         // expr_str
-        S_expr_bool = 99,                        // expr_bool
-        S_funtype = 100,                         // funtype
-        S_typelist = 101,                        // typelist
-        S_mattype = 102,                         // mattype
-        S_matsize = 103,                         // matsize
-        S_type = 104                             // type
+        S_expr = 95,                             // expr
+        S_val = 96,                              // val
+        S_expr_mat = 97,                         // expr_mat
+        S_matvals = 98,                          // matvals
+        S_expr_int = 99,                         // expr_int
+        S_expr_float = 100,                      // expr_float
+        S_expr_str = 101,                        // expr_str
+        S_expr_bool = 102,                       // expr_bool
+        S_funtype = 103,                         // funtype
+        S_typelist = 104,                        // typelist
+        S_mattype = 105,                         // mattype
+        S_matsize = 106,                         // matsize
+        S_type = 107                             // type
       };
     };
 
@@ -2551,9 +2554,9 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 1060,     ///< Last index in yytable_.
-      yynnts_ = 43,  ///< Number of nonterminal symbols.
-      yyfinal_ = 91 ///< Termination state number.
+      yylast_ = 1186,     ///< Last index in yytable_.
+      yynnts_ = 46,  ///< Number of nonterminal symbols.
+      yyfinal_ = 99 ///< Termination state number.
     };
 
 
@@ -2565,7 +2568,7 @@ switch (yykind)
 
 #line 13 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
 } //  ptc 
-#line 2569 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
+#line 2572 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
 
 
 
