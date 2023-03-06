@@ -131,6 +131,7 @@
 
 /* Associativity and precedence */
 %right SET
+%left CONCAT
 %left LOR
 %left LAND
 %left IN
@@ -144,7 +145,6 @@
 %left PLUS MINUS
 %left MUL DIV MOD
 %right POW
-%left CONCAT
 %right LNOT BNOT
 %left DOT
 
@@ -176,19 +176,18 @@ stmt : stmts
 stmts : END
       | stmts_ne
       ;
-stmts_ne : set
-         | expr
-         | vardecl
-         | vardef
-         | import
+stmts_ne : set END
+         | expr END
+         | vardecl END
+         | vardef END
+         | import END
          | for
          | if
          | while
          | dowhile
-         | scope
          | struct
          | function
-         | flowctl
+         | flowctl END
          ;
 
 // Code block     
@@ -199,7 +198,7 @@ block : LBR RBR
       | END LBR stmt RBR END
       ;
 // Code block or single statement
-body : stmts_ne END
+body : stmts_ne
      | block
      ;
 
@@ -216,14 +215,8 @@ flowctl : KWBREAK
         | return
         ;
 return : KWRETURN
-       | KWRETURN scope
        | KWRETURN expr
        ;
-
-// Condition
-cond : scope
-     | expr
-     ;
 
 // For loop
 for : KWFOR LPAR ID COLON ID RPAR body
@@ -231,17 +224,17 @@ for : KWFOR LPAR ID COLON ID RPAR body
     ;
 
 // While loop
-while : KWWHILE LPAR cond RPAR body
+while : KWWHILE LPAR expr RPAR body
       ;
 // Do while
-dowhile : KWDO body KWWHILE LPAR cond RPAR
+dowhile : KWDO body KWWHILE LPAR expr RPAR
         ;
 
 // If-elif-else statement
-if : KWIF LPAR cond RPAR body elif else
+if : KWIF LPAR expr RPAR body elif else
    ;
-elif : KWELIF LPAR cond RPAR body
-     | elif KWELIF LPAR cond RPAR body
+elif : KWELIF LPAR expr RPAR body
+     | elif KWELIF LPAR expr RPAR body
      |
      ;
 else : KWELSE body
@@ -260,9 +253,7 @@ decllist : END
          ;
 declistval : vardecl
            | type ID SET expr
-           | type ID SET scope
            | KWVAR ID SET expr
-           | KWVAR ID SET scope
            ;
 
 // Function definition
@@ -276,7 +267,6 @@ funargs : type ID
         | funargs COMMA funargs
         ;
 funargdef : type ID SET expr
-          | type ID SET scope
           | funargdef COMMA funargdef
           ;
 
@@ -285,43 +275,31 @@ vardecl : type ID
         ;
 
 // Definition
-vardef : type ID SET scope
-       | type ID SET expr
-       | KWCONST ID SET scope
+vardef : type ID SET expr
        | KWCONST ID SET expr
-       | KWVAR ID SET scope
        | KWVAR ID SET expr
        ;
 
 // Assignment
 set : scope SET expr
-    | scope SET scope
     ;
 
 // Function call
 funcall : scope LPAR RPAR
         | scope LPAR callarglist RPAR
         ;
-callarglist : callarg
+callarglist : expr
             //| callargnamed
-            | callarg COMMA callarglist
+            | expr COMMA callarglist
             ;
-callarg : expr
-        | scope
-        ;
 //callargnamed : ID SET val
 //             | ID SET scope
 //             | callargnamed COMMA callargnamed
 //             ;
 
-// Index
-index : expr
-      | scope
-      ;
-
 // Matrix selection
-select : LSQ index RSQ
-       | LSQ index RSQ select
+select : LSQ expr RSQ
+       | LSQ expr RSQ select
        ;
 
 // Scope - Complex id
@@ -333,9 +311,103 @@ scope : ID
       ;
 
 // Expressions
-expr : val
-     | expr_mat
+expr : expr_mat
+     | expr_var
+     | val
      ;
+
+expr_var : scope
+         | MINUS scope %prec NEG
+         | LPAR scope RPAR
+
+         /*| expr_float POW expr
+         | expr POW expr
+
+         | expr_int MUL expr
+         | expr_float MUL expr
+         | expr MUL expr
+
+         | expr_int DIV expr
+         | expr_float DIV expr
+         | expr DIV expr
+
+         | expr_int MOD expr
+         | expr_float MOD expr
+         | expr MOD expr
+
+         | expr_int PLUS expr
+         | expr_float PLUS expr
+         | expr PLUS expr
+
+         | expr_int MINUS expr
+         | expr_float MINUS expr
+         | expr MINUS expr
+
+         | expr_int BLSHFT expr
+         | expr BLSHFT expr
+
+         | expr_int BRSHFT expr
+         | expr BRSHFT expr
+
+         | expr_int BT expr
+         | expr_float BT expr
+         | expr_str BT expr
+         | expr BT expr
+
+         | expr_int BEQ expr
+         | expr_float BEQ expr
+         | expr_str BEQ expr
+         | expr BEQ expr
+
+         | expr_int LT expr
+         | expr_float LT expr
+         | expr_str LT expr
+         | expr LT expr
+
+         | expr_int LEQ expr
+         | expr_float LEQ expr
+         | expr_str LEQ expr
+         | expr LEQ expr
+
+         | expr_int EQ expr
+         | expr_float EQ expr
+         | expr_str EQ expr
+         | expr_bool EQ expr
+         | expr EQ expr
+
+         | expr_int NEQ expr
+         | expr_float NEQ expr
+         | expr_str NEQ expr
+         | expr_bool NEQ expr
+         | expr NEQ expr
+
+         | expr_int BAND expr
+         | expr BAND expr
+
+         | expr_int BXOR expr
+         | expr BXOR expr
+
+         | expr_int BOR expr
+         | expr BOR expr
+
+         | expr_int IN expr
+         | expr_float IN expr
+         | expr_str IN expr
+         | expr_bool IN expr
+         | expr IN expr
+
+         | expr_bool LAND expr
+         | expr LAND expr
+         
+         | expr_bool LOR expr
+         | expr LOR expr
+
+         | expr_int CONCAT expr
+         | expr_float CONCAT expr
+         | expr_str CONCAT expr
+         | expr_bool CONCAT expr
+         | expr CONCAT expr*/
+         ;
 
 // Constant values
 val : expr_int //{ std::cout << "=" << $1 << std::endl; }
@@ -352,28 +424,25 @@ expr_mat : LSQ RSQ
          | LSQ END matvals END RSQ
          ;
 matvals : expr
-        | scope
         | expr COMMA matvals
-        | scope COMMA matvals
         | expr COMMA END matvals
-        | scope COMMA END matvals
         ;
 
 // Integer expression
 expr_int : INT { $$ = $1; }
          | MINUS expr_int %prec NEG { $$ = -$2; }
          | LPAR expr_int RPAR { $$ = $2; }
+         | BNOT expr_int { $$ = ~$2; }
          | expr_int MUL expr_int { $$ = $1 * $3; }
          | expr_int DIV expr_int { $$ = $1 / $3; }
          | expr_int MOD expr_int { $$ = $1 % $3; }
          | expr_int MINUS expr_int { $$ = $1 - $3; }
          | expr_int PLUS expr_int { $$ = $1 + $3; }
-         | expr_int BAND expr_int { $$ = $1 & $3; }
-         | expr_int BOR expr_int { $$ = $1 | $3; }
-         | expr_int BXOR expr_int { $$ = $1 ^ $3; }
-         | BNOT expr_int { $$ = ~$2; }
          | expr_int BLSHFT expr_int { $$ = $1 << $3; }
          | expr_int BRSHFT expr_int { $$ = $1 >> $3; }
+         | expr_int BAND expr_int { $$ = $1 & $3; }
+         | expr_int BXOR expr_int { $$ = $1 ^ $3; }
+         | expr_int BOR expr_int { $$ = $1 | $3; }
          ;
 
 // Float expression
@@ -469,9 +538,7 @@ mattype : ID LSQ matsize RSQ
         | KWBOOL LSQ matsize RSQ
         | KWBOOL LSQ RSQ
         ;
-matsize : scope
-        | expr
-        | scope COMMA matsize
+matsize : expr
         | expr COMMA matsize
         ;
 

@@ -21,6 +21,9 @@ float f5 = 55.22e+5
 float f6 = .22e-5
 float f7 = 42.e+5
 
+int g = 42 * 4 - 2 + 45 * 2 / 48
+string g = "Hello" ++ " " ++ "World"
+string g = "Hello " ++ 42 * 1
 // Comment
 
 for(i : a) a = 4
@@ -105,8 +108,7 @@ while(5 > 4) {
 }
 
 while(a.b[4]){}
-while(false)
-{
+while(false) {
 
 }
 
@@ -135,10 +137,10 @@ biz();
 f1(4, false, b)
 f2(true, 4)
 f3(f())
-f8(a)
-f9(0)
+(f8(a))
+-f9(0)
 
-h[0][1][0](4, 5)
+-h[0][1][0](4, 5)
 
 h[1].a[1][0].a = 5
 h[2][10].a[0]()
@@ -212,7 +214,7 @@ const b = a
 
 var intv = 42
 var f = 0.8e-8
-var s = "string"
+var s = r"string"
 var b = false
 
 float[] n = [0.0, 1.0]
@@ -228,3 +230,15 @@ int[4, 3] m = [
 
 int[4, 3] m = [[1, 1, 0, 1],[1, 1, 1, 0],[1, 1, 1, 1]
 ]
+
+for(a : b) if(a) print(a); else print("f"); print("haha")
+
+a * b * c
+
+a[0]() * 4
+f() * 4 * b
+
+float a = f() ** a
+c = 0.0 * b - f() + 48 / a.b
+a.b[0] * 2.0 * a
+d = a and b or false

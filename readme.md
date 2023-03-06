@@ -155,9 +155,7 @@ do print(".") while(a)
 
 ### Modules
 ```
-import Module1
-import Module2 as m2
-from Module3 import MyStruct, foo
+import Module1, Module2
 ```
 
 ## Examples
