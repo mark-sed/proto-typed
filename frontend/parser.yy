@@ -321,93 +321,139 @@ expr_var : scope
          | MINUS scope %prec NEG
          | LPAR scope RPAR
 
-         /*| expr_float POW expr
-         | expr POW expr
+         | expr_float POW expr_var
+         | expr_var POW expr_float
+         | expr_var POW expr_var
 
-         | expr_int MUL expr
-         | expr_float MUL expr
-         | expr MUL expr
+         | expr_int MUL expr_var
+         | expr_float MUL expr_var
+         | expr_var MUL expr_int
+         | expr_var MUL expr_float
+         | expr_var MUL expr_var
 
-         | expr_int DIV expr
-         | expr_float DIV expr
-         | expr DIV expr
+         | expr_int DIV expr_var
+         | expr_float DIV expr_var
+         | expr_var DIV expr_int
+         | expr_var DIV expr_float
+         | expr_var DIV expr_var
 
-         | expr_int MOD expr
-         | expr_float MOD expr
-         | expr MOD expr
+         | expr_int MOD expr_var
+         | expr_float MOD expr_var
+         | expr_var MOD expr_int
+         | expr_var MOD expr_float
+         | expr_var MOD expr_var
 
-         | expr_int PLUS expr
-         | expr_float PLUS expr
-         | expr PLUS expr
+         | expr_int PLUS expr_var
+         | expr_float PLUS expr_var
+         | expr_var PLUS expr_int
+         | expr_var PLUS expr_float
+         | expr_var PLUS expr_var
 
-         | expr_int MINUS expr
-         | expr_float MINUS expr
-         | expr MINUS expr
+         | expr_int MINUS expr_var
+         | expr_float MINUS expr_var
+         | expr_var MINUS expr_int
+         | expr_var MINUS expr_float
+         | expr_var MINUS expr_var
 
-         | expr_int BLSHFT expr
-         | expr BLSHFT expr
+         | expr_int BLSHFT expr_var
+         | expr_var BLSHFT expr_int
+         | expr_var BLSHFT expr_var
 
-         | expr_int BRSHFT expr
-         | expr BRSHFT expr
+         | expr_int BRSHFT expr_var
+         | expr_var BRSHFT expr_int
+         | expr_var BRSHFT expr_var
 
-         | expr_int BT expr
-         | expr_float BT expr
-         | expr_str BT expr
-         | expr BT expr
+         | expr_int BT expr_var
+         | expr_float BT expr_var
+         | expr_str BT expr_var
+         | expr_var BT expr_int
+         | expr_var BT expr_float
+         | expr_var BT expr_str
+         | expr_var BT expr_var
 
-         | expr_int BEQ expr
-         | expr_float BEQ expr
-         | expr_str BEQ expr
-         | expr BEQ expr
+         | expr_int BEQ expr_var
+         | expr_float BEQ expr_var
+         | expr_str BEQ expr_var
+         | expr_var BEQ expr_int
+         | expr_var BEQ expr_float
+         | expr_var BEQ expr_str
+         | expr_var BEQ expr_var
 
-         | expr_int LT expr
-         | expr_float LT expr
-         | expr_str LT expr
-         | expr LT expr
+         | expr_int LT expr_var
+         | expr_float LT expr_var
+         | expr_str LT expr_var
+         | expr_var LT expr_int
+         | expr_var LT expr_float
+         | expr_var LT expr_str
+         | expr_var LT expr_var
 
-         | expr_int LEQ expr
-         | expr_float LEQ expr
-         | expr_str LEQ expr
-         | expr LEQ expr
+         | expr_int LEQ expr_var
+         | expr_float LEQ expr_var
+         | expr_str LEQ expr_var
+         | expr_var LEQ expr_int
+         | expr_var LEQ expr_float
+         | expr_var LEQ expr_str
+         | expr_var LEQ expr_var
 
-         | expr_int EQ expr
-         | expr_float EQ expr
-         | expr_str EQ expr
-         | expr_bool EQ expr
-         | expr EQ expr
+         | expr_int EQ expr_var
+         | expr_float EQ expr_var
+         | expr_str EQ expr_var
+         | expr_bool EQ expr_var
+         | expr_var EQ expr_int
+         | expr_var EQ expr_float
+         | expr_var EQ expr_str
+         | expr_var EQ expr_bool
+         | expr_var EQ expr_var
 
-         | expr_int NEQ expr
-         | expr_float NEQ expr
-         | expr_str NEQ expr
-         | expr_bool NEQ expr
-         | expr NEQ expr
+         | expr_int NEQ expr_var
+         | expr_float NEQ expr_var
+         | expr_str NEQ expr_var
+         | expr_bool NEQ expr_var
+         | expr_var NEQ expr_int
+         | expr_var NEQ expr_float
+         | expr_var NEQ expr_str
+         | expr_var NEQ expr_bool
+         | expr_var NEQ expr_var
 
-         | expr_int BAND expr
-         | expr BAND expr
+         | expr_int BAND expr_var
+         | expr_var BAND expr_int
+         | expr_var BAND expr_var
 
-         | expr_int BXOR expr
-         | expr BXOR expr
+         | expr_int BXOR expr_var
+         | expr_var BXOR expr_int
+         | expr_var BXOR expr_var
 
-         | expr_int BOR expr
-         | expr BOR expr
+         | expr_int BOR expr_var
+         | expr_var BOR expr_int
+         | expr_var BOR expr_var
 
-         | expr_int IN expr
-         | expr_float IN expr
-         | expr_str IN expr
-         | expr_bool IN expr
-         | expr IN expr
+         | expr_int IN expr_var
+         | expr_float IN expr_var
+         | expr_str IN expr_var
+         | expr_bool IN expr_var
+         | expr_var IN expr_int
+         | expr_var IN expr_float
+         | expr_var IN expr_str
+         | expr_var IN expr_bool
+         | expr_var IN expr_var
 
-         | expr_bool LAND expr
-         | expr LAND expr
+         | expr_bool LAND expr_var
+         | expr_var LAND expr_bool
+         | expr_var LAND expr_var
          
-         | expr_bool LOR expr
-         | expr LOR expr
+         | expr_bool LOR expr_var
+         | expr_var LOR expr_bool
+         | expr_var LOR expr_var
 
-         | expr_int CONCAT expr
-         | expr_float CONCAT expr
-         | expr_str CONCAT expr
-         | expr_bool CONCAT expr
-         | expr CONCAT expr*/
+         | expr_int CONCAT expr_var
+         | expr_float CONCAT expr_var
+         | expr_str CONCAT expr_var
+         | expr_bool CONCAT expr_var
+         | expr_var CONCAT expr_int
+         | expr_var CONCAT expr_float
+         | expr_var CONCAT expr_str
+         | expr_var CONCAT expr_bool
+         | expr_var CONCAT expr_var
          ;
 
 // Constant values

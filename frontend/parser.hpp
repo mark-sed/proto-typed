@@ -2331,7 +2331,7 @@ switch (yykind)
     // YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
     // Performed when YYTABLE does not specify something else to do.  Zero
     // means the default is an error.
-    static const unsigned char yydefact_[];
+    static const short yydefact_[];
 
     // YYPGOTO[NTERM-NUM].
     static const short yypgoto_[];
@@ -2586,7 +2586,7 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 1184,     ///< Last index in yytable_.
+      yylast_ = 2067,     ///< Last index in yytable_.
       yynnts_ = 44,  ///< Number of nonterminal symbols.
       yyfinal_ = 111 ///< Termination state number.
     };

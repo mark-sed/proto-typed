@@ -243,4 +243,6 @@ c = 0.0 * b - f() + 48 / a.b
 a.b[0] * 2.0 * a
 d = a and b or false
 
+c = false and a
+
 int? c = none
