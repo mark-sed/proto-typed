@@ -934,15 +934,18 @@ namespace  ptc  {
         S_matvals = 111,                         // matvals
         S_expr_mat = 112,                        // expr_mat
         S_expr_none = 113,                       // expr_none
-        S_expr_int = 114,                        // expr_int
-        S_expr_float = 115,                      // expr_float
-        S_expr_str = 116,                        // expr_str
-        S_expr_bool = 117,                       // expr_bool
-        S_funtype = 118,                         // funtype
-        S_typelist = 119,                        // typelist
-        S_mattype = 120,                         // mattype
-        S_matsize = 121,                         // matsize
-        S_type = 122                             // type
+        S_expr_struct = 114,                     // expr_struct
+        S_struct_val = 115,                      // struct_val
+        S_struct_list = 116,                     // struct_list
+        S_expr_int = 117,                        // expr_int
+        S_expr_float = 118,                      // expr_float
+        S_expr_str = 119,                        // expr_str
+        S_expr_bool = 120,                       // expr_bool
+        S_funtype = 121,                         // funtype
+        S_typelist = 122,                        // typelist
+        S_mattype = 123,                         // mattype
+        S_matsize = 124,                         // matsize
+        S_type = 125                             // type
       };
     };
 
@@ -2809,9 +2812,9 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 2233,     ///< Last index in yytable_.
-      yynnts_ = 46,  ///< Number of nonterminal symbols.
-      yyfinal_ = 116 ///< Termination state number.
+      yylast_ = 2533,     ///< Last index in yytable_.
+      yynnts_ = 49,  ///< Number of nonterminal symbols.
+      yyfinal_ = 121 ///< Termination state number.
     };
 
 
@@ -2823,7 +2826,7 @@ switch (yykind)
 
 #line 13 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
 } //  ptc 
-#line 2827 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
+#line 2830 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
 
 
 

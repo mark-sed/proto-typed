@@ -261,3 +261,24 @@ c += 4
 c = a = b = 42
 
 c **= 2.0 + 2
+
+MyData md = {.x = 42, .name = "md"}
+
+MyData md = MyData{.x = 42, .name = "md"}
+
+foo(Val{.x = 4, .a = false})
+
+var ms = SomeStruct {.b = 43}
+
+SomeStruct {.b = 43} == SomeStruct {.b = 43}
+
+SomeStruct {.b = 43} != SomeStruct {.b = 43} == false
+
+4 ++ SomeStruct {.b = 43}
+
+SomeStruct {.b = 43} ++ " = id"
+
+SomeStruct {.b = 43} ++ false ++ none
+
+4 == 4.0
+ 

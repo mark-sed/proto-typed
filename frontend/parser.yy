@@ -287,7 +287,8 @@ vardecl : type ID
         ;
 
 // Definition
-vardef : type ID SET expr
+vardef : type ID SET struct_val
+       | type ID SET expr
        | KWCONST ID SET expr
        | KWVAR ID SET expr
        ;
@@ -341,6 +342,7 @@ expr : expr_mat
      | expr_var
      | val
      | expr_none
+     | expr_struct
      ;
 
 expr_var : scope
@@ -426,11 +428,14 @@ expr_var : scope
          | expr_str EQ expr_var
          | expr_bool EQ expr_var
          | expr_none EQ expr_var
+         | expr_struct EQ expr_struct
+         | expr_struct EQ expr_var
          | expr_var EQ expr_int
          | expr_var EQ expr_float
          | expr_var EQ expr_str
          | expr_var EQ expr_bool
          | expr_var EQ expr_none
+         | expr_var EQ expr_struct
          | expr_var EQ expr_var
 
          | expr_int NEQ expr_var
@@ -438,11 +443,14 @@ expr_var : scope
          | expr_str NEQ expr_var
          | expr_bool NEQ expr_var
          | expr_none NEQ expr_var
+         | expr_struct NEQ expr_struct
+         | expr_struct NEQ expr_var
          | expr_var NEQ expr_int
          | expr_var NEQ expr_float
          | expr_var NEQ expr_str
          | expr_var NEQ expr_bool
          | expr_var NEQ expr_none
+         | expr_var NEQ expr_struct
          | expr_var NEQ expr_var
 
          | expr_int BAND expr_var
@@ -461,10 +469,8 @@ expr_var : scope
          | expr_float IN expr_var
          | expr_str IN expr_var
          | expr_bool IN expr_var
-         | expr_var IN expr_int
-         | expr_var IN expr_float
+         | expr_none IN expr_var
          | expr_var IN expr_str
-         | expr_var IN expr_bool
          | expr_var IN expr_var
 
          | expr_bool LAND expr_var
@@ -475,14 +481,29 @@ expr_var : scope
          | expr_var LOR expr_bool
          | expr_var LOR expr_var
 
+         | expr_int CONCAT expr_struct
+         | expr_float CONCAT expr_struct
+         | expr_str CONCAT expr_struct
+         | expr_bool CONCAT expr_struct
+         | expr_none CONCAT expr_struct
+         | expr_struct CONCAT expr_int
+         | expr_struct CONCAT expr_float
+         | expr_struct CONCAT expr_str
+         | expr_struct CONCAT expr_bool
+         | expr_struct CONCAT expr_none
+         | expr_struct CONCAT expr_struct
          | expr_int CONCAT expr_var
          | expr_float CONCAT expr_var
          | expr_str CONCAT expr_var
          | expr_bool CONCAT expr_var
+         | expr_none CONCAT expr_var
+         | expr_struct CONCAT expr_var
          | expr_var CONCAT expr_int
          | expr_var CONCAT expr_float
          | expr_var CONCAT expr_str
          | expr_var CONCAT expr_bool
+         | expr_var CONCAT expr_none
+         | expr_var CONCAT expr_struct
          | expr_var CONCAT expr_var
          ;
 
@@ -514,6 +535,17 @@ expr_mat : matrix
 expr_none : NONE
           | LPAR NONE RPAR
           ;
+
+// Struct expression
+expr_struct : ID struct_val
+            | LPAR ID struct_val RPAR
+            ;
+struct_val : LBR RBR
+           | LBR struct_list RBR
+           ;
+struct_list : DOT ID SET expr
+            | DOT ID SET expr COMMA struct_list
+            ;
 
 // Integer expression
 expr_int : INT { $$ = $1; }
@@ -592,27 +624,45 @@ expr_bool : BOOL { $$ = $1; }
           | LNOT expr_bool { $$ = !$2; }
           | expr_bool LOR expr_bool { $$ = $1 || $3; }
           | expr_bool LAND expr_bool { $$ = $1 && $3; }
+
           | expr_bool EQ expr_bool { $$ = $1 == $3; }
           | expr_int EQ expr_int { $$ = $1 == $3; }
+          | expr_int EQ expr_float { $$ = $1 == $3; }
           | expr_float EQ expr_float { $$ = $1 == $3; }
+          | expr_float EQ expr_int { $$ = $1 == $3; }
           | expr_str EQ expr_str { $$ = $1 == $3; }
           | expr_none EQ expr_none { $$ = true; }
+
           | expr_bool NEQ expr_bool { $$ = $1 != $3; }
           | expr_int NEQ expr_int { $$ = $1 != $3; }
+          | expr_int NEQ expr_float { $$ = $1 != $3; }
           | expr_float NEQ expr_float { $$ = $1 != $3; }
+          | expr_float NEQ expr_int { $$ = $1 != $3; }
           | expr_str NEQ expr_str { $$ = $1 != $3; }
           | expr_none NEQ expr_none { $$ = false; }
+
           | expr_int BT expr_int { $$ = $1 > $3; }
+          | expr_int BT expr_float { $$ = $1 > $3; }
           | expr_float BT expr_float { $$ = $1 > $3; }
+          | expr_float BT expr_int { $$ = $1 > $3; }
           | expr_str BT expr_str { $$ = $1 > $3; }
+
           | expr_int LT expr_int { $$ = $1 < $3; }
+          | expr_int LT expr_float { $$ = $1 < $3; }
           | expr_float LT expr_float { $$ = $1 < $3; }
+          | expr_float LT expr_int { $$ = $1 < $3; }
           | expr_str LT expr_str { $$ = $1 < $3; }
+
           | expr_int BEQ expr_int { $$ = $1 >= $3; }
+          | expr_int BEQ expr_float { $$ = $1 >= $3; }
           | expr_float BEQ expr_float { $$ = $1 >= $3; }
+          | expr_float BEQ expr_int { $$ = $1 >= $3; }
           | expr_str BEQ expr_str { $$ = $1 >= $3; }
+
           | expr_int LEQ expr_int { $$ = $1 <= $3; }
+          | expr_int LEQ expr_float { $$ = $1 <= $3; }
           | expr_float LEQ expr_float { $$ = $1 <= $3; }
+          | expr_float LEQ expr_int { $$ = $1 <= $3; }
           | expr_str LEQ expr_str { $$ = $1 <= $3; }
           ;
 
