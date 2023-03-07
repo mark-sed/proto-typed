@@ -69,6 +69,22 @@ hex     0[Xx][0-9A-Fa-f]+
 "]"             { return token::RSQ; }
 "{"             { return token::LBR; }
 "}"             { return token::RBR; }
+
+"++="            { return token::SETCONCAT; }
+"**="            { return token::SETPOW; }
+"+="             { return token::SETPLUS; }
+"-="             { return token::SETMINUS; }
+"/="             { return token::SETDIV; }
+"*="             { return token::SETMUL; }
+"%="             { return token::SETMOD; }
+
+"&="             { return token::SETBAND; }
+"|="             { return token::SETBOR; }
+"^="             { return token::SETBXOR; }
+"~="             { return token::SETBNOT; }
+"<<="            { return token::SETBLSHFT; }
+">>="            { return token::SETBRSHFT; }
+
 "++"            { return token::CONCAT; }
 "**"            { return token::POW; }
 "+"             { return token::PLUS; }

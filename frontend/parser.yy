@@ -103,7 +103,19 @@
 %token COLON ":"
 
 %token SET "="
-// TODO: Add more op - +=, -=...
+%token SETCONCAT "++="
+%token SETPOW "**="
+%token SETMOD "%="
+%token SETDIV "/="
+%token SETMUL "*="
+%token SETMINUS "-="
+%token SETPLUS "+="
+%token SETBAND "&="
+%token SETBOR "|="
+%token SETBXOR "^="
+%token SETBNOT "~="
+%token SETBLSHFT "<<="
+%token SETBRSHFT ">>="
 
 /* Keywords */
 %token KWVAR "var"
@@ -280,8 +292,22 @@ vardef : type ID SET expr
        | KWVAR ID SET expr
        ;
 
-// Assignment
-set : scope SET expr
+// Assignment and compound assignment
+set : scope SETCONCAT expr
+    | scope SETPOW expr
+    | scope SETMOD expr
+    | scope SETDIV expr
+    | scope SETMUL expr
+    | scope SETMINUS expr
+    | scope SETPLUS expr
+    | scope SETBAND expr
+    | scope SETBOR expr
+    | scope SETBXOR expr
+    | scope SETBNOT expr
+    | scope SETBLSHFT expr
+    | scope SETBRSHFT expr
+    | scope SET expr
+    | scope SET set
     ;
 
 // Function call
@@ -314,7 +340,7 @@ scope : ID
 expr : expr_mat
      | expr_var
      | val
-     | NONE
+     | expr_none
      ;
 
 expr_var : scope
@@ -399,20 +425,24 @@ expr_var : scope
          | expr_float EQ expr_var
          | expr_str EQ expr_var
          | expr_bool EQ expr_var
+         | expr_none EQ expr_var
          | expr_var EQ expr_int
          | expr_var EQ expr_float
          | expr_var EQ expr_str
          | expr_var EQ expr_bool
+         | expr_var EQ expr_none
          | expr_var EQ expr_var
 
          | expr_int NEQ expr_var
          | expr_float NEQ expr_var
          | expr_str NEQ expr_var
          | expr_bool NEQ expr_var
+         | expr_none NEQ expr_var
          | expr_var NEQ expr_int
          | expr_var NEQ expr_float
          | expr_var NEQ expr_str
          | expr_var NEQ expr_bool
+         | expr_var NEQ expr_none
          | expr_var NEQ expr_var
 
          | expr_int BAND expr_var
@@ -464,16 +494,26 @@ val : expr_int //{ std::cout << "=" << $1 << std::endl; }
     ;
 
 // Matrix value
-expr_mat : LSQ RSQ
-         | LSQ matvals RSQ
-         | LSQ END matvals RSQ
-         | LSQ matvals END RSQ
-         | LSQ END matvals END RSQ
-         ;
+matrix : LSQ RSQ
+       | LSQ matvals RSQ
+       | LSQ END matvals RSQ
+       | LSQ matvals END RSQ
+       | LSQ END matvals END RSQ
+       ;
 matvals : expr
         | expr COMMA matvals
         | expr COMMA END matvals
         ;
+
+// Matrix expression
+expr_mat : matrix
+         | LPAR matrix RPAR
+         ; // TODO: Add compile time matrix simplification?
+
+// None expression
+expr_none : NONE
+          | LPAR NONE RPAR
+          ;
 
 // Integer expression
 expr_int : INT { $$ = $1; }
@@ -523,18 +563,27 @@ expr_str : STRING { $$ = $1; }
          | expr_str CONCAT expr_int { $$ = $1 + std::to_string($3); }
          | expr_str CONCAT expr_float { $$ = $1 + std::to_string($3); }
          | expr_str CONCAT expr_bool { $$ = $1 + ($3 ? "true" : "false"); }
+         | expr_str CONCAT expr_none { $$ = $1 + "none"; }
          | expr_int CONCAT expr_str { $$ = std::to_string($1) + $3; }
          | expr_int CONCAT expr_int { $$ = std::to_string($1) + std::to_string($3); }
          | expr_int CONCAT expr_float { $$ = std::to_string($1) + std::to_string($3); }
          | expr_int CONCAT expr_bool { $$ = std::to_string($1) + ($3 ? "true" : "false"); }
+         | expr_int CONCAT expr_none { $$ = std::to_string($1) + "none"; }
          | expr_float CONCAT expr_str { $$ = std::to_string($1) + $3; }
          | expr_float CONCAT expr_int { $$ = std::to_string($1) + std::to_string($3); }
          | expr_float CONCAT expr_float { $$ = std::to_string($1) + std::to_string($3); }
          | expr_float CONCAT expr_bool { $$ = std::to_string($1) + ($3 ? "true" : "false"); }
+         | expr_float CONCAT expr_none { $$ = std::to_string($1) + "none"; }
          | expr_bool CONCAT expr_str { $$ = ($1 ? "true" : "false") + $3; }
          | expr_bool CONCAT expr_int { $$ = ($1 ? "true" : "false") + std::to_string($3); }
          | expr_bool CONCAT expr_float { $$ = ($1 ? "true" : "false") + std::to_string($3); }
          | expr_bool CONCAT expr_bool { $$ = ($1 ? std::string("true") : std::string("false")) + ($3 ? "true" : "false"); }
+         | expr_bool CONCAT expr_none { $$ = ($1 ? std::string("true") : std::string("false")) + "none"; }
+         | expr_none CONCAT expr_str { $$ = std::string("none") + $3; }
+         | expr_none CONCAT expr_int { $$ = std::string("none") + std::to_string($3); }
+         | expr_none CONCAT expr_float { $$ = std::string("none") + std::to_string($3); }
+         | expr_none CONCAT expr_bool { $$ = std::string("none") + ($3 ? "true" : "false"); }
+         | expr_none CONCAT expr_none { $$ = std::string("nonenone"); }
          ;
 
 // Boolean expression
@@ -547,10 +596,12 @@ expr_bool : BOOL { $$ = $1; }
           | expr_int EQ expr_int { $$ = $1 == $3; }
           | expr_float EQ expr_float { $$ = $1 == $3; }
           | expr_str EQ expr_str { $$ = $1 == $3; }
+          | expr_none EQ expr_none { $$ = true; }
           | expr_bool NEQ expr_bool { $$ = $1 != $3; }
           | expr_int NEQ expr_int { $$ = $1 != $3; }
           | expr_float NEQ expr_float { $$ = $1 != $3; }
           | expr_str NEQ expr_str { $$ = $1 != $3; }
+          | expr_none NEQ expr_none { $$ = false; }
           | expr_int BT expr_int { $$ = $1 > $3; }
           | expr_float BT expr_float { $$ = $1 > $3; }
           | expr_str BT expr_str { $$ = $1 > $3; }

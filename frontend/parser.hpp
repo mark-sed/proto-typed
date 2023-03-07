@@ -768,27 +768,40 @@ namespace  ptc  {
     COMMA = 295,                   // ","
     COLON = 296,                   // ":"
     SET = 297,                     // "="
-    KWVAR = 298,                   // "var"
-    KWIMPORT = 299,                // "import"
-    KWIF = 300,                    // "if"
-    KWELIF = 301,                  // "elif"
-    KWELSE = 302,                  // "else"
-    KWFOR = 303,                   // "for"
-    KWWHILE = 304,                 // "while"
-    KWDO = 305,                    // "do"
-    KWRETURN = 306,                // "return"
-    KWBREAK = 307,                 // "break"
-    KWCONTINUE = 308,              // "continue"
-    KWCONST = 309,                 // "const"
-    KWMAYBE = 310,                 // "?"
-    KWINT = 311,                   // "\"int\""
-    KWFLOAT = 312,                 // "\"float\""
-    KWSTRING = 313,                // "\"string\""
-    KWBOOL = 314,                  // "\"bool\""
-    KWSTRUCT = 315,                // "\"struct\""
-    KWVOID = 316,                  // "\"void\""
-    ID = 317,                      // "identifier"
-    NEG = 318                      // NEG
+    SETCONCAT = 298,               // "++="
+    SETPOW = 299,                  // "**="
+    SETMOD = 300,                  // "%="
+    SETDIV = 301,                  // "/="
+    SETMUL = 302,                  // "*="
+    SETMINUS = 303,                // "-="
+    SETPLUS = 304,                 // "+="
+    SETBAND = 305,                 // "&="
+    SETBOR = 306,                  // "|="
+    SETBXOR = 307,                 // "^="
+    SETBNOT = 308,                 // "~="
+    SETBLSHFT = 309,               // "<<="
+    SETBRSHFT = 310,               // ">>="
+    KWVAR = 311,                   // "var"
+    KWIMPORT = 312,                // "import"
+    KWIF = 313,                    // "if"
+    KWELIF = 314,                  // "elif"
+    KWELSE = 315,                  // "else"
+    KWFOR = 316,                   // "for"
+    KWWHILE = 317,                 // "while"
+    KWDO = 318,                    // "do"
+    KWRETURN = 319,                // "return"
+    KWBREAK = 320,                 // "break"
+    KWCONTINUE = 321,              // "continue"
+    KWCONST = 322,                 // "const"
+    KWMAYBE = 323,                 // "?"
+    KWINT = 324,                   // "\"int\""
+    KWFLOAT = 325,                 // "\"float\""
+    KWSTRING = 326,                // "\"string\""
+    KWBOOL = 327,                  // "\"bool\""
+    KWSTRUCT = 328,                // "\"struct\""
+    KWVOID = 329,                  // "\"void\""
+    ID = 330,                      // "identifier"
+    NEG = 331                      // NEG
       };
       /// Backward compatibility alias (Bison 3.6).
       typedef token_kind_type yytokentype;
@@ -805,7 +818,7 @@ namespace  ptc  {
     {
       enum symbol_kind_type
       {
-        YYNTOKENS = 64, ///< Number of tokens.
+        YYNTOKENS = 77, ///< Number of tokens.
         S_YYEMPTY = -2,
         S_YYEOF = 0,                             // "end of file"
         S_YYerror = 1,                           // error
@@ -850,71 +863,86 @@ namespace  ptc  {
         S_COMMA = 40,                            // ","
         S_COLON = 41,                            // ":"
         S_SET = 42,                              // "="
-        S_KWVAR = 43,                            // "var"
-        S_KWIMPORT = 44,                         // "import"
-        S_KWIF = 45,                             // "if"
-        S_KWELIF = 46,                           // "elif"
-        S_KWELSE = 47,                           // "else"
-        S_KWFOR = 48,                            // "for"
-        S_KWWHILE = 49,                          // "while"
-        S_KWDO = 50,                             // "do"
-        S_KWRETURN = 51,                         // "return"
-        S_KWBREAK = 52,                          // "break"
-        S_KWCONTINUE = 53,                       // "continue"
-        S_KWCONST = 54,                          // "const"
-        S_KWMAYBE = 55,                          // "?"
-        S_KWINT = 56,                            // "\"int\""
-        S_KWFLOAT = 57,                          // "\"float\""
-        S_KWSTRING = 58,                         // "\"string\""
-        S_KWBOOL = 59,                           // "\"bool\""
-        S_KWSTRUCT = 60,                         // "\"struct\""
-        S_KWVOID = 61,                           // "\"void\""
-        S_ID = 62,                               // "identifier"
-        S_NEG = 63,                              // NEG
-        S_YYACCEPT = 64,                         // $accept
-        S_start = 65,                            // start
-        S_stmt = 66,                             // stmt
-        S_stmts = 67,                            // stmts
-        S_stmts_ne = 68,                         // stmts_ne
-        S_block = 69,                            // block
-        S_body = 70,                             // body
-        S_import = 71,                           // import
-        S_id_list = 72,                          // id_list
-        S_flowctl = 73,                          // flowctl
-        S_return = 74,                           // return
-        S_for = 75,                              // for
-        S_while = 76,                            // while
-        S_dowhile = 77,                          // dowhile
-        S_if = 78,                               // if
-        S_elif = 79,                             // elif
-        S_else = 80,                             // else
-        S_struct = 81,                           // struct
-        S_decllist = 82,                         // decllist
-        S_declistval = 83,                       // declistval
-        S_function = 84,                         // function
-        S_funargs = 85,                          // funargs
-        S_funargdef = 86,                        // funargdef
-        S_vardecl = 87,                          // vardecl
-        S_vardef = 88,                           // vardef
-        S_set = 89,                              // set
-        S_funcall = 90,                          // funcall
-        S_callarglist = 91,                      // callarglist
-        S_select = 92,                           // select
-        S_scope = 93,                            // scope
-        S_expr = 94,                             // expr
-        S_expr_var = 95,                         // expr_var
-        S_val = 96,                              // val
-        S_expr_mat = 97,                         // expr_mat
-        S_matvals = 98,                          // matvals
-        S_expr_int = 99,                         // expr_int
-        S_expr_float = 100,                      // expr_float
-        S_expr_str = 101,                        // expr_str
-        S_expr_bool = 102,                       // expr_bool
-        S_funtype = 103,                         // funtype
-        S_typelist = 104,                        // typelist
-        S_mattype = 105,                         // mattype
-        S_matsize = 106,                         // matsize
-        S_type = 107                             // type
+        S_SETCONCAT = 43,                        // "++="
+        S_SETPOW = 44,                           // "**="
+        S_SETMOD = 45,                           // "%="
+        S_SETDIV = 46,                           // "/="
+        S_SETMUL = 47,                           // "*="
+        S_SETMINUS = 48,                         // "-="
+        S_SETPLUS = 49,                          // "+="
+        S_SETBAND = 50,                          // "&="
+        S_SETBOR = 51,                           // "|="
+        S_SETBXOR = 52,                          // "^="
+        S_SETBNOT = 53,                          // "~="
+        S_SETBLSHFT = 54,                        // "<<="
+        S_SETBRSHFT = 55,                        // ">>="
+        S_KWVAR = 56,                            // "var"
+        S_KWIMPORT = 57,                         // "import"
+        S_KWIF = 58,                             // "if"
+        S_KWELIF = 59,                           // "elif"
+        S_KWELSE = 60,                           // "else"
+        S_KWFOR = 61,                            // "for"
+        S_KWWHILE = 62,                          // "while"
+        S_KWDO = 63,                             // "do"
+        S_KWRETURN = 64,                         // "return"
+        S_KWBREAK = 65,                          // "break"
+        S_KWCONTINUE = 66,                       // "continue"
+        S_KWCONST = 67,                          // "const"
+        S_KWMAYBE = 68,                          // "?"
+        S_KWINT = 69,                            // "\"int\""
+        S_KWFLOAT = 70,                          // "\"float\""
+        S_KWSTRING = 71,                         // "\"string\""
+        S_KWBOOL = 72,                           // "\"bool\""
+        S_KWSTRUCT = 73,                         // "\"struct\""
+        S_KWVOID = 74,                           // "\"void\""
+        S_ID = 75,                               // "identifier"
+        S_NEG = 76,                              // NEG
+        S_YYACCEPT = 77,                         // $accept
+        S_start = 78,                            // start
+        S_stmt = 79,                             // stmt
+        S_stmts = 80,                            // stmts
+        S_stmts_ne = 81,                         // stmts_ne
+        S_block = 82,                            // block
+        S_body = 83,                             // body
+        S_import = 84,                           // import
+        S_id_list = 85,                          // id_list
+        S_flowctl = 86,                          // flowctl
+        S_return = 87,                           // return
+        S_for = 88,                              // for
+        S_while = 89,                            // while
+        S_dowhile = 90,                          // dowhile
+        S_if = 91,                               // if
+        S_elif = 92,                             // elif
+        S_else = 93,                             // else
+        S_struct = 94,                           // struct
+        S_decllist = 95,                         // decllist
+        S_declistval = 96,                       // declistval
+        S_function = 97,                         // function
+        S_funargs = 98,                          // funargs
+        S_funargdef = 99,                        // funargdef
+        S_vardecl = 100,                         // vardecl
+        S_vardef = 101,                          // vardef
+        S_set = 102,                             // set
+        S_funcall = 103,                         // funcall
+        S_callarglist = 104,                     // callarglist
+        S_select = 105,                          // select
+        S_scope = 106,                           // scope
+        S_expr = 107,                            // expr
+        S_expr_var = 108,                        // expr_var
+        S_val = 109,                             // val
+        S_matrix = 110,                          // matrix
+        S_matvals = 111,                         // matvals
+        S_expr_mat = 112,                        // expr_mat
+        S_expr_none = 113,                       // expr_none
+        S_expr_int = 114,                        // expr_int
+        S_expr_float = 115,                      // expr_float
+        S_expr_str = 116,                        // expr_str
+        S_expr_bool = 117,                       // expr_bool
+        S_funtype = 118,                         // funtype
+        S_typelist = 119,                        // typelist
+        S_mattype = 120,                         // mattype
+        S_matsize = 121,                         // matsize
+        S_type = 122                             // type
       };
     };
 
@@ -1944,6 +1972,201 @@ switch (yykind)
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
+      make_SETCONCAT (location_type l)
+      {
+        return symbol_type (token::SETCONCAT, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_SETCONCAT (const location_type& l)
+      {
+        return symbol_type (token::SETCONCAT, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_SETPOW (location_type l)
+      {
+        return symbol_type (token::SETPOW, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_SETPOW (const location_type& l)
+      {
+        return symbol_type (token::SETPOW, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_SETMOD (location_type l)
+      {
+        return symbol_type (token::SETMOD, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_SETMOD (const location_type& l)
+      {
+        return symbol_type (token::SETMOD, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_SETDIV (location_type l)
+      {
+        return symbol_type (token::SETDIV, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_SETDIV (const location_type& l)
+      {
+        return symbol_type (token::SETDIV, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_SETMUL (location_type l)
+      {
+        return symbol_type (token::SETMUL, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_SETMUL (const location_type& l)
+      {
+        return symbol_type (token::SETMUL, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_SETMINUS (location_type l)
+      {
+        return symbol_type (token::SETMINUS, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_SETMINUS (const location_type& l)
+      {
+        return symbol_type (token::SETMINUS, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_SETPLUS (location_type l)
+      {
+        return symbol_type (token::SETPLUS, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_SETPLUS (const location_type& l)
+      {
+        return symbol_type (token::SETPLUS, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_SETBAND (location_type l)
+      {
+        return symbol_type (token::SETBAND, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_SETBAND (const location_type& l)
+      {
+        return symbol_type (token::SETBAND, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_SETBOR (location_type l)
+      {
+        return symbol_type (token::SETBOR, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_SETBOR (const location_type& l)
+      {
+        return symbol_type (token::SETBOR, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_SETBXOR (location_type l)
+      {
+        return symbol_type (token::SETBXOR, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_SETBXOR (const location_type& l)
+      {
+        return symbol_type (token::SETBXOR, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_SETBNOT (location_type l)
+      {
+        return symbol_type (token::SETBNOT, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_SETBNOT (const location_type& l)
+      {
+        return symbol_type (token::SETBNOT, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_SETBLSHFT (location_type l)
+      {
+        return symbol_type (token::SETBLSHFT, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_SETBLSHFT (const location_type& l)
+      {
+        return symbol_type (token::SETBLSHFT, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_SETBRSHFT (location_type l)
+      {
+        return symbol_type (token::SETBRSHFT, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_SETBRSHFT (const location_type& l)
+      {
+        return symbol_type (token::SETBRSHFT, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
       make_KWVAR (location_type l)
       {
         return symbol_type (token::KWVAR, std::move (l));
@@ -2586,9 +2809,9 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 2067,     ///< Last index in yytable_.
-      yynnts_ = 44,  ///< Number of nonterminal symbols.
-      yyfinal_ = 111 ///< Termination state number.
+      yylast_ = 2233,     ///< Last index in yytable_.
+      yynnts_ = 46,  ///< Number of nonterminal symbols.
+      yyfinal_ = 116 ///< Termination state number.
     };
 
 
@@ -2600,7 +2823,7 @@ switch (yykind)
 
 #line 13 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
 } //  ptc 
-#line 2604 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
+#line 2827 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
 
 
 

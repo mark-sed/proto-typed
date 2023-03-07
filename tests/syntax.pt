@@ -246,3 +246,18 @@ d = a and b or false
 c = false and a
 
 int? c = none
+
+none ++ none ++ (none)
+"hello "++none
+
+none == none
+
+a == none
+
+b != none
+
+c += 4
+
+c = a = b = 42
+
+c **= 2.0 + 2
