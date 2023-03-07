@@ -102,6 +102,7 @@ hex     0[Xx][0-9A-Fa-f]+
 ":"             { return token::COLON; }
 
 "="             { return token::SET; }
+"?"             { return token::KWMAYBE; }
 
 "var"           { return token::KWVAR; }
 "import"        { return token::KWIMPORT; }
@@ -129,6 +130,10 @@ hex     0[Xx][0-9A-Fa-f]+
 "false"         { 
                   yylval->emplace<bool>(false);
                   return token::BOOL; 
+                }
+"none"          { 
+                  //yylval->emplace<>();
+                  return token::NONE; 
                 }
 "r"{string}     { /* Raw string */
                   auto no_pref = (yytext + 1);

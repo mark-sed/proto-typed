@@ -60,6 +60,7 @@
 %token <double> FLOAT "float"
 %token <std::string> STRING "string"
 %token <bool> BOOL "bool"
+%token NONE "none" // TODO: Add type
 
 /* Operators */
 %token LPAR "("
@@ -117,14 +118,13 @@
 %token KWBREAK "break"
 %token KWCONTINUE "continue"
 %token KWCONST "const"
+%token KWMAYBE "?"
 %token KWINT "\"int\""
 %token KWFLOAT "\"float\""
 %token KWSTRING "\"string\""
 %token KWBOOL "\"bool\""
 %token KWSTRUCT "\"struct\""
 %token KWVOID "\"void\""
-
-//%token NIL "nil"
 
 /* Identifiers */
 %token <std::string> ID "identifier"
@@ -314,6 +314,7 @@ scope : ID
 expr : expr_mat
      | expr_var
      | val
+     | NONE
      ;
 
 expr_var : scope
@@ -543,7 +544,15 @@ matsize : expr
         ;
 
 // Variable types
-type : KWINT
+type : KWMAYBE KWMAYBE
+     | KWINT KWMAYBE
+     | KWFLOAT KWMAYBE
+     | KWSTRING KWMAYBE
+     | KWBOOL KWMAYBE
+     | ID KWMAYBE
+     | funtype KWMAYBE
+     | mattype KWMAYBE
+     | KWINT
      | KWFLOAT
      | KWSTRING
      | KWBOOL

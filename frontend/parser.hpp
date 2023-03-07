@@ -733,60 +733,62 @@ namespace  ptc  {
     FLOAT = 260,                   // "float"
     STRING = 261,                  // "string"
     BOOL = 262,                    // "bool"
-    LPAR = 263,                    // "("
-    RPAR = 264,                    // ")"
-    LSQ = 265,                     // "["
-    RSQ = 266,                     // "]"
-    LBR = 267,                     // "{"
-    RBR = 268,                     // "}"
-    PLUS = 269,                    // "+"
-    MINUS = 270,                   // "-"
-    MUL = 271,                     // "*"
-    DIV = 272,                     // "/"
-    MOD = 273,                     // "%"
-    POW = 274,                     // "**"
-    CONCAT = 275,                  // "++"
-    LAND = 276,                    // "and"
-    LOR = 277,                     // "or"
-    LNOT = 278,                    // "not"
-    IN = 279,                      // "in"
-    BAND = 280,                    // "&"
-    BOR = 281,                     // "|"
-    BXOR = 282,                    // "^"
-    BNOT = 283,                    // "~"
-    BLSHFT = 284,                  // "<<"
-    BRSHFT = 285,                  // ">>"
-    EQ = 286,                      // "=="
-    NEQ = 287,                     // "!="
-    BT = 288,                      // ">"
-    LT = 289,                      // "<"
-    BEQ = 290,                     // ">="
-    LEQ = 291,                     // "<="
-    RANGE = 292,                   // ".."
-    DOT = 293,                     // "."
-    COMMA = 294,                   // ","
-    COLON = 295,                   // ":"
-    SET = 296,                     // "="
-    KWVAR = 297,                   // "var"
-    KWIMPORT = 298,                // "import"
-    KWIF = 299,                    // "if"
-    KWELIF = 300,                  // "elif"
-    KWELSE = 301,                  // "else"
-    KWFOR = 302,                   // "for"
-    KWWHILE = 303,                 // "while"
-    KWDO = 304,                    // "do"
-    KWRETURN = 305,                // "return"
-    KWBREAK = 306,                 // "break"
-    KWCONTINUE = 307,              // "continue"
-    KWCONST = 308,                 // "const"
-    KWINT = 309,                   // "\"int\""
-    KWFLOAT = 310,                 // "\"float\""
-    KWSTRING = 311,                // "\"string\""
-    KWBOOL = 312,                  // "\"bool\""
-    KWSTRUCT = 313,                // "\"struct\""
-    KWVOID = 314,                  // "\"void\""
-    ID = 315,                      // "identifier"
-    NEG = 316                      // NEG
+    NONE = 263,                    // "none"
+    LPAR = 264,                    // "("
+    RPAR = 265,                    // ")"
+    LSQ = 266,                     // "["
+    RSQ = 267,                     // "]"
+    LBR = 268,                     // "{"
+    RBR = 269,                     // "}"
+    PLUS = 270,                    // "+"
+    MINUS = 271,                   // "-"
+    MUL = 272,                     // "*"
+    DIV = 273,                     // "/"
+    MOD = 274,                     // "%"
+    POW = 275,                     // "**"
+    CONCAT = 276,                  // "++"
+    LAND = 277,                    // "and"
+    LOR = 278,                     // "or"
+    LNOT = 279,                    // "not"
+    IN = 280,                      // "in"
+    BAND = 281,                    // "&"
+    BOR = 282,                     // "|"
+    BXOR = 283,                    // "^"
+    BNOT = 284,                    // "~"
+    BLSHFT = 285,                  // "<<"
+    BRSHFT = 286,                  // ">>"
+    EQ = 287,                      // "=="
+    NEQ = 288,                     // "!="
+    BT = 289,                      // ">"
+    LT = 290,                      // "<"
+    BEQ = 291,                     // ">="
+    LEQ = 292,                     // "<="
+    RANGE = 293,                   // ".."
+    DOT = 294,                     // "."
+    COMMA = 295,                   // ","
+    COLON = 296,                   // ":"
+    SET = 297,                     // "="
+    KWVAR = 298,                   // "var"
+    KWIMPORT = 299,                // "import"
+    KWIF = 300,                    // "if"
+    KWELIF = 301,                  // "elif"
+    KWELSE = 302,                  // "else"
+    KWFOR = 303,                   // "for"
+    KWWHILE = 304,                 // "while"
+    KWDO = 305,                    // "do"
+    KWRETURN = 306,                // "return"
+    KWBREAK = 307,                 // "break"
+    KWCONTINUE = 308,              // "continue"
+    KWCONST = 309,                 // "const"
+    KWMAYBE = 310,                 // "?"
+    KWINT = 311,                   // "\"int\""
+    KWFLOAT = 312,                 // "\"float\""
+    KWSTRING = 313,                // "\"string\""
+    KWBOOL = 314,                  // "\"bool\""
+    KWSTRUCT = 315,                // "\"struct\""
+    KWVOID = 316,                  // "\"void\""
+    ID = 317,                      // "identifier"
+    NEG = 318                      // NEG
       };
       /// Backward compatibility alias (Bison 3.6).
       typedef token_kind_type yytokentype;
@@ -803,7 +805,7 @@ namespace  ptc  {
     {
       enum symbol_kind_type
       {
-        YYNTOKENS = 62, ///< Number of tokens.
+        YYNTOKENS = 64, ///< Number of tokens.
         S_YYEMPTY = -2,
         S_YYEOF = 0,                             // "end of file"
         S_YYerror = 1,                           // error
@@ -813,104 +815,106 @@ namespace  ptc  {
         S_FLOAT = 5,                             // "float"
         S_STRING = 6,                            // "string"
         S_BOOL = 7,                              // "bool"
-        S_LPAR = 8,                              // "("
-        S_RPAR = 9,                              // ")"
-        S_LSQ = 10,                              // "["
-        S_RSQ = 11,                              // "]"
-        S_LBR = 12,                              // "{"
-        S_RBR = 13,                              // "}"
-        S_PLUS = 14,                             // "+"
-        S_MINUS = 15,                            // "-"
-        S_MUL = 16,                              // "*"
-        S_DIV = 17,                              // "/"
-        S_MOD = 18,                              // "%"
-        S_POW = 19,                              // "**"
-        S_CONCAT = 20,                           // "++"
-        S_LAND = 21,                             // "and"
-        S_LOR = 22,                              // "or"
-        S_LNOT = 23,                             // "not"
-        S_IN = 24,                               // "in"
-        S_BAND = 25,                             // "&"
-        S_BOR = 26,                              // "|"
-        S_BXOR = 27,                             // "^"
-        S_BNOT = 28,                             // "~"
-        S_BLSHFT = 29,                           // "<<"
-        S_BRSHFT = 30,                           // ">>"
-        S_EQ = 31,                               // "=="
-        S_NEQ = 32,                              // "!="
-        S_BT = 33,                               // ">"
-        S_LT = 34,                               // "<"
-        S_BEQ = 35,                              // ">="
-        S_LEQ = 36,                              // "<="
-        S_RANGE = 37,                            // ".."
-        S_DOT = 38,                              // "."
-        S_COMMA = 39,                            // ","
-        S_COLON = 40,                            // ":"
-        S_SET = 41,                              // "="
-        S_KWVAR = 42,                            // "var"
-        S_KWIMPORT = 43,                         // "import"
-        S_KWIF = 44,                             // "if"
-        S_KWELIF = 45,                           // "elif"
-        S_KWELSE = 46,                           // "else"
-        S_KWFOR = 47,                            // "for"
-        S_KWWHILE = 48,                          // "while"
-        S_KWDO = 49,                             // "do"
-        S_KWRETURN = 50,                         // "return"
-        S_KWBREAK = 51,                          // "break"
-        S_KWCONTINUE = 52,                       // "continue"
-        S_KWCONST = 53,                          // "const"
-        S_KWINT = 54,                            // "\"int\""
-        S_KWFLOAT = 55,                          // "\"float\""
-        S_KWSTRING = 56,                         // "\"string\""
-        S_KWBOOL = 57,                           // "\"bool\""
-        S_KWSTRUCT = 58,                         // "\"struct\""
-        S_KWVOID = 59,                           // "\"void\""
-        S_ID = 60,                               // "identifier"
-        S_NEG = 61,                              // NEG
-        S_YYACCEPT = 62,                         // $accept
-        S_start = 63,                            // start
-        S_stmt = 64,                             // stmt
-        S_stmts = 65,                            // stmts
-        S_stmts_ne = 66,                         // stmts_ne
-        S_block = 67,                            // block
-        S_body = 68,                             // body
-        S_import = 69,                           // import
-        S_id_list = 70,                          // id_list
-        S_flowctl = 71,                          // flowctl
-        S_return = 72,                           // return
-        S_for = 73,                              // for
-        S_while = 74,                            // while
-        S_dowhile = 75,                          // dowhile
-        S_if = 76,                               // if
-        S_elif = 77,                             // elif
-        S_else = 78,                             // else
-        S_struct = 79,                           // struct
-        S_decllist = 80,                         // decllist
-        S_declistval = 81,                       // declistval
-        S_function = 82,                         // function
-        S_funargs = 83,                          // funargs
-        S_funargdef = 84,                        // funargdef
-        S_vardecl = 85,                          // vardecl
-        S_vardef = 86,                           // vardef
-        S_set = 87,                              // set
-        S_funcall = 88,                          // funcall
-        S_callarglist = 89,                      // callarglist
-        S_select = 90,                           // select
-        S_scope = 91,                            // scope
-        S_expr = 92,                             // expr
-        S_expr_var = 93,                         // expr_var
-        S_val = 94,                              // val
-        S_expr_mat = 95,                         // expr_mat
-        S_matvals = 96,                          // matvals
-        S_expr_int = 97,                         // expr_int
-        S_expr_float = 98,                       // expr_float
-        S_expr_str = 99,                         // expr_str
-        S_expr_bool = 100,                       // expr_bool
-        S_funtype = 101,                         // funtype
-        S_typelist = 102,                        // typelist
-        S_mattype = 103,                         // mattype
-        S_matsize = 104,                         // matsize
-        S_type = 105                             // type
+        S_NONE = 8,                              // "none"
+        S_LPAR = 9,                              // "("
+        S_RPAR = 10,                             // ")"
+        S_LSQ = 11,                              // "["
+        S_RSQ = 12,                              // "]"
+        S_LBR = 13,                              // "{"
+        S_RBR = 14,                              // "}"
+        S_PLUS = 15,                             // "+"
+        S_MINUS = 16,                            // "-"
+        S_MUL = 17,                              // "*"
+        S_DIV = 18,                              // "/"
+        S_MOD = 19,                              // "%"
+        S_POW = 20,                              // "**"
+        S_CONCAT = 21,                           // "++"
+        S_LAND = 22,                             // "and"
+        S_LOR = 23,                              // "or"
+        S_LNOT = 24,                             // "not"
+        S_IN = 25,                               // "in"
+        S_BAND = 26,                             // "&"
+        S_BOR = 27,                              // "|"
+        S_BXOR = 28,                             // "^"
+        S_BNOT = 29,                             // "~"
+        S_BLSHFT = 30,                           // "<<"
+        S_BRSHFT = 31,                           // ">>"
+        S_EQ = 32,                               // "=="
+        S_NEQ = 33,                              // "!="
+        S_BT = 34,                               // ">"
+        S_LT = 35,                               // "<"
+        S_BEQ = 36,                              // ">="
+        S_LEQ = 37,                              // "<="
+        S_RANGE = 38,                            // ".."
+        S_DOT = 39,                              // "."
+        S_COMMA = 40,                            // ","
+        S_COLON = 41,                            // ":"
+        S_SET = 42,                              // "="
+        S_KWVAR = 43,                            // "var"
+        S_KWIMPORT = 44,                         // "import"
+        S_KWIF = 45,                             // "if"
+        S_KWELIF = 46,                           // "elif"
+        S_KWELSE = 47,                           // "else"
+        S_KWFOR = 48,                            // "for"
+        S_KWWHILE = 49,                          // "while"
+        S_KWDO = 50,                             // "do"
+        S_KWRETURN = 51,                         // "return"
+        S_KWBREAK = 52,                          // "break"
+        S_KWCONTINUE = 53,                       // "continue"
+        S_KWCONST = 54,                          // "const"
+        S_KWMAYBE = 55,                          // "?"
+        S_KWINT = 56,                            // "\"int\""
+        S_KWFLOAT = 57,                          // "\"float\""
+        S_KWSTRING = 58,                         // "\"string\""
+        S_KWBOOL = 59,                           // "\"bool\""
+        S_KWSTRUCT = 60,                         // "\"struct\""
+        S_KWVOID = 61,                           // "\"void\""
+        S_ID = 62,                               // "identifier"
+        S_NEG = 63,                              // NEG
+        S_YYACCEPT = 64,                         // $accept
+        S_start = 65,                            // start
+        S_stmt = 66,                             // stmt
+        S_stmts = 67,                            // stmts
+        S_stmts_ne = 68,                         // stmts_ne
+        S_block = 69,                            // block
+        S_body = 70,                             // body
+        S_import = 71,                           // import
+        S_id_list = 72,                          // id_list
+        S_flowctl = 73,                          // flowctl
+        S_return = 74,                           // return
+        S_for = 75,                              // for
+        S_while = 76,                            // while
+        S_dowhile = 77,                          // dowhile
+        S_if = 78,                               // if
+        S_elif = 79,                             // elif
+        S_else = 80,                             // else
+        S_struct = 81,                           // struct
+        S_decllist = 82,                         // decllist
+        S_declistval = 83,                       // declistval
+        S_function = 84,                         // function
+        S_funargs = 85,                          // funargs
+        S_funargdef = 86,                        // funargdef
+        S_vardecl = 87,                          // vardecl
+        S_vardef = 88,                           // vardef
+        S_set = 89,                              // set
+        S_funcall = 90,                          // funcall
+        S_callarglist = 91,                      // callarglist
+        S_select = 92,                           // select
+        S_scope = 93,                            // scope
+        S_expr = 94,                             // expr
+        S_expr_var = 95,                         // expr_var
+        S_val = 96,                              // val
+        S_expr_mat = 97,                         // expr_mat
+        S_matvals = 98,                          // matvals
+        S_expr_int = 99,                         // expr_int
+        S_expr_float = 100,                      // expr_float
+        S_expr_str = 101,                        // expr_str
+        S_expr_bool = 102,                       // expr_bool
+        S_funtype = 103,                         // funtype
+        S_typelist = 104,                        // typelist
+        S_mattype = 105,                         // mattype
+        S_matsize = 106,                         // matsize
+        S_type = 107                             // type
       };
     };
 
@@ -1191,7 +1195,7 @@ switch (yykind)
 #if !defined _MSC_VER || defined __clang__
         YY_ASSERT (tok == token::END_FILE
                    || (token::YYerror <= tok && tok <= token::END)
-                   || (token::LPAR <= tok && tok <= token::KWVOID)
+                   || (token::NONE <= tok && tok <= token::KWVOID)
                    || tok == token::NEG);
 #endif
       }
@@ -1410,6 +1414,21 @@ switch (yykind)
       make_BOOL (const bool& v, const location_type& l)
       {
         return symbol_type (token::BOOL, v, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_NONE (location_type l)
+      {
+        return symbol_type (token::NONE, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_NONE (const location_type& l)
+      {
+        return symbol_type (token::NONE, l);
       }
 #endif
 #if 201103L <= YY_CPLUSPLUS
@@ -2105,6 +2124,21 @@ switch (yykind)
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
+      make_KWMAYBE (location_type l)
+      {
+        return symbol_type (token::KWMAYBE, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_KWMAYBE (const location_type& l)
+      {
+        return symbol_type (token::KWMAYBE, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
       make_KWINT (location_type l)
       {
         return symbol_type (token::KWINT, std::move (l));
@@ -2552,9 +2586,9 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 1153,     ///< Last index in yytable_.
+      yylast_ = 1184,     ///< Last index in yytable_.
       yynnts_ = 44,  ///< Number of nonterminal symbols.
-      yyfinal_ = 103 ///< Termination state number.
+      yyfinal_ = 111 ///< Termination state number.
     };
 
 
@@ -2566,7 +2600,7 @@ switch (yykind)
 
 #line 13 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
 } //  ptc 
-#line 2570 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
+#line 2604 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
 
 
 

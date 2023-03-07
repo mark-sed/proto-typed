@@ -76,6 +76,16 @@ MD md2
 print(md2.x)
 ```
 
+### Maybe types
+```
+int? b1 = 4
+int? b2 = none
+
+int? f() {
+    return none
+}
+```
+
 ## Syntax
 
 ### Comments
