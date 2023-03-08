@@ -340,9 +340,9 @@ scope : ID
 // Expressions
 expr : expr_mat
      | expr_var
-     | val
      | expr_none
      | expr_struct
+     | val
      ;
 
 expr_var : scope
@@ -357,6 +357,9 @@ expr_var : scope
          | expr_float MUL expr_var
          | expr_var MUL expr_int
          | expr_var MUL expr_float
+         | expr_mat MUL expr_mat
+         | expr_mat MUL expr_var
+         | expr_var MUL expr_mat
          | expr_var MUL expr_var
 
          | expr_int DIV expr_var
@@ -375,12 +378,18 @@ expr_var : scope
          | expr_float PLUS expr_var
          | expr_var PLUS expr_int
          | expr_var PLUS expr_float
+         | expr_mat PLUS expr_mat
+         | expr_var PLUS expr_mat
+         | expr_mat PLUS expr_var
          | expr_var PLUS expr_var
 
          | expr_int MINUS expr_var
          | expr_float MINUS expr_var
          | expr_var MINUS expr_int
          | expr_var MINUS expr_float
+         | expr_mat MINUS expr_mat
+         | expr_var MINUS expr_mat
+         | expr_mat MINUS expr_var
          | expr_var MINUS expr_var
 
          | expr_int BLSHFT expr_var
@@ -436,6 +445,9 @@ expr_var : scope
          | expr_var EQ expr_bool
          | expr_var EQ expr_none
          | expr_var EQ expr_struct
+         | expr_mat EQ expr_mat
+         | expr_var EQ expr_mat
+         | expr_mat EQ expr_var
          | expr_var EQ expr_var
 
          | expr_int NEQ expr_var
@@ -451,6 +463,9 @@ expr_var : scope
          | expr_var NEQ expr_bool
          | expr_var NEQ expr_none
          | expr_var NEQ expr_struct
+         | expr_mat NEQ expr_mat
+         | expr_var NEQ expr_mat
+         | expr_mat NEQ expr_var
          | expr_var NEQ expr_var
 
          | expr_int BAND expr_var
@@ -465,11 +480,20 @@ expr_var : scope
          | expr_var BOR expr_int
          | expr_var BOR expr_var
 
+         | expr_int IN expr_mat
+         | expr_float IN expr_mat
+         | expr_str IN expr_mat
+         | expr_bool IN expr_mat
+         | expr_none IN expr_mat
+         | expr_struct IN expr_mat
+         | expr_mat IN expr_mat
          | expr_int IN expr_var
          | expr_float IN expr_var
          | expr_str IN expr_var
          | expr_bool IN expr_var
          | expr_none IN expr_var
+         | expr_struct IN expr_var
+         | expr_mat IN expr_var
          | expr_var IN expr_str
          | expr_var IN expr_var
 
@@ -664,6 +688,8 @@ expr_bool : BOOL { $$ = $1; }
           | expr_float LEQ expr_float { $$ = $1 <= $3; }
           | expr_float LEQ expr_int { $$ = $1 <= $3; }
           | expr_str LEQ expr_str { $$ = $1 <= $3; }
+
+          | expr_str IN expr_str { $$ = $3.find($1) != std::string::npos; }
           ;
 
 // Function signature (as a type)

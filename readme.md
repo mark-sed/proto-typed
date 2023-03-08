@@ -54,8 +54,14 @@ string[4] s = ["hello", ", ", "world", "!"]
 int[WIDTH, HEIGHT] screen
 screen[x][y] = 1
 
-int[,] subm = m[:1][1:2] // [[1, 0],[1, 1]]
+int[] subm = m[:1][1:2] // [[1, 0],[1, 1]]
 ```
+
+When the size of the matrix is used in the type, then
+the matrix cannot be appended to or removed from
+(it has static size).
+
+When `[]` is used then its a dynamic matrix.
 
 ### Struct
 ```
