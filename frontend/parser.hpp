@@ -32,7 +32,7 @@
 
 
 /**
- ** \file /home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp
+ ** \file frontend/parser.hpp
  ** Define the  ptc ::parser class.
  */
 
@@ -42,10 +42,10 @@
 // especially those whose name start with YY_ or yy_.  They are
 // private implementation details that can be changed or removed.
 
-#ifndef YY_YY_HOME_MAREK_DESKTOP_PROGRAMMING_PROTO_TYPED_FRONTEND_PARSER_HPP_INCLUDED
-# define YY_YY_HOME_MAREK_DESKTOP_PROGRAMMING_PROTO_TYPED_FRONTEND_PARSER_HPP_INCLUDED
+#ifndef YY_YY_FRONTEND_PARSER_HPP_INCLUDED
+# define YY_YY_FRONTEND_PARSER_HPP_INCLUDED
 // "%code requires" blocks.
-#line 19 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+#line 19 "frontend/parser.yy"
 
     namespace ptc {
         class Scanner;
@@ -59,7 +59,7 @@
         #endif
     #endif
 
-#line 63 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
+#line 63 "frontend/parser.hpp"
 
 # include <cassert>
 # include <cstdlib> // std::abort
@@ -198,9 +198,9 @@
 # define YYDEBUG 0
 #endif
 
-#line 13 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+#line 13 "frontend/parser.yy"
 namespace  ptc  {
-#line 204 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
+#line 204 "frontend/parser.hpp"
 
 
   /// A point in a source file.
@@ -923,31 +923,28 @@ namespace  ptc  {
         S_vardecl = 100,                         // vardecl
         S_vardef = 101,                          // vardef
         S_set = 102,                             // set
-        S_funcall = 103,                         // funcall
-        S_callarglist = 104,                     // callarglist
-        S_scope = 105,                           // scope
-        S_expr = 106,                            // expr
-        S_expr_var = 107,                        // expr_var
-        S_val = 108,                             // val
-        S_matrix = 109,                          // matrix
-        S_matvals = 110,                         // matvals
-        S_expr_mat = 111,                        // expr_mat
-        S_range = 112,                           // range
-        S_int_val = 113,                         // int_val
-        S_slice = 114,                           // slice
-        S_expr_none = 115,                       // expr_none
-        S_expr_struct = 116,                     // expr_struct
-        S_struct_val = 117,                      // struct_val
-        S_struct_list = 118,                     // struct_list
-        S_expr_int = 119,                        // expr_int
-        S_expr_float = 120,                      // expr_float
-        S_expr_str = 121,                        // expr_str
-        S_expr_bool = 122,                       // expr_bool
-        S_funtype = 123,                         // funtype
-        S_typelist = 124,                        // typelist
-        S_mattype = 125,                         // mattype
-        S_matsize = 126,                         // matsize
-        S_type = 127                             // type
+        S_callarglist = 103,                     // callarglist
+        S_expr = 104,                            // expr
+        S_expr_var = 105,                        // expr_var
+        S_matrix = 106,                          // matrix
+        S_matvals = 107,                         // matvals
+        S_expr_mat = 108,                        // expr_mat
+        S_range = 109,                           // range
+        S_int_val = 110,                         // int_val
+        S_slice = 111,                           // slice
+        S_expr_none = 112,                       // expr_none
+        S_expr_struct = 113,                     // expr_struct
+        S_struct_val = 114,                      // struct_val
+        S_struct_list = 115,                     // struct_list
+        S_expr_int = 116,                        // expr_int
+        S_expr_float = 117,                      // expr_float
+        S_expr_str = 118,                        // expr_str
+        S_expr_bool = 119,                       // expr_bool
+        S_funtype = 120,                         // funtype
+        S_typelist = 121,                        // typelist
+        S_mattype = 122,                         // mattype
+        S_matsize = 123,                         // matsize
+        S_type = 124                             // type
       };
     };
 
@@ -2814,9 +2811,9 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 3294,     ///< Last index in yytable_.
-      yynnts_ = 51,  ///< Number of nonterminal symbols.
-      yyfinal_ = 129 ///< Termination state number.
+      yylast_ = 3345,     ///< Last index in yytable_.
+      yynnts_ = 48,  ///< Number of nonterminal symbols.
+      yyfinal_ = 123 ///< Termination state number.
     };
 
 
@@ -2826,11 +2823,11 @@ switch (yykind)
   };
 
 
-#line 13 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
+#line 13 "frontend/parser.yy"
 } //  ptc 
-#line 2832 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
+#line 2829 "frontend/parser.hpp"
 
 
 
 
-#endif // !YY_YY_HOME_MAREK_DESKTOP_PROGRAMMING_PROTO_TYPED_FRONTEND_PARSER_HPP_INCLUDED
+#endif // !YY_YY_FRONTEND_PARSER_HPP_INCLUDED

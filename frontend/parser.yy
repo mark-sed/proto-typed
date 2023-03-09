@@ -231,8 +231,7 @@ return : KWRETURN
        ;
 
 // For loop
-for : KWFOR LPAR ID COLON ID RPAR body
-    | KWFOR LPAR ID COLON expr_str RPAR body
+for : KWFOR LPAR ID COLON expr RPAR body
     ;
 
 // While loop
@@ -294,50 +293,57 @@ vardef : type ID SET struct_val
        ;
 
 // Assignment and compound assignment
-set : scope SETCONCAT expr
-    | scope SETPOW expr
-    | scope SETMOD expr
-    | scope SETDIV expr
-    | scope SETMUL expr
-    | scope SETMINUS expr
-    | scope SETPLUS expr
-    | scope SETBAND expr
-    | scope SETBOR expr
-    | scope SETBXOR expr
-    | scope SETBNOT expr
-    | scope SETBLSHFT expr
-    | scope SETBRSHFT expr
-    | scope SET expr
-    | scope SET set
+set : expr SETCONCAT expr
+    | expr SETPOW expr
+    | expr SETMOD expr
+    | expr SETDIV expr
+    | expr SETMUL expr
+    | expr SETMINUS expr
+    | expr SETPLUS expr
+    | expr SETBAND expr
+    | expr SETBOR expr
+    | expr SETBXOR expr
+    | expr SETBNOT expr
+    | expr SETBLSHFT expr
+    | expr SETBRSHFT expr
+    | expr SET expr
+    | expr SET set
     ;
 
-// Function call
-funcall : scope LPAR RPAR
-        | scope LPAR callarglist RPAR
-        ;
+// Function call arguments
 callarglist : expr
             | expr COMMA callarglist
             ;
-
-// Scope - Complex id
-scope : ID
-      | funcall
-      | ID LSQ int_val RSQ
-      | scope LSQ int_val RSQ
-      | scope DOT scope
-      ;
 
 // Expressions
 expr : expr_mat
      | expr_var
      | expr_none
      | expr_struct
-     | val
+     | expr_int //{ std::cout << "=" << $1 << std::endl; }
+     | expr_float //{ std::cout << "=" << $1 << std::endl; }
+     | expr_str //{ std::cout << "=" << $1 << std::endl; }
+     | expr_bool //{ std::cout << "=" << $1 << std::endl; }
      ;
 
-expr_var : scope
-         | MINUS scope %prec NEG
-         | LPAR scope RPAR
+expr_var : ID
+         | MINUS ID %prec NEG
+         | LPAR expr_var RPAR
+
+         | expr_var LPAR RPAR
+         | expr_var LPAR callarglist RPAR
+
+         | expr_str LSQ int_val RSQ
+         | expr_mat LSQ int_val RSQ
+         | ID LSQ int_val RSQ
+         | expr_var LSQ int_val RSQ
+
+         | expr_mat slice
+         | ID slice
+         | expr_var slice
+
+         | ID DOT expr_var
+         | expr_var DOT expr_var
 
          | expr_float POW expr_var
          | expr_var POW expr_float
@@ -521,13 +527,6 @@ expr_var : scope
          | expr_var CONCAT expr_var
          ;
 
-// Constant values
-val : expr_int //{ std::cout << "=" << $1 << std::endl; }
-    | expr_float //{ std::cout << "=" << $1 << std::endl; }
-    | expr_str //{ std::cout << "=" << $1 << std::endl; }
-    | expr_bool //{ std::cout << "=" << $1 << std::endl; }
-    ;
-
 // Matrix value
 matrix : LSQ RSQ
        | LSQ matvals RSQ
@@ -543,9 +542,7 @@ matvals : expr
 // Matrix expression
 expr_mat : matrix
          | range
-         | slice
          | LPAR matrix RPAR
-         | LPAR slice RPAR
          | LPAR range RPAR
          ; // TODO: Add compile time matrix simplification?
 range : LPAR int_val RANGE int_val RPAR
@@ -554,30 +551,18 @@ range : LPAR int_val RANGE int_val RPAR
 int_val : expr_int
         | expr_var
         ;
-slice : ID LSQ COLON RSQ
-      | ID LSQ int_val COLON RSQ
-      | ID LSQ COLON int_val RSQ
-      | ID LSQ int_val COLON int_val RSQ
-      | ID LSQ COLON COLON RSQ
-      | ID LSQ int_val COLON COLON RSQ
-      | ID LSQ COLON int_val COLON RSQ
-      | ID LSQ COLON COLON int_val RSQ
-      | ID LSQ int_val COLON int_val COLON RSQ
-      | ID LSQ int_val COLON COLON int_val RSQ
-      | ID LSQ COLON int_val COLON int_val RSQ
-      | ID LSQ int_val COLON int_val COLON int_val RSQ
-      | scope LSQ COLON RSQ
-      | scope LSQ int_val COLON RSQ
-      | scope LSQ COLON int_val RSQ
-      | scope LSQ int_val COLON int_val RSQ
-      | scope LSQ COLON COLON RSQ
-      | scope LSQ int_val COLON COLON RSQ
-      | scope LSQ COLON int_val COLON RSQ
-      | scope LSQ COLON COLON int_val RSQ
-      | scope LSQ int_val COLON int_val COLON RSQ
-      | scope LSQ int_val COLON COLON int_val RSQ
-      | scope LSQ COLON int_val COLON int_val RSQ
-      | scope LSQ int_val COLON int_val COLON int_val RSQ
+slice : LSQ COLON RSQ
+      | LSQ int_val COLON RSQ
+      | LSQ COLON int_val RSQ
+      | LSQ int_val COLON int_val RSQ
+      | LSQ COLON COLON RSQ
+      | LSQ int_val COLON COLON RSQ
+      | LSQ COLON int_val COLON RSQ
+      | LSQ COLON COLON int_val RSQ
+      | LSQ int_val COLON int_val COLON RSQ
+      | LSQ int_val COLON COLON int_val RSQ
+      | LSQ COLON int_val COLON int_val RSQ
+      | LSQ int_val COLON int_val COLON int_val RSQ
       ;
 
 // None expression

@@ -63,6 +63,17 @@ the matrix cannot be appended to or removed from
 
 When `[]` is used then its a dynamic matrix.
 
+Matrix is also a product of slicing:
+```
+a[1:300:2];
+```
+And a product of a range:
+```
+for(a : (1..100)) {}
+
+a = (1,3 .. 500)
+```
+
 ### Struct
 ```
 struct MyData {
