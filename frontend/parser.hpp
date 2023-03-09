@@ -925,27 +925,29 @@ namespace  ptc  {
         S_set = 102,                             // set
         S_funcall = 103,                         // funcall
         S_callarglist = 104,                     // callarglist
-        S_select = 105,                          // select
-        S_scope = 106,                           // scope
-        S_expr = 107,                            // expr
-        S_expr_var = 108,                        // expr_var
-        S_val = 109,                             // val
-        S_matrix = 110,                          // matrix
-        S_matvals = 111,                         // matvals
-        S_expr_mat = 112,                        // expr_mat
-        S_expr_none = 113,                       // expr_none
-        S_expr_struct = 114,                     // expr_struct
-        S_struct_val = 115,                      // struct_val
-        S_struct_list = 116,                     // struct_list
-        S_expr_int = 117,                        // expr_int
-        S_expr_float = 118,                      // expr_float
-        S_expr_str = 119,                        // expr_str
-        S_expr_bool = 120,                       // expr_bool
-        S_funtype = 121,                         // funtype
-        S_typelist = 122,                        // typelist
-        S_mattype = 123,                         // mattype
-        S_matsize = 124,                         // matsize
-        S_type = 125                             // type
+        S_scope = 105,                           // scope
+        S_expr = 106,                            // expr
+        S_expr_var = 107,                        // expr_var
+        S_val = 108,                             // val
+        S_matrix = 109,                          // matrix
+        S_matvals = 110,                         // matvals
+        S_expr_mat = 111,                        // expr_mat
+        S_range = 112,                           // range
+        S_int_val = 113,                         // int_val
+        S_slice = 114,                           // slice
+        S_expr_none = 115,                       // expr_none
+        S_expr_struct = 116,                     // expr_struct
+        S_struct_val = 117,                      // struct_val
+        S_struct_list = 118,                     // struct_list
+        S_expr_int = 119,                        // expr_int
+        S_expr_float = 120,                      // expr_float
+        S_expr_str = 121,                        // expr_str
+        S_expr_bool = 122,                       // expr_bool
+        S_funtype = 123,                         // funtype
+        S_typelist = 124,                        // typelist
+        S_mattype = 125,                         // mattype
+        S_matsize = 126,                         // matsize
+        S_type = 127                             // type
       };
     };
 
@@ -2812,9 +2814,9 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 2790,     ///< Last index in yytable_.
-      yynnts_ = 49,  ///< Number of nonterminal symbols.
-      yyfinal_ = 121 ///< Termination state number.
+      yylast_ = 3294,     ///< Last index in yytable_.
+      yynnts_ = 51,  ///< Number of nonterminal symbols.
+      yyfinal_ = 129 ///< Termination state number.
     };
 
 
@@ -2826,7 +2828,7 @@ switch (yykind)
 
 #line 13 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.yy"
 } //  ptc 
-#line 2830 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
+#line 2832 "/home/marek/Desktop/Programming/proto-typed/frontend/parser.hpp"
 
 
 

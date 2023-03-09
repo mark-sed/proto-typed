@@ -189,7 +189,6 @@ stmts : END
       | stmts_ne
       ;
 stmts_ne : set END
-         | expr END
          | vardecl END
          | vardef END
          | import END
@@ -200,6 +199,7 @@ stmts_ne : set END
          | struct
          | function
          | flowctl END
+         | expr END
          ;
 
 // Code block     
@@ -316,24 +316,14 @@ funcall : scope LPAR RPAR
         | scope LPAR callarglist RPAR
         ;
 callarglist : expr
-            //| callargnamed
             | expr COMMA callarglist
             ;
-//callargnamed : ID SET val
-//             | ID SET scope
-//             | callargnamed COMMA callargnamed
-//             ;
-
-// Matrix selection
-select : LSQ expr RSQ
-       | LSQ expr RSQ select
-       ;
 
 // Scope - Complex id
 scope : ID
       | funcall
-      | ID select
-      | ID select DOT scope
+      | ID LSQ int_val RSQ
+      | scope LSQ int_val RSQ
       | scope DOT scope
       ;
 
@@ -552,8 +542,43 @@ matvals : expr
 
 // Matrix expression
 expr_mat : matrix
+         | range
+         | slice
          | LPAR matrix RPAR
+         | LPAR slice RPAR
+         | LPAR range RPAR
          ; // TODO: Add compile time matrix simplification?
+range : LPAR int_val RANGE int_val RPAR
+      | LPAR int_val COMMA int_val RANGE int_val RPAR
+      ;
+int_val : expr_int
+        | expr_var
+        ;
+slice : ID LSQ COLON RSQ
+      | ID LSQ int_val COLON RSQ
+      | ID LSQ COLON int_val RSQ
+      | ID LSQ int_val COLON int_val RSQ
+      | ID LSQ COLON COLON RSQ
+      | ID LSQ int_val COLON COLON RSQ
+      | ID LSQ COLON int_val COLON RSQ
+      | ID LSQ COLON COLON int_val RSQ
+      | ID LSQ int_val COLON int_val COLON RSQ
+      | ID LSQ int_val COLON COLON int_val RSQ
+      | ID LSQ COLON int_val COLON int_val RSQ
+      | ID LSQ int_val COLON int_val COLON int_val RSQ
+      | scope LSQ COLON RSQ
+      | scope LSQ int_val COLON RSQ
+      | scope LSQ COLON int_val RSQ
+      | scope LSQ int_val COLON int_val RSQ
+      | scope LSQ COLON COLON RSQ
+      | scope LSQ int_val COLON COLON RSQ
+      | scope LSQ COLON int_val COLON RSQ
+      | scope LSQ COLON COLON int_val RSQ
+      | scope LSQ int_val COLON int_val COLON RSQ
+      | scope LSQ int_val COLON COLON int_val RSQ
+      | scope LSQ COLON int_val COLON int_val RSQ
+      | scope LSQ int_val COLON int_val COLON int_val RSQ
+      ;
 
 // None expression
 expr_none : NONE
@@ -712,8 +737,8 @@ mattype : ID LSQ matsize RSQ
         | KWBOOL LSQ matsize RSQ
         | KWBOOL LSQ RSQ
         ;
-matsize : expr
-        | expr COMMA matsize
+matsize : int_val
+        | int_val COMMA matsize
         ;
 
 // Variable types
