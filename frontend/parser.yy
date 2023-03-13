@@ -6,6 +6,7 @@
 /* Since new constructs are used, newer version is needed */
 %require "3.7"
 /* Use C++ parser */
+%language "c++"
 %skeleton "lalr1.cc"
 
 %defines
@@ -14,6 +15,7 @@
 /* Parser class */
 %define api.parser.class { Parser }
 %define api.location.file none
+%define api.token.raw
 
 /* Forward declarations */
 %code requires {
@@ -40,6 +42,7 @@
     #include <sstream>
     // Include compiler to use error
     #include "scanner.hpp"
+    #include "error.hpp"
 
     // Set correct token method
     #undef yylex
@@ -47,7 +50,7 @@
 }
 
 %define api.value.type variant
-%define parse.assert
+//%define parse.assert
 %define parse.error verbose
 
 /* Tokens */
@@ -748,5 +751,6 @@ type : KWMAYBE KWMAYBE
 
 /* Error method */
 void ptc::Parser::error(const location_type &l, const std::string &err_message) {
-    std::cerr << scanner->loc->begin.line << ":" << scanner->loc->begin.column << ": " << err_message << std::endl;
+    auto msg = std::to_string(scanner->loc->begin.line) + ":" + std::to_string(scanner->loc->begin.column) + ": " + err_message;
+    ptc::err::error(msg);
 }

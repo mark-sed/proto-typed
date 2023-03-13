@@ -1,6 +1,6 @@
-#line 2 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.cpp"
+#line 2 "frontend/lexer.cpp"
 
-#line 4 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.cpp"
+#line 4 "frontend/lexer.cpp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -549,15 +549,16 @@ static const flex_int32_t yy_rule_can_match_eol[86] =
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 1 "frontend/lexer.ll"
 /**
  * Grammar file for Flex tool for Proto-typed language
  * @copyright Marek Sedlacek, 2023
  */
-#line 7 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 7 "frontend/lexer.ll"
 
 #include <string>
 #include "scanner.hpp"
+#include "error.hpp"
 
 // Define custom lex method
 #undef YY_DECL
@@ -572,9 +573,9 @@ using token = ptc::Parser::token;
 #define yyterminate() return (token::END_FILE)
 
 #include <iostream>
-#line 576 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.cpp"
+#line 577 "frontend/lexer.cpp"
 /* Define what scanner class is used */
-#line 578 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.cpp"
+#line 579 "frontend/lexer.cpp"
 
 #define INITIAL 0
 
@@ -706,14 +707,14 @@ YY_DECL
 		}
 
 	{
-#line 39 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 40 "frontend/lexer.ll"
 
 
-#line 42 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 43 "frontend/lexer.ll"
     yylval = lval;    
 
 
-#line 717 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.cpp"
+#line 718 "frontend/lexer.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -782,12 +783,12 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 45 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 46 "frontend/lexer.ll"
 { /* Ignore spaces and tabs */; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 46 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 47 "frontend/lexer.ll"
 {   /* Multiline comment */
                     int c; 
                     while((c = yyinput()) != 0) {
@@ -805,13 +806,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 60 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 61 "frontend/lexer.ll"
 { /* Line comment */ ; }
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 61 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 62 "frontend/lexer.ll"
 {
                   loc->lines();
                   return token::END;
@@ -819,342 +820,342 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 65 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 66 "frontend/lexer.ll"
 { return token::END; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 67 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 68 "frontend/lexer.ll"
 { return token::LPAR; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 68 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 69 "frontend/lexer.ll"
 { return token::RPAR; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 69 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 70 "frontend/lexer.ll"
 { return token::LSQ; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 70 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 71 "frontend/lexer.ll"
 { return token::RSQ; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 71 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 72 "frontend/lexer.ll"
 { return token::LBR; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 72 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 73 "frontend/lexer.ll"
 { return token::RBR; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 74 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 75 "frontend/lexer.ll"
 { return token::SETCONCAT; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 75 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 76 "frontend/lexer.ll"
 { return token::SETPOW; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 76 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 77 "frontend/lexer.ll"
 { return token::SETPLUS; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 77 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 78 "frontend/lexer.ll"
 { return token::SETMINUS; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 78 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 79 "frontend/lexer.ll"
 { return token::SETDIV; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 79 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 80 "frontend/lexer.ll"
 { return token::SETMUL; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 80 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 81 "frontend/lexer.ll"
 { return token::SETMOD; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 82 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 83 "frontend/lexer.ll"
 { return token::SETBAND; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 83 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 84 "frontend/lexer.ll"
 { return token::SETBOR; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 84 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 85 "frontend/lexer.ll"
 { return token::SETBXOR; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 85 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 86 "frontend/lexer.ll"
 { return token::SETBNOT; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 86 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 87 "frontend/lexer.ll"
 { return token::SETBLSHFT; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 87 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 88 "frontend/lexer.ll"
 { return token::SETBRSHFT; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 89 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 90 "frontend/lexer.ll"
 { return token::CONCAT; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 90 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 91 "frontend/lexer.ll"
 { return token::POW; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 91 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 92 "frontend/lexer.ll"
 { return token::PLUS; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 92 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 93 "frontend/lexer.ll"
 { return token::MINUS; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 93 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 94 "frontend/lexer.ll"
 { return token::DIV; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 94 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 95 "frontend/lexer.ll"
 { return token::MUL; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 95 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 96 "frontend/lexer.ll"
 { return token::MOD; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 97 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 98 "frontend/lexer.ll"
 { return token::LAND; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 98 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 99 "frontend/lexer.ll"
 { return token::LOR; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 99 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 100 "frontend/lexer.ll"
 { return token::LNOT; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 100 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 101 "frontend/lexer.ll"
 { return token::IN; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 102 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 103 "frontend/lexer.ll"
 { return token::BAND; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 103 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 104 "frontend/lexer.ll"
 { return token::BOR; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 104 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 105 "frontend/lexer.ll"
 { return token::BXOR; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 105 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 106 "frontend/lexer.ll"
 { return token::BNOT; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 106 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 107 "frontend/lexer.ll"
 { return token::BLSHFT; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 107 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 108 "frontend/lexer.ll"
 { return token::BRSHFT; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 109 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 110 "frontend/lexer.ll"
 { return token::EQ; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 110 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 111 "frontend/lexer.ll"
 { return token::NEQ; }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 111 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 112 "frontend/lexer.ll"
 { return token::BT; }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 112 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 113 "frontend/lexer.ll"
 { return token::LT; }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 113 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 114 "frontend/lexer.ll"
 { return token::BEQ; }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 114 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 115 "frontend/lexer.ll"
 { return token::LEQ; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 116 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 117 "frontend/lexer.ll"
 { return token::RANGE; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 117 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 118 "frontend/lexer.ll"
 { return token::DOT; }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 118 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 119 "frontend/lexer.ll"
 { return token::COMMA; }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 119 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 120 "frontend/lexer.ll"
 { return token::COLON; }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 121 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 122 "frontend/lexer.ll"
 { return token::SET; }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 122 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 123 "frontend/lexer.ll"
 { return token::KWMAYBE; }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 124 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 125 "frontend/lexer.ll"
 { return token::KWVAR; }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 125 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 126 "frontend/lexer.ll"
 { return token::KWIMPORT; }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 126 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 127 "frontend/lexer.ll"
 { return token::KWIF; }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 127 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 128 "frontend/lexer.ll"
 { return token::KWELIF; }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 128 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 129 "frontend/lexer.ll"
 { return token::KWELSE; }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 129 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 130 "frontend/lexer.ll"
 { return token::KWFOR; }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 130 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 131 "frontend/lexer.ll"
 { return token::KWWHILE; }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 131 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 132 "frontend/lexer.ll"
 { return token::KWDO; }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 132 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 133 "frontend/lexer.ll"
 { return token::KWRETURN; }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 133 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 134 "frontend/lexer.ll"
 { return token::KWBREAK; }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 134 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 135 "frontend/lexer.ll"
 { return token::KWCONTINUE; }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 135 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 136 "frontend/lexer.ll"
 { return token::KWCONST; }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 136 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 137 "frontend/lexer.ll"
 { return token::KWINT; }
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 137 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 138 "frontend/lexer.ll"
 { return token::KWFLOAT; }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 138 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 139 "frontend/lexer.ll"
 { return token::KWSTRING; }
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 139 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 140 "frontend/lexer.ll"
 { return token::KWBOOL; }
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 140 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 141 "frontend/lexer.ll"
 { return token::KWSTRUCT; }
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 141 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 142 "frontend/lexer.ll"
 { return token::KWVOID; }
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 143 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 144 "frontend/lexer.ll"
 { 
                   yylval->emplace<bool>(true);
                   return token::BOOL; 
@@ -1162,7 +1163,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 147 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 148 "frontend/lexer.ll"
 { 
                   yylval->emplace<bool>(false);
                   return token::BOOL; 
@@ -1170,7 +1171,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 151 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 152 "frontend/lexer.ll"
 { 
                   //yylval->emplace<>();
                   return token::NONE; 
@@ -1178,7 +1179,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 155 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 156 "frontend/lexer.ll"
 { /* Raw string */
                   auto no_pref = (yytext + 1);
                   remove_quotes(&no_pref);
@@ -1188,7 +1189,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 161 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 162 "frontend/lexer.ll"
 { /* String */
                   remove_quotes(&yytext);
                   // TODO: Process escape chars
@@ -1198,7 +1199,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 167 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 168 "frontend/lexer.ll"
 { /* Integer (long) */
                   // atol can be used since syntactical analysis was done here
                   yylval->emplace<long>(atol(yytext));
@@ -1207,7 +1208,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 172 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 173 "frontend/lexer.ll"
 { /* Hex Integer (long) */
                   // atol can be used since syntactical analysis was done here
                   yylval->emplace<long>(std::strtol(yytext, nullptr, 16));
@@ -1216,7 +1217,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
-#line 177 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 178 "frontend/lexer.ll"
 {   // Float in scientific notation
                   yylval->build<double>(std::stod(yytext)); 
                   return token::FLOAT;
@@ -1224,7 +1225,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
-#line 181 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 182 "frontend/lexer.ll"
 {   // Float in scientific notation
                   yylval->build<double>(std::stod(yytext)); 
                   return token::FLOAT;
@@ -1232,7 +1233,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
-#line 185 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 186 "frontend/lexer.ll"
 {   // Float
                   yylval->build<double>(std::stod(yytext)); 
                   return token::FLOAT;
@@ -1240,7 +1241,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 189 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 190 "frontend/lexer.ll"
 {   // Float
                   yylval->build<double>(std::stod(yytext)); 
                   return token::FLOAT;
@@ -1248,7 +1249,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 83:
 YY_RULE_SETUP
-#line 193 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 194 "frontend/lexer.ll"
 {
                     yylval->build<std::string>(yytext);
                     return token::ID;
@@ -1256,15 +1257,18 @@ YY_RULE_SETUP
 	YY_BREAK
 case 84:
 YY_RULE_SETUP
-#line 197 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
-{ std::cout << "ERROR: Unknown token '" << yytext << "'" << std::endl; }
+#line 198 "frontend/lexer.ll"
+{ 
+                  auto msg = std::string("ERROR: Unknown token '")+ yytext + std::string("'");
+                  ptc::err::error(msg); 
+                }
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
-#line 198 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 202 "frontend/lexer.ll"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 1268 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.cpp"
+#line 1272 "frontend/lexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2236,5 +2240,5 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 198 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 202 "frontend/lexer.ll"
 

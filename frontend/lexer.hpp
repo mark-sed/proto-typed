@@ -426,7 +426,7 @@ static int yy_flex_strlen ( const char * );
 #undef yyTABLES_NAME
 #endif
 
-#line 198 "/home/marek/Desktop/Programming/proto-typed/frontend/lexer.ll"
+#line 202 "frontend/lexer.ll"
 
 
 #line 433 "frontend/lexer.hpp"

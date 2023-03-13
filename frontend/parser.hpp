@@ -45,7 +45,7 @@
 #ifndef YY_YY_FRONTEND_PARSER_HPP_INCLUDED
 # define YY_YY_FRONTEND_PARSER_HPP_INCLUDED
 // "%code requires" blocks.
-#line 19 "frontend/parser.yy"
+#line 21 "frontend/parser.yy"
 
     namespace ptc {
         class Scanner;
@@ -61,7 +61,7 @@
 
 #line 63 "frontend/parser.hpp"
 
-# include <cassert>
+
 # include <cstdlib> // std::abort
 # include <iostream>
 # include <stdexcept>
@@ -105,11 +105,6 @@
 # define YY_CONSTEXPR
 #endif
 
-#include <typeinfo>
-#ifndef YY_ASSERT
-# include <cassert>
-# define YY_ASSERT assert
-#endif
 
 
 #ifndef YY_ATTRIBUTE_PURE
@@ -198,9 +193,9 @@
 # define YYDEBUG 0
 #endif
 
-#line 13 "frontend/parser.yy"
+#line 14 "frontend/parser.yy"
 namespace  ptc  {
-#line 204 "frontend/parser.hpp"
+#line 199 "frontend/parser.hpp"
 
 
   /// A point in a source file.
@@ -470,15 +465,12 @@ namespace  ptc  {
     /// Empty construction.
     value_type () YY_NOEXCEPT
       : yyraw_ ()
-      , yytypeid_ (YY_NULLPTR)
     {}
 
     /// Construct and fill.
     template <typename T>
     value_type (YY_RVREF (T) t)
-      : yytypeid_ (&typeid (T))
     {
-      YY_ASSERT (sizeof (T) <= size);
       new (yyas_<T> ()) T (YY_MOVE (t));
     }
 
@@ -491,9 +483,7 @@ namespace  ptc  {
 
     /// Destruction, allowed only if empty.
     ~value_type () YY_NOEXCEPT
-    {
-      YY_ASSERT (!yytypeid_);
-    }
+    {}
 
 # if 201103L <= YY_CPLUSPLUS
     /// Instantiate a \a T in here from \a t.
@@ -501,9 +491,6 @@ namespace  ptc  {
     T&
     emplace (U&&... u)
     {
-      YY_ASSERT (!yytypeid_);
-      YY_ASSERT (sizeof (T) <= size);
-      yytypeid_ = & typeid (T);
       return *new (yyas_<T> ()) T (std::forward <U>(u)...);
     }
 # else
@@ -512,9 +499,6 @@ namespace  ptc  {
     T&
     emplace ()
     {
-      YY_ASSERT (!yytypeid_);
-      YY_ASSERT (sizeof (T) <= size);
-      yytypeid_ = & typeid (T);
       return *new (yyas_<T> ()) T ();
     }
 
@@ -523,9 +507,6 @@ namespace  ptc  {
     T&
     emplace (const T& t)
     {
-      YY_ASSERT (!yytypeid_);
-      YY_ASSERT (sizeof (T) <= size);
-      yytypeid_ = & typeid (T);
       return *new (yyas_<T> ()) T (t);
     }
 # endif
@@ -553,9 +534,6 @@ namespace  ptc  {
     T&
     as () YY_NOEXCEPT
     {
-      YY_ASSERT (yytypeid_);
-      YY_ASSERT (*yytypeid_ == typeid (T));
-      YY_ASSERT (sizeof (T) <= size);
       return *yyas_<T> ();
     }
 
@@ -564,9 +542,6 @@ namespace  ptc  {
     const T&
     as () const YY_NOEXCEPT
     {
-      YY_ASSERT (yytypeid_);
-      YY_ASSERT (*yytypeid_ == typeid (T));
-      YY_ASSERT (sizeof (T) <= size);
       return *yyas_<T> ();
     }
 
@@ -582,8 +557,6 @@ namespace  ptc  {
     void
     swap (self_type& that) YY_NOEXCEPT
     {
-      YY_ASSERT (yytypeid_);
-      YY_ASSERT (*yytypeid_ == *that.yytypeid_);
       std::swap (as<T> (), that.as<T> ());
     }
 
@@ -628,7 +601,6 @@ namespace  ptc  {
     destroy ()
     {
       as<T> ().~T ();
-      yytypeid_ = YY_NULLPTR;
     }
 
   private:
@@ -689,9 +661,6 @@ namespace  ptc  {
       /// A buffer large enough to store any of the semantic values.
       char yyraw_[size];
     };
-
-    /// Whether the content is built: if defined, the name of the stored type.
-    const std::type_info *yytypeid_;
   };
 
 #endif
@@ -726,82 +695,82 @@ namespace  ptc  {
       {
         YYEMPTY = -2,
     END_FILE = 0,                  // "end of file"
-    YYerror = 256,                 // error
-    YYUNDEF = 257,                 // "invalid token"
-    END = 258,                     // "terminator (\\n or ;)"
-    INT = 259,                     // "int"
-    FLOAT = 260,                   // "float"
-    STRING = 261,                  // "string"
-    BOOL = 262,                    // "bool"
-    NONE = 263,                    // "none"
-    LPAR = 264,                    // "("
-    RPAR = 265,                    // ")"
-    LSQ = 266,                     // "["
-    RSQ = 267,                     // "]"
-    LBR = 268,                     // "{"
-    RBR = 269,                     // "}"
-    PLUS = 270,                    // "+"
-    MINUS = 271,                   // "-"
-    MUL = 272,                     // "*"
-    DIV = 273,                     // "/"
-    MOD = 274,                     // "%"
-    POW = 275,                     // "**"
-    CONCAT = 276,                  // "++"
-    LAND = 277,                    // "and"
-    LOR = 278,                     // "or"
-    LNOT = 279,                    // "not"
-    IN = 280,                      // "in"
-    BAND = 281,                    // "&"
-    BOR = 282,                     // "|"
-    BXOR = 283,                    // "^"
-    BNOT = 284,                    // "~"
-    BLSHFT = 285,                  // "<<"
-    BRSHFT = 286,                  // ">>"
-    EQ = 287,                      // "=="
-    NEQ = 288,                     // "!="
-    BT = 289,                      // ">"
-    LT = 290,                      // "<"
-    BEQ = 291,                     // ">="
-    LEQ = 292,                     // "<="
-    RANGE = 293,                   // ".."
-    DOT = 294,                     // "."
-    COMMA = 295,                   // ","
-    COLON = 296,                   // ":"
-    SET = 297,                     // "="
-    SETCONCAT = 298,               // "++="
-    SETPOW = 299,                  // "**="
-    SETMOD = 300,                  // "%="
-    SETDIV = 301,                  // "/="
-    SETMUL = 302,                  // "*="
-    SETMINUS = 303,                // "-="
-    SETPLUS = 304,                 // "+="
-    SETBAND = 305,                 // "&="
-    SETBOR = 306,                  // "|="
-    SETBXOR = 307,                 // "^="
-    SETBNOT = 308,                 // "~="
-    SETBLSHFT = 309,               // "<<="
-    SETBRSHFT = 310,               // ">>="
-    KWVAR = 311,                   // "var"
-    KWIMPORT = 312,                // "import"
-    KWIF = 313,                    // "if"
-    KWELIF = 314,                  // "elif"
-    KWELSE = 315,                  // "else"
-    KWFOR = 316,                   // "for"
-    KWWHILE = 317,                 // "while"
-    KWDO = 318,                    // "do"
-    KWRETURN = 319,                // "return"
-    KWBREAK = 320,                 // "break"
-    KWCONTINUE = 321,              // "continue"
-    KWCONST = 322,                 // "const"
-    KWMAYBE = 323,                 // "?"
-    KWINT = 324,                   // "\"int\""
-    KWFLOAT = 325,                 // "\"float\""
-    KWSTRING = 326,                // "\"string\""
-    KWBOOL = 327,                  // "\"bool\""
-    KWSTRUCT = 328,                // "\"struct\""
-    KWVOID = 329,                  // "\"void\""
-    ID = 330,                      // "identifier"
-    NEG = 331                      // NEG
+    YYerror = 1,                   // error
+    YYUNDEF = 2,                   // "invalid token"
+    END = 3,                       // "terminator (\\n or ;)"
+    INT = 4,                       // "int"
+    FLOAT = 5,                     // "float"
+    STRING = 6,                    // "string"
+    BOOL = 7,                      // "bool"
+    NONE = 8,                      // "none"
+    LPAR = 9,                      // "("
+    RPAR = 10,                     // ")"
+    LSQ = 11,                      // "["
+    RSQ = 12,                      // "]"
+    LBR = 13,                      // "{"
+    RBR = 14,                      // "}"
+    PLUS = 15,                     // "+"
+    MINUS = 16,                    // "-"
+    MUL = 17,                      // "*"
+    DIV = 18,                      // "/"
+    MOD = 19,                      // "%"
+    POW = 20,                      // "**"
+    CONCAT = 21,                   // "++"
+    LAND = 22,                     // "and"
+    LOR = 23,                      // "or"
+    LNOT = 24,                     // "not"
+    IN = 25,                       // "in"
+    BAND = 26,                     // "&"
+    BOR = 27,                      // "|"
+    BXOR = 28,                     // "^"
+    BNOT = 29,                     // "~"
+    BLSHFT = 30,                   // "<<"
+    BRSHFT = 31,                   // ">>"
+    EQ = 32,                       // "=="
+    NEQ = 33,                      // "!="
+    BT = 34,                       // ">"
+    LT = 35,                       // "<"
+    BEQ = 36,                      // ">="
+    LEQ = 37,                      // "<="
+    RANGE = 38,                    // ".."
+    DOT = 39,                      // "."
+    COMMA = 40,                    // ","
+    COLON = 41,                    // ":"
+    SET = 42,                      // "="
+    SETCONCAT = 43,                // "++="
+    SETPOW = 44,                   // "**="
+    SETMOD = 45,                   // "%="
+    SETDIV = 46,                   // "/="
+    SETMUL = 47,                   // "*="
+    SETMINUS = 48,                 // "-="
+    SETPLUS = 49,                  // "+="
+    SETBAND = 50,                  // "&="
+    SETBOR = 51,                   // "|="
+    SETBXOR = 52,                  // "^="
+    SETBNOT = 53,                  // "~="
+    SETBLSHFT = 54,                // "<<="
+    SETBRSHFT = 55,                // ">>="
+    KWVAR = 56,                    // "var"
+    KWIMPORT = 57,                 // "import"
+    KWIF = 58,                     // "if"
+    KWELIF = 59,                   // "elif"
+    KWELSE = 60,                   // "else"
+    KWFOR = 61,                    // "for"
+    KWWHILE = 62,                  // "while"
+    KWDO = 63,                     // "do"
+    KWRETURN = 64,                 // "return"
+    KWBREAK = 65,                  // "break"
+    KWCONTINUE = 66,               // "continue"
+    KWCONST = 67,                  // "const"
+    KWMAYBE = 68,                  // "?"
+    KWINT = 69,                    // "\"int\""
+    KWFLOAT = 70,                  // "\"float\""
+    KWSTRING = 71,                 // "\"string\""
+    KWBOOL = 72,                   // "\"bool\""
+    KWSTRUCT = 73,                 // "\"struct\""
+    KWVOID = 74,                   // "\"void\""
+    ID = 75,                       // "identifier"
+    NEG = 76                       // NEG
       };
       /// Backward compatibility alias (Bison 3.6).
       typedef token_kind_type yytokentype;
@@ -1221,14 +1190,7 @@ switch (yykind)
       symbol_type (int tok, const location_type& l)
         : super_type (token_kind_type (tok), l)
 #endif
-      {
-#if !defined _MSC_VER || defined __clang__
-        YY_ASSERT (tok == token::END_FILE
-                   || (token::YYerror <= tok && tok <= token::END)
-                   || (token::NONE <= tok && tok <= token::KWVOID)
-                   || tok == token::NEG);
-#endif
-      }
+      {}
 #if 201103L <= YY_CPLUSPLUS
       symbol_type (int tok, bool v, location_type l)
         : super_type (token_kind_type (tok), std::move (v), std::move (l))
@@ -1236,11 +1198,7 @@ switch (yykind)
       symbol_type (int tok, const bool& v, const location_type& l)
         : super_type (token_kind_type (tok), v, l)
 #endif
-      {
-#if !defined _MSC_VER || defined __clang__
-        YY_ASSERT (tok == token::BOOL);
-#endif
-      }
+      {}
 #if 201103L <= YY_CPLUSPLUS
       symbol_type (int tok, double v, location_type l)
         : super_type (token_kind_type (tok), std::move (v), std::move (l))
@@ -1248,11 +1206,7 @@ switch (yykind)
       symbol_type (int tok, const double& v, const location_type& l)
         : super_type (token_kind_type (tok), v, l)
 #endif
-      {
-#if !defined _MSC_VER || defined __clang__
-        YY_ASSERT (tok == token::FLOAT);
-#endif
-      }
+      {}
 #if 201103L <= YY_CPLUSPLUS
       symbol_type (int tok, long v, location_type l)
         : super_type (token_kind_type (tok), std::move (v), std::move (l))
@@ -1260,11 +1214,7 @@ switch (yykind)
       symbol_type (int tok, const long& v, const location_type& l)
         : super_type (token_kind_type (tok), v, l)
 #endif
-      {
-#if !defined _MSC_VER || defined __clang__
-        YY_ASSERT (tok == token::INT);
-#endif
-      }
+      {}
 #if 201103L <= YY_CPLUSPLUS
       symbol_type (int tok, std::string v, location_type l)
         : super_type (token_kind_type (tok), std::move (v), std::move (l))
@@ -1272,12 +1222,7 @@ switch (yykind)
       symbol_type (int tok, const std::string& v, const location_type& l)
         : super_type (token_kind_type (tok), v, l)
 #endif
-      {
-#if !defined _MSC_VER || defined __clang__
-        YY_ASSERT (tok == token::STRING
-                   || tok == token::ID);
-#endif
-      }
+      {}
     };
 
     /// Build a parser object.
@@ -2823,9 +2768,9 @@ switch (yykind)
   };
 
 
-#line 13 "frontend/parser.yy"
+#line 14 "frontend/parser.yy"
 } //  ptc 
-#line 2829 "frontend/parser.hpp"
+#line 2774 "frontend/parser.hpp"
 
 
 
