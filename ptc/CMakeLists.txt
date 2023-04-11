@@ -9,5 +9,6 @@ add_ptc_tool(ptc
 
 target_link_libraries(ptc
     PRIVATE
-    ptcFrontend
+    ptcfrontend
+    ptcir
 )

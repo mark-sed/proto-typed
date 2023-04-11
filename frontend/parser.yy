@@ -730,8 +730,7 @@ matsize : int_val
         ;
 
 // Variable types
-type : KWMAYBE KWMAYBE
-     | KWINT KWMAYBE
+type : KWINT KWMAYBE
      | KWFLOAT KWMAYBE
      | KWSTRING KWMAYBE
      | KWBOOL KWMAYBE
