@@ -154,12 +154,12 @@ hex     0[Xx][0-9A-Fa-f]+
                 }
 "r"{string}     { /* Raw string */
                   auto no_pref = (yytext + 1);
-                  remove_quotes(&no_pref);
+                  removeQuotes(&no_pref);
                   yylval->build<std::string>(yytext);
                   return token::STRING;
                 }
 {string}        { /* String */
-                  remove_quotes(&yytext);
+                  removeQuotes(&yytext);
                   // TODO: Process escape chars
                   yylval->build<std::string>(yytext);
                   return token::STRING;

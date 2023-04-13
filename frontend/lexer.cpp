@@ -1182,7 +1182,7 @@ YY_RULE_SETUP
 #line 156 "frontend/lexer.ll"
 { /* Raw string */
                   auto no_pref = (yytext + 1);
-                  remove_quotes(&no_pref);
+                  removeQuotes(&no_pref);
                   yylval->build<std::string>(yytext);
                   return token::STRING;
                 }
@@ -1191,7 +1191,7 @@ case 76:
 YY_RULE_SETUP
 #line 162 "frontend/lexer.ll"
 { /* String */
-                  remove_quotes(&yytext);
+                  removeQuotes(&yytext);
                   // TODO: Process escape chars
                   yylval->build<std::string>(yytext);
                   return token::STRING;

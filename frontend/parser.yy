@@ -323,10 +323,10 @@ expr : expr_mat
      | expr_var
      | expr_none
      | expr_struct
-     | expr_int //{ std::cout << "=" << $1 << std::endl; }
-     | expr_float //{ std::cout << "=" << $1 << std::endl; }
-     | expr_str //{ std::cout << "=" << $1 << std::endl; }
-     | expr_bool //{ std::cout << "=" << $1 << std::endl; }
+     | expr_int
+     | expr_float
+     | expr_str
+     | expr_bool
      ;
 
 expr_var : ID

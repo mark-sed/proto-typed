@@ -1,4 +1,5 @@
 add_ptc_library(ptcir
     ir.cpp
-    expression.hpp
+    expression.cpp
+    scope.cpp
 )
