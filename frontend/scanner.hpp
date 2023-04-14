@@ -11,6 +11,7 @@
 #include "ir.hpp"
 #include "expression.hpp"
 #include "scope.hpp"
+#include "logging.hpp"
 
 namespace ptc {
 
@@ -39,6 +40,10 @@ public:
     void parse(std::istream *code);
     void removeQuotes(char **str);
 
+    ir::IR *sym_lookup(llvm::StringRef name) {
+        LOGMAX("Symbol lookup: "+name.str());
+        return currScope->lookup(name);
+    }
 };
 
 

@@ -7,7 +7,7 @@
 
 #include <string>
 #include "scanner.hpp"
-#include "error.hpp"
+#include "logging.hpp"
 
 // Define custom lex method
 #undef YY_DECL
@@ -196,6 +196,6 @@ hex     0[Xx][0-9A-Fa-f]+
                 }
 .               { 
                   auto msg = std::string("ERROR: Unknown token '")+ yytext + std::string("'");
-                  ptc::err::error(msg); 
+                  ptc::log::error(msg); 
                 }
 %%

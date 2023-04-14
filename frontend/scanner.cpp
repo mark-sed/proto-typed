@@ -1,5 +1,5 @@
 #include "scanner.hpp"
-#include "error.hpp"
+#include "logging.hpp"
 #include <cstring>
 
 using namespace ptc;
@@ -31,7 +31,7 @@ void Scanner::parse(std::istream *code) {
 
     if(parser->parse() != 0) {
         // TODO: ERROR
-        err::error("Could not parse the source code.");
+        log::error("Could not parse the source code.");
         exit(1);
     }
 }

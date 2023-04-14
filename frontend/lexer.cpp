@@ -558,7 +558,7 @@ static const flex_int32_t yy_rule_can_match_eol[86] =
 
 #include <string>
 #include "scanner.hpp"
-#include "error.hpp"
+#include "logging.hpp"
 
 // Define custom lex method
 #undef YY_DECL
@@ -1260,7 +1260,7 @@ YY_RULE_SETUP
 #line 198 "frontend/lexer.ll"
 { 
                   auto msg = std::string("ERROR: Unknown token '")+ yytext + std::string("'");
-                  ptc::err::error(msg); 
+                  ptc::log::error(msg); 
                 }
 	YY_BREAK
 case 85:

@@ -36,6 +36,8 @@ public:
 
 
 class TypeDecl : public IR {
+private:
+    bool is_maybe;
 public:
     TypeDecl(IR *enclosing_ir, llvm::SMLoc loc, llvm::StringRef name)
             : IR(IRKind::IR_TYPE_DECL, enclosing_ir, loc, name) {}

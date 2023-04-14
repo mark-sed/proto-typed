@@ -8,8 +8,8 @@
  */
 #include "ptc.hpp"
 #include "scanner.hpp"
+#include "logging.hpp"
 #include "llvm/Support/InitLLVM.h"
-//#include "llvm/Support/raw_ostream.h"
 #include <string>
 #include <sstream>
 
@@ -17,6 +17,10 @@ using namespace ptc;
 
 int main(int argc, char *argv[]) {
     llvm::InitLLVM LLVMX(argc, argv);
+
+    log::Logger::get().set_disable(false);
+    log::Logger::get().set_log_everything(true);
+    log::Logger::get().set_logging_level(MAX_LOGGING_LEVEL);
 
     auto scanner = new Scanner();
     auto code = &std::cin;

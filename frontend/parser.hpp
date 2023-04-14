@@ -49,6 +49,9 @@
 
     namespace ptc {
         class Scanner;
+        namespace ir {
+            class IR;
+        }
     }
 
     #ifndef YY_NULLPTR
@@ -59,7 +62,7 @@
         #endif
     #endif
 
-#line 63 "frontend/parser.hpp"
+#line 66 "frontend/parser.hpp"
 
 
 # include <cstdlib> // std::abort
@@ -195,7 +198,7 @@
 
 #line 14 "frontend/parser.yy"
 namespace  ptc  {
-#line 199 "frontend/parser.hpp"
+#line 202 "frontend/parser.hpp"
 
 
   /// A point in a source file.
@@ -644,10 +647,13 @@ namespace  ptc  {
       // expr_int
       char dummy3[sizeof (long)];
 
+      // type
+      char dummy4[sizeof (ptc::ir::IR *)];
+
       // "string"
       // "identifier"
       // expr_str
-      char dummy4[sizeof (std::string)];
+      char dummy5[sizeof (std::string)];
     };
 
     /// The size of the largest semantic type.
@@ -965,6 +971,10 @@ namespace  ptc  {
         value.move< long > (std::move (that.value));
         break;
 
+      case symbol_kind::S_type: // type
+        value.move< ptc::ir::IR * > (std::move (that.value));
+        break;
+
       case symbol_kind::S_STRING: // "string"
       case symbol_kind::S_ID: // "identifier"
       case symbol_kind::S_expr_str: // expr_str
@@ -1037,6 +1047,20 @@ namespace  ptc  {
 #endif
 
 #if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, ptc::ir::IR *&& v, location_type&& l)
+        : Base (t)
+        , value (std::move (v))
+        , location (std::move (l))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const ptc::ir::IR *& v, const location_type& l)
+        : Base (t)
+        , value (v)
+        , location (l)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
       basic_symbol (typename Base::kind_type t, std::string&& v, location_type&& l)
         : Base (t)
         , value (std::move (v))
@@ -1087,6 +1111,10 @@ switch (yykind)
       case symbol_kind::S_INT: // "int"
       case symbol_kind::S_expr_int: // expr_int
         value.template destroy< long > ();
+        break;
+
+      case symbol_kind::S_type: // type
+        value.template destroy< ptc::ir::IR * > ();
         break;
 
       case symbol_kind::S_STRING: // "string"
@@ -2770,7 +2798,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 2774 "frontend/parser.hpp"
+#line 2802 "frontend/parser.hpp"
 
 
 

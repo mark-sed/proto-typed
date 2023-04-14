@@ -21,6 +21,9 @@
 %code requires {
     namespace ptc {
         class Scanner;
+        namespace ir {
+            class IR;
+        }
     }
 
     #ifndef YY_NULLPTR
@@ -40,9 +43,10 @@
 
     #include <cmath>
     #include <sstream>
-    // Include compiler to use error
     #include "scanner.hpp"
-    #include "error.hpp"
+    #include "logging.hpp"
+    #include "ir.hpp"
+    #include "expression.hpp"
 
     // Set correct token method
     #undef yylex
@@ -173,6 +177,8 @@
 %type <double> expr_float
 %type <std::string> expr_str
 %type <bool> expr_bool
+
+%type <ptc::ir::IR *> type
 
 %locations
 
@@ -730,20 +736,20 @@ matsize : int_val
         ;
 
 // Variable types
-type : KWINT KWMAYBE
-     | KWFLOAT KWMAYBE
-     | KWSTRING KWMAYBE
-     | KWBOOL KWMAYBE
-     | ID KWMAYBE
-     | funtype KWMAYBE
-     | mattype KWMAYBE
-     | KWINT
-     | KWFLOAT
-     | KWSTRING
-     | KWBOOL
-     | ID
-     | funtype
-     | mattype
+type : KWINT KWMAYBE    { $$ = nullptr; /*TODO*/ }
+     | KWFLOAT KWMAYBE  { $$ = nullptr; /*TODO*/ }
+     | KWSTRING KWMAYBE { $$ = nullptr; /*TODO*/ }
+     | KWBOOL KWMAYBE   { $$ = nullptr; /*TODO*/ }
+     | ID KWMAYBE       { $$ = nullptr; /*TODO*/ }
+     | funtype KWMAYBE  { $$ = nullptr; /*TODO*/ }
+     | mattype KWMAYBE  { $$ = nullptr; /*TODO*/ }
+     | KWINT            { $$ = scanner->sym_lookup("int"); }
+     | KWFLOAT          { $$ = scanner->sym_lookup("float"); }
+     | KWSTRING         { $$ = scanner->sym_lookup("string"); }
+     | KWBOOL           { $$ = scanner->sym_lookup("bool"); }
+     | ID               { $$ = scanner->sym_lookup($1); }
+     | funtype          { $$ = nullptr; /*TODO*/ }
+     | mattype          { $$ = nullptr; /*TODO*/ }
      ;
 
 %%
@@ -751,5 +757,5 @@ type : KWINT KWMAYBE
 /* Error method */
 void ptc::Parser::error(const location_type &l, const std::string &err_message) {
     auto msg = std::to_string(scanner->loc->begin.line) + ":" + std::to_string(scanner->loc->begin.column) + ": " + err_message;
-    ptc::err::error(msg);
+    ptc::log::error(msg);
 }
