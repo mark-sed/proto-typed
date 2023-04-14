@@ -22,7 +22,10 @@ int main(int argc, char *argv[]) {
     log::Logger::get().set_log_everything(true);
     log::Logger::get().set_logging_level(MAX_LOGGING_LEVEL);
 
-    auto scanner = new Scanner();
+    llvm::SourceMgr srcMgr;
+    Diagnostics diags(srcMgr);
+
+    auto scanner = new Scanner(diags);
     auto code = &std::cin;
     if(argc > 1) {
         std::istringstream cdss(argv[1]);

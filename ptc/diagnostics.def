@@ -1,0 +1,13 @@
+#ifndef DIAG
+#define DIAG(id, level, msg)
+#endif
+
+DIAG(ERR_VARDECL_REQUIRES_TYPE, Error, "variable declaration requires type")
+DIAG(ERR_SYM_ALREADY_DECLARED, Error, "symbol ‘{0}’ is already declared")
+
+
+DIAG(ERR_EXPECTED, Error, "expected ‘{0}’ but found ‘{1}’")
+//DIAG(note_module_identifier_declaration, Note, "module identifier declared here")
+DIAG(WARN_AMBIGOUS_NEGATION, Warning, "Negation is ambigous. Please consider using parenthesis.")
+
+#undef DIAG

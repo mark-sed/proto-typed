@@ -47,3 +47,25 @@ void Logger::debug(unsigned level, const std::string &file_func, const std::stri
         (*s) << std::boolalpha << file_func << ": " << message << std::endl;
     }
 }
+
+namespace {
+
+const char *diagnosticText[] = {
+#define DIAG(id, level, msg) msg,
+#include "diagnostics.def"
+};
+
+llvm::SourceMgr::DiagKind diagnosticKind[] = {
+#define DIAG(id, level, msg) llvm::SourceMgr::DK_##level,
+#include "diagnostics.def"
+};
+
+}
+
+const char *Diagnostics::getDiagnosticText(unsigned diagID) {
+  return diagnosticText[diagID];
+}
+
+llvm::SourceMgr::DiagKind Diagnostics::getDiagnosticKind(unsigned diagID) {
+  return diagnosticKind[diagID];
+}

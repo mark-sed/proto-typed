@@ -647,6 +647,7 @@ namespace  ptc  {
       // expr_int
       char dummy3[sizeof (long)];
 
+      // vardecl
       // type
       char dummy4[sizeof (ptc::ir::IR *)];
 
@@ -971,6 +972,7 @@ namespace  ptc  {
         value.move< long > (std::move (that.value));
         break;
 
+      case symbol_kind::S_vardecl: // vardecl
       case symbol_kind::S_type: // type
         value.move< ptc::ir::IR * > (std::move (that.value));
         break;
@@ -1113,6 +1115,7 @@ switch (yykind)
         value.template destroy< long > ();
         break;
 
+      case symbol_kind::S_vardecl: // vardecl
       case symbol_kind::S_type: // type
         value.template destroy< ptc::ir::IR * > ();
         break;
@@ -2798,7 +2801,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 2802 "frontend/parser.hpp"
+#line 2805 "frontend/parser.hpp"
 
 
 

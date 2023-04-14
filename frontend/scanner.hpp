@@ -22,6 +22,7 @@ private:
 
     ir::IR *currentIR;
     Scope *currScope;
+    Diagnostics &diags;
 
     ir::TypeDecl *intType;
     ir::TypeDecl *floatType;
@@ -31,7 +32,7 @@ private:
 public:
     ptc::Parser::location_type *loc = nullptr;     ///< Current parsing location
     
-    Scanner();
+    Scanner(Diagnostics &diags);
     void init();
 
     virtual int yylex(ptc::Parser::semantic_type *const lval,
@@ -44,6 +45,8 @@ public:
         LOGMAX("Symbol lookup: "+name.str());
         return currScope->lookup(name);
     }
+
+    ir::IR *parseVarDecl(ir::IR *type, std::string name);
 };
 
 

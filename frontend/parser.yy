@@ -179,6 +179,7 @@
 %type <bool> expr_bool
 
 %type <ptc::ir::IR *> type
+%type <ptc::ir::IR *> vardecl
 
 %locations
 
@@ -291,7 +292,7 @@ funargdef : type ID SET expr
           ;
 
 // Variable declaration
-vardecl : type ID
+vardecl : type ID { $$ = scanner->parseVarDecl($1, $2); }
         ;
 
 // Definition

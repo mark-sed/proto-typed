@@ -1,6 +1,10 @@
 #ifndef _LOGGING_HPP_
 #define _LOGGING_HPP_
 
+#include "llvm/ADT/StringRef.h"
+#include "llvm/Support/FormatVariadic.h"
+#include "llvm/Support/SMLoc.h"
+#include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/raw_ostream.h"
 #include <sstream>
 #include <string>
@@ -10,10 +14,40 @@
 #include <cstring>
 
 namespace ptc {
+
+namespace diag {
+enum {
+#define DIAG(id, level, msg) id,
+#include "diagnostics.def"
+};
+}
+
+class Diagnostics {
+    static const char *getDiagnosticText(unsigned diagID);
+    static llvm::SourceMgr::DiagKind getDiagnosticKind(unsigned diagID);
+
+    llvm::SourceMgr &srcMgr;
+    unsigned numErrors;
+
+public:
+    Diagnostics(llvm::SourceMgr &srcMgr) : srcMgr(srcMgr), numErrors(0) {}
+
+    unsigned getNumErrors() { return numErrors; }
+
+    template <typename... Args>
+    void report(llvm::SMLoc loc, unsigned diagID, Args &&... arguments) {
+        std::string msg = llvm::formatv(getDiagnosticText(diagID),
+                      std::forward<Args>(arguments)...).str();
+        llvm::SourceMgr::DiagKind kind = getDiagnosticKind(diagID);
+        srcMgr.PrintMessage(loc, kind, msg);
+        numErrors += (kind == llvm::SourceMgr::DK_Error);
+    }
+};
+
+
 namespace log {
 
 void error(std::string msg);
-
 /**
  * Base class for all loggers
  */ 

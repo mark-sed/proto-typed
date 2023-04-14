@@ -196,6 +196,7 @@ namespace  ptc  {
         value.copy< long > (YY_MOVE (that.value));
         break;
 
+      case symbol_kind::S_vardecl: // vardecl
       case symbol_kind::S_type: // type
         value.copy< ptc::ir::IR * > (YY_MOVE (that.value));
         break;
@@ -252,6 +253,7 @@ namespace  ptc  {
         value.move< long > (YY_MOVE (s.value));
         break;
 
+      case symbol_kind::S_vardecl: // vardecl
       case symbol_kind::S_type: // type
         value.move< ptc::ir::IR * > (YY_MOVE (s.value));
         break;
@@ -378,6 +380,7 @@ namespace  ptc  {
         value.YY_MOVE_OR_COPY< long > (YY_MOVE (that.value));
         break;
 
+      case symbol_kind::S_vardecl: // vardecl
       case symbol_kind::S_type: // type
         value.YY_MOVE_OR_COPY< ptc::ir::IR * > (YY_MOVE (that.value));
         break;
@@ -418,6 +421,7 @@ namespace  ptc  {
         value.move< long > (YY_MOVE (that.value));
         break;
 
+      case symbol_kind::S_vardecl: // vardecl
       case symbol_kind::S_type: // type
         value.move< ptc::ir::IR * > (YY_MOVE (that.value));
         break;
@@ -458,6 +462,7 @@ namespace  ptc  {
         value.copy< long > (that.value);
         break;
 
+      case symbol_kind::S_vardecl: // vardecl
       case symbol_kind::S_type: // type
         value.copy< ptc::ir::IR * > (that.value);
         break;
@@ -497,6 +502,7 @@ namespace  ptc  {
         value.move< long > (that.value);
         break;
 
+      case symbol_kind::S_vardecl: // vardecl
       case symbol_kind::S_type: // type
         value.move< ptc::ir::IR * > (that.value);
         break;
@@ -780,6 +786,7 @@ namespace  ptc  {
         yylhs.value.emplace< long > ();
         break;
 
+      case symbol_kind::S_vardecl: // vardecl
       case symbol_kind::S_type: // type
         yylhs.value.emplace< ptc::ir::IR * > ();
         break;
@@ -810,704 +817,710 @@ namespace  ptc  {
         {
           switch (yyn)
             {
+  case 64: // vardecl: type "identifier"
+#line 295 "frontend/parser.yy"
+                  { yylhs.value.as < ptc::ir::IR * > () = scanner->parseVarDecl(yystack_[1].value.as < ptc::ir::IR * > (), yystack_[0].value.as < std::string > ()); }
+#line 824 "frontend/parser.cpp"
+    break;
+
   case 304: // expr_int: "int"
-#line 594 "frontend/parser.yy"
+#line 595 "frontend/parser.yy"
                { yylhs.value.as < long > () = yystack_[0].value.as < long > (); }
-#line 817 "frontend/parser.cpp"
+#line 830 "frontend/parser.cpp"
     break;
 
   case 305: // expr_int: "-" expr_int
-#line 595 "frontend/parser.yy"
+#line 596 "frontend/parser.yy"
                                     { yylhs.value.as < long > () = -yystack_[0].value.as < long > (); }
-#line 823 "frontend/parser.cpp"
+#line 836 "frontend/parser.cpp"
     break;
 
   case 306: // expr_int: "(" expr_int ")"
-#line 596 "frontend/parser.yy"
+#line 597 "frontend/parser.yy"
                               { yylhs.value.as < long > () = yystack_[1].value.as < long > (); }
-#line 829 "frontend/parser.cpp"
+#line 842 "frontend/parser.cpp"
     break;
 
   case 307: // expr_int: "~" expr_int
-#line 597 "frontend/parser.yy"
+#line 598 "frontend/parser.yy"
                          { yylhs.value.as < long > () = ~yystack_[0].value.as < long > (); }
-#line 835 "frontend/parser.cpp"
+#line 848 "frontend/parser.cpp"
     break;
 
   case 308: // expr_int: expr_int "*" expr_int
-#line 598 "frontend/parser.yy"
+#line 599 "frontend/parser.yy"
                                  { yylhs.value.as < long > () = yystack_[2].value.as < long > () * yystack_[0].value.as < long > (); }
-#line 841 "frontend/parser.cpp"
+#line 854 "frontend/parser.cpp"
     break;
 
   case 309: // expr_int: expr_int "/" expr_int
-#line 599 "frontend/parser.yy"
+#line 600 "frontend/parser.yy"
                                  { yylhs.value.as < long > () = yystack_[2].value.as < long > () / yystack_[0].value.as < long > (); }
-#line 847 "frontend/parser.cpp"
+#line 860 "frontend/parser.cpp"
     break;
 
   case 310: // expr_int: expr_int "%" expr_int
-#line 600 "frontend/parser.yy"
+#line 601 "frontend/parser.yy"
                                  { yylhs.value.as < long > () = yystack_[2].value.as < long > () % yystack_[0].value.as < long > (); }
-#line 853 "frontend/parser.cpp"
+#line 866 "frontend/parser.cpp"
     break;
 
   case 311: // expr_int: expr_int "-" expr_int
-#line 601 "frontend/parser.yy"
+#line 602 "frontend/parser.yy"
                                    { yylhs.value.as < long > () = yystack_[2].value.as < long > () - yystack_[0].value.as < long > (); }
-#line 859 "frontend/parser.cpp"
+#line 872 "frontend/parser.cpp"
     break;
 
   case 312: // expr_int: expr_int "+" expr_int
-#line 602 "frontend/parser.yy"
+#line 603 "frontend/parser.yy"
                                   { yylhs.value.as < long > () = yystack_[2].value.as < long > () + yystack_[0].value.as < long > (); }
-#line 865 "frontend/parser.cpp"
+#line 878 "frontend/parser.cpp"
     break;
 
   case 313: // expr_int: expr_int "<<" expr_int
-#line 603 "frontend/parser.yy"
+#line 604 "frontend/parser.yy"
                                     { yylhs.value.as < long > () = yystack_[2].value.as < long > () << yystack_[0].value.as < long > (); }
-#line 871 "frontend/parser.cpp"
+#line 884 "frontend/parser.cpp"
     break;
 
   case 314: // expr_int: expr_int ">>" expr_int
-#line 604 "frontend/parser.yy"
+#line 605 "frontend/parser.yy"
                                     { yylhs.value.as < long > () = yystack_[2].value.as < long > () >> yystack_[0].value.as < long > (); }
-#line 877 "frontend/parser.cpp"
+#line 890 "frontend/parser.cpp"
     break;
 
   case 315: // expr_int: expr_int "&" expr_int
-#line 605 "frontend/parser.yy"
+#line 606 "frontend/parser.yy"
                                   { yylhs.value.as < long > () = yystack_[2].value.as < long > () & yystack_[0].value.as < long > (); }
-#line 883 "frontend/parser.cpp"
+#line 896 "frontend/parser.cpp"
     break;
 
   case 316: // expr_int: expr_int "^" expr_int
-#line 606 "frontend/parser.yy"
+#line 607 "frontend/parser.yy"
                                   { yylhs.value.as < long > () = yystack_[2].value.as < long > () ^ yystack_[0].value.as < long > (); }
-#line 889 "frontend/parser.cpp"
+#line 902 "frontend/parser.cpp"
     break;
 
   case 317: // expr_int: expr_int "|" expr_int
-#line 607 "frontend/parser.yy"
+#line 608 "frontend/parser.yy"
                                  { yylhs.value.as < long > () = yystack_[2].value.as < long > () | yystack_[0].value.as < long > (); }
-#line 895 "frontend/parser.cpp"
+#line 908 "frontend/parser.cpp"
     break;
 
   case 318: // expr_float: "float"
-#line 611 "frontend/parser.yy"
+#line 612 "frontend/parser.yy"
                    { yylhs.value.as < double > () = yystack_[0].value.as < double > (); }
-#line 901 "frontend/parser.cpp"
+#line 914 "frontend/parser.cpp"
     break;
 
   case 319: // expr_float: "-" expr_float
-#line 612 "frontend/parser.yy"
+#line 613 "frontend/parser.yy"
                                         { yylhs.value.as < double > () = -yystack_[0].value.as < double > (); }
-#line 907 "frontend/parser.cpp"
+#line 920 "frontend/parser.cpp"
     break;
 
   case 320: // expr_float: "(" expr_float ")"
-#line 613 "frontend/parser.yy"
+#line 614 "frontend/parser.yy"
                                   { yylhs.value.as < double > () = yystack_[1].value.as < double > (); }
-#line 913 "frontend/parser.cpp"
+#line 926 "frontend/parser.cpp"
     break;
 
   case 321: // expr_float: expr_float "**" expr_float
-#line 614 "frontend/parser.yy"
+#line 615 "frontend/parser.yy"
                                        { yylhs.value.as < double > () = std::pow(yystack_[2].value.as < double > (), yystack_[0].value.as < double > ()); }
-#line 919 "frontend/parser.cpp"
+#line 932 "frontend/parser.cpp"
     break;
 
   case 322: // expr_float: expr_float "**" expr_int
-#line 615 "frontend/parser.yy"
+#line 616 "frontend/parser.yy"
                                      { yylhs.value.as < double > () = std::pow(yystack_[2].value.as < double > (), yystack_[0].value.as < long > ()); }
-#line 925 "frontend/parser.cpp"
+#line 938 "frontend/parser.cpp"
     break;
 
   case 323: // expr_float: expr_int "**" expr_float
-#line 616 "frontend/parser.yy"
+#line 617 "frontend/parser.yy"
                                      { yylhs.value.as < double > () = std::pow(yystack_[2].value.as < long > (), yystack_[0].value.as < double > ()); }
-#line 931 "frontend/parser.cpp"
+#line 944 "frontend/parser.cpp"
     break;
 
   case 324: // expr_float: expr_float "*" expr_float
-#line 617 "frontend/parser.yy"
+#line 618 "frontend/parser.yy"
                                        { yylhs.value.as < double > () = yystack_[2].value.as < double > () * yystack_[0].value.as < double > (); }
-#line 937 "frontend/parser.cpp"
+#line 950 "frontend/parser.cpp"
     break;
 
   case 325: // expr_float: expr_float "*" expr_int
-#line 618 "frontend/parser.yy"
+#line 619 "frontend/parser.yy"
                                      { yylhs.value.as < double > () = yystack_[2].value.as < double > () * yystack_[0].value.as < long > (); }
-#line 943 "frontend/parser.cpp"
+#line 956 "frontend/parser.cpp"
     break;
 
   case 326: // expr_float: expr_int "*" expr_float
-#line 619 "frontend/parser.yy"
+#line 620 "frontend/parser.yy"
                                      { yylhs.value.as < double > () = yystack_[2].value.as < long > () * yystack_[0].value.as < double > (); }
-#line 949 "frontend/parser.cpp"
+#line 962 "frontend/parser.cpp"
     break;
 
   case 327: // expr_float: expr_float "/" expr_float
-#line 620 "frontend/parser.yy"
+#line 621 "frontend/parser.yy"
                                        { yylhs.value.as < double > () = yystack_[2].value.as < double > () / yystack_[0].value.as < double > (); }
-#line 955 "frontend/parser.cpp"
+#line 968 "frontend/parser.cpp"
     break;
 
   case 328: // expr_float: expr_float "/" expr_int
-#line 621 "frontend/parser.yy"
+#line 622 "frontend/parser.yy"
                                      { yylhs.value.as < double > () = yystack_[2].value.as < double > () / yystack_[0].value.as < long > (); }
-#line 961 "frontend/parser.cpp"
+#line 974 "frontend/parser.cpp"
     break;
 
   case 329: // expr_float: expr_int "/" expr_float
-#line 622 "frontend/parser.yy"
+#line 623 "frontend/parser.yy"
                                      { yylhs.value.as < double > () = yystack_[2].value.as < long > () / yystack_[0].value.as < double > (); }
-#line 967 "frontend/parser.cpp"
+#line 980 "frontend/parser.cpp"
     break;
 
   case 330: // expr_float: expr_float "%" expr_float
-#line 623 "frontend/parser.yy"
+#line 624 "frontend/parser.yy"
                                        { yylhs.value.as < double > () = std::fmod(yystack_[2].value.as < double > (), yystack_[0].value.as < double > ()); }
-#line 973 "frontend/parser.cpp"
+#line 986 "frontend/parser.cpp"
     break;
 
   case 331: // expr_float: expr_float "%" expr_int
-#line 624 "frontend/parser.yy"
+#line 625 "frontend/parser.yy"
                                      { yylhs.value.as < double > () = std::fmod(yystack_[2].value.as < double > (), yystack_[0].value.as < long > ()); }
-#line 979 "frontend/parser.cpp"
+#line 992 "frontend/parser.cpp"
     break;
 
   case 332: // expr_float: expr_int "%" expr_float
-#line 625 "frontend/parser.yy"
+#line 626 "frontend/parser.yy"
                                      { yylhs.value.as < double > () = std::fmod(yystack_[2].value.as < long > (), yystack_[0].value.as < double > ()); }
-#line 985 "frontend/parser.cpp"
+#line 998 "frontend/parser.cpp"
     break;
 
   case 333: // expr_float: expr_float "-" expr_float
-#line 626 "frontend/parser.yy"
+#line 627 "frontend/parser.yy"
                                          { yylhs.value.as < double > () = yystack_[2].value.as < double > () - yystack_[0].value.as < double > (); }
-#line 991 "frontend/parser.cpp"
+#line 1004 "frontend/parser.cpp"
     break;
 
   case 334: // expr_float: expr_float "-" expr_int
-#line 627 "frontend/parser.yy"
+#line 628 "frontend/parser.yy"
                                        { yylhs.value.as < double > () = yystack_[2].value.as < double > () - yystack_[0].value.as < long > (); }
-#line 997 "frontend/parser.cpp"
+#line 1010 "frontend/parser.cpp"
     break;
 
   case 335: // expr_float: expr_int "-" expr_float
-#line 628 "frontend/parser.yy"
+#line 629 "frontend/parser.yy"
                                        { yylhs.value.as < double > () = yystack_[2].value.as < long > () - yystack_[0].value.as < double > (); }
-#line 1003 "frontend/parser.cpp"
+#line 1016 "frontend/parser.cpp"
     break;
 
   case 336: // expr_float: expr_float "+" expr_float
-#line 629 "frontend/parser.yy"
+#line 630 "frontend/parser.yy"
                                         { yylhs.value.as < double > () = yystack_[2].value.as < double > () + yystack_[0].value.as < double > (); }
-#line 1009 "frontend/parser.cpp"
+#line 1022 "frontend/parser.cpp"
     break;
 
   case 337: // expr_float: expr_float "+" expr_int
-#line 630 "frontend/parser.yy"
+#line 631 "frontend/parser.yy"
                                       { yylhs.value.as < double > () = yystack_[2].value.as < double > () + yystack_[0].value.as < long > (); }
-#line 1015 "frontend/parser.cpp"
+#line 1028 "frontend/parser.cpp"
     break;
 
   case 338: // expr_float: expr_int "+" expr_float
-#line 631 "frontend/parser.yy"
+#line 632 "frontend/parser.yy"
                                       { yylhs.value.as < double > () = yystack_[2].value.as < long > () + yystack_[0].value.as < double > (); }
-#line 1021 "frontend/parser.cpp"
+#line 1034 "frontend/parser.cpp"
     break;
 
   case 339: // expr_str: "string"
-#line 635 "frontend/parser.yy"
+#line 636 "frontend/parser.yy"
                   { yylhs.value.as < std::string > () = yystack_[0].value.as < std::string > (); }
-#line 1027 "frontend/parser.cpp"
+#line 1040 "frontend/parser.cpp"
     break;
 
   case 340: // expr_str: "(" expr_str ")"
-#line 636 "frontend/parser.yy"
+#line 637 "frontend/parser.yy"
                               { yylhs.value.as < std::string > () = yystack_[1].value.as < std::string > (); }
-#line 1033 "frontend/parser.cpp"
+#line 1046 "frontend/parser.cpp"
     break;
 
   case 341: // expr_str: expr_str "++" expr_str
-#line 637 "frontend/parser.yy"
+#line 638 "frontend/parser.yy"
                                     { yylhs.value.as < std::string > () = yystack_[2].value.as < std::string > () + yystack_[0].value.as < std::string > (); }
-#line 1039 "frontend/parser.cpp"
+#line 1052 "frontend/parser.cpp"
     break;
 
   case 342: // expr_str: expr_str "++" expr_int
-#line 638 "frontend/parser.yy"
+#line 639 "frontend/parser.yy"
                                     { yylhs.value.as < std::string > () = yystack_[2].value.as < std::string > () + std::to_string(yystack_[0].value.as < long > ()); }
-#line 1045 "frontend/parser.cpp"
+#line 1058 "frontend/parser.cpp"
     break;
 
   case 343: // expr_str: expr_str "++" expr_float
-#line 639 "frontend/parser.yy"
+#line 640 "frontend/parser.yy"
                                       { yylhs.value.as < std::string > () = yystack_[2].value.as < std::string > () + std::to_string(yystack_[0].value.as < double > ()); }
-#line 1051 "frontend/parser.cpp"
+#line 1064 "frontend/parser.cpp"
     break;
 
   case 344: // expr_str: expr_str "++" expr_bool
-#line 640 "frontend/parser.yy"
+#line 641 "frontend/parser.yy"
                                      { yylhs.value.as < std::string > () = yystack_[2].value.as < std::string > () + (yystack_[0].value.as < bool > () ? "true" : "false"); }
-#line 1057 "frontend/parser.cpp"
+#line 1070 "frontend/parser.cpp"
     break;
 
   case 345: // expr_str: expr_str "++" expr_none
-#line 641 "frontend/parser.yy"
+#line 642 "frontend/parser.yy"
                                      { yylhs.value.as < std::string > () = yystack_[2].value.as < std::string > () + "none"; }
-#line 1063 "frontend/parser.cpp"
+#line 1076 "frontend/parser.cpp"
     break;
 
   case 346: // expr_str: expr_int "++" expr_str
-#line 642 "frontend/parser.yy"
+#line 643 "frontend/parser.yy"
                                     { yylhs.value.as < std::string > () = std::to_string(yystack_[2].value.as < long > ()) + yystack_[0].value.as < std::string > (); }
-#line 1069 "frontend/parser.cpp"
+#line 1082 "frontend/parser.cpp"
     break;
 
   case 347: // expr_str: expr_int "++" expr_int
-#line 643 "frontend/parser.yy"
+#line 644 "frontend/parser.yy"
                                     { yylhs.value.as < std::string > () = std::to_string(yystack_[2].value.as < long > ()) + std::to_string(yystack_[0].value.as < long > ()); }
-#line 1075 "frontend/parser.cpp"
+#line 1088 "frontend/parser.cpp"
     break;
 
   case 348: // expr_str: expr_int "++" expr_float
-#line 644 "frontend/parser.yy"
+#line 645 "frontend/parser.yy"
                                       { yylhs.value.as < std::string > () = std::to_string(yystack_[2].value.as < long > ()) + std::to_string(yystack_[0].value.as < double > ()); }
-#line 1081 "frontend/parser.cpp"
+#line 1094 "frontend/parser.cpp"
     break;
 
   case 349: // expr_str: expr_int "++" expr_bool
-#line 645 "frontend/parser.yy"
+#line 646 "frontend/parser.yy"
                                      { yylhs.value.as < std::string > () = std::to_string(yystack_[2].value.as < long > ()) + (yystack_[0].value.as < bool > () ? "true" : "false"); }
-#line 1087 "frontend/parser.cpp"
+#line 1100 "frontend/parser.cpp"
     break;
 
   case 350: // expr_str: expr_int "++" expr_none
-#line 646 "frontend/parser.yy"
+#line 647 "frontend/parser.yy"
                                      { yylhs.value.as < std::string > () = std::to_string(yystack_[2].value.as < long > ()) + "none"; }
-#line 1093 "frontend/parser.cpp"
+#line 1106 "frontend/parser.cpp"
     break;
 
   case 351: // expr_str: expr_float "++" expr_str
-#line 647 "frontend/parser.yy"
+#line 648 "frontend/parser.yy"
                                       { yylhs.value.as < std::string > () = std::to_string(yystack_[2].value.as < double > ()) + yystack_[0].value.as < std::string > (); }
-#line 1099 "frontend/parser.cpp"
+#line 1112 "frontend/parser.cpp"
     break;
 
   case 352: // expr_str: expr_float "++" expr_int
-#line 648 "frontend/parser.yy"
+#line 649 "frontend/parser.yy"
                                       { yylhs.value.as < std::string > () = std::to_string(yystack_[2].value.as < double > ()) + std::to_string(yystack_[0].value.as < long > ()); }
-#line 1105 "frontend/parser.cpp"
+#line 1118 "frontend/parser.cpp"
     break;
 
   case 353: // expr_str: expr_float "++" expr_float
-#line 649 "frontend/parser.yy"
+#line 650 "frontend/parser.yy"
                                         { yylhs.value.as < std::string > () = std::to_string(yystack_[2].value.as < double > ()) + std::to_string(yystack_[0].value.as < double > ()); }
-#line 1111 "frontend/parser.cpp"
+#line 1124 "frontend/parser.cpp"
     break;
 
   case 354: // expr_str: expr_float "++" expr_bool
-#line 650 "frontend/parser.yy"
+#line 651 "frontend/parser.yy"
                                        { yylhs.value.as < std::string > () = std::to_string(yystack_[2].value.as < double > ()) + (yystack_[0].value.as < bool > () ? "true" : "false"); }
-#line 1117 "frontend/parser.cpp"
+#line 1130 "frontend/parser.cpp"
     break;
 
   case 355: // expr_str: expr_float "++" expr_none
-#line 651 "frontend/parser.yy"
+#line 652 "frontend/parser.yy"
                                        { yylhs.value.as < std::string > () = std::to_string(yystack_[2].value.as < double > ()) + "none"; }
-#line 1123 "frontend/parser.cpp"
+#line 1136 "frontend/parser.cpp"
     break;
 
   case 356: // expr_str: expr_bool "++" expr_str
-#line 652 "frontend/parser.yy"
+#line 653 "frontend/parser.yy"
                                      { yylhs.value.as < std::string > () = (yystack_[2].value.as < bool > () ? "true" : "false") + yystack_[0].value.as < std::string > (); }
-#line 1129 "frontend/parser.cpp"
+#line 1142 "frontend/parser.cpp"
     break;
 
   case 357: // expr_str: expr_bool "++" expr_int
-#line 653 "frontend/parser.yy"
+#line 654 "frontend/parser.yy"
                                      { yylhs.value.as < std::string > () = (yystack_[2].value.as < bool > () ? "true" : "false") + std::to_string(yystack_[0].value.as < long > ()); }
-#line 1135 "frontend/parser.cpp"
+#line 1148 "frontend/parser.cpp"
     break;
 
   case 358: // expr_str: expr_bool "++" expr_float
-#line 654 "frontend/parser.yy"
+#line 655 "frontend/parser.yy"
                                        { yylhs.value.as < std::string > () = (yystack_[2].value.as < bool > () ? "true" : "false") + std::to_string(yystack_[0].value.as < double > ()); }
-#line 1141 "frontend/parser.cpp"
+#line 1154 "frontend/parser.cpp"
     break;
 
   case 359: // expr_str: expr_bool "++" expr_bool
-#line 655 "frontend/parser.yy"
+#line 656 "frontend/parser.yy"
                                       { yylhs.value.as < std::string > () = (yystack_[2].value.as < bool > () ? std::string("true") : std::string("false")) + (yystack_[0].value.as < bool > () ? "true" : "false"); }
-#line 1147 "frontend/parser.cpp"
+#line 1160 "frontend/parser.cpp"
     break;
 
   case 360: // expr_str: expr_bool "++" expr_none
-#line 656 "frontend/parser.yy"
+#line 657 "frontend/parser.yy"
                                       { yylhs.value.as < std::string > () = (yystack_[2].value.as < bool > () ? std::string("true") : std::string("false")) + "none"; }
-#line 1153 "frontend/parser.cpp"
+#line 1166 "frontend/parser.cpp"
     break;
 
   case 361: // expr_str: expr_none "++" expr_str
-#line 657 "frontend/parser.yy"
+#line 658 "frontend/parser.yy"
                                      { yylhs.value.as < std::string > () = std::string("none") + yystack_[0].value.as < std::string > (); }
-#line 1159 "frontend/parser.cpp"
+#line 1172 "frontend/parser.cpp"
     break;
 
   case 362: // expr_str: expr_none "++" expr_int
-#line 658 "frontend/parser.yy"
+#line 659 "frontend/parser.yy"
                                      { yylhs.value.as < std::string > () = std::string("none") + std::to_string(yystack_[0].value.as < long > ()); }
-#line 1165 "frontend/parser.cpp"
+#line 1178 "frontend/parser.cpp"
     break;
 
   case 363: // expr_str: expr_none "++" expr_float
-#line 659 "frontend/parser.yy"
+#line 660 "frontend/parser.yy"
                                        { yylhs.value.as < std::string > () = std::string("none") + std::to_string(yystack_[0].value.as < double > ()); }
-#line 1171 "frontend/parser.cpp"
+#line 1184 "frontend/parser.cpp"
     break;
 
   case 364: // expr_str: expr_none "++" expr_bool
-#line 660 "frontend/parser.yy"
+#line 661 "frontend/parser.yy"
                                       { yylhs.value.as < std::string > () = std::string("none") + (yystack_[0].value.as < bool > () ? "true" : "false"); }
-#line 1177 "frontend/parser.cpp"
+#line 1190 "frontend/parser.cpp"
     break;
 
   case 365: // expr_str: expr_none "++" expr_none
-#line 661 "frontend/parser.yy"
+#line 662 "frontend/parser.yy"
                                       { yylhs.value.as < std::string > () = std::string("nonenone"); }
-#line 1183 "frontend/parser.cpp"
+#line 1196 "frontend/parser.cpp"
     break;
 
   case 366: // expr_bool: "bool"
-#line 665 "frontend/parser.yy"
+#line 666 "frontend/parser.yy"
                  { yylhs.value.as < bool > () = yystack_[0].value.as < bool > (); }
-#line 1189 "frontend/parser.cpp"
+#line 1202 "frontend/parser.cpp"
     break;
 
   case 367: // expr_bool: "(" expr_bool ")"
-#line 666 "frontend/parser.yy"
+#line 667 "frontend/parser.yy"
                                 { yylhs.value.as < bool > () = yystack_[1].value.as < bool > (); }
-#line 1195 "frontend/parser.cpp"
+#line 1208 "frontend/parser.cpp"
     break;
 
   case 368: // expr_bool: "not" expr_bool
-#line 667 "frontend/parser.yy"
+#line 668 "frontend/parser.yy"
                            { yylhs.value.as < bool > () = !yystack_[0].value.as < bool > (); }
-#line 1201 "frontend/parser.cpp"
+#line 1214 "frontend/parser.cpp"
     break;
 
   case 369: // expr_bool: expr_bool "or" expr_bool
-#line 668 "frontend/parser.yy"
+#line 669 "frontend/parser.yy"
                                     { yylhs.value.as < bool > () = yystack_[2].value.as < bool > () || yystack_[0].value.as < bool > (); }
-#line 1207 "frontend/parser.cpp"
+#line 1220 "frontend/parser.cpp"
     break;
 
   case 370: // expr_bool: expr_bool "and" expr_bool
-#line 669 "frontend/parser.yy"
+#line 670 "frontend/parser.yy"
                                      { yylhs.value.as < bool > () = yystack_[2].value.as < bool > () && yystack_[0].value.as < bool > (); }
-#line 1213 "frontend/parser.cpp"
+#line 1226 "frontend/parser.cpp"
     break;
 
   case 371: // expr_bool: expr_bool "==" expr_bool
-#line 671 "frontend/parser.yy"
+#line 672 "frontend/parser.yy"
                                    { yylhs.value.as < bool > () = yystack_[2].value.as < bool > () == yystack_[0].value.as < bool > (); }
-#line 1219 "frontend/parser.cpp"
+#line 1232 "frontend/parser.cpp"
     break;
 
   case 372: // expr_bool: expr_int "==" expr_int
-#line 672 "frontend/parser.yy"
+#line 673 "frontend/parser.yy"
                                  { yylhs.value.as < bool > () = yystack_[2].value.as < long > () == yystack_[0].value.as < long > (); }
-#line 1225 "frontend/parser.cpp"
+#line 1238 "frontend/parser.cpp"
     break;
 
   case 373: // expr_bool: expr_int "==" expr_float
-#line 673 "frontend/parser.yy"
+#line 674 "frontend/parser.yy"
                                    { yylhs.value.as < bool > () = yystack_[2].value.as < long > () == yystack_[0].value.as < double > (); }
-#line 1231 "frontend/parser.cpp"
+#line 1244 "frontend/parser.cpp"
     break;
 
   case 374: // expr_bool: expr_float "==" expr_float
-#line 674 "frontend/parser.yy"
+#line 675 "frontend/parser.yy"
                                      { yylhs.value.as < bool > () = yystack_[2].value.as < double > () == yystack_[0].value.as < double > (); }
-#line 1237 "frontend/parser.cpp"
+#line 1250 "frontend/parser.cpp"
     break;
 
   case 375: // expr_bool: expr_float "==" expr_int
-#line 675 "frontend/parser.yy"
+#line 676 "frontend/parser.yy"
                                    { yylhs.value.as < bool > () = yystack_[2].value.as < double > () == yystack_[0].value.as < long > (); }
-#line 1243 "frontend/parser.cpp"
+#line 1256 "frontend/parser.cpp"
     break;
 
   case 376: // expr_bool: expr_str "==" expr_str
-#line 676 "frontend/parser.yy"
+#line 677 "frontend/parser.yy"
                                  { yylhs.value.as < bool > () = yystack_[2].value.as < std::string > () == yystack_[0].value.as < std::string > (); }
-#line 1249 "frontend/parser.cpp"
+#line 1262 "frontend/parser.cpp"
     break;
 
   case 377: // expr_bool: expr_none "==" expr_none
-#line 677 "frontend/parser.yy"
+#line 678 "frontend/parser.yy"
                                    { yylhs.value.as < bool > () = true; }
-#line 1255 "frontend/parser.cpp"
+#line 1268 "frontend/parser.cpp"
     break;
 
   case 378: // expr_bool: expr_bool "!=" expr_bool
-#line 679 "frontend/parser.yy"
+#line 680 "frontend/parser.yy"
                                     { yylhs.value.as < bool > () = yystack_[2].value.as < bool > () != yystack_[0].value.as < bool > (); }
-#line 1261 "frontend/parser.cpp"
+#line 1274 "frontend/parser.cpp"
     break;
 
   case 379: // expr_bool: expr_int "!=" expr_int
-#line 680 "frontend/parser.yy"
+#line 681 "frontend/parser.yy"
                                   { yylhs.value.as < bool > () = yystack_[2].value.as < long > () != yystack_[0].value.as < long > (); }
-#line 1267 "frontend/parser.cpp"
+#line 1280 "frontend/parser.cpp"
     break;
 
   case 380: // expr_bool: expr_int "!=" expr_float
-#line 681 "frontend/parser.yy"
+#line 682 "frontend/parser.yy"
                                     { yylhs.value.as < bool > () = yystack_[2].value.as < long > () != yystack_[0].value.as < double > (); }
-#line 1273 "frontend/parser.cpp"
+#line 1286 "frontend/parser.cpp"
     break;
 
   case 381: // expr_bool: expr_float "!=" expr_float
-#line 682 "frontend/parser.yy"
+#line 683 "frontend/parser.yy"
                                       { yylhs.value.as < bool > () = yystack_[2].value.as < double > () != yystack_[0].value.as < double > (); }
-#line 1279 "frontend/parser.cpp"
+#line 1292 "frontend/parser.cpp"
     break;
 
   case 382: // expr_bool: expr_float "!=" expr_int
-#line 683 "frontend/parser.yy"
+#line 684 "frontend/parser.yy"
                                     { yylhs.value.as < bool > () = yystack_[2].value.as < double > () != yystack_[0].value.as < long > (); }
-#line 1285 "frontend/parser.cpp"
+#line 1298 "frontend/parser.cpp"
     break;
 
   case 383: // expr_bool: expr_str "!=" expr_str
-#line 684 "frontend/parser.yy"
+#line 685 "frontend/parser.yy"
                                   { yylhs.value.as < bool > () = yystack_[2].value.as < std::string > () != yystack_[0].value.as < std::string > (); }
-#line 1291 "frontend/parser.cpp"
+#line 1304 "frontend/parser.cpp"
     break;
 
   case 384: // expr_bool: expr_none "!=" expr_none
-#line 685 "frontend/parser.yy"
+#line 686 "frontend/parser.yy"
                                     { yylhs.value.as < bool > () = false; }
-#line 1297 "frontend/parser.cpp"
+#line 1310 "frontend/parser.cpp"
     break;
 
   case 385: // expr_bool: expr_int ">" expr_int
-#line 687 "frontend/parser.yy"
+#line 688 "frontend/parser.yy"
                                  { yylhs.value.as < bool > () = yystack_[2].value.as < long > () > yystack_[0].value.as < long > (); }
-#line 1303 "frontend/parser.cpp"
+#line 1316 "frontend/parser.cpp"
     break;
 
   case 386: // expr_bool: expr_int ">" expr_float
-#line 688 "frontend/parser.yy"
+#line 689 "frontend/parser.yy"
                                    { yylhs.value.as < bool > () = yystack_[2].value.as < long > () > yystack_[0].value.as < double > (); }
-#line 1309 "frontend/parser.cpp"
+#line 1322 "frontend/parser.cpp"
     break;
 
   case 387: // expr_bool: expr_float ">" expr_float
-#line 689 "frontend/parser.yy"
+#line 690 "frontend/parser.yy"
                                      { yylhs.value.as < bool > () = yystack_[2].value.as < double > () > yystack_[0].value.as < double > (); }
-#line 1315 "frontend/parser.cpp"
+#line 1328 "frontend/parser.cpp"
     break;
 
   case 388: // expr_bool: expr_float ">" expr_int
-#line 690 "frontend/parser.yy"
+#line 691 "frontend/parser.yy"
                                    { yylhs.value.as < bool > () = yystack_[2].value.as < double > () > yystack_[0].value.as < long > (); }
-#line 1321 "frontend/parser.cpp"
+#line 1334 "frontend/parser.cpp"
     break;
 
   case 389: // expr_bool: expr_str ">" expr_str
-#line 691 "frontend/parser.yy"
+#line 692 "frontend/parser.yy"
                                  { yylhs.value.as < bool > () = yystack_[2].value.as < std::string > () > yystack_[0].value.as < std::string > (); }
-#line 1327 "frontend/parser.cpp"
+#line 1340 "frontend/parser.cpp"
     break;
 
   case 390: // expr_bool: expr_int "<" expr_int
-#line 693 "frontend/parser.yy"
+#line 694 "frontend/parser.yy"
                                  { yylhs.value.as < bool > () = yystack_[2].value.as < long > () < yystack_[0].value.as < long > (); }
-#line 1333 "frontend/parser.cpp"
+#line 1346 "frontend/parser.cpp"
     break;
 
   case 391: // expr_bool: expr_int "<" expr_float
-#line 694 "frontend/parser.yy"
+#line 695 "frontend/parser.yy"
                                    { yylhs.value.as < bool > () = yystack_[2].value.as < long > () < yystack_[0].value.as < double > (); }
-#line 1339 "frontend/parser.cpp"
+#line 1352 "frontend/parser.cpp"
     break;
 
   case 392: // expr_bool: expr_float "<" expr_float
-#line 695 "frontend/parser.yy"
+#line 696 "frontend/parser.yy"
                                      { yylhs.value.as < bool > () = yystack_[2].value.as < double > () < yystack_[0].value.as < double > (); }
-#line 1345 "frontend/parser.cpp"
+#line 1358 "frontend/parser.cpp"
     break;
 
   case 393: // expr_bool: expr_float "<" expr_int
-#line 696 "frontend/parser.yy"
+#line 697 "frontend/parser.yy"
                                    { yylhs.value.as < bool > () = yystack_[2].value.as < double > () < yystack_[0].value.as < long > (); }
-#line 1351 "frontend/parser.cpp"
+#line 1364 "frontend/parser.cpp"
     break;
 
   case 394: // expr_bool: expr_str "<" expr_str
-#line 697 "frontend/parser.yy"
+#line 698 "frontend/parser.yy"
                                  { yylhs.value.as < bool > () = yystack_[2].value.as < std::string > () < yystack_[0].value.as < std::string > (); }
-#line 1357 "frontend/parser.cpp"
+#line 1370 "frontend/parser.cpp"
     break;
 
   case 395: // expr_bool: expr_int ">=" expr_int
-#line 699 "frontend/parser.yy"
+#line 700 "frontend/parser.yy"
                                   { yylhs.value.as < bool > () = yystack_[2].value.as < long > () >= yystack_[0].value.as < long > (); }
-#line 1363 "frontend/parser.cpp"
+#line 1376 "frontend/parser.cpp"
     break;
 
   case 396: // expr_bool: expr_int ">=" expr_float
-#line 700 "frontend/parser.yy"
+#line 701 "frontend/parser.yy"
                                     { yylhs.value.as < bool > () = yystack_[2].value.as < long > () >= yystack_[0].value.as < double > (); }
-#line 1369 "frontend/parser.cpp"
+#line 1382 "frontend/parser.cpp"
     break;
 
   case 397: // expr_bool: expr_float ">=" expr_float
-#line 701 "frontend/parser.yy"
+#line 702 "frontend/parser.yy"
                                       { yylhs.value.as < bool > () = yystack_[2].value.as < double > () >= yystack_[0].value.as < double > (); }
-#line 1375 "frontend/parser.cpp"
+#line 1388 "frontend/parser.cpp"
     break;
 
   case 398: // expr_bool: expr_float ">=" expr_int
-#line 702 "frontend/parser.yy"
+#line 703 "frontend/parser.yy"
                                     { yylhs.value.as < bool > () = yystack_[2].value.as < double > () >= yystack_[0].value.as < long > (); }
-#line 1381 "frontend/parser.cpp"
+#line 1394 "frontend/parser.cpp"
     break;
 
   case 399: // expr_bool: expr_str ">=" expr_str
-#line 703 "frontend/parser.yy"
+#line 704 "frontend/parser.yy"
                                   { yylhs.value.as < bool > () = yystack_[2].value.as < std::string > () >= yystack_[0].value.as < std::string > (); }
-#line 1387 "frontend/parser.cpp"
+#line 1400 "frontend/parser.cpp"
     break;
 
   case 400: // expr_bool: expr_int "<=" expr_int
-#line 705 "frontend/parser.yy"
+#line 706 "frontend/parser.yy"
                                   { yylhs.value.as < bool > () = yystack_[2].value.as < long > () <= yystack_[0].value.as < long > (); }
-#line 1393 "frontend/parser.cpp"
+#line 1406 "frontend/parser.cpp"
     break;
 
   case 401: // expr_bool: expr_int "<=" expr_float
-#line 706 "frontend/parser.yy"
+#line 707 "frontend/parser.yy"
                                     { yylhs.value.as < bool > () = yystack_[2].value.as < long > () <= yystack_[0].value.as < double > (); }
-#line 1399 "frontend/parser.cpp"
+#line 1412 "frontend/parser.cpp"
     break;
 
   case 402: // expr_bool: expr_float "<=" expr_float
-#line 707 "frontend/parser.yy"
+#line 708 "frontend/parser.yy"
                                       { yylhs.value.as < bool > () = yystack_[2].value.as < double > () <= yystack_[0].value.as < double > (); }
-#line 1405 "frontend/parser.cpp"
+#line 1418 "frontend/parser.cpp"
     break;
 
   case 403: // expr_bool: expr_float "<=" expr_int
-#line 708 "frontend/parser.yy"
+#line 709 "frontend/parser.yy"
                                     { yylhs.value.as < bool > () = yystack_[2].value.as < double > () <= yystack_[0].value.as < long > (); }
-#line 1411 "frontend/parser.cpp"
+#line 1424 "frontend/parser.cpp"
     break;
 
   case 404: // expr_bool: expr_str "<=" expr_str
-#line 709 "frontend/parser.yy"
+#line 710 "frontend/parser.yy"
                                   { yylhs.value.as < bool > () = yystack_[2].value.as < std::string > () <= yystack_[0].value.as < std::string > (); }
-#line 1417 "frontend/parser.cpp"
+#line 1430 "frontend/parser.cpp"
     break;
 
   case 405: // expr_bool: expr_str "in" expr_str
-#line 711 "frontend/parser.yy"
+#line 712 "frontend/parser.yy"
                                  { yylhs.value.as < bool > () = yystack_[0].value.as < std::string > ().find(yystack_[2].value.as < std::string > ()) != std::string::npos; }
-#line 1423 "frontend/parser.cpp"
+#line 1436 "frontend/parser.cpp"
     break;
 
   case 422: // type: "\"int\"" "?"
-#line 739 "frontend/parser.yy"
+#line 740 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = nullptr; /*TODO*/ }
-#line 1429 "frontend/parser.cpp"
+#line 1442 "frontend/parser.cpp"
     break;
 
   case 423: // type: "\"float\"" "?"
-#line 740 "frontend/parser.yy"
+#line 741 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = nullptr; /*TODO*/ }
-#line 1435 "frontend/parser.cpp"
+#line 1448 "frontend/parser.cpp"
     break;
 
   case 424: // type: "\"string\"" "?"
-#line 741 "frontend/parser.yy"
+#line 742 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = nullptr; /*TODO*/ }
-#line 1441 "frontend/parser.cpp"
+#line 1454 "frontend/parser.cpp"
     break;
 
   case 425: // type: "\"bool\"" "?"
-#line 742 "frontend/parser.yy"
+#line 743 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = nullptr; /*TODO*/ }
-#line 1447 "frontend/parser.cpp"
+#line 1460 "frontend/parser.cpp"
     break;
 
   case 426: // type: "identifier" "?"
-#line 743 "frontend/parser.yy"
+#line 744 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = nullptr; /*TODO*/ }
-#line 1453 "frontend/parser.cpp"
+#line 1466 "frontend/parser.cpp"
     break;
 
   case 427: // type: funtype "?"
-#line 744 "frontend/parser.yy"
+#line 745 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = nullptr; /*TODO*/ }
-#line 1459 "frontend/parser.cpp"
+#line 1472 "frontend/parser.cpp"
     break;
 
   case 428: // type: mattype "?"
-#line 745 "frontend/parser.yy"
+#line 746 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = nullptr; /*TODO*/ }
-#line 1465 "frontend/parser.cpp"
+#line 1478 "frontend/parser.cpp"
     break;
 
   case 429: // type: "\"int\""
-#line 746 "frontend/parser.yy"
+#line 747 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = scanner->sym_lookup("int"); }
-#line 1471 "frontend/parser.cpp"
+#line 1484 "frontend/parser.cpp"
     break;
 
   case 430: // type: "\"float\""
-#line 747 "frontend/parser.yy"
+#line 748 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = scanner->sym_lookup("float"); }
-#line 1477 "frontend/parser.cpp"
+#line 1490 "frontend/parser.cpp"
     break;
 
   case 431: // type: "\"string\""
-#line 748 "frontend/parser.yy"
+#line 749 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = scanner->sym_lookup("string"); }
-#line 1483 "frontend/parser.cpp"
+#line 1496 "frontend/parser.cpp"
     break;
 
   case 432: // type: "\"bool\""
-#line 749 "frontend/parser.yy"
+#line 750 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = scanner->sym_lookup("bool"); }
-#line 1489 "frontend/parser.cpp"
+#line 1502 "frontend/parser.cpp"
     break;
 
   case 433: // type: "identifier"
-#line 750 "frontend/parser.yy"
+#line 751 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = scanner->sym_lookup(yystack_[0].value.as < std::string > ()); }
-#line 1495 "frontend/parser.cpp"
+#line 1508 "frontend/parser.cpp"
     break;
 
   case 434: // type: funtype
-#line 751 "frontend/parser.yy"
+#line 752 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = nullptr; /*TODO*/ }
-#line 1501 "frontend/parser.cpp"
+#line 1514 "frontend/parser.cpp"
     break;
 
   case 435: // type: mattype
-#line 752 "frontend/parser.yy"
+#line 753 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = nullptr; /*TODO*/ }
-#line 1507 "frontend/parser.cpp"
+#line 1520 "frontend/parser.cpp"
     break;
 
 
-#line 1511 "frontend/parser.cpp"
+#line 1524 "frontend/parser.cpp"
 
             default:
               break;
@@ -2939,50 +2952,50 @@ namespace  ptc  {
   const short
    Parser ::yyrline_[] =
   {
-       0,   188,   188,   189,   191,   192,   193,   197,   198,   200,
-     201,   202,   203,   204,   205,   206,   207,   208,   209,   210,
-     211,   215,   216,   217,   218,   219,   222,   223,   227,   229,
-     230,   234,   235,   236,   238,   239,   243,   247,   250,   254,
-     256,   257,   258,   260,   261,   265,   266,   267,   269,   270,
-     271,   272,   274,   275,   276,   280,   281,   282,   283,   285,
-     286,   287,   289,   290,   294,   298,   299,   300,   301,   305,
-     306,   307,   308,   309,   310,   311,   312,   313,   314,   315,
-     316,   317,   318,   319,   323,   324,   328,   329,   330,   331,
-     332,   333,   334,   335,   338,   339,   340,   342,   343,   345,
-     346,   347,   348,   350,   351,   352,   354,   355,   357,   358,
-     359,   361,   362,   363,   364,   365,   366,   367,   368,   370,
-     371,   372,   373,   374,   376,   377,   378,   379,   380,   382,
-     383,   384,   385,   386,   387,   388,   389,   391,   392,   393,
-     394,   395,   396,   397,   398,   400,   401,   402,   404,   405,
-     406,   408,   409,   410,   411,   412,   413,   414,   416,   417,
-     418,   419,   420,   421,   422,   424,   425,   426,   427,   428,
-     429,   430,   432,   433,   434,   435,   436,   437,   438,   440,
-     441,   442,   443,   444,   445,   446,   447,   448,   449,   450,
-     451,   452,   453,   454,   455,   456,   458,   459,   460,   461,
-     462,   463,   464,   465,   466,   467,   468,   469,   470,   471,
-     472,   473,   474,   476,   477,   478,   480,   481,   482,   484,
-     485,   486,   488,   489,   490,   491,   492,   493,   494,   495,
-     496,   497,   498,   499,   500,   501,   502,   503,   505,   506,
-     507,   509,   510,   511,   513,   514,   515,   516,   517,   518,
-     519,   520,   521,   522,   523,   524,   525,   526,   527,   528,
-     529,   530,   531,   532,   533,   534,   535,   536,   540,   541,
-     542,   543,   544,   546,   547,   548,   552,   553,   554,   555,
-     557,   558,   560,   561,   563,   564,   565,   566,   567,   568,
-     569,   570,   571,   572,   573,   574,   578,   579,   583,   584,
-     586,   587,   589,   590,   594,   595,   596,   597,   598,   599,
-     600,   601,   602,   603,   604,   605,   606,   607,   611,   612,
-     613,   614,   615,   616,   617,   618,   619,   620,   621,   622,
-     623,   624,   625,   626,   627,   628,   629,   630,   631,   635,
-     636,   637,   638,   639,   640,   641,   642,   643,   644,   645,
-     646,   647,   648,   649,   650,   651,   652,   653,   654,   655,
-     656,   657,   658,   659,   660,   661,   665,   666,   667,   668,
-     669,   671,   672,   673,   674,   675,   676,   677,   679,   680,
-     681,   682,   683,   684,   685,   687,   688,   689,   690,   691,
-     693,   694,   695,   696,   697,   699,   700,   701,   702,   703,
-     705,   706,   707,   708,   709,   711,   715,   716,   718,   719,
-     723,   724,   725,   726,   727,   728,   729,   730,   731,   732,
-     734,   735,   739,   740,   741,   742,   743,   744,   745,   746,
-     747,   748,   749,   750,   751,   752
+       0,   189,   189,   190,   192,   193,   194,   198,   199,   201,
+     202,   203,   204,   205,   206,   207,   208,   209,   210,   211,
+     212,   216,   217,   218,   219,   220,   223,   224,   228,   230,
+     231,   235,   236,   237,   239,   240,   244,   248,   251,   255,
+     257,   258,   259,   261,   262,   266,   267,   268,   270,   271,
+     272,   273,   275,   276,   277,   281,   282,   283,   284,   286,
+     287,   288,   290,   291,   295,   299,   300,   301,   302,   306,
+     307,   308,   309,   310,   311,   312,   313,   314,   315,   316,
+     317,   318,   319,   320,   324,   325,   329,   330,   331,   332,
+     333,   334,   335,   336,   339,   340,   341,   343,   344,   346,
+     347,   348,   349,   351,   352,   353,   355,   356,   358,   359,
+     360,   362,   363,   364,   365,   366,   367,   368,   369,   371,
+     372,   373,   374,   375,   377,   378,   379,   380,   381,   383,
+     384,   385,   386,   387,   388,   389,   390,   392,   393,   394,
+     395,   396,   397,   398,   399,   401,   402,   403,   405,   406,
+     407,   409,   410,   411,   412,   413,   414,   415,   417,   418,
+     419,   420,   421,   422,   423,   425,   426,   427,   428,   429,
+     430,   431,   433,   434,   435,   436,   437,   438,   439,   441,
+     442,   443,   444,   445,   446,   447,   448,   449,   450,   451,
+     452,   453,   454,   455,   456,   457,   459,   460,   461,   462,
+     463,   464,   465,   466,   467,   468,   469,   470,   471,   472,
+     473,   474,   475,   477,   478,   479,   481,   482,   483,   485,
+     486,   487,   489,   490,   491,   492,   493,   494,   495,   496,
+     497,   498,   499,   500,   501,   502,   503,   504,   506,   507,
+     508,   510,   511,   512,   514,   515,   516,   517,   518,   519,
+     520,   521,   522,   523,   524,   525,   526,   527,   528,   529,
+     530,   531,   532,   533,   534,   535,   536,   537,   541,   542,
+     543,   544,   545,   547,   548,   549,   553,   554,   555,   556,
+     558,   559,   561,   562,   564,   565,   566,   567,   568,   569,
+     570,   571,   572,   573,   574,   575,   579,   580,   584,   585,
+     587,   588,   590,   591,   595,   596,   597,   598,   599,   600,
+     601,   602,   603,   604,   605,   606,   607,   608,   612,   613,
+     614,   615,   616,   617,   618,   619,   620,   621,   622,   623,
+     624,   625,   626,   627,   628,   629,   630,   631,   632,   636,
+     637,   638,   639,   640,   641,   642,   643,   644,   645,   646,
+     647,   648,   649,   650,   651,   652,   653,   654,   655,   656,
+     657,   658,   659,   660,   661,   662,   666,   667,   668,   669,
+     670,   672,   673,   674,   675,   676,   677,   678,   680,   681,
+     682,   683,   684,   685,   686,   688,   689,   690,   691,   692,
+     694,   695,   696,   697,   698,   700,   701,   702,   703,   704,
+     706,   707,   708,   709,   710,   712,   716,   717,   719,   720,
+     724,   725,   726,   727,   728,   729,   730,   731,   732,   733,
+     735,   736,   740,   741,   742,   743,   744,   745,   746,   747,
+     748,   749,   750,   751,   752,   753
   };
 
   void
@@ -3020,9 +3033,9 @@ namespace  ptc  {
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 3024 "frontend/parser.cpp"
+#line 3037 "frontend/parser.cpp"
 
-#line 755 "frontend/parser.yy"
+#line 756 "frontend/parser.yy"
 
 
 /* Error method */

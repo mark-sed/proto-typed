@@ -1,10 +1,11 @@
 #include "scanner.hpp"
 #include "logging.hpp"
+#include "llvm/Support/Casting.h"
 #include <cstring>
 
 using namespace ptc;
 
-Scanner::Scanner() : currentIR(nullptr) {
+Scanner::Scanner(Diagnostics &diags) : currentIR(nullptr), diags(diags) {
     loc = new Parser::location_type();
     init();
 }
@@ -41,4 +42,23 @@ void Scanner::removeQuotes(char **str) {
     *str = &(*str)[1];
     // Remove last quote
     (*str)[std::strlen(*str)-1] = '\0';
+}
+
+ir::IR *Scanner::parseVarDecl(ir::IR *type, std::string name) {
+    LOGMAX(type->getName().str()+" "+name);
+    ir::TypeDecl *t = llvm::dyn_cast<ir::TypeDecl>(type);
+    if(t) {
+        auto v = new ir::VarDecl(currentIR, type->getLocation(), name, t);
+        if(currScope->insert(v)) {
+            this->decls.push_back(v);
+        }
+        else {
+            diags.report(type->getLocation(), diag::ERR_SYM_ALREADY_DECLARED, name);
+        }
+        return v;
+    }
+    else {
+        diags.report(type->getLocation(), diag::ERR_VARDECL_REQUIRES_TYPE);
+    }
+    return nullptr;
 }
