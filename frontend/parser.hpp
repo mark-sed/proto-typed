@@ -51,6 +51,7 @@
         class Scanner;
         namespace ir {
             class IR;
+            class Expr;
         }
     }
 
@@ -62,7 +63,7 @@
         #endif
     #endif
 
-#line 66 "frontend/parser.hpp"
+#line 67 "frontend/parser.hpp"
 
 
 # include <cstdlib> // std::abort
@@ -198,7 +199,7 @@
 
 #line 14 "frontend/parser.yy"
 namespace  ptc  {
-#line 202 "frontend/parser.hpp"
+#line 203 "frontend/parser.hpp"
 
 
   /// A point in a source file.
@@ -647,14 +648,19 @@ namespace  ptc  {
       // expr_int
       char dummy3[sizeof (long)];
 
+      // set
+      // expr
+      // expr_var
+      char dummy4[sizeof (ptc::ir::Expr *)];
+
       // vardecl
       // type
-      char dummy4[sizeof (ptc::ir::IR *)];
+      char dummy5[sizeof (ptc::ir::IR *)];
 
       // "string"
       // "identifier"
       // expr_str
-      char dummy5[sizeof (std::string)];
+      char dummy6[sizeof (std::string)];
     };
 
     /// The size of the largest semantic type.
@@ -972,6 +978,12 @@ namespace  ptc  {
         value.move< long > (std::move (that.value));
         break;
 
+      case symbol_kind::S_set: // set
+      case symbol_kind::S_expr: // expr
+      case symbol_kind::S_expr_var: // expr_var
+        value.move< ptc::ir::Expr * > (std::move (that.value));
+        break;
+
       case symbol_kind::S_vardecl: // vardecl
       case symbol_kind::S_type: // type
         value.move< ptc::ir::IR * > (std::move (that.value));
@@ -1049,6 +1061,20 @@ namespace  ptc  {
 #endif
 
 #if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, ptc::ir::Expr *&& v, location_type&& l)
+        : Base (t)
+        , value (std::move (v))
+        , location (std::move (l))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const ptc::ir::Expr *& v, const location_type& l)
+        : Base (t)
+        , value (v)
+        , location (l)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
       basic_symbol (typename Base::kind_type t, ptc::ir::IR *&& v, location_type&& l)
         : Base (t)
         , value (std::move (v))
@@ -1113,6 +1139,12 @@ switch (yykind)
       case symbol_kind::S_INT: // "int"
       case symbol_kind::S_expr_int: // expr_int
         value.template destroy< long > ();
+        break;
+
+      case symbol_kind::S_set: // set
+      case symbol_kind::S_expr: // expr
+      case symbol_kind::S_expr_var: // expr_var
+        value.template destroy< ptc::ir::Expr * > ();
         break;
 
       case symbol_kind::S_vardecl: // vardecl
@@ -2787,7 +2819,7 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 3170,     ///< Last index in yytable_.
+      yylast_ = 3233,     ///< Last index in yytable_.
       yynnts_ = 48,  ///< Number of nonterminal symbols.
       yyfinal_ = 121 ///< Termination state number.
     };
@@ -2801,7 +2833,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 2805 "frontend/parser.hpp"
+#line 2837 "frontend/parser.hpp"
 
 
 

@@ -23,6 +23,7 @@
         class Scanner;
         namespace ir {
             class IR;
+            class Expr;
         }
     }
 
@@ -46,7 +47,6 @@
     #include "scanner.hpp"
     #include "logging.hpp"
     #include "ir.hpp"
-    #include "expression.hpp"
 
     // Set correct token method
     #undef yylex
@@ -180,6 +180,9 @@
 
 %type <ptc::ir::IR *> type
 %type <ptc::ir::IR *> vardecl
+%type <ptc::ir::Expr *> expr
+%type <ptc::ir::Expr *> expr_var
+%type <ptc::ir::Expr *> set
 
 %locations
 
@@ -198,7 +201,7 @@ stmt : stmts
 stmts : END
       | stmts_ne
       ;
-stmts_ne : set END
+stmts_ne : set END      { scanner->parseExprStmt($1); }
          | vardecl END
          | vardef END
          | import END
@@ -303,21 +306,20 @@ vardef : type ID SET struct_val
        ;
 
 // Assignment and compound assignment
-set : expr SETCONCAT expr
-    | expr SETPOW expr
-    | expr SETMOD expr
-    | expr SETDIV expr
-    | expr SETMUL expr
-    | expr SETMINUS expr
-    | expr SETPLUS expr
-    | expr SETBAND expr
-    | expr SETBOR expr
-    | expr SETBXOR expr
-    | expr SETBNOT expr
-    | expr SETBLSHFT expr
-    | expr SETBRSHFT expr
-    | expr SET expr
-    | expr SET set
+set : expr SETCONCAT expr { $$ = scanner->parseInfixExpr($1, scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_CONCAT)), ir::Operator(ir::OperatorKind::OP_ASSIGN)); }
+    | expr SETPOW expr    { $$ = scanner->parseInfixExpr($1, scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_POW)), ir::Operator(ir::OperatorKind::OP_ASSIGN)); }
+    | expr SETMOD expr    { $$ = scanner->parseInfixExpr($1, scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_MOD)), ir::Operator(ir::OperatorKind::OP_ASSIGN)); }
+    | expr SETDIV expr    { $$ = scanner->parseInfixExpr($1, scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_DIV)), ir::Operator(ir::OperatorKind::OP_ASSIGN)); }
+    | expr SETMUL expr    { $$ = scanner->parseInfixExpr($1, scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_MUL)), ir::Operator(ir::OperatorKind::OP_ASSIGN)); }
+    | expr SETMINUS expr  { $$ = scanner->parseInfixExpr($1, scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_SUB)), ir::Operator(ir::OperatorKind::OP_ASSIGN)); }
+    | expr SETPLUS expr   { $$ = scanner->parseInfixExpr($1, scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_ADD)), ir::Operator(ir::OperatorKind::OP_ASSIGN)); }
+    | expr SETBAND expr   { $$ = scanner->parseInfixExpr($1, scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_BAND)), ir::Operator(ir::OperatorKind::OP_ASSIGN)); }
+    | expr SETBOR expr    { $$ = scanner->parseInfixExpr($1, scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_BOR)), ir::Operator(ir::OperatorKind::OP_ASSIGN)); }
+    | expr SETBXOR expr   { $$ = scanner->parseInfixExpr($1, scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_BXOR)), ir::Operator(ir::OperatorKind::OP_ASSIGN)); }
+    | expr SETBLSHFT expr { $$ = scanner->parseInfixExpr($1, scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_BLSHFT)), ir::Operator(ir::OperatorKind::OP_ASSIGN)); }
+    | expr SETBRSHFT expr { $$ = scanner->parseInfixExpr($1, scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_BRSHFT)), ir::Operator(ir::OperatorKind::OP_ASSIGN)); }
+    | expr SET expr       { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_ASSIGN)); }
+    | expr SET set        
     ;
 
 // Function call arguments
@@ -326,19 +328,19 @@ callarglist : expr
             ;
 
 // Expressions
-expr : expr_mat
-     | expr_var
-     | expr_none
-     | expr_struct
-     | expr_int
-     | expr_float
-     | expr_str
-     | expr_bool
+expr : expr_mat     { $$ = nullptr; }
+     | expr_var     { $$ = $1; }
+     | expr_none    { $$ = nullptr; }
+     | expr_struct  { $$ = nullptr; }
+     | expr_int     { $$ = scanner->parseInt($1); }
+     | expr_float   { $$ = scanner->parseFloat($1); }
+     | expr_str     { $$ = scanner->parseString($1); }
+     | expr_bool    { $$ = scanner->parseBool($1); }
      ;
 
-expr_var : ID
-         | MINUS ID %prec NEG
-         | LPAR expr_var RPAR
+expr_var : ID { $$ = scanner->parseVar($1); }
+         | MINUS ID %prec NEG { $$ = scanner->parseInfixExpr(scanner->parseInt(0), scanner->parseVar($2), ir::Operator(ir::OperatorKind::OP_SUB)); }
+         | LPAR expr_var RPAR { $$ = $2; }
 
          | expr_var LPAR RPAR
          | expr_var LPAR callarglist RPAR
@@ -380,10 +382,10 @@ expr_var : ID
          | expr_var MOD expr_float
          | expr_var MOD expr_var
 
-         | expr_int PLUS expr_var
-         | expr_float PLUS expr_var
-         | expr_var PLUS expr_int
-         | expr_var PLUS expr_float
+         | expr_int PLUS expr_var   { $$ = scanner->parseInfixExpr(scanner->parseInt($1), $3, ir::Operator(ir::OperatorKind::OP_ADD)); }
+         | expr_float PLUS expr_var { $$ = scanner->parseInfixExpr(scanner->parseFloat($1), $3, ir::Operator(ir::OperatorKind::OP_ADD)); }
+         | expr_var PLUS expr_int   { $$ = scanner->parseInfixExpr($1, scanner->parseInt($3), ir::Operator(ir::OperatorKind::OP_ADD)); }
+         | expr_var PLUS expr_float { $$ = scanner->parseInfixExpr($1, scanner->parseFloat($3), ir::Operator(ir::OperatorKind::OP_ADD)); }
          | expr_mat PLUS expr_mat
          | expr_var PLUS expr_mat
          | expr_mat PLUS expr_var

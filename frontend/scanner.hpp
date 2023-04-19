@@ -9,7 +9,6 @@
 #include <vector>
 #include "parser.hpp"
 #include "ir.hpp"
-#include "expression.hpp"
 #include "scope.hpp"
 #include "logging.hpp"
 
@@ -23,6 +22,8 @@ private:
     ir::IR *currentIR;
     Scope *currScope;
     Diagnostics &diags;
+
+    llvm::SMLoc llvmloc;
 
     ir::TypeDecl *intType;
     ir::TypeDecl *floatType;
@@ -47,6 +48,15 @@ public:
     }
 
     ir::IR *parseVarDecl(ir::IR *type, std::string name);
+    ir::IR *parseExprStmt(ir::Expr *e);
+
+    ir::Expr *parseAssignment(ir::Expr *dst, ir::Expr *value);
+    ir::Expr *parseInt(long v);
+    ir::Expr *parseFloat(double v);
+    ir::Expr *parseBool(bool v);
+    ir::Expr *parseString(std::string v);
+    ir::Expr *parseVar(std::string v);
+    ir::Expr *parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, bool is_const=false);
 };
 
 

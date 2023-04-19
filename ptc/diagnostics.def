@@ -2,12 +2,15 @@
 #define DIAG(id, level, msg)
 #endif
 
-DIAG(ERR_VARDECL_REQUIRES_TYPE, Error, "variable declaration requires type")
-DIAG(ERR_SYM_ALREADY_DECLARED, Error, "symbol ‘{0}’ is already declared")
+DIAG(ERR_VARDECL_REQUIRES_TYPE, Error, "variable declaration requires type.")
+DIAG(ERR_SYM_ALREADY_DECLARED, Error, "symbol ‘{0}’ is already declared.")
+DIAG(ERR_UNDEFINED_VAR, Error, "variable ‘{0}’ is not defined.")
+DIAG(ERR_INTERNAL, Error, "internal error. {0}.")
+DIAG(ERR_INVALID_CONVERSION, Error, "invalid conversion from ‘{0}’ to ‘{1}’.")
 
 
-DIAG(ERR_EXPECTED, Error, "expected ‘{0}’ but found ‘{1}’")
+DIAG(ERR_EXPECTED, Error, "expected ‘{0}’ but found ‘{1}’.")
 //DIAG(note_module_identifier_declaration, Note, "module identifier declared here")
-DIAG(WARN_AMBIGOUS_NEGATION, Warning, "Negation is ambigous. Please consider using parenthesis.")
+DIAG(WARN_AMBIGOUS_NEGATION, Warning, "negation is ambigous. Please consider using parenthesis.")
 
 #undef DIAG
