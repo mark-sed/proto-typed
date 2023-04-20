@@ -1,3 +1,13 @@
+/**
+ * @file diagnostics.def
+ * @author Marek Sedlacek
+ * @brief Diagnostics messages for error reporting
+ * @date 2023-04-20
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
+
 #ifndef DIAG
 #define DIAG(id, level, msg)
 #endif

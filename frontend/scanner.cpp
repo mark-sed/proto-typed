@@ -1,3 +1,14 @@
+/**
+ * @file scanner.cpp
+ * @author Marek Sedlacek
+ * @brief Scanner and parsing driver (semantics)
+ * @date 2023-04-20
+ * 
+ * @copyright Copyright (c) 2023
+ * Takes care of scanning, parsing and creating
+ * IR from parsed code.
+ */
+
 #include "scanner.hpp"
 #include "logging.hpp"
 #include "llvm/Support/Casting.h"

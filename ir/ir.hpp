@@ -1,3 +1,13 @@
+/**
+ * @file ir.hpp
+ * @author Marek Sedlacek
+ * @brief IR handling and code representation
+ * @date 2023-04-20
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
+
 #ifndef _IR_HPP_
 #define _IR_HPP_
 
@@ -12,6 +22,9 @@ namespace ir {
 class Expr;
 class VarAccess;
 
+/**
+ * Types of IR
+ */
 enum IRKind {
     IR_VAR_DECL,
     IR_TYPE_DECL,
@@ -19,6 +32,9 @@ enum IRKind {
     IR_ASSIGNMENT
 };
 
+/**
+ * Types of expressions
+ */
 enum ExprKind {
     EX_BIN_INF,
     EX_BIN_PRE,
@@ -30,13 +46,9 @@ enum ExprKind {
     EX_VAR
 };
 
-enum DataType {
-    INT,
-    BOOL,
-    FLOAT,
-    STRING
-};
-
+/**
+ * Types of operators
+ */
 enum OperatorKind {
     OP_ADD,
     OP_SUB,
@@ -63,7 +75,9 @@ enum OperatorKind {
     OP_UNKNOWN
 };
 
-
+/**
+ * Parent class for all IR objects - declarations
+ */
 class IR {
 private:
     const IRKind kind;
@@ -85,7 +99,9 @@ public:
     IR *getEnclosingIR() { return enclosing_ir; }
 };
 
-
+/**
+ * Declaration of a type
+ */
 class TypeDecl : public IR {
 private:
     bool is_maybe;
@@ -99,7 +115,9 @@ public:
     std::string debug() const override { return name.str(); }
 };
 
-
+/**
+ * Declaration of a variable
+ */
 class VarDecl : public IR {
 private:
     TypeDecl *td;
@@ -115,8 +133,9 @@ public:
     virtual std::string debug() const override { return "("+td->debug()+")"+name.str(); }
 };
 
-
-
+/**
+ * Operator in an expression
+ */
 class Operator {
 private:
     //llvm::SMLoc loc;
@@ -161,7 +180,9 @@ public:
     bool isUnspecified() const { return unspecified; }
 };
 
-
+/**
+ * Parent class for any expression
+ */
 class Expr {
 private:
     const ExprKind kind;
@@ -178,7 +199,9 @@ public:
     bool isConst() { return is_const; }
 };
 
-
+/**
+ * Expression containing 2 arguments and an operator
+ */
 class BinaryInfixExpr : public Expr {
 private:
     Expr *left;
@@ -201,13 +224,15 @@ public:
     }
 };
 
-
-class BinaryPrefixExpr : public Expr {
+/**
+ * Unary expression with prefixed operator
+ */
+class UnaryPrefixExpr : public Expr {
 private:
     Expr *e;
     const Operator op;
 public:
-    BinaryPrefixExpr(Expr *e, Operator op, TypeDecl *type, bool is_const)
+    UnaryPrefixExpr(Expr *e, Operator op, TypeDecl *type, bool is_const)
                     : Expr(ExprKind::EX_BIN_PRE, type, is_const),
                       e(e),
                       op(op) {
@@ -221,7 +246,9 @@ public:
     }
 };
 
-
+/**
+ * Integer value
+ */
 class IntLiteral : public Expr {
 private:
     llvm::SMLoc loc;
@@ -240,7 +267,9 @@ public:
     std::string debug() const override { return std::to_string(value.getExtValue()); }
 };
 
-
+/**
+ * Boolean value
+ */
 class BoolLiteral : public Expr {
 private:
     llvm::SMLoc loc;
@@ -259,6 +288,9 @@ public:
     std::string debug() const override { return value ? "true" : "false"; }
 };
 
+/**
+ * Access to a variable (as a variable in an expression)
+ */
 class VarAccess : public Expr {
 private:
     IR *var;
@@ -272,6 +304,9 @@ public:
     std::string debug() const override { return var->debug(); }
 };
 
+/**
+ * Standalone expression (statement)
+ */
 class ExprStmt : public IR {
 private:
     Expr *e;

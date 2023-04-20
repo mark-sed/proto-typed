@@ -1,3 +1,13 @@
+/**
+ * @file scope.cpp
+ * @author Marek Sedlacek
+ * @brief Symbol scope
+ * @date 2023-04-20
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
+
 #include "scope.hpp"
 
 using namespace ptc;

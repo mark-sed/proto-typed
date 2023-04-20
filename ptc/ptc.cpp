@@ -6,6 +6,7 @@
  * 
  * @copyright Copyright (c) Marek Sedlacek, 2023
  */
+
 #include "ptc.hpp"
 #include "scanner.hpp"
 #include "logging.hpp"
@@ -15,6 +16,7 @@
 
 using namespace ptc;
 
+/** Main */
 int main(int argc, char *argv[]) {
     llvm::InitLLVM LLVMX(argc, argv);
 

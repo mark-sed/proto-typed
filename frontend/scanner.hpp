@@ -1,3 +1,14 @@
+/**
+ * @file scanner.hpp
+ * @author Marek Sedlacek
+ * @brief Scanner and parsing driver (semantics)
+ * @date 2023-04-20
+ * 
+ * @copyright Copyright (c) 2023
+ * Takes care of scanning, parsing and creating
+ * IR from parsed code.
+ */
+
 #ifndef _SCANNER_HPP_
 #define _SCANNER_HPP_
 
@@ -14,6 +25,9 @@
 
 namespace ptc {
 
+/**
+ * Scanning, parsing and semantics driver
+ */
 class Scanner : public yyFlexLexer {
 private:
     ptc::Parser::semantic_type *yylval = nullptr;
@@ -34,22 +48,42 @@ public:
     ptc::Parser::location_type *loc = nullptr;     ///< Current parsing location
     
     Scanner(Diagnostics &diags);
+
+    /**
+     * Initializer method to be called before parsing
+     */
     void init();
 
     virtual int yylex(ptc::Parser::semantic_type *const lval,
                       ptc::Parser::location_type *location);
 
+    /**
+     * Starts parsing of the given code
+     * @param code Code to be parsed
+     */
     void parse(std::istream *code);
+
+    /**
+     * Removes quotes from a string
+     * @param str String with quotes
+     * @note The method does no checking, it just removes
+     *       the first and last character
+     */
     void removeQuotes(char **str);
 
+    /**
+     * Looks up a symbol in the current scope
+     * @param name Symbol to lookup
+     * @return The symbol if it is found or nullptr
+     */
     ir::IR *sym_lookup(llvm::StringRef name) {
         LOGMAX("Symbol lookup: "+name.str());
         return currScope->lookup(name);
     }
 
+    // Parsing methods
     ir::IR *parseVarDecl(ir::IR *type, std::string name);
     ir::IR *parseExprStmt(ir::Expr *e);
-
     ir::Expr *parseAssignment(ir::Expr *dst, ir::Expr *value);
     ir::Expr *parseInt(long v);
     ir::Expr *parseFloat(double v);

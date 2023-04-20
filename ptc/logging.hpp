@@ -1,3 +1,13 @@
+/**
+ * @file logging.hpp
+ * @author Marek Sedlacek
+ * @brief Logging and reporting for ptc
+ * @date 2023-04-20
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
+
 #ifndef _LOGGING_HPP_
 #define _LOGGING_HPP_
 
@@ -15,6 +25,9 @@
 
 namespace ptc {
 
+/**
+ * Namespace to guard diagnostics messages
+ */
 namespace diag {
 enum {
 #define DIAG(id, level, msg) id,
@@ -22,6 +35,9 @@ enum {
 };
 }
 
+/**
+ * Reporting for errors, warnings and info
+ */
 class Diagnostics {
     static const char *getDiagnosticText(unsigned diagID);
     static llvm::SourceMgr::DiagKind getDiagnosticKind(unsigned diagID);
@@ -32,8 +48,19 @@ class Diagnostics {
 public:
     Diagnostics(llvm::SourceMgr &srcMgr) : srcMgr(srcMgr), numErrors(0) {}
 
+    /**
+     * @return The number of errors that has occured
+     */
     unsigned getNumErrors() { return numErrors; }
 
+    /**
+     * Reports an error, warning or note in LLVM style
+     * 
+     * @tparam Args 
+     * @param loc Location where the report occures
+     * @param diagID Report ID
+     * @param arguments Arguments to fill in report message if needed
+     */
     template <typename... Args>
     void report(llvm::SMLoc loc, unsigned diagID, Args &&... arguments) {
         std::string msg = llvm::formatv(getDiagnosticText(diagID),
@@ -44,10 +71,16 @@ public:
     }
 };
 
-
+/** Logging for debugging */
 namespace log {
 
+/**
+ * Error message output
+ * @warning Use Diagnostics for real error messages
+ * @param msg Error message
+ */
 void error(std::string msg);
+
 /**
  * Base class for all loggers
  */ 

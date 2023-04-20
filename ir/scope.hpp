@@ -1,3 +1,13 @@
+/**
+ * @file scope.hpp
+ * @author Marek Sedlacek
+ * @brief Symbol scope
+ * @date 2023-04-20
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
+
 #ifndef _SCOPE_HPP_
 #define _SCOPE_HPP_
 
@@ -7,6 +17,9 @@
 
 namespace ptc {
 
+/**
+ * Symbol scope
+ */
 class Scope {
 private:
     Scope *parent;
@@ -15,9 +28,23 @@ private:
 public:
     Scope(Scope *parent=nullptr) : parent(parent) {}
 
+    /**
+     * Inserts an IR declaration into a scope if it isn't already inside
+     * @param decl IR to be inserted
+     * @return true if insertion was successful, false otherwise
+     */
     bool insert(ir::IR *decl);
+
+    /**
+     * @brief Finds a symbol in the scope
+     * @param name Symbol to find
+     * @return The IR of the symbol or nullptr if not found
+     */
     ir::IR *lookup(llvm::StringRef name);
 
+    /**
+     * @return Parent of the current scope 
+     */
     Scope *getParent() { return parent; }
 };
 

@@ -1,3 +1,13 @@
+/**
+ * @file logging.cpp
+ * @author Marek Sedlacek
+ * @brief Logging and reporting for ptc
+ * @date 2023-04-20
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
+
 #include "logging.hpp"
 #include <iostream>
 
