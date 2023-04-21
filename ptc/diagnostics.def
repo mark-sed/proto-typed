@@ -17,6 +17,7 @@ DIAG(ERR_SYM_ALREADY_DECLARED, Error, "symbol ‘{0}’ is already declared.")
 DIAG(ERR_UNDEFINED_VAR, Error, "variable ‘{0}’ is not defined.")
 DIAG(ERR_INTERNAL, Error, "internal error. {0}.")
 DIAG(ERR_INVALID_CONVERSION, Error, "invalid conversion from ‘{0}’ to ‘{1}’.")
+DIAG(ERR_UNSUPPORTED_OP_TYPE, Error, "unsupported operand type(s) for ‘{0}’: ‘{1}’ and ‘{2}’.")
 
 
 DIAG(ERR_EXPECTED, Error, "expected ‘{0}’ but found ‘{1}’.")

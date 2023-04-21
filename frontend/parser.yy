@@ -300,7 +300,7 @@ vardecl : type ID { $$ = scanner->parseVarDecl($1, $2); }
 
 // Definition
 vardef : type ID SET struct_val
-       | type ID SET expr
+       | type ID SET expr        { scanner->parseVarDef($1, $2, $4); }
        | KWCONST ID SET expr
        | KWVAR ID SET expr
        ;
@@ -389,7 +389,7 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          | expr_mat PLUS expr_mat
          | expr_var PLUS expr_mat
          | expr_mat PLUS expr_var
-         | expr_var PLUS expr_var
+         | expr_var PLUS expr_var   { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_ADD)); }
 
          | expr_int MINUS expr_var
          | expr_float MINUS expr_var

@@ -20,6 +20,22 @@
 
 using namespace ptc;
 
+// Helper functions
+
+/**
+ * @param v Value to check if is in accepted
+ * @param accepted Accepted values
+ * @return true if v is in accepted
+ * @return false if v is not in accepted
+ */
+template<typename T>
+bool isOneOf(T v, std::initializer_list<T> accepted) {
+    return std::find(begin(accepted), end(accepted), v) != std::end(accepted);
+}
+bool isOneOf(llvm::StringRef v, std::initializer_list<std::string> accepted) {
+    return std::find(begin(accepted), end(accepted), v.str().c_str()) != std::end(accepted);
+}
+
 Scanner::Scanner(Diagnostics &diags) : currentIR(nullptr), diags(diags) {
     loc = new Parser::location_type();
     init();
@@ -31,10 +47,10 @@ void Scanner::init() {
 
     llvmloc = llvm::SMLoc();
     
-    intType = new ir::TypeDecl(currentIR, llvm::SMLoc(), "int");
-    floatType = new ir::TypeDecl(currentIR, llvm::SMLoc(), "float");
-    stringType = new ir::TypeDecl(currentIR, llvm::SMLoc(), "string");
-    boolType = new ir::TypeDecl(currentIR, llvm::SMLoc(), "bool");
+    intType = new ir::TypeDecl(currentIR, llvm::SMLoc(), INT_CSTR);
+    floatType = new ir::TypeDecl(currentIR, llvm::SMLoc(), FLOAT_CSTR);
+    stringType = new ir::TypeDecl(currentIR, llvm::SMLoc(), STRING_CSTR);
+    boolType = new ir::TypeDecl(currentIR, llvm::SMLoc(), BOOL_CSTR);
 
     currScope->insert(intType);
     currScope->insert(boolType);
@@ -112,6 +128,7 @@ ir::Expr *Scanner::parseString(std::string v) {
 }
 
 ir::Expr *Scanner::parseVar(std::string v) {
+    LOGMAX("Parsing a variable "+v);
     auto var = currScope->lookup(v);
     if(var) {
         return new ir::VarAccess(llvm::dyn_cast<ir::VarDecl>(var));
@@ -130,12 +147,12 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
     switch(op.getKind()) {
     case ir::OperatorKind::OP_ASSIGN:
         if(tl->getName() != tr->getName()) {
-            if((tl->getName() == "float" && tr->getName() == "int")
-              || (tl->getName() == "int" && tr->getName() == "float")) {
+            if((tl->getName() == FLOAT_CSTR && tr->getName() == INT_CSTR)
+              || (tl->getName() == INT_CSTR && tr->getName() == FLOAT_CSTR)) {
                 type = tl;
             }
             else {
-                diags.report(llvmloc, diag::ERR_INVALID_CONVERSION, tl->getName(), tr->getName());
+                diags.report(llvmloc, diag::ERR_INVALID_CONVERSION, tr->getName(), tl->getName());
             }
         }
     break;
@@ -145,16 +162,24 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
     case ir::OperatorKind::OP_MUL:
     case ir::OperatorKind::OP_DIV:
     case ir::OperatorKind::OP_MOD:
-        // Int or Float
-        if(tl->getName() != tr->getName()) {
-            // One is float
-            type = this->floatType;
+        if(!isOneOf(tl->getName(), {INT_CSTR, FLOAT_CSTR}) || !isOneOf(tr->getName(), {INT_CSTR, FLOAT_CSTR})) {
+            diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+        }
+        else {
+            // Int or Float
+            if(tl->getName() != tr->getName()) {
+                // One is float
+                type = this->floatType;
+            }
         }
     break;
     case ir::OperatorKind::OP_CONCAT:
         type = this->stringType;
     break;
     case ir::OperatorKind::OP_POW:
+        if(!isOneOf(tl->getName(), {FLOAT_CSTR}) || !isOneOf(tr->getName(), {FLOAT_CSTR})) {
+            diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+        }
         type = this->floatType;
     break;
     case ir::OperatorKind::OP_BLSHFT:
@@ -162,17 +187,39 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
     case ir::OperatorKind::OP_BAND:
     case ir::OperatorKind::OP_BXOR:
     case ir::OperatorKind::OP_BOR:
+        if(!isOneOf(tl->getName(), {INT_CSTR}) || !isOneOf(tr->getName(), {INT_CSTR})) {
+            diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+        }
         type = this->intType;
     break;
     case ir::OperatorKind::OP_BT:
     case ir::OperatorKind::OP_BEQ:
     case ir::OperatorKind::OP_LT:
     case ir::OperatorKind::OP_LEQ:
+        if(!isOneOf(tl->getName(), {INT_CSTR, FLOAT_CSTR, STRING_CSTR}) ||
+            !isOneOf(tr->getName(), {INT_CSTR, FLOAT_CSTR, STRING_CSTR})) {
+            diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+        }
+        if(tl->getName() == STRING_CSTR || tr->getName() == STRING_CSTR) {
+            if(tl->getName() != tr->getName()) {
+                diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+            }
+        }
+        type = this->boolType;
+    break;
     case ir::OperatorKind::OP_EQ:
     case ir::OperatorKind::OP_NEQ:
+        type = this->boolType;
+    break;
     case ir::OperatorKind::OP_LAND:
     case ir::OperatorKind::OP_LOR:
+        if(!isOneOf(tl->getName(), {BOOL_CSTR}) || !isOneOf(tr->getName(), {BOOL_CSTR})) {
+            diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+        }
+        type = this->boolType;
+    break;
     case ir::OperatorKind::OP_IN:
+        // TODO: check that tr is a matrix
         type = this->boolType;
     break;
     default: diags.report(llvmloc, diag::ERR_INTERNAL, "Unknown operator in an expression");
@@ -181,3 +228,7 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
     return new ir::BinaryInfixExpr(l, r, op, type, is_const);
 }
 
+void Scanner::parseVarDef(ir::IR *type, std::string name, ir::Expr *value) {
+    this->parseVarDecl(type, name);
+    this->parseInfixExpr(this->parseVar(name), value, ir::Operator(ir::OperatorKind::OP_ASSIGN));
+}

@@ -15,6 +15,11 @@
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/APSInt.h"
 
+#define INT_CSTR "int"
+#define FLOAT_CSTR "float"
+#define BOOL_CSTR "bool"
+#define STRING_CSTR "string"
+
 namespace ptc {
 
 namespace ir {

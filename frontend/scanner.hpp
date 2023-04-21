@@ -83,8 +83,8 @@ public:
 
     // Parsing methods
     ir::IR *parseVarDecl(ir::IR *type, std::string name);
+    void parseVarDef(ir::IR *type, std::string name, ir::Expr *value);
     ir::IR *parseExprStmt(ir::Expr *e);
-    ir::Expr *parseAssignment(ir::Expr *dst, ir::Expr *value);
     ir::Expr *parseInt(long v);
     ir::Expr *parseFloat(double v);
     ir::Expr *parseBool(bool v);
