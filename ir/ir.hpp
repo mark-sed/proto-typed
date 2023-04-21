@@ -14,13 +14,13 @@
 #include "llvm/Support/SMLoc.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/APSInt.h"
-#include <sstream>
 #include <vector>
 
 #define INT_CSTR "int"
 #define FLOAT_CSTR "float"
 #define BOOL_CSTR "bool"
 #define STRING_CSTR "string"
+#define VOID_CSTR "void"
 
 namespace ptc {
 
@@ -52,7 +52,8 @@ enum ExprKind {
     EX_STRING,
     EX_NONE,
     EX_VAR,
-    EX_FUN_CALL
+    EX_FUN_CALL,
+    EX_FUN_PTR
 };
 
 /**
@@ -185,15 +186,10 @@ public:
     
     TypeDecl *getReturnType() { return returnType; }
     static bool classof(const IR *ir) {
-        return ir->getKind() == IRKind::IR_FORMAL_PARAM_DECL;
+        return ir->getKind() == IRKind::IR_FUNCTION_DECL;
     }
-    virtual std::string debug() const override { 
-        std::stringstream ss;
-        // TODO: prettyfy 
-        for(auto p : params) {
-            ss << p.debug() << ", ";
-        }
-        return returnType->getName().str()+" "+name.str()+"("+ss.str()+") { ... }"; 
+    virtual std::string debug() const override {
+        return returnType->getName().str()+" "+name.str()+"(...) { ... }"; 
     }
 };
 
@@ -360,6 +356,8 @@ private:
     IR *var;
 public:
     VarAccess(VarDecl *var) : Expr(ExprKind::EX_VAR, var->getType(), false), var(var) {}
+    VarAccess(FormalParamDecl *var) : Expr(ExprKind::EX_VAR, var->getType(), false), var(var) {}
+    VarAccess(FunctionDecl *var, TypeDecl *type) : Expr(ExprKind::EX_VAR, type, false), var(var) {}
     
     IR *getVar() { return var; }
     static bool classof(const Expr *e) {
@@ -381,7 +379,7 @@ public:
     
     Expr *getExpr() { return e; }
     static bool classof(const IR *ir) {
-        return ir->getKind() == IRKind::IR_VAR_DECL;
+        return ir->getKind() == IRKind::IR_EXPR_STMT;
     }
     virtual std::string debug() const override { return e->debug(); }
 };
@@ -404,11 +402,8 @@ public:
         return e->getKind() == ExprKind::EX_FUN_CALL;
     }
     std::string debug() const override { 
-        std::stringstream ss;
-        for(auto p: params) {
-            ss << p->debug()+", ";
-        }
-        return fun->getName().str()+"("+ss.str()+")";
+        // TODO: Better debug
+        return fun->getName().str()+"( ... )";
     }
 };
 

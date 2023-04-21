@@ -43,6 +43,7 @@ private:
     ir::TypeDecl *floatType;
     ir::TypeDecl *stringType;
     ir::TypeDecl *boolType;
+    ir::TypeDecl *voidType;
 
 public:
     ptc::Parser::location_type *loc = nullptr;     ///< Current parsing location

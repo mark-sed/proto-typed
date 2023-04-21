@@ -36,6 +36,11 @@ bool isOneOf(llvm::StringRef v, std::initializer_list<std::string> accepted) {
     return std::find(begin(accepted), end(accepted), v.str().c_str()) != std::end(accepted);
 }
 
+llvm::StringRef encodeFunction(llvm::StringRef name, ir::TypeDecl *retType, std::vector<ir::FormalParamDecl> params) {
+    // TODO: encode function
+    return name;
+}
+
 Scanner::Scanner(Diagnostics &diags) : currentIR(nullptr), diags(diags) {
     loc = new Parser::location_type();
     init();
@@ -51,11 +56,27 @@ void Scanner::init() {
     floatType = new ir::TypeDecl(currentIR, llvm::SMLoc(), FLOAT_CSTR);
     stringType = new ir::TypeDecl(currentIR, llvm::SMLoc(), STRING_CSTR);
     boolType = new ir::TypeDecl(currentIR, llvm::SMLoc(), BOOL_CSTR);
+    voidType = new ir::TypeDecl(currentIR, llvm::SMLoc(), VOID_CSTR);
 
     currScope->insert(intType);
     currScope->insert(boolType);
     currScope->insert(floatType);
     currScope->insert(stringType);
+    currScope->insert(voidType);
+
+    auto printParams = std::vector<ir::FormalParamDecl>{
+        ir::FormalParamDecl(currentIR, llvmloc, "v", this->intType, false)
+    };
+    auto printBody = std::vector<ir::IR *> {
+        // TODO
+    };
+    auto printIntFun = new ir::FunctionDecl(currentIR, 
+                                            llvm::SMLoc(), 
+                                            encodeFunction("print", this->voidType, printParams),
+                                            this->voidType,
+                                            printParams,
+                                            printBody);
+    currScope->insert(printIntFun);
 }
 
 void Scanner::parse(std::istream *code) {
@@ -131,12 +152,24 @@ ir::Expr *Scanner::parseVar(std::string v) {
     LOGMAX("Parsing a variable "+v);
     auto var = currScope->lookup(v);
     if(var) {
-        return new ir::VarAccess(llvm::dyn_cast<ir::VarDecl>(var));
+        if(llvm::isa<ir::VarDecl>(var)) {
+            return new ir::VarAccess(llvm::dyn_cast<ir::VarDecl>(var));
+        }
+        else if(llvm::isa<ir::FunctionDecl>(var)) {
+            return new ir::VarAccess(llvm::dyn_cast<ir::FunctionDecl>(var), this->intType);
+        }
+        else if(llvm::isa<ir::FormalParamDecl>(var)) {
+            return new ir::VarAccess(llvm::dyn_cast<ir::FormalParamDecl>(var));
+        }
+        else {
+            diags.report(llvmloc, diag::ERR_INTERNAL, "Only variable and function access is just yet implemented");
+        }
     }
     else {
         diags.report(llvmloc, diag::ERR_UNDEFINED_VAR, v);
         return nullptr;
     }
+    return nullptr;
 }
 
 ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, bool is_const) {
@@ -248,6 +281,7 @@ std::vector<ir::Expr *> Scanner::parseAddFunCallArg(std::vector<ir::Expr *> &lis
 
 ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
     if(!fun) {
+        LOG1("Function call called with nullptr function");
         return nullptr;
     }
     LOGMAX("Parsing function call "+fun->debug());
