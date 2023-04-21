@@ -44,6 +44,7 @@
 
     #include <cmath>
     #include <sstream>
+    #include <vector>
     #include "scanner.hpp"
     #include "logging.hpp"
     #include "ir.hpp"
@@ -183,6 +184,7 @@
 %type <ptc::ir::Expr *> expr
 %type <ptc::ir::Expr *> expr_var
 %type <ptc::ir::Expr *> set
+%type <std::vector<ptc::ir::Expr *> > callarglist
 
 %locations
 
@@ -323,8 +325,8 @@ set : expr SETCONCAT expr { $$ = scanner->parseInfixExpr($1, scanner->parseInfix
     ;
 
 // Function call arguments
-callarglist : expr
-            | expr COMMA callarglist
+callarglist : expr                    { $$ = scanner->parseFunCallArg($1); }
+            | callarglist COMMA expr  { $$ = scanner->parseAddFunCallArg($1, $3); }
             ;
 
 // Expressions
@@ -342,8 +344,8 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          | MINUS ID %prec NEG { $$ = scanner->parseInfixExpr(scanner->parseInt(0), scanner->parseVar($2), ir::Operator(ir::OperatorKind::OP_SUB)); }
          | LPAR expr_var RPAR { $$ = $2; }
 
-         | expr_var LPAR RPAR
-         | expr_var LPAR callarglist RPAR
+         | expr_var LPAR RPAR             { $$ = scanner->parseFunCall($1, std::vector<ptc::ir::Expr *>{}); }
+         | expr_var LPAR callarglist RPAR { $$ = scanner->parseFunCall($1, $3); }
 
          | expr_str LSQ int_val RSQ
          | expr_mat LSQ int_val RSQ

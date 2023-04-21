@@ -661,6 +661,9 @@ namespace  ptc  {
       // "identifier"
       // expr_str
       char dummy6[sizeof (std::string)];
+
+      // callarglist
+      char dummy7[sizeof (std::vector<ptc::ir::Expr *> )];
     };
 
     /// The size of the largest semantic type.
@@ -995,6 +998,10 @@ namespace  ptc  {
         value.move< std::string > (std::move (that.value));
         break;
 
+      case symbol_kind::S_callarglist: // callarglist
+        value.move< std::vector<ptc::ir::Expr *>  > (std::move (that.value));
+        break;
+
       default:
         break;
     }
@@ -1102,6 +1109,20 @@ namespace  ptc  {
       {}
 #endif
 
+#if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, std::vector<ptc::ir::Expr *> && v, location_type&& l)
+        : Base (t)
+        , value (std::move (v))
+        , location (std::move (l))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const std::vector<ptc::ir::Expr *> & v, const location_type& l)
+        : Base (t)
+        , value (v)
+        , location (l)
+      {}
+#endif
+
       /// Destroy the symbol.
       ~basic_symbol ()
       {
@@ -1156,6 +1177,10 @@ switch (yykind)
       case symbol_kind::S_ID: // "identifier"
       case symbol_kind::S_expr_str: // expr_str
         value.template destroy< std::string > ();
+        break;
+
+      case symbol_kind::S_callarglist: // callarglist
+        value.template destroy< std::vector<ptc::ir::Expr *>  > ();
         break;
 
       default:
@@ -2833,7 +2858,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 2837 "frontend/parser.hpp"
+#line 2862 "frontend/parser.hpp"
 
 
 

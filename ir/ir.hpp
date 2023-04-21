@@ -14,6 +14,8 @@
 #include "llvm/Support/SMLoc.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/APSInt.h"
+#include <sstream>
+#include <vector>
 
 #define INT_CSTR "int"
 #define FLOAT_CSTR "float"
@@ -34,7 +36,8 @@ enum IRKind {
     IR_VAR_DECL,
     IR_TYPE_DECL,
     IR_EXPR_STMT,
-    IR_ASSIGNMENT
+    IR_FORMAL_PARAM_DECL,
+    IR_FUNCTION_DECL
 };
 
 /**
@@ -48,7 +51,8 @@ enum ExprKind {
     EX_FLOAT,
     EX_STRING,
     EX_NONE,
-    EX_VAR
+    EX_VAR,
+    EX_FUN_CALL
 };
 
 /**
@@ -136,6 +140,61 @@ public:
         return ir->getKind() == IRKind::IR_VAR_DECL;
     }
     virtual std::string debug() const override { return "("+td->debug()+")"+name.str(); }
+};
+
+/**
+ * Declaration of a formal parameter
+ */
+class FormalParamDecl : public IR {
+private:
+    TypeDecl *td;
+    bool byReference;
+public:
+    FormalParamDecl(IR *enclosing_ir, llvm::SMLoc loc, llvm::StringRef name, TypeDecl *td, bool byReference=false)
+           : IR(IRKind::IR_FORMAL_PARAM_DECL, enclosing_ir, loc, name),
+             td(td),
+             byReference(byReference) {}
+    
+    TypeDecl *getType() { return td; }
+    bool isByReference() { return byReference; }
+    static bool classof(const IR *ir) {
+        return ir->getKind() == IRKind::IR_FORMAL_PARAM_DECL;
+    }
+    virtual std::string debug() const override { return "("+td->debug()+(byReference ? "&" : "")+")"+name.str(); }
+};
+
+/**
+ * Declaration of a function
+ */
+class FunctionDecl : public IR {
+private:
+    TypeDecl *returnType;
+    std::vector<FormalParamDecl> &params;
+    std::vector<ir::IR *> decls;
+public:
+    FunctionDecl(IR *enclosing_ir, 
+                 llvm::SMLoc loc,
+                 llvm::StringRef name,
+                 TypeDecl *returnType,
+                 std::vector<FormalParamDecl> &params,
+                 std::vector<ir::IR *> decls)
+           : IR(IRKind::IR_FUNCTION_DECL, enclosing_ir, loc, name),
+             returnType(returnType),
+             params(params),
+             decls(decls) {}
+    
+    TypeDecl *getReturnType() { return returnType; }
+    static bool classof(const IR *ir) {
+        return ir->getKind() == IRKind::IR_FORMAL_PARAM_DECL;
+    }
+    virtual std::string debug() const override { 
+        std::stringstream ss;
+        // TODO: prettyfy 
+        for(auto p : params) {
+            ss << p.debug() << ", ";
+        }
+        return returnType->getName().str()+" "+name.str()+"("+ss.str()+") { ... }"; 
+    }
 };
 
 /**
@@ -325,6 +384,32 @@ public:
         return ir->getKind() == IRKind::IR_VAR_DECL;
     }
     virtual std::string debug() const override { return e->debug(); }
+};
+
+/**
+ * Function call
+ */
+class FunctionCall : public Expr {
+private:
+    FunctionDecl *fun;
+    std::vector<Expr *> params;
+public:
+    FunctionCall(FunctionDecl *fun, std::vector<Expr *> params) 
+                : Expr(ExprKind::EX_FUN_CALL, fun->getReturnType(), false),
+                  fun(fun),
+                  params(params) {}
+    
+    FunctionDecl *getFun() { return fun; }
+    static bool classof(const Expr *e) {
+        return e->getKind() == ExprKind::EX_FUN_CALL;
+    }
+    std::string debug() const override { 
+        std::stringstream ss;
+        for(auto p: params) {
+            ss << p->debug()+", ";
+        }
+        return fun->getName().str()+"("+ss.str()+")";
+    }
 };
 
 }

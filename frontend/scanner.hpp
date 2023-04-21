@@ -91,6 +91,9 @@ public:
     ir::Expr *parseString(std::string v);
     ir::Expr *parseVar(std::string v);
     ir::Expr *parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, bool is_const=false);
+    ir::Expr *parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params);
+    std::vector<ir::Expr *> parseFunCallArg(ir::Expr *e);
+    std::vector<ir::Expr *> parseAddFunCallArg(std::vector<ir::Expr *> &list, ir::Expr *e);
 };
 
 

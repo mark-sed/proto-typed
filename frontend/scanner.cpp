@@ -230,5 +230,47 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
 
 void Scanner::parseVarDef(ir::IR *type, std::string name, ir::Expr *value) {
     this->parseVarDecl(type, name);
-    this->parseInfixExpr(this->parseVar(name), value, ir::Operator(ir::OperatorKind::OP_ASSIGN));
+    auto e = this->parseInfixExpr(this->parseVar(name), value, ir::Operator(ir::OperatorKind::OP_ASSIGN));
+    this->parseExprStmt(e);
+}
+
+std::vector<ir::Expr *> Scanner::parseFunCallArg(ir::Expr *e) {
+    LOGMAX("Creating new function call list with "+e->debug());
+    std::vector<ir::Expr *> list{e};
+    return list;    
+}
+
+std::vector<ir::Expr *> Scanner::parseAddFunCallArg(std::vector<ir::Expr *> &list, ir::Expr *e) {
+    LOGMAX("Pushing new argument into call list: "+e->debug());
+    list.push_back(e);
+    return list;
+}
+
+ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
+    if(!fun) {
+        return nullptr;
+    }
+    LOGMAX("Parsing function call "+fun->debug());
+    // TODO: Handle when calling on return value
+    auto var = llvm::dyn_cast<ir::VarAccess>(fun);
+    if(var) {
+        auto fir = this->sym_lookup(var->getVar()->getName());
+        if(fir) {
+            auto f = llvm::dyn_cast<ir::FunctionDecl>(fir);
+            if(f) {
+                auto fc = new ir::FunctionCall(f, params);
+                return fc;
+            }
+            else {
+                diags.report(llvmloc, diag::ERR_NOT_CALLABLE, var->getVar()->getName());
+            }
+        }
+        else {
+            diags.report(llvmloc, diag::ERR_UNDEFINED_VAR, var->getVar()->getName());
+        }
+    }
+    else {
+        diags.report(llvmloc, diag::ERR_INTERNAL, "Function call is not implemented for expressions");
+    }
+    return nullptr;
 }
