@@ -89,6 +89,11 @@ void Scanner::parse(std::istream *code) {
         log::error("Could not parse the source code.");
         exit(1);
     }
+
+    std::cout << "\n-----\nIR generated:\n";
+    for(auto a : this->decls) {
+        std::cout << a->debug() << "\n";
+    }
 }
 
 void Scanner::removeQuotes(char **str) {
@@ -104,7 +109,7 @@ ir::IR *Scanner::parseVarDecl(ir::IR *type, std::string name) {
     if(t) {
         auto v = new ir::VarDecl(currentIR, type->getLocation(), name, t);
         if(currScope->insert(v)) {
-            this->decls.push_back(v);
+            //this->decls.push_back(v);
         }
         else {
             diags.report(type->getLocation(), diag::ERR_SYM_ALREADY_DECLARED, name);
@@ -120,7 +125,7 @@ ir::IR *Scanner::parseVarDecl(ir::IR *type, std::string name) {
 ir::IR *Scanner::parseExprStmt(ir::Expr *e) {
     LOGMAX("Parsing expression '"+e->debug()+"' into a statement");
     auto v = new ir::ExprStmt(currentIR, llvmloc, "Expression", e);
-    this->decls.push_back(v);
+    //this->decls.push_back(v);
     return v;
 }
 
@@ -261,10 +266,10 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
     return new ir::BinaryInfixExpr(l, r, op, type, is_const);
 }
 
-void Scanner::parseVarDef(ir::IR *type, std::string name, ir::Expr *value) {
+ir::IR *Scanner::parseVarDef(ir::IR *type, std::string name, ir::Expr *value) {
     this->parseVarDecl(type, name);
     auto e = this->parseInfixExpr(this->parseVar(name), value, ir::Operator(ir::OperatorKind::OP_ASSIGN));
-    this->parseExprStmt(e);
+    return this->parseExprStmt(e);
 }
 
 std::vector<ir::Expr *> Scanner::parseFunCallArg(ir::Expr *e) {
@@ -277,6 +282,29 @@ std::vector<ir::Expr *> Scanner::parseAddFunCallArg(std::vector<ir::Expr *> &lis
     LOGMAX("Pushing new argument into call list: "+e->debug());
     list.push_back(e);
     return list;
+}
+
+std::vector<ir::IR *> Scanner::parseStmtBody(ir::IR *stmt) {
+    if(!stmt) {
+        LOGMAX("Creating empty statement body");
+        std::vector<ir::IR *> body{};
+        return body;
+    }
+    else {
+        LOGMAX("Creating statement body "+stmt->debug());
+        std::vector<ir::IR *> body{stmt};
+        return body;
+    }
+}
+
+std::vector<ir::IR *> Scanner::parseStmtBodyAdd(std::vector<ir::IR *> &body, ir::IR *stmt) {
+    if(!stmt) {
+        LOGMAX("Nullptr was to be added to statement body");
+        return body;
+    }
+    LOGMAX("Adding to a statement body "+stmt->debug());
+    body.push_back(stmt);
+    return body;
 }
 
 ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
@@ -307,4 +335,20 @@ ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
         diags.report(llvmloc, diag::ERR_INTERNAL, "Function call is not implemented for expressions");
     }
     return nullptr;
+}
+
+ir::IR *Scanner::parseIfStmt(ir::Expr *cond, std::vector<ir::IR *> &ifBranch, std::vector<ir::IR *> &elseBranch) {
+    LOGMAX("Parsing if statement");
+    if(cond->getType() != boolType) {
+        diags.report(llvmloc, diag::ERR_IF_COND_MUST_BE_BOOL, cond->getType()->getName());
+    }
+    auto ifstmt = new ir::IfStatement(currentIR, llvmloc, "if", cond, ifBranch, elseBranch);
+    return ifstmt;
+}
+
+void Scanner::parseMain(std::vector<ir::IR *> body) {
+    LOGMAX("Parsing main");
+    for(auto i: body) {
+        this->decls.push_back(i);
+    }
 }

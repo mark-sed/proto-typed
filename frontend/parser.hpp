@@ -653,7 +653,11 @@ namespace  ptc  {
       // expr_var
       char dummy4[sizeof (ptc::ir::Expr *)];
 
+      // stmts
+      // stmts_ne
+      // if
       // vardecl
+      // vardef
       // type
       char dummy5[sizeof (ptc::ir::IR *)];
 
@@ -664,6 +668,12 @@ namespace  ptc  {
 
       // callarglist
       char dummy7[sizeof (std::vector<ptc::ir::Expr *> )];
+
+      // stmt
+      // block
+      // body
+      // else
+      char dummy8[sizeof (std::vector<ptc::ir::IR *> )];
     };
 
     /// The size of the largest semantic type.
@@ -897,39 +907,38 @@ namespace  ptc  {
         S_while = 89,                            // while
         S_dowhile = 90,                          // dowhile
         S_if = 91,                               // if
-        S_elif = 92,                             // elif
-        S_else = 93,                             // else
-        S_struct = 94,                           // struct
-        S_decllist = 95,                         // decllist
-        S_declistval = 96,                       // declistval
-        S_function = 97,                         // function
-        S_funargs = 98,                          // funargs
-        S_funargdef = 99,                        // funargdef
-        S_vardecl = 100,                         // vardecl
-        S_vardef = 101,                          // vardef
-        S_set = 102,                             // set
-        S_callarglist = 103,                     // callarglist
-        S_expr = 104,                            // expr
-        S_expr_var = 105,                        // expr_var
-        S_matrix = 106,                          // matrix
-        S_matvals = 107,                         // matvals
-        S_expr_mat = 108,                        // expr_mat
-        S_range = 109,                           // range
-        S_int_val = 110,                         // int_val
-        S_slice = 111,                           // slice
-        S_expr_none = 112,                       // expr_none
-        S_expr_struct = 113,                     // expr_struct
-        S_struct_val = 114,                      // struct_val
-        S_struct_list = 115,                     // struct_list
-        S_expr_int = 116,                        // expr_int
-        S_expr_float = 117,                      // expr_float
-        S_expr_str = 118,                        // expr_str
-        S_expr_bool = 119,                       // expr_bool
-        S_funtype = 120,                         // funtype
-        S_typelist = 121,                        // typelist
-        S_mattype = 122,                         // mattype
-        S_matsize = 123,                         // matsize
-        S_type = 124                             // type
+        S_else = 92,                             // else
+        S_struct = 93,                           // struct
+        S_decllist = 94,                         // decllist
+        S_declistval = 95,                       // declistval
+        S_function = 96,                         // function
+        S_funargs = 97,                          // funargs
+        S_funargdef = 98,                        // funargdef
+        S_vardecl = 99,                          // vardecl
+        S_vardef = 100,                          // vardef
+        S_set = 101,                             // set
+        S_callarglist = 102,                     // callarglist
+        S_expr = 103,                            // expr
+        S_expr_var = 104,                        // expr_var
+        S_matrix = 105,                          // matrix
+        S_matvals = 106,                         // matvals
+        S_expr_mat = 107,                        // expr_mat
+        S_range = 108,                           // range
+        S_int_val = 109,                         // int_val
+        S_slice = 110,                           // slice
+        S_expr_none = 111,                       // expr_none
+        S_expr_struct = 112,                     // expr_struct
+        S_struct_val = 113,                      // struct_val
+        S_struct_list = 114,                     // struct_list
+        S_expr_int = 115,                        // expr_int
+        S_expr_float = 116,                      // expr_float
+        S_expr_str = 117,                        // expr_str
+        S_expr_bool = 118,                       // expr_bool
+        S_funtype = 119,                         // funtype
+        S_typelist = 120,                        // typelist
+        S_mattype = 121,                         // mattype
+        S_matsize = 122,                         // matsize
+        S_type = 123                             // type
       };
     };
 
@@ -987,7 +996,11 @@ namespace  ptc  {
         value.move< ptc::ir::Expr * > (std::move (that.value));
         break;
 
+      case symbol_kind::S_stmts: // stmts
+      case symbol_kind::S_stmts_ne: // stmts_ne
+      case symbol_kind::S_if: // if
       case symbol_kind::S_vardecl: // vardecl
+      case symbol_kind::S_vardef: // vardef
       case symbol_kind::S_type: // type
         value.move< ptc::ir::IR * > (std::move (that.value));
         break;
@@ -1000,6 +1013,13 @@ namespace  ptc  {
 
       case symbol_kind::S_callarglist: // callarglist
         value.move< std::vector<ptc::ir::Expr *>  > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_stmt: // stmt
+      case symbol_kind::S_block: // block
+      case symbol_kind::S_body: // body
+      case symbol_kind::S_else: // else
+        value.move< std::vector<ptc::ir::IR *>  > (std::move (that.value));
         break;
 
       default:
@@ -1123,6 +1143,20 @@ namespace  ptc  {
       {}
 #endif
 
+#if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, std::vector<ptc::ir::IR *> && v, location_type&& l)
+        : Base (t)
+        , value (std::move (v))
+        , location (std::move (l))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const std::vector<ptc::ir::IR *> & v, const location_type& l)
+        : Base (t)
+        , value (v)
+        , location (l)
+      {}
+#endif
+
       /// Destroy the symbol.
       ~basic_symbol ()
       {
@@ -1168,7 +1202,11 @@ switch (yykind)
         value.template destroy< ptc::ir::Expr * > ();
         break;
 
+      case symbol_kind::S_stmts: // stmts
+      case symbol_kind::S_stmts_ne: // stmts_ne
+      case symbol_kind::S_if: // if
       case symbol_kind::S_vardecl: // vardecl
+      case symbol_kind::S_vardef: // vardef
       case symbol_kind::S_type: // type
         value.template destroy< ptc::ir::IR * > ();
         break;
@@ -1181,6 +1219,13 @@ switch (yykind)
 
       case symbol_kind::S_callarglist: // callarglist
         value.template destroy< std::vector<ptc::ir::Expr *>  > ();
+        break;
+
+      case symbol_kind::S_stmt: // stmt
+      case symbol_kind::S_block: // block
+      case symbol_kind::S_body: // body
+      case symbol_kind::S_else: // else
+        value.template destroy< std::vector<ptc::ir::IR *>  > ();
         break;
 
       default:
@@ -2844,8 +2889,8 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 3233,     ///< Last index in yytable_.
-      yynnts_ = 48,  ///< Number of nonterminal symbols.
+      yylast_ = 3153,     ///< Last index in yytable_.
+      yynnts_ = 47,  ///< Number of nonterminal symbols.
       yyfinal_ = 121 ///< Termination state number.
     };
 
@@ -2858,7 +2903,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 2862 "frontend/parser.hpp"
+#line 2907 "frontend/parser.hpp"
 
 
 

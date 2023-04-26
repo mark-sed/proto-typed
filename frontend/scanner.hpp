@@ -84,7 +84,7 @@ public:
 
     // Parsing methods
     ir::IR *parseVarDecl(ir::IR *type, std::string name);
-    void parseVarDef(ir::IR *type, std::string name, ir::Expr *value);
+    ir::IR *parseVarDef(ir::IR *type, std::string name, ir::Expr *value);
     ir::IR *parseExprStmt(ir::Expr *e);
     ir::Expr *parseInt(long v);
     ir::Expr *parseFloat(double v);
@@ -93,8 +93,12 @@ public:
     ir::Expr *parseVar(std::string v);
     ir::Expr *parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, bool is_const=false);
     ir::Expr *parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params);
+    ir::IR *parseIfStmt(ir::Expr *cond, std::vector<ir::IR *> &ifBranch, std::vector<ir::IR *> &elseBranch);
     std::vector<ir::Expr *> parseFunCallArg(ir::Expr *e);
     std::vector<ir::Expr *> parseAddFunCallArg(std::vector<ir::Expr *> &list, ir::Expr *e);
+    std::vector<ir::IR *> parseStmtBody(ir::IR *stmt);
+    std::vector<ir::IR *> parseStmtBodyAdd(std::vector<ir::IR *> &body, ir::IR *stmt);
+    void parseMain(std::vector<ir::IR *> body);
 };
 
 

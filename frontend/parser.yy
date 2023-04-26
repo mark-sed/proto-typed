@@ -181,10 +181,18 @@
 
 %type <ptc::ir::IR *> type
 %type <ptc::ir::IR *> vardecl
+%type <ptc::ir::IR *> vardef
+%type <ptc::ir::IR *> stmts_ne
+%type <ptc::ir::IR *> if
+%type <ptc::ir::IR *> stmts
 %type <ptc::ir::Expr *> expr
 %type <ptc::ir::Expr *> expr_var
 %type <ptc::ir::Expr *> set
 %type <std::vector<ptc::ir::Expr *> > callarglist
+%type <std::vector<ptc::ir::IR *> > body
+%type <std::vector<ptc::ir::IR *> > block
+%type <std::vector<ptc::ir::IR *> > else
+%type <std::vector<ptc::ir::IR *> > stmt
 
 %locations
 
@@ -192,41 +200,41 @@
 
 // Start
 start : END_FILE
-      | stmt END_FILE
+      | stmt END_FILE   { scanner->parseMain($1); }
       ;
-stmt : stmts
-     | stmt stmts
-     | stmt error stmts
+stmt : stmts            { $$ = scanner->parseStmtBody($1); }
+     | stmt stmts       { $$ = scanner->parseStmtBodyAdd($1, $2); }
+     | stmt error stmts { $$ = scanner->parseStmtBodyAdd($1, $3); }
      ;
 
 // Statements
-stmts : END
-      | stmts_ne
+stmts : END      { $$ = nullptr; }
+      | stmts_ne { $$ = $1; }
       ;
-stmts_ne : set END      { scanner->parseExprStmt($1); }
-         | vardecl END
-         | vardef END
-         | import END
+stmts_ne : set END      { $$ = scanner->parseExprStmt($1); }
+         | vardecl END  { $$ = $1; }
+         | vardef END   { $$ = $1; }
+         | import END   
          | for
-         | if
+         | if           { $$ = $1; }
          | while
          | dowhile
          | struct
          | function
          | flowctl END
-         | expr END
+         | expr END     { $$ = scanner->parseExprStmt($1); }
          ;
 
-// Code block     
-block : LBR RBR
-      | LBR stmt RBR
-      | END LBR stmt RBR
-      | LBR stmt RBR END
-      | END LBR stmt RBR END
+// Code block
+block : LBR RBR                 { $$ = scanner->parseStmtBody(nullptr); }
+      | LBR stmt RBR            { $$ = $2; }
+      | END LBR stmt RBR        { $$ = $3; }
+      | LBR stmt RBR END        { $$ = $2; }
+      | END LBR stmt RBR END    { $$ = $3; }
       ;
 // Code block or single statement
-body : stmts_ne
-     | block
+body : stmts_ne { $$ = scanner->parseStmtBody($1); }
+     | block    { $$ = $1; }
      ;
 
 // Import
@@ -257,14 +265,14 @@ dowhile : KWDO body KWWHILE LPAR expr RPAR
         ;
 
 // If-elif-else statement
-if : KWIF LPAR expr RPAR body elif else
+if : KWIF LPAR expr RPAR body else { $$ = scanner->parseIfStmt($3, $5, $6); }
    ;
-elif : KWELIF LPAR expr RPAR body
-     | elif KWELIF LPAR expr RPAR body
-     |
-     ;
-else : KWELSE body
-     |
+//elif : KWELIF LPAR expr RPAR body
+//     | elif KWELIF LPAR expr RPAR body
+//     |
+//     ;
+else : KWELSE body  { $$ = $2; }
+     |              { $$ = scanner->parseStmtBody(nullptr); }
      ;
 
 // Struct definition

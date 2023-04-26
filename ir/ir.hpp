@@ -15,6 +15,7 @@
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/APSInt.h"
 #include <vector>
+#include <sstream>
 
 #define INT_CSTR "int"
 #define FLOAT_CSTR "float"
@@ -37,7 +38,8 @@ enum IRKind {
     IR_TYPE_DECL,
     IR_EXPR_STMT,
     IR_FORMAL_PARAM_DECL,
-    IR_FUNCTION_DECL
+    IR_FUNCTION_DECL,
+    IR_IF
 };
 
 /**
@@ -84,6 +86,27 @@ enum OperatorKind {
     OP_ASSIGN,
     OP_UNKNOWN
 };
+
+/**
+ * @brief Converts a block of IRs to a debug string
+ * 
+ * @param block Block of IRs
+ * @return Block as a debug string
+ */
+/*std::string block2String(std::vector<ir::IR *> block) {
+    std::stringstream ss;
+    for(auto i : block) {
+        ss << i->debug() << std::endl;
+    }
+    return ss.str();
+}
+std::string block2String(std::vector<ir::Expr *> block) {
+    std::stringstream ss;
+    for(auto i : block) {
+        ss << i->debug() << std::endl;
+    }
+    return ss.str();
+}*/
 
 /**
  * Parent class for all IR objects - declarations
@@ -401,9 +424,39 @@ public:
     static bool classof(const Expr *e) {
         return e->getKind() == ExprKind::EX_FUN_CALL;
     }
-    std::string debug() const override { 
-        // TODO: Better debug
-        return fun->getName().str()+"( ... )";
+    std::string debug() const override {
+        return fun->getName().str()+"(...)";
+    }
+};
+
+/**
+ * If statement
+ */
+class IfStatement : public IR {
+private:
+    Expr *cond;
+    std::vector<ir::IR *> ifBranch;
+    std::vector<ir::IR *> elseBranch;
+public:
+    IfStatement(IR *enclosing_ir, 
+                llvm::SMLoc loc,
+                llvm::StringRef name,
+                Expr *cond,
+                std::vector<ir::IR *> &ifBranch,
+                std::vector<ir::IR *> &elseBranch)
+           : IR(IRKind::IR_IF, enclosing_ir, loc, name),
+             cond(cond),
+             ifBranch(ifBranch),
+             elseBranch(elseBranch) {}
+    
+    Expr *getCond() { return cond; }
+    std::vector<ir::IR *> getIfBranch() { return ifBranch; }
+    std::vector<ir::IR *> getElseBranch() { return elseBranch; }
+    static bool classof(const IR *ir) {
+        return ir->getKind() == IRKind::IR_IF;
+    }
+    virtual std::string debug() const override {
+        return "if("+cond->debug()+") {\n...} else {\n...}\n";
     }
 };
 
