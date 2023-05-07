@@ -39,7 +39,8 @@ enum IRKind {
     IR_EXPR_STMT,
     IR_FORMAL_PARAM_DECL,
     IR_FUNCTION_DECL,
-    IR_IF
+    IR_IF,
+    IR_MODULE_DECL
 };
 
 /**
@@ -456,7 +457,37 @@ public:
         return ir->getKind() == IRKind::IR_IF;
     }
     virtual std::string debug() const override {
-        return "if("+cond->debug()+") {\n...} else {\n...}\n";
+        return "if("+cond->debug()+") {\n...} else {\n...}";
+    }
+};
+
+class ModuleDecl : public IR {
+private:
+    std::vector<IR *> decls;
+public:
+    ModuleDecl(IR *enclosing_ir, llvm::SMLoc loc, llvm::StringRef name)
+              : IR(IRKind::IR_MODULE_DECL, enclosing_ir, loc, name) {}
+    ModuleDecl(IR *enclosing_ir, 
+               llvm::SMLoc loc,
+               llvm::StringRef name,
+               std::vector<ir::IR *> &decls)
+              : IR(IRKind::IR_MODULE_DECL, enclosing_ir, loc, name), decls(decls) {}
+    
+    std::vector<ir::IR *> getDecls() { return decls; }
+    void setDecls(std::vector<ir::IR *> &decls) { this->decls = decls; }
+
+    static bool classof(const IR *ir) {
+        return ir->getKind() == IRKind::IR_MODULE_DECL;
+    }
+
+    virtual std::string debug() const override {
+        std::string dbg = "module "+name.str()+" {\n";
+        // FIXME: Dont use string concat
+        for(auto d: decls) {
+            dbg += d->debug()+"\n";
+        }
+        dbg+="}\n";
+        return dbg;
     }
 };
 

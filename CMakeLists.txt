@@ -35,8 +35,11 @@ include_directories(BEFORE
     ${CMAKE_CURRENT_SOURCE_DIR}/ir
     ${CMAKE_CURRENT_BINARY_DIR}/ptc
     ${CMAKE_CURRENT_SOURCE_DIR}/ptc
+    ${CMAKE_CURRENT_BINARY_DIR}/backend
+    ${CMAKE_CURRENT_SOURCE_DIR}/backend
 )
 
 add_subdirectory(frontend)
 add_subdirectory(ir)
 add_subdirectory(ptc)
+add_subdirectory(backend)

@@ -51,6 +51,9 @@ void Scanner::init() {
     currentIR = nullptr;
 
     llvmloc = llvm::SMLoc();
+
+    // TODO: Maybe set the name to the module's correct name?
+    mainModule = new ir::ModuleDecl(nullptr, llvm::SMLoc(), "mainModule");
     
     intType = new ir::TypeDecl(currentIR, llvm::SMLoc(), INT_CSTR);
     floatType = new ir::TypeDecl(currentIR, llvm::SMLoc(), FLOAT_CSTR);
@@ -70,8 +73,8 @@ void Scanner::init() {
     auto printBody = std::vector<ir::IR *> {
         // TODO
     };
-    auto printIntFun = new ir::FunctionDecl(currentIR, 
-                                            llvm::SMLoc(), 
+    auto printIntFun = new ir::FunctionDecl(currentIR,
+                                            llvm::SMLoc(),
                                             encodeFunction("print", this->voidType, printParams),
                                             this->voidType,
                                             printParams,
@@ -90,10 +93,13 @@ void Scanner::parse(std::istream *code) {
         exit(1);
     }
 
-    std::cout << "\n-----\nIR generated:\n";
-    for(auto a : this->decls) {
+    mainModule->setDecls(this->decls);
+
+    LOG1("\n-----\nIR generated:\n");
+    LOG1(mainModule->debug());
+    /*for(auto a : this->decls) {
         std::cout << a->debug() << "\n";
-    }
+    }*/
 }
 
 void Scanner::removeQuotes(char **str) {

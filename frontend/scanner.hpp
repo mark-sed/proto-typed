@@ -39,6 +39,8 @@ private:
 
     llvm::SMLoc llvmloc;
 
+    ir::ModuleDecl *mainModule;
+
     ir::TypeDecl *intType;
     ir::TypeDecl *floatType;
     ir::TypeDecl *stringType;
