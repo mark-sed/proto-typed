@@ -1,5 +1,5 @@
 int a
 
 void foo() {
-    a = 42;
+    
 }

@@ -47,6 +47,19 @@ protected:
         builder.SetInsertPoint(currBB);
     }
 
+    struct BasicBlockDef {
+        // Maps the variable (or formal parameter) to its definition.
+        llvm::DenseMap<ir::IR *, llvm::TrackingVH<llvm::Value>> defs;
+        // Set of incompleted phi instructions.
+        llvm::DenseMap<llvm::PHINode *, ir::IR *> incompletePhis;
+        // Block is sealed, that is, no more predecessors will be added.
+        bool sealed;
+
+        BasicBlockDef() : sealed(true) {}
+    };
+
+    llvm::DenseMap<llvm::BasicBlock *, BasicBlockDef> currDef;
+
     virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) = 0;
     virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl) = 0;
 

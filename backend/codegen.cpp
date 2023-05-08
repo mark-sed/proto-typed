@@ -51,7 +51,8 @@ llvm::Type *cg::CodeGen::convertType(ir::TypeDecl *t) {
 std::string cg::CodeGen::mangleName(ir::IR *ir) {
     std::string mangled;
     while(ir) {
-        mangled.insert(0, ir->getName().str()+"_");
+        LOGMAX(ir->getName());
+        mangled.insert(0, ir->getName()+"_");
         ir = ir->getEnclosingIR();
     }
     mangled.insert(0, "_ptc_");
@@ -269,7 +270,30 @@ void cg::CGFunction::run(ir::FunctionDecl *fun) {
     setCurrBB(bb);
 
     size_t idx = 0;
-    // TODO:
+    auto &defs = currDef[bb];
+    for(auto i = llvmFun->arg_begin(); i != llvmFun->arg_end(); ++i, ++idx) {
+        llvm::Argument *arg = i;
+        ir::FormalParamDecl *fp = fun->getParams()[idx];
+        formalParams[fp] = arg;
+        defs.defs.insert(std::pair<ir::IR *, llvm::Value *>(fp, arg));
+    }
+
+    for(auto *d : fun->getDecl()) {
+        if(auto *var = llvm::dyn_cast<ir::VarDecl>(d)) {
+            llvm::Type *ty = mapType(var);
+            if(ty->isAggregateType()) {
+                llvm::Value *val = builder.CreateAlloca(ty);
+                defs.defs.insert(std::pair<ir::IR *, llvm::Value *>(var, val));
+            }
+        }
+    }
+
+    auto block = fun->getDecl();
+    emit(fun->getDecl());
+    if(!currBB->getTerminator()) {
+        builder.CreateRetVoid();
+    }
+    //sealBlock(currBB);
 }
 
 //void cg::CGFunction::run() { }

@@ -118,9 +118,9 @@ private:
 protected:
     IR *enclosing_ir;
     llvm::SMLoc loc;
-    llvm::StringRef name;
+    std::string name;
 public:
-    IR(IRKind kind, IR *enclosing_ir, llvm::SMLoc loc, llvm::StringRef name) : kind(kind),
+    IR(IRKind kind, IR *enclosing_ir, llvm::SMLoc loc, std::string name) : kind(kind),
                                                                                enclosing_ir(enclosing_ir),
                                                                                loc(loc),
                                                                                name(name) {
@@ -128,7 +128,7 @@ public:
 
     IRKind getKind() const { return kind; }
     llvm::SMLoc getLocation() { return loc; }
-    llvm::StringRef getName() { return name; }
+    std::string getName() { return name; }
     virtual std::string debug() const { return "IR"; }
     IR *getEnclosingIR() { return enclosing_ir; }
 };
@@ -140,13 +140,13 @@ class TypeDecl : public IR {
 private:
     bool is_maybe;
 public:
-    TypeDecl(IR *enclosing_ir, llvm::SMLoc loc, llvm::StringRef name)
+    TypeDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name)
             : IR(IRKind::IR_TYPE_DECL, enclosing_ir, loc, name) {}
 
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_TYPE_DECL;
     }
-    std::string debug() const override { return name.str(); }
+    std::string debug() const override { return name; }
 };
 
 /**
@@ -156,7 +156,7 @@ class VarDecl : public IR {
 private:
     TypeDecl *td;
 public:
-    VarDecl(IR *enclosing_ir, llvm::SMLoc loc, llvm::StringRef name, TypeDecl *td)
+    VarDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name, TypeDecl *td)
            : IR(IRKind::IR_VAR_DECL, enclosing_ir, loc, name),
              td(td) {}
     
@@ -164,7 +164,7 @@ public:
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_VAR_DECL;
     }
-    virtual std::string debug() const override { return "("+td->debug()+")"+name.str(); }
+    virtual std::string debug() const override { return "("+td->debug()+")"+name; }
 };
 
 /**
@@ -175,7 +175,7 @@ private:
     TypeDecl *td;
     bool byReference;
 public:
-    FormalParamDecl(IR *enclosing_ir, llvm::SMLoc loc, llvm::StringRef name, TypeDecl *td, bool byReference=false)
+    FormalParamDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name, TypeDecl *td, bool byReference=false)
            : IR(IRKind::IR_FORMAL_PARAM_DECL, enclosing_ir, loc, name),
              td(td),
              byReference(byReference) {}
@@ -185,7 +185,7 @@ public:
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_FORMAL_PARAM_DECL;
     }
-    virtual std::string debug() const override { return "("+td->debug()+(byReference ? "&" : "")+")"+name.str(); }
+    virtual std::string debug() const override { return "("+td->debug()+(byReference ? "&" : "")+")"+name; }
 };
 
 /**
@@ -194,14 +194,14 @@ public:
 class FunctionDecl : public IR {
 private:
     TypeDecl *returnType;
-    std::vector<FormalParamDecl *> &params;
+    std::vector<FormalParamDecl *> params;
     std::vector<ir::IR *> decls;
 public:
     FunctionDecl(IR *enclosing_ir, 
                  llvm::SMLoc loc,
-                 llvm::StringRef name,
+                 std::string name,
                  TypeDecl *returnType,
-                 std::vector<FormalParamDecl *> &params,
+                 std::vector<FormalParamDecl *> params,
                  std::vector<ir::IR *> decls)
            : IR(IRKind::IR_FUNCTION_DECL, enclosing_ir, loc, name),
              returnType(returnType),
@@ -210,11 +210,12 @@ public:
     
     TypeDecl *getReturnType() { return returnType; }
     std::vector<FormalParamDecl *> getParams() { return params; }
+    std::vector<ir::IR *> getDecl() { return decls; }
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_FUNCTION_DECL;
     }
     virtual std::string debug() const override {
-        return returnType->getName().str()+" "+name.str()+"(...) { ... }"; 
+        return returnType->getName()+" "+name+"(...) { ... }"; 
     }
 };
 
@@ -398,7 +399,7 @@ class ExprStmt : public IR {
 private:
     Expr *e;
 public:
-    ExprStmt(IR *enclosing_ir, llvm::SMLoc loc, llvm::StringRef name, Expr *e)
+    ExprStmt(IR *enclosing_ir, llvm::SMLoc loc, std::string name, Expr *e)
            : IR(IRKind::IR_EXPR_STMT, enclosing_ir, loc, name),
              e(e) {}
     
@@ -427,7 +428,7 @@ public:
         return e->getKind() == ExprKind::EX_FUN_CALL;
     }
     std::string debug() const override {
-        return fun->getName().str()+"(...)";
+        return fun->getName()+"(...)";
     }
 };
 
@@ -442,7 +443,7 @@ private:
 public:
     IfStatement(IR *enclosing_ir, 
                 llvm::SMLoc loc,
-                llvm::StringRef name,
+                std::string name,
                 Expr *cond,
                 std::vector<ir::IR *> &ifBranch,
                 std::vector<ir::IR *> &elseBranch)
@@ -466,11 +467,11 @@ class ModuleDecl : public IR {
 private:
     std::vector<IR *> decls;
 public:
-    ModuleDecl(IR *enclosing_ir, llvm::SMLoc loc, llvm::StringRef name)
+    ModuleDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name)
               : IR(IRKind::IR_MODULE_DECL, enclosing_ir, loc, name) {}
     ModuleDecl(IR *enclosing_ir, 
                llvm::SMLoc loc,
-               llvm::StringRef name,
+               std::string name,
                std::vector<ir::IR *> &decls)
               : IR(IRKind::IR_MODULE_DECL, enclosing_ir, loc, name), decls(decls) {}
     
@@ -482,7 +483,7 @@ public:
     }
 
     virtual std::string debug() const override {
-        std::string dbg = "module "+name.str()+" {\n";
+        std::string dbg = "module "+name+" {\n";
         // FIXME: Dont use string concat
         for(auto d: decls) {
             dbg += d->debug()+"\n";

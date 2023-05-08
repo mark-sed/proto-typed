@@ -36,9 +36,12 @@ bool isOneOf(llvm::StringRef v, std::initializer_list<std::string> accepted) {
     return std::find(begin(accepted), end(accepted), v.str().c_str()) != std::end(accepted);
 }
 
-llvm::StringRef encodeFunction(llvm::StringRef name, ir::TypeDecl *retType, std::vector<ir::FormalParamDecl *> params) {
-    // TODO: encode function
-    return name;
+std::string encodeFunction(std::string name, ir::TypeDecl *retType, std::vector<ir::FormalParamDecl *> params) {
+    std::string paramStr;
+    for(auto p : params) {
+        paramStr += p->getType()->getName()+p->getName()+"_";
+    }
+    return name+"_"+retType->getName()+std::to_string(params.size())+paramStr;
 }
 
 Scanner::Scanner(Diagnostics &diags) : currentIR(nullptr), diags(diags) {
@@ -110,8 +113,8 @@ void Scanner::removeQuotes(char **str) {
     (*str)[std::strlen(*str)-1] = '\0';
 }
 
-ir::IR *Scanner::parseVarDecl(ir::IR *type, std::string name) {
-    LOGMAX(type->getName().str()+" "+name);
+ir::IR *Scanner::parseVarDecl(ir::IR *type, const std::string name) {
+    LOGMAX(type->getName()+" "+name);
     ir::TypeDecl *t = llvm::dyn_cast<ir::TypeDecl>(type);
     if(t) {
         auto v = new ir::VarDecl(currentIR, type->getLocation(), name, t);
@@ -351,6 +354,18 @@ ir::IR *Scanner::parseIfStmt(ir::Expr *cond, std::vector<ir::IR *> &ifBranch, st
     }
     auto ifstmt = new ir::IfStatement(currentIR, llvmloc, "if", cond, ifBranch, elseBranch);
     return ifstmt;
+}
+
+ir::IR *Scanner::parseFun(ir::IR *type, std::string name, std::vector<ir::Expr *> params, std::vector<ir::IR *> body) {
+    LOGMAX("Parsing a function");
+    
+    std::vector<ir::FormalParamDecl *> formParams{};
+    //for(auto p: params) {
+        // TODO: convert
+    //}
+
+    auto ctype = llvm::dyn_cast<ir::TypeDecl>(type);
+    return new ir::FunctionDecl(currentIR, llvmloc, encodeFunction(name, ctype, formParams), ctype, formParams, body);
 }
 
 void Scanner::parseMain(std::vector<ir::IR *> body) {

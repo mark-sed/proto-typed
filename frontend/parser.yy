@@ -185,6 +185,7 @@
 %type <ptc::ir::IR *> stmts_ne
 %type <ptc::ir::IR *> if
 %type <ptc::ir::IR *> stmts
+%type <ptc::ir::IR *> function
 %type <ptc::ir::Expr *> expr
 %type <ptc::ir::Expr *> expr_var
 %type <ptc::ir::Expr *> set
@@ -220,7 +221,7 @@ stmts_ne : set END      { $$ = scanner->parseExprStmt($1); }
          | while
          | dowhile
          | struct
-         | function
+         | function     { $$ = $1; }
          | flowctl END
          | expr END     { $$ = scanner->parseExprStmt($1); }
          ;
@@ -293,7 +294,7 @@ declistval : vardecl
 // Function definition
 function : type ID LPAR RPAR block
          | type ID LPAR funargs RPAR block
-         | KWVOID ID LPAR RPAR block
+         | KWVOID ID LPAR RPAR block            { $$ = scanner->parseFun(scanner->sym_lookup("void"), $2, std::vector<ptc::ir::Expr *>{}, $5); }
          | KWVOID ID LPAR funargs RPAR block
          ;
 funargs : type ID

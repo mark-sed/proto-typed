@@ -656,6 +656,7 @@ namespace  ptc  {
       // stmts
       // stmts_ne
       // if
+      // function
       // vardecl
       // vardef
       // type
@@ -999,6 +1000,7 @@ namespace  ptc  {
       case symbol_kind::S_stmts: // stmts
       case symbol_kind::S_stmts_ne: // stmts_ne
       case symbol_kind::S_if: // if
+      case symbol_kind::S_function: // function
       case symbol_kind::S_vardecl: // vardecl
       case symbol_kind::S_vardef: // vardef
       case symbol_kind::S_type: // type
@@ -1205,6 +1207,7 @@ switch (yykind)
       case symbol_kind::S_stmts: // stmts
       case symbol_kind::S_stmts_ne: // stmts_ne
       case symbol_kind::S_if: // if
+      case symbol_kind::S_function: // function
       case symbol_kind::S_vardecl: // vardecl
       case symbol_kind::S_vardef: // vardef
       case symbol_kind::S_type: // type
@@ -2903,7 +2906,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 2907 "frontend/parser.hpp"
+#line 2910 "frontend/parser.hpp"
 
 
 
