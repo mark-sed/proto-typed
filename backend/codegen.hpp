@@ -28,22 +28,40 @@ public:
     std::unique_ptr<llvm::Module> run(ir::ModuleDecl *module, std::string fileName);
 };
 
+class CGModule;
 
 class CodeGen {
 protected:
     llvm::LLVMContext &ctx;
 
-    CodeGen(llvm::LLVMContext &ctx) : ctx(ctx), builder(ctx) {
+    CodeGen(llvm::LLVMContext &ctx, CGModule &currModule) : ctx(ctx), builder(ctx), currBB(nullptr), currModule(currModule) {
         init();
     }
 
     llvm::IRBuilder<> builder;
+    llvm::BasicBlock *currBB;
+    CGModule &currModule;
+
+    void setCurrBB(llvm::BasicBlock *BB) {
+        currBB = BB;
+        builder.SetInsertPoint(currBB);
+    }
+
+    virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) = 0;
+    virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl) = 0;
+
+    llvm::Value *emitInfixExpr(ir::BinaryInfixExpr *e);
+    llvm::Value *emitExpr(ir::Expr *e);
+
+    void emitStmt(ir::ExprStmt *stmt);
+
 public:
     llvm::Type *voidT;
     llvm::Type *int1T;
     llvm::Type *int64T;
     llvm::Type *doubleT;
 
+    llvm::Type *mapType(ir::IR *decl);
     llvm::Type *convertType(ir::TypeDecl *type);
     std::string mangleName(ir::IR *ir);
 
@@ -56,9 +74,12 @@ private:
     llvm::Module *llvmMod;
     ir::ModuleDecl *mod;
     llvm::DenseMap<ir::IR *, llvm::GlobalObject *> globals;
+protected:
+    virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) override;
+    virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl) override;
 
 public:
-    CGModule(llvm::Module *llvmMod) : CodeGen(llvmMod->getContext()), llvmMod(llvmMod) {}
+    CGModule(llvm::Module *llvmMod) : CodeGen(llvmMod->getContext(), *this), llvmMod(llvmMod) {}
 
     llvm::LLVMContext &getLLVMCtx() { return llvmMod->getContext(); }
     llvm::Module *getLLVMMod() { return llvmMod; }
@@ -74,13 +95,19 @@ private:
     ir::FunctionDecl *fun;
     llvm::FunctionType *funType;
     llvm::Function *llvmFun;
+    llvm::DenseMap<ir::FormalParamDecl *, llvm::Argument *> formalParams;
 
-    llvm::BasicBlock *currBB;
+    llvm::Value *readLocalVar(llvm::BasicBlock *BB, ir::IR *decl);
 
     llvm::FunctionType *createFunctionType(ir::FunctionDecl *fun);
     llvm::Function *createFunction(ir::FunctionDecl *fun, llvm::FunctionType *funType);
+protected:
+    virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) override;
+    virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl) override;
+
+    virtual void emit(std::vector<ir::IR *> stmts);
 public:
-    CGFunction(CGModule &cgm) : CodeGen(cgm.getLLVMCtx()), cgm(cgm), currBB(nullptr) {} 
+    CGFunction(CGModule &cgm) : CodeGen(cgm.getLLVMCtx(), cgm), cgm(cgm) {} 
 
     void run(ir::FunctionDecl *fun);
     //void run();

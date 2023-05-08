@@ -1,5 +1,20 @@
 set(LLVM_LINK_COMPONENTS
-    Support
+  ${LLVM_TARGETS_TO_BUILD}
+  Analysis
+  CodeGen
+  Core
+  IPO
+  AggressiveInstCombine
+  InstCombine
+  Instrumentation
+  MC
+  MCParser
+  ObjCARCOpts
+  Option
+  ScalarOpts
+  Support
+  TransformUtils
+  Vectorize
 )
 
 add_ptc_tool(ptc
@@ -11,4 +26,5 @@ target_link_libraries(ptc
     PRIVATE
     ptcfrontend
     ptcir
+    ptcbackend
 )

@@ -39,8 +39,6 @@ private:
 
     llvm::SMLoc llvmloc;
 
-    ir::ModuleDecl *mainModule;
-
     ir::TypeDecl *intType;
     ir::TypeDecl *floatType;
     ir::TypeDecl *stringType;
@@ -49,7 +47,8 @@ private:
 
 public:
     ptc::Parser::location_type *loc = nullptr;     ///< Current parsing location
-    
+    ir::ModuleDecl *mainModule;
+
     Scanner(Diagnostics &diags);
 
     /**

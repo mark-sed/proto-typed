@@ -36,7 +36,7 @@ bool isOneOf(llvm::StringRef v, std::initializer_list<std::string> accepted) {
     return std::find(begin(accepted), end(accepted), v.str().c_str()) != std::end(accepted);
 }
 
-llvm::StringRef encodeFunction(llvm::StringRef name, ir::TypeDecl *retType, std::vector<ir::FormalParamDecl> params) {
+llvm::StringRef encodeFunction(llvm::StringRef name, ir::TypeDecl *retType, std::vector<ir::FormalParamDecl *> params) {
     // TODO: encode function
     return name;
 }
@@ -48,13 +48,14 @@ Scanner::Scanner(Diagnostics &diags) : currentIR(nullptr), diags(diags) {
 
 void Scanner::init() {
     currScope = new Scope();
-    currentIR = nullptr;
+    
 
     llvmloc = llvm::SMLoc();
 
     // TODO: Maybe set the name to the module's correct name?
     mainModule = new ir::ModuleDecl(nullptr, llvm::SMLoc(), "mainModule");
-    
+    currentIR = mainModule;
+
     intType = new ir::TypeDecl(currentIR, llvm::SMLoc(), INT_CSTR);
     floatType = new ir::TypeDecl(currentIR, llvm::SMLoc(), FLOAT_CSTR);
     stringType = new ir::TypeDecl(currentIR, llvm::SMLoc(), STRING_CSTR);
@@ -67,8 +68,8 @@ void Scanner::init() {
     currScope->insert(stringType);
     currScope->insert(voidType);
 
-    auto printParams = std::vector<ir::FormalParamDecl>{
-        ir::FormalParamDecl(currentIR, llvmloc, "v", this->intType, false)
+    auto printParams = std::vector<ir::FormalParamDecl *>{
+        new ir::FormalParamDecl(currentIR, llvmloc, "v", this->intType, false)
     };
     auto printBody = std::vector<ir::IR *> {
         // TODO

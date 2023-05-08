@@ -194,14 +194,14 @@ public:
 class FunctionDecl : public IR {
 private:
     TypeDecl *returnType;
-    std::vector<FormalParamDecl> &params;
+    std::vector<FormalParamDecl *> &params;
     std::vector<ir::IR *> decls;
 public:
     FunctionDecl(IR *enclosing_ir, 
                  llvm::SMLoc loc,
                  llvm::StringRef name,
                  TypeDecl *returnType,
-                 std::vector<FormalParamDecl> &params,
+                 std::vector<FormalParamDecl *> &params,
                  std::vector<ir::IR *> decls)
            : IR(IRKind::IR_FUNCTION_DECL, enclosing_ir, loc, name),
              returnType(returnType),
@@ -209,6 +209,7 @@ public:
              decls(decls) {}
     
     TypeDecl *getReturnType() { return returnType; }
+    std::vector<FormalParamDecl *> getParams() { return params; }
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_FUNCTION_DECL;
     }
