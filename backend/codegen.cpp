@@ -51,7 +51,6 @@ llvm::Type *cg::CodeGen::convertType(ir::TypeDecl *t) {
 std::string cg::CodeGen::mangleName(ir::IR *ir) {
     std::string mangled;
     while(ir) {
-        LOGMAX(ir->getName());
         mangled.insert(0, ir->getName()+"_");
         ir = ir->getEnclosingIR();
     }
@@ -205,6 +204,7 @@ void cg::CGFunction::emit(std::vector<ir::IR *> stmts) {
 }
 
 void cg::CGModule::run(ir::ModuleDecl *mod) {
+    this->mod = mod;
     for(auto *decl: mod->getDecls()) {
         auto kind = decl->getKind();
         switch(kind) {
