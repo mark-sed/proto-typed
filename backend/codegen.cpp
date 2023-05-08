@@ -72,17 +72,14 @@ llvm::Type *cg::CodeGen::mapType(ir::IR *decl) {
     return convertType(llvm::cast<ir::TypeDecl>(decl));
 }
 
-/*void cg::CodeGen::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) {
-    // TODO
-}*/
-
 void cg::CGModule::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) {
-    if(llvm::dyn_cast<ir::VarDecl>(decl)) {
+    /*if(llvm::dyn_cast<ir::VarDecl>(decl)) {
         LOGMAX("Writing variable in module");
         builder.CreateStore(val, getGlobals(decl));
     } else {
         llvm::report_fatal_error("Unsupported variable access");
-    }
+    }*/
+    llvm::report_fatal_error("UNIMPLEMENTED module var read");
 }
 
 void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) {
@@ -110,21 +107,8 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
     }
 }
 
-/*llvm::Value *cg::CodeGen::readVar(llvm::BasicBlock *BB, ir::IR *decl) {
-    if(auto *v = llvm::dyn_cast<ir::VarDecl>(decl)) {
-        if(v->getEnclosingIR()->getKind() == ir::IRKind::IR_MODULE_DECL) {
-            return builder.CreateLoad(mapType(decl), currModule.getGlobals(decl));
-        }
-        else {
-            llvm::report_fatal_error("Unsupported variable access in module");
-        }
-    } else {
-        llvm::report_fatal_error("Unsupported variable declaration");
-    }
-}*/
-
 llvm::Value *cg::CGModule::readVar(llvm::BasicBlock *BB, ir::IR *decl) {
-    if(auto *v = llvm::dyn_cast<ir::VarDecl>(decl)) {
+    /*if(auto *v = llvm::dyn_cast<ir::VarDecl>(decl)) {
         if(v->getEnclosingIR()->getKind() == ir::IRKind::IR_MODULE_DECL) {
             return builder.CreateLoad(mapType(v), getGlobals(decl));
         }
@@ -133,8 +117,8 @@ llvm::Value *cg::CGModule::readVar(llvm::BasicBlock *BB, ir::IR *decl) {
         }
     } else {
         llvm::report_fatal_error("Unsupported variable declaration");
-    }
-    llvm::report_fatal_error("Unsupported variable declaration");
+    }*/
+    llvm::report_fatal_error("UNIMPLEMENTED module var read");
 }
 
 llvm::Value *cg::CGFunction::readLocalVar(llvm::BasicBlock *BB, ir::IR *decl) {
