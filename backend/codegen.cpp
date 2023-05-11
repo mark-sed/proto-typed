@@ -152,35 +152,219 @@ llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl) {
 llvm::Value *cg::CodeGen::emitExpr(ir::Expr *e) {
     switch(e->getKind()) {
     case ir::ExprKind::EX_BIN_INF: return emitInfixExpr(llvm::dyn_cast<ir::BinaryInfixExpr>(e));
-    case ir::ExprKind::EX_VAR: 
+    case ir::ExprKind::EX_VAR:
     {
         auto *decl = llvm::dyn_cast<ir::VarAccess>(e)->getVar();
         return readVar(currBB, decl);
     }
-    case ir::ExprKind::EX_INT: 
+    case ir::ExprKind::EX_INT:
         LOGMAX("Accessing int value");
         return llvm::ConstantInt::get(int64T, llvm::dyn_cast<ir::IntLiteral>(e)->getValue());
     case ir::ExprKind::EX_BOOL: return llvm::ConstantInt::get(int1T, llvm::dyn_cast<ir::BoolLiteral>(e)->getValue());
-    // TODO: Double    
+    // TODO: Double
     // TODO: Other ones
-    default: 
+    default:
         llvm::report_fatal_error("Unimplemented expression kind in code generation");
         return nullptr;
     }
 }
 
 llvm::Value *cg::CodeGen::emitInfixExpr(ir::BinaryInfixExpr *e) {
-    //llvm::Value *left = emitExpr(e->getLeft());
+    llvm::Value *left = emitExpr(e->getLeft());
     llvm::Value *right = emitExpr(e->getRight());
     llvm::Value *result = nullptr;
     switch(e->getOperator().getKind()) {
     case ir::OperatorKind::OP_ASSIGN:
     {
+        LOGMAX("Creating assignment instruction");
         auto var = llvm::dyn_cast<ir::VarAccess>(e->getLeft());
         auto varDecl = llvm::dyn_cast<ir::VarDecl>(var->getVar());
         writeVar(currBB, varDecl, right);
-        break;
     }
+    break;
+    case ir::OperatorKind::OP_ADD:
+    {
+        LOGMAX("Creating ADD instruction");
+        if(left->getType() == this->int64T && left->getType() == right->getType()) {
+            result = builder.CreateNSWAdd(left, right);
+        }
+        else {
+            llvm::report_fatal_error("ADD does not supported given type");
+        }
+    }
+    break;
+    case ir::OperatorKind::OP_SUB:
+    {
+        LOGMAX("Creating SUB instruction");
+        if(left->getType() == this->int64T && left->getType() == right->getType()) {
+            result = builder.CreateNSWSub(left, right);
+        }
+        else {
+            llvm::report_fatal_error("SUB does not supported given type");
+        }
+    }
+    break;
+    case ir::OperatorKind::OP_POW:
+    {
+        // TODO:
+    }
+    break;
+    case ir::OperatorKind::OP_MUL:
+    {
+        LOGMAX("Creating MUL instruction");
+        if(left->getType() == this->int64T && left->getType() == right->getType()) {
+            result = builder.CreateNSWMul(left, right);
+        }
+        else {
+            llvm::report_fatal_error("MUL does not supported given type");
+        }
+    }
+    break;
+    case ir::OperatorKind::OP_DIV:
+    {
+        LOGMAX("Creating DIV instruction");
+        if(left->getType() == this->int64T && left->getType() == right->getType()) {
+            result = builder.CreateSDiv(left, right);
+        }
+        else {
+            llvm::report_fatal_error("DIV does not supported given type");
+        }
+    }
+    break;
+    case ir::OperatorKind::OP_MOD:
+    {
+        LOGMAX("Creating MOD instruction");
+        if(left->getType() == this->int64T && left->getType() == right->getType()) {
+            result = builder.CreateSRem(left, right);
+        }
+        else {
+            llvm::report_fatal_error("MOD does not supported given type");
+        }
+    }
+    break;
+    case ir::OperatorKind::OP_BLSHFT:
+    {
+
+    }
+    break;
+    case ir::OperatorKind::OP_BRSHFT:
+    {
+
+    }
+    break;
+    case ir::OperatorKind::OP_BT:
+    {
+        LOGMAX("Creating BT instruction");
+        if(left->getType() == right->getType()) {
+            result = builder.CreateICmpSGT(left, right);
+        }
+        else {
+            llvm::report_fatal_error("BT does not supported given type");
+        }
+    }
+    break;
+    case ir::OperatorKind::OP_BEQ:
+    {
+        LOGMAX("Creating BEQ instruction");
+        if(left->getType() == right->getType()) {
+            result = builder.CreateICmpSGE(left, right);
+        }
+        else {
+            llvm::report_fatal_error("BEQ does not supported given type");
+        }
+    }
+    break;
+    case ir::OperatorKind::OP_LT:
+    {
+        LOGMAX("Creating LT instruction");
+        if(left->getType() == right->getType()) {
+            result = builder.CreateICmpSLT(left, right);
+        }
+        else {
+            llvm::report_fatal_error("LT does not supported given type");
+        }
+    }
+    break;
+    case ir::OperatorKind::OP_LEQ:
+    {
+        LOGMAX("Creating LEQ instruction");
+        if(left->getType() == right->getType()) {
+            result = builder.CreateICmpSLE(left, right);
+        }
+        else {
+            llvm::report_fatal_error("LEQ does not supported given type");
+        }
+    }
+    break;
+    case ir::OperatorKind::OP_EQ:
+    {
+        LOGMAX("Creating EQ instruction");
+        if(left->getType() == right->getType()) {
+            result = builder.CreateICmpEQ(left, right);
+        }
+        else {
+            llvm::report_fatal_error("EQ does not supported given type");
+        }
+    }
+    break;
+    case ir::OperatorKind::OP_NEQ:
+    {
+        LOGMAX("Creating NEQ instruction");
+        if(left->getType() == right->getType()) {
+            result = builder.CreateICmpNE(left, right);
+        }
+        else {
+            llvm::report_fatal_error("NEQ does not supported given type");
+        }
+    }
+    break;
+    case ir::OperatorKind::OP_BAND:
+    {
+
+    }
+    break;
+    case ir::OperatorKind::OP_BXOR:
+    {
+
+    }
+    break;
+    case ir::OperatorKind::OP_BOR:
+    {
+
+    }
+    break;
+    case ir::OperatorKind::OP_IN:
+    {
+
+    }
+    break;
+    case ir::OperatorKind::OP_LAND:
+    {
+        LOGMAX("Creating AND instruction");
+        if(left->getType() == int1T && left->getType() == right->getType()) {
+            result = builder.CreateAnd(left, right);
+        }
+        else {
+            llvm::report_fatal_error("AND does not supported given type");
+        }
+    }
+    break;
+    case ir::OperatorKind::OP_LOR:
+    {
+        LOGMAX("Creating OR instruction");
+        if(left->getType() == int1T && left->getType() == right->getType()) {
+            result = builder.CreateOr(left, right);
+        }
+        else {
+            llvm::report_fatal_error("OR does not supported given type");
+        }
+    }
+    break;
+    case ir::OperatorKind::OP_CONCAT:
+    {
+        // TODO:
+    }
+    break;
     // TODO: implement rest
     default: llvm::report_fatal_error("Uknown operator in code generation");
     }
@@ -209,9 +393,9 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
         auto kind = decl->getKind();
         switch(kind) {
         case ir::IRKind::IR_VAR_DECL:
-        { // new variable needs its own scope
+        {   // new variable needs its own scope
             auto var = llvm::dyn_cast<ir::VarDecl>(decl);
-            llvm::GlobalVariable *v = new llvm::GlobalVariable(*llvmMod, 
+            llvm::GlobalVariable *v = new llvm::GlobalVariable(*llvmMod,
                                                                convertType(var->getType()),
                                                                false,
                                                                llvm::GlobalValue::PrivateLinkage,
