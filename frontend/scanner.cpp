@@ -36,12 +36,20 @@ bool isOneOf(llvm::StringRef v, std::initializer_list<std::string> accepted) {
     return std::find(begin(accepted), end(accepted), v.str().c_str()) != std::end(accepted);
 }
 
-std::string encodeFunction(std::string name, ir::TypeDecl *retType, std::vector<ir::FormalParamDecl *> params) {
+std::string encodeFunction(std::string name, std::vector<ir::FormalParamDecl *> params) {
     std::string paramStr;
     for(auto p : params) {
-        paramStr += p->getType()->getName()+p->getName()+"_";
+        paramStr += p->getType()->getName()+"_";
     }
-    return name+"_"+retType->getName()+std::to_string(params.size())+paramStr;
+    return name+"_"+std::to_string(params.size())+paramStr;
+}
+
+std::string encodeFunction(std::string name, std::vector<ir::Expr *> params) {
+    std::string paramStr;
+    for(auto p : params) {
+        paramStr += p->getType()->getName()+"_";
+    }
+    return name+"_"+std::to_string(params.size())+paramStr;
 }
 
 Scanner::Scanner(Diagnostics &diags) : currentIR(nullptr), diags(diags) {
@@ -79,7 +87,7 @@ void Scanner::init() {
     };
     auto printIntFun = new ir::FunctionDecl(currentIR,
                                             llvm::SMLoc(),
-                                            encodeFunction("print", this->voidType, printParams),
+                                            "print",
                                             this->voidType,
                                             printParams,
                                             printBody);
@@ -91,11 +99,13 @@ void Scanner::parse(std::istream *code) {
     loc = new Parser::location_type();
     auto parser = new Parser(this);
 
+    enterScope(mainModule);
     if(parser->parse() != 0) {
         // TODO: ERROR
         log::error("Could not parse the source code.");
         exit(1);
     }
+    leaveScope();
 
     mainModule->setDecls(this->decls);
 
@@ -111,6 +121,26 @@ void Scanner::removeQuotes(char **str) {
     *str = &(*str)[1];
     // Remove last quote
     (*str)[std::strlen(*str)-1] = '\0';
+}
+
+void Scanner::enterScope(ir::IR *decl) {
+    LOGMAX("Creating new scope");
+    currScope = new Scope(currScope);
+    currentIR = decl;
+}
+
+void Scanner::enterFunScope() {
+    LOGMAX("Creating new function scope");
+    currScope = new Scope(currScope);
+    currentIR = new ir::FunctionDecl(currentIR);
+}
+
+void Scanner::leaveScope() {
+    LOGMAX("Leaving current scope");
+    Scope *parent = currScope->getParent();
+    delete currScope;
+    currScope = parent;
+    currentIR = currentIR->getEnclosingIR();
 }
 
 ir::IR *Scanner::parseVarDecl(ir::IR *type, const std::string name) {
@@ -365,7 +395,12 @@ ir::IR *Scanner::parseFun(ir::IR *type, std::string name, std::vector<ir::Expr *
     //}
 
     auto ctype = llvm::dyn_cast<ir::TypeDecl>(type);
-    return new ir::FunctionDecl(currentIR, llvmloc, encodeFunction(name, ctype, formParams), ctype, formParams, body);
+    auto f = llvm::dyn_cast<ir::FunctionDecl>(currentIR);
+    f->resolveFunction(llvmloc, encodeFunction(name, formParams), ctype, formParams, body);
+
+    leaveScope();
+
+    return f;
 }
 
 void Scanner::parseMain(std::vector<ir::IR *> body) {

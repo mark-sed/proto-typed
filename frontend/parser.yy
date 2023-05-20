@@ -177,6 +177,7 @@
 %type <long> expr_int
 %type <double> expr_float
 %type <std::string> expr_str
+%type <std::string> fun_id
 %type <bool> expr_bool
 
 %type <ptc::ir::IR *> type
@@ -294,9 +295,11 @@ declistval : vardecl
 // Function definition
 function : type ID LPAR RPAR block
          | type ID LPAR funargs RPAR block
-         | KWVOID ID LPAR RPAR block            { $$ = scanner->parseFun(scanner->sym_lookup("void"), $2, std::vector<ptc::ir::Expr *>{}, $5); }
-         | KWVOID ID LPAR funargs RPAR block
+         | KWVOID fun_id LPAR RPAR block         { $$ = scanner->parseFun(scanner->sym_lookup("void"), $2, std::vector<ptc::ir::Expr *>{}, $5); }
+         | KWVOID fun_id LPAR funargs RPAR block
          ;
+fun_id : ID { scanner->enterFunScope(); }
+       ;
 funargs : type ID
         | funargdef
         | funargs COMMA funargs

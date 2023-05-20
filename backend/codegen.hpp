@@ -111,6 +111,12 @@ private:
     llvm::DenseMap<ir::FormalParamDecl *, llvm::Argument *> formalParams;
 
     llvm::Value *readLocalVar(llvm::BasicBlock *BB, ir::IR *decl);
+    llvm::Value *readLocalVarRecursive(llvm::BasicBlock *BB, ir::IR *decl);
+    void writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val);
+    void sealBlock(llvm::BasicBlock *BB);
+    llvm::PHINode *addEmptyPhi(llvm::BasicBlock *BB, ir::IR *decl);
+    void addPhiOperands(llvm::BasicBlock *BB, ir::IR *decl, llvm::PHINode *phi);
+    void optimizePhi(llvm::PHINode *phi);
 
     llvm::FunctionType *createFunctionType(ir::FunctionDecl *fun);
     llvm::Function *createFunction(ir::FunctionDecl *fun, llvm::FunctionType *funType);

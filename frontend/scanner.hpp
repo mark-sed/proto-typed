@@ -44,7 +44,6 @@ private:
     ir::TypeDecl *stringType;
     ir::TypeDecl *boolType;
     ir::TypeDecl *voidType;
-
 public:
     ptc::Parser::location_type *loc = nullptr;     ///< Current parsing location
     ir::ModuleDecl *mainModule;
@@ -72,6 +71,10 @@ public:
      *       the first and last character
      */
     void removeQuotes(char **str);
+
+    void enterScope(ir::IR *decl);
+    void enterFunScope();
+    void leaveScope();
 
     /**
      * Looks up a symbol in the current scope

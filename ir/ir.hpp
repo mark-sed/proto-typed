@@ -131,6 +131,7 @@ public:
     std::string getName() { return name; }
     virtual std::string debug() const { return "IR"; }
     IR *getEnclosingIR() { return enclosing_ir; }
+    void setEnclosingIR(ir::IR *parent) { enclosing_ir = parent; }
 };
 
 /**
@@ -196,6 +197,7 @@ private:
     TypeDecl *returnType;
     std::vector<FormalParamDecl *> params;
     std::vector<ir::IR *> decls;
+    bool prototype;
 public:
     FunctionDecl(IR *enclosing_ir, 
                  llvm::SMLoc loc,
@@ -206,7 +208,24 @@ public:
            : IR(IRKind::IR_FUNCTION_DECL, enclosing_ir, loc, name),
              returnType(returnType),
              params(params),
-             decls(decls) {}
+             decls(decls),
+             prototype(false) {}
+    FunctionDecl(IR *enclosing_ir) : IR(IRKind::IR_FUNCTION_DECL, enclosing_ir, llvm::SMLoc(), "unknownfunc"),
+                                     returnType(nullptr),
+                                     prototype(true) {}
+
+    void resolveFunction(llvm::SMLoc loc,
+                         std::string name,
+                         TypeDecl *returnType,
+                         std::vector<FormalParamDecl *> params,
+                         std::vector<ir::IR *> decls) {
+        this->loc = loc;
+        this->name = name;
+        this->returnType = returnType;
+        this->params = params;
+        this->decls = decls;
+        this->prototype = false;
+    }
     
     TypeDecl *getReturnType() { return returnType; }
     std::vector<FormalParamDecl *> getParams() { return params; }
@@ -215,7 +234,10 @@ public:
         return ir->getKind() == IRKind::IR_FUNCTION_DECL;
     }
     virtual std::string debug() const override {
-        return returnType->getName()+" "+name+"(...) { ... }"; 
+        if(!prototype)
+            return returnType->getName()+" "+name+"(...) { ... }";
+        else
+            return "unknwon-type unknown-function(?) { ... }";
     }
 };
 

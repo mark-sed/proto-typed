@@ -79,14 +79,23 @@ void cg::CGModule::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val
     } else {
         llvm::report_fatal_error("Unsupported variable access");
     }*/
-    llvm::report_fatal_error("UNIMPLEMENTED module var read");
+    llvm::report_fatal_error("UNIMPLEMENTED module var write");
+}
+
+void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) {
+    /*if(llvm::dyn_cast<ir::VarDecl>(decl)) {
+        LOGMAX("Writing variable in module");
+        builder.CreateStore(val, getGlobals(decl));
+    } else {
+        llvm::report_fatal_error("Unsupported variable access");
+    }*/
+    llvm::report_fatal_error("UNIMPLEMENTED module var write");
 }
 
 void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) {
     if(auto *v = llvm::dyn_cast<ir::VarDecl>(decl)) {
         if(v->getEnclosingIR() == fun) {
-            // TODO:
-            //writeLocalVar(BB, decl, val);
+            writeLocalVar(BB, decl, val);
         }
         else if(v->getEnclosingIR() == cgm.getModuleDecl()) {
             builder.CreateStore(val, cgm.getGlobals(decl));
@@ -99,8 +108,7 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
             builder.CreateStore(val, formalParams[v]);
         }
         else {
-            // TODO:
-            //writeLocalVar(BB, decl, val);
+            writeLocalVar(BB, decl, val);
         }
     } else {
         llvm::report_fatal_error("Unsupported variable access");
@@ -123,9 +131,82 @@ llvm::Value *cg::CGModule::readVar(llvm::BasicBlock *BB, ir::IR *decl) {
 
 llvm::Value *cg::CGFunction::readLocalVar(llvm::BasicBlock *BB, ir::IR *decl) {
     // TODO: Checks for type
-    
-    // TODO: implement
-    return nullptr;
+    auto val = currDef[BB].defs.find(decl);
+    if(val != currDef[BB].defs.end()) {
+        return val->second;
+    }
+    return readLocalVarRecursive(BB, decl);
+}
+
+llvm::Value *cg::CGFunction::readLocalVarRecursive(llvm::BasicBlock *BB, ir::IR *decl) {
+    // TODO: Checks for type
+    llvm::Value *val = nullptr;
+    if(!currDef[BB].sealed) {
+        // incomplete for var
+        llvm::PHINode *phi = addEmptyPhi(BB, decl);
+        currDef[BB].incompletePhis[phi] = decl;
+        val = phi;
+    }
+    else if(auto *predBB = BB->getSinglePredecessor()) {
+        // only one predecessor
+        val = readLocalVar(predBB, decl);
+    }
+    else {
+        // Creating empty phi to break potential cycles
+        llvm::PHINode *phi = addEmptyPhi(BB, decl);
+        val = phi;
+        writeLocalVar(BB, decl, val);
+        addPhiOperands(BB, decl, phi);
+    }
+    writeLocalVar(BB, decl, val);
+    return val;
+}
+
+llvm::PHINode *cg::CGFunction::addEmptyPhi(llvm::BasicBlock *BB, ir::IR *decl) {
+    if(BB->empty()) {
+        return llvm::PHINode::Create(mapType(decl), 0, "", BB);
+    }
+    return llvm::PHINode::Create(mapType(decl), 0, "", &BB->front());
+}
+
+void cg::CGFunction::addPhiOperands(llvm::BasicBlock *BB, ir::IR *decl, llvm::PHINode *phi) {
+    for(auto i = llvm::pred_begin(BB), e = llvm::pred_end(BB); i != e; ++i) {
+        phi->addIncoming(readLocalVar(*i, decl), *i);
+    }
+    optimizePhi(phi);
+}
+
+void cg::CGFunction::optimizePhi(llvm::PHINode *phi) {
+    llvm::Value *same = nullptr;
+    for(llvm::Value *v : phi->incoming_values()) {
+        if(v == same || v == phi) continue;
+        if(same && v != same) return;
+        same = v;
+    }
+    if(same == nullptr) {
+        same = llvm::UndefValue::get(phi->getType());
+    }
+    llvm::SmallVector<llvm::PHINode *, 8> candidatePhis;
+    for(llvm::Use &u: phi->uses()) {
+        if(auto *p = llvm::dyn_cast<llvm::PHINode>(u.getUser())) {
+            if(p != phi) {
+                candidatePhis.push_back(p);
+            }
+        }
+    }
+    phi->replaceAllUsesWith(same);
+    phi->eraseFromParent();
+    for(auto *p: candidatePhis) {
+        optimizePhi(p);
+    }
+}
+
+void cg::CGFunction::sealBlock(llvm::BasicBlock *BB) {
+    for(auto phi: currDef[BB].incompletePhis) {
+        addPhiOperands(BB, phi.second, phi.first);
+    }
+    currDef[BB].incompletePhis.clear();
+    currDef[BB].sealed = true;
 }
 
 llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl) {
@@ -477,7 +558,7 @@ void cg::CGFunction::run(ir::FunctionDecl *fun) {
     if(!currBB->getTerminator()) {
         builder.CreateRetVoid();
     }
-    //sealBlock(currBB);
+    sealBlock(currBB);
 }
 
 //void cg::CGFunction::run() { }

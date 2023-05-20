@@ -664,6 +664,7 @@ namespace  ptc  {
 
       // "string"
       // "identifier"
+      // fun_id
       // expr_str
       char dummy6[sizeof (std::string)];
 
@@ -913,33 +914,34 @@ namespace  ptc  {
         S_decllist = 94,                         // decllist
         S_declistval = 95,                       // declistval
         S_function = 96,                         // function
-        S_funargs = 97,                          // funargs
-        S_funargdef = 98,                        // funargdef
-        S_vardecl = 99,                          // vardecl
-        S_vardef = 100,                          // vardef
-        S_set = 101,                             // set
-        S_callarglist = 102,                     // callarglist
-        S_expr = 103,                            // expr
-        S_expr_var = 104,                        // expr_var
-        S_matrix = 105,                          // matrix
-        S_matvals = 106,                         // matvals
-        S_expr_mat = 107,                        // expr_mat
-        S_range = 108,                           // range
-        S_int_val = 109,                         // int_val
-        S_slice = 110,                           // slice
-        S_expr_none = 111,                       // expr_none
-        S_expr_struct = 112,                     // expr_struct
-        S_struct_val = 113,                      // struct_val
-        S_struct_list = 114,                     // struct_list
-        S_expr_int = 115,                        // expr_int
-        S_expr_float = 116,                      // expr_float
-        S_expr_str = 117,                        // expr_str
-        S_expr_bool = 118,                       // expr_bool
-        S_funtype = 119,                         // funtype
-        S_typelist = 120,                        // typelist
-        S_mattype = 121,                         // mattype
-        S_matsize = 122,                         // matsize
-        S_type = 123                             // type
+        S_fun_id = 97,                           // fun_id
+        S_funargs = 98,                          // funargs
+        S_funargdef = 99,                        // funargdef
+        S_vardecl = 100,                         // vardecl
+        S_vardef = 101,                          // vardef
+        S_set = 102,                             // set
+        S_callarglist = 103,                     // callarglist
+        S_expr = 104,                            // expr
+        S_expr_var = 105,                        // expr_var
+        S_matrix = 106,                          // matrix
+        S_matvals = 107,                         // matvals
+        S_expr_mat = 108,                        // expr_mat
+        S_range = 109,                           // range
+        S_int_val = 110,                         // int_val
+        S_slice = 111,                           // slice
+        S_expr_none = 112,                       // expr_none
+        S_expr_struct = 113,                     // expr_struct
+        S_struct_val = 114,                      // struct_val
+        S_struct_list = 115,                     // struct_list
+        S_expr_int = 116,                        // expr_int
+        S_expr_float = 117,                      // expr_float
+        S_expr_str = 118,                        // expr_str
+        S_expr_bool = 119,                       // expr_bool
+        S_funtype = 120,                         // funtype
+        S_typelist = 121,                        // typelist
+        S_mattype = 122,                         // mattype
+        S_matsize = 123,                         // matsize
+        S_type = 124                             // type
       };
     };
 
@@ -1009,6 +1011,7 @@ namespace  ptc  {
 
       case symbol_kind::S_STRING: // "string"
       case symbol_kind::S_ID: // "identifier"
+      case symbol_kind::S_fun_id: // fun_id
       case symbol_kind::S_expr_str: // expr_str
         value.move< std::string > (std::move (that.value));
         break;
@@ -1216,6 +1219,7 @@ switch (yykind)
 
       case symbol_kind::S_STRING: // "string"
       case symbol_kind::S_ID: // "identifier"
+      case symbol_kind::S_fun_id: // fun_id
       case symbol_kind::S_expr_str: // expr_str
         value.template destroy< std::string > ();
         break;
@@ -2892,9 +2896,9 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 3153,     ///< Last index in yytable_.
-      yynnts_ = 47,  ///< Number of nonterminal symbols.
-      yyfinal_ = 121 ///< Termination state number.
+      yylast_ = 3126,     ///< Last index in yytable_.
+      yynnts_ = 48,  ///< Number of nonterminal symbols.
+      yyfinal_ = 122 ///< Termination state number.
     };
 
 
@@ -2906,7 +2910,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 2910 "frontend/parser.hpp"
+#line 2914 "frontend/parser.hpp"
 
 
 
