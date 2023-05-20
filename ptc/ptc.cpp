@@ -14,6 +14,7 @@
 #include "llvm/Support/InitLLVM.h"
 #include "llvm/CodeGen/CommandFlags.h"
 #include "llvm/IR/IRPrintingPasses.h"
+#include "llvm/Pass.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/Host.h"
@@ -38,7 +39,7 @@ static const char *head = "Proto-typed compiler";
 
 void printVersion(llvm::raw_ostream &OS) {
     // TODO: print version
-    OS << head << " " << "TODO" << "\n";
+    OS << head << " " << PTC_VERSION << "\n";
     OS << "  Default target: "
         << llvm::sys::getDefaultTargetTriple() << "\n";
     std::string CPU(llvm::sys::getHostCPUName());
@@ -113,8 +114,7 @@ bool emit(std::string ptcName, llvm::Module *module, llvm::TargetMachine *target
 
     llvm::legacy::PassManager passM;
     if(fileType == llvm::CGFT_AssemblyFile && emitLLVM) {
-        // TODO:
-        //passM.add(llvm::createPrintModulePass(outF->os()));
+        passM.add(llvm::createPrintModulePass(outF->os()));
     }
     else {
         if(target->addPassesToEmitFile(passM, outF->os(), nullptr, fileType)) {
