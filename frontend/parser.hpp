@@ -52,6 +52,7 @@
         namespace ir {
             class IR;
             class Expr;
+            class FormalParamDecl;
         }
     }
 
@@ -63,7 +64,7 @@
         #endif
     #endif
 
-#line 67 "frontend/parser.hpp"
+#line 68 "frontend/parser.hpp"
 
 
 # include <cstdlib> // std::abort
@@ -199,7 +200,7 @@
 
 #line 14 "frontend/parser.yy"
 namespace  ptc  {
-#line 203 "frontend/parser.hpp"
+#line 204 "frontend/parser.hpp"
 
 
   /// A point in a source file.
@@ -671,11 +672,14 @@ namespace  ptc  {
       // callarglist
       char dummy7[sizeof (std::vector<ptc::ir::Expr *> )];
 
+      // funargs
+      char dummy8[sizeof (std::vector<ptc::ir::FormalParamDecl *> )];
+
       // stmt
       // block
       // body
       // else
-      char dummy8[sizeof (std::vector<ptc::ir::IR *> )];
+      char dummy9[sizeof (std::vector<ptc::ir::IR *> )];
     };
 
     /// The size of the largest semantic type.
@@ -1020,6 +1024,10 @@ namespace  ptc  {
         value.move< std::vector<ptc::ir::Expr *>  > (std::move (that.value));
         break;
 
+      case symbol_kind::S_funargs: // funargs
+        value.move< std::vector<ptc::ir::FormalParamDecl *>  > (std::move (that.value));
+        break;
+
       case symbol_kind::S_stmt: // stmt
       case symbol_kind::S_block: // block
       case symbol_kind::S_body: // body
@@ -1149,6 +1157,20 @@ namespace  ptc  {
 #endif
 
 #if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, std::vector<ptc::ir::FormalParamDecl *> && v, location_type&& l)
+        : Base (t)
+        , value (std::move (v))
+        , location (std::move (l))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const std::vector<ptc::ir::FormalParamDecl *> & v, const location_type& l)
+        : Base (t)
+        , value (v)
+        , location (l)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
       basic_symbol (typename Base::kind_type t, std::vector<ptc::ir::IR *> && v, location_type&& l)
         : Base (t)
         , value (std::move (v))
@@ -1226,6 +1248,10 @@ switch (yykind)
 
       case symbol_kind::S_callarglist: // callarglist
         value.template destroy< std::vector<ptc::ir::Expr *>  > ();
+        break;
+
+      case symbol_kind::S_funargs: // funargs
+        value.template destroy< std::vector<ptc::ir::FormalParamDecl *>  > ();
         break;
 
       case symbol_kind::S_stmt: // stmt
@@ -2896,7 +2922,7 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 3126,     ///< Last index in yytable_.
+      yylast_ = 3134,     ///< Last index in yytable_.
       yynnts_ = 48,  ///< Number of nonterminal symbols.
       yyfinal_ = 122 ///< Termination state number.
     };
@@ -2910,7 +2936,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 2914 "frontend/parser.hpp"
+#line 2940 "frontend/parser.hpp"
 
 
 

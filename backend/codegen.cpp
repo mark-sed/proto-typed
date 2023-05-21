@@ -229,9 +229,11 @@ llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl) {
         if(v->isByReference()) {
             return builder.CreateLoad(mapType(v)->getNonOpaquePointerElementType(), formalParams[v]);
         }
-    } else {
-        llvm::report_fatal_error("Unsupported variable declaration");
+        else {
+            return readLocalVar(BB, decl);
+        }
     }
+    llvm::report_fatal_error("Unsupported variable declaration");
     return nullptr;
 }
 
@@ -263,9 +265,16 @@ llvm::Value *cg::CodeGen::emitInfixExpr(ir::BinaryInfixExpr *e) {
     case ir::OperatorKind::OP_ASSIGN:
     {
         LOGMAX("Creating assignment instruction");
-        auto var = llvm::dyn_cast<ir::VarAccess>(e->getLeft());
-        auto varDecl = llvm::dyn_cast<ir::VarDecl>(var->getVar());
-        writeVar(currBB, varDecl, right);
+        auto *var = llvm::dyn_cast<ir::VarAccess>(e->getLeft());
+        if(auto *varDecl = llvm::dyn_cast<ir::VarDecl>(var->getVar())) {
+            writeVar(currBB, varDecl, right);
+        }
+        else if(auto *fp = llvm::dyn_cast<ir::FormalParamDecl>(var->getVar())) {
+            writeVar(currBB, fp, right);
+        }
+        else {
+            llvm::report_fatal_error("Unknown left value in an assignment");
+        }
     }
     break;
     case ir::OperatorKind::OP_ADD:

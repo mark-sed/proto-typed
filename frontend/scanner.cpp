@@ -37,6 +37,7 @@ bool isOneOf(llvm::StringRef v, std::initializer_list<std::string> accepted) {
 }
 
 std::string encodeFunction(std::string name, std::vector<ir::FormalParamDecl *> params) {
+    assert(name.size() > 0 && "Function name cannot be empty");
     std::string paramStr;
     for(auto p : params) {
         paramStr += p->getType()->getName()+"_";
@@ -45,6 +46,7 @@ std::string encodeFunction(std::string name, std::vector<ir::FormalParamDecl *> 
 }
 
 std::string encodeFunction(std::string name, std::vector<ir::Expr *> params) {
+    assert(name.size() > 0 && "Function name cannot be empty");
     std::string paramStr;
     for(auto p : params) {
         paramStr += p->getType()->getName()+"_";
@@ -59,11 +61,9 @@ Scanner::Scanner(Diagnostics &diags, std::string moduleName) : currentIR(nullptr
 
 void Scanner::init() {
     currScope = new Scope();
-    
 
     llvmloc = llvm::SMLoc();
 
-    // TODO: Maybe set the name to the module's correct name?
     mainModule = new ir::ModuleDecl(nullptr, llvm::SMLoc(), moduleName);
     currentIR = mainModule;
 
@@ -325,6 +325,26 @@ std::vector<ir::Expr *> Scanner::parseAddFunCallArg(std::vector<ir::Expr *> &lis
     return list;
 }
 
+std::vector<ir::FormalParamDecl *> Scanner::parseFunParam(ir::IR *type, std::string name) {
+    LOGMAX("Creating new function param list with "+name);
+    // TODO: Handle by reference
+    auto fp = new ir::FormalParamDecl(currentIR, llvmloc, name, llvm::dyn_cast<ir::TypeDecl>(type));
+    std::vector<ir::FormalParamDecl *> list{fp};
+    currScope->insert(fp);
+    //this->decls.push_back(fp);
+    return list;
+}
+
+std::vector<ir::FormalParamDecl *> Scanner::parseAddFunParam(std::vector<ir::FormalParamDecl *> &list, ir::IR *type, std::string name) {
+    LOGMAX("Pushing new argument into function param list: "+name);
+    // TODO: Handle by reference
+    auto fp = new ir::FormalParamDecl(currentIR, llvmloc, name, llvm::dyn_cast<ir::TypeDecl>(type));
+    list.push_back(fp);
+    currScope->insert(fp);
+    //this->decls.push_back(fp);
+    return list;
+}
+
 std::vector<ir::IR *> Scanner::parseStmtBody(ir::IR *stmt) {
     if(!stmt) {
         LOGMAX("Creating empty statement body");
@@ -387,17 +407,11 @@ ir::IR *Scanner::parseIfStmt(ir::Expr *cond, std::vector<ir::IR *> &ifBranch, st
     return ifstmt;
 }
 
-ir::IR *Scanner::parseFun(ir::IR *type, std::string name, std::vector<ir::Expr *> params, std::vector<ir::IR *> body) {
-    LOGMAX("Parsing a function");
-    
-    std::vector<ir::FormalParamDecl *> formParams{};
-    //for(auto p: params) {
-        // TODO: convert
-    //}
-
+ir::IR *Scanner::parseFun(ir::IR *type, std::string name, std::vector<ir::FormalParamDecl *> params, std::vector<ir::IR *> body) {
+    LOGMAX("Parsing a function "+name);
     auto ctype = llvm::dyn_cast<ir::TypeDecl>(type);
     auto f = llvm::dyn_cast<ir::FunctionDecl>(currentIR);
-    f->resolveFunction(llvmloc, encodeFunction(name, formParams), ctype, formParams, body);
+    f->resolveFunction(llvmloc, encodeFunction(name, params), ctype, params, body);
 
     leaveScope();
 

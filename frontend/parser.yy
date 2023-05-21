@@ -24,6 +24,7 @@
         namespace ir {
             class IR;
             class Expr;
+            class FormalParamDecl;
         }
     }
 
@@ -195,6 +196,7 @@
 %type <std::vector<ptc::ir::IR *> > block
 %type <std::vector<ptc::ir::IR *> > else
 %type <std::vector<ptc::ir::IR *> > stmt
+%type <std::vector<ptc::ir::FormalParamDecl *> > funargs
 
 %locations
 
@@ -293,16 +295,16 @@ declistval : vardecl
            ;
 
 // Function definition
-function : type ID LPAR RPAR block
-         | type ID LPAR funargs RPAR block
-         | KWVOID fun_id LPAR RPAR block         { $$ = scanner->parseFun(scanner->sym_lookup("void"), $2, std::vector<ptc::ir::Expr *>{}, $5); }
-         | KWVOID fun_id LPAR funargs RPAR block
+function : type fun_id LPAR RPAR block               { $$ = scanner->parseFun($1, $2, std::vector<ptc::ir::FormalParamDecl *>{}, $5); }
+         | type fun_id LPAR funargs RPAR block       { $$ = scanner->parseFun($1, $2, $4, $6); }
+         | KWVOID fun_id LPAR RPAR block         { $$ = scanner->parseFun(scanner->sym_lookup("void"), $2, std::vector<ptc::ir::FormalParamDecl *>{}, $5); }
+         | KWVOID fun_id LPAR funargs RPAR block { $$ = scanner->parseFun(scanner->sym_lookup("void"), $2, $4, $6); }
          ;
-fun_id : ID { scanner->enterFunScope(); }
+fun_id : ID { scanner->enterFunScope(); $$ = $1; }
        ;
-funargs : type ID
+funargs : type ID               { $$ = scanner->parseFunParam($1, $2); }
         | funargdef
-        | funargs COMMA funargs
+        | funargs COMMA type ID { $$ = scanner->parseAddFunParam($1, $3, $4); }
         ;
 funargdef : type ID SET expr
           | funargdef COMMA funargdef

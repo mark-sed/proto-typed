@@ -92,7 +92,7 @@ public:
     ir::IR *parseVarDef(ir::IR *type, std::string name, ir::Expr *value);
     ir::IR *parseExprStmt(ir::Expr *e);
     ir::IR *parseIfStmt(ir::Expr *cond, std::vector<ir::IR *> &ifBranch, std::vector<ir::IR *> &elseBranch);
-    ir::IR *parseFun(ir::IR *type, std::string name, std::vector<ir::Expr *> params, std::vector<ir::IR *> body);
+    ir::IR *parseFun(ir::IR *type, std::string name, std::vector<ir::FormalParamDecl *> params, std::vector<ir::IR *> body);
     ir::Expr *parseInt(long v);
     ir::Expr *parseFloat(double v);
     ir::Expr *parseBool(bool v);
@@ -102,6 +102,8 @@ public:
     ir::Expr *parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params);
     std::vector<ir::Expr *> parseFunCallArg(ir::Expr *e);
     std::vector<ir::Expr *> parseAddFunCallArg(std::vector<ir::Expr *> &list, ir::Expr *e);
+    std::vector<ir::FormalParamDecl *> parseFunParam(ir::IR *type, std::string name);
+    std::vector<ir::FormalParamDecl *> parseAddFunParam(std::vector<ir::FormalParamDecl *> &list, ir::IR *type, std::string name);
     std::vector<ir::IR *> parseStmtBody(ir::IR *stmt);
     std::vector<ir::IR *> parseStmtBodyAdd(std::vector<ir::IR *> &body, ir::IR *stmt);
     void parseMain(std::vector<ir::IR *> body);
