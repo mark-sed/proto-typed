@@ -52,7 +52,7 @@ std::string encodeFunction(std::string name, std::vector<ir::Expr *> params) {
     return name+"_"+std::to_string(params.size())+paramStr;
 }
 
-Scanner::Scanner(Diagnostics &diags) : currentIR(nullptr), diags(diags) {
+Scanner::Scanner(Diagnostics &diags, std::string moduleName) : currentIR(nullptr), diags(diags), moduleName(moduleName) {
     loc = new Parser::location_type();
     init();
 }
@@ -64,7 +64,7 @@ void Scanner::init() {
     llvmloc = llvm::SMLoc();
 
     // TODO: Maybe set the name to the module's correct name?
-    mainModule = new ir::ModuleDecl(nullptr, llvm::SMLoc(), "mainModule");
+    mainModule = new ir::ModuleDecl(nullptr, llvm::SMLoc(), moduleName);
     currentIR = mainModule;
 
     intType = new ir::TypeDecl(currentIR, llvm::SMLoc(), INT_CSTR);
@@ -84,6 +84,7 @@ void Scanner::init() {
     };
     auto printBody = std::vector<ir::IR *> {
         // TODO
+        
     };
     auto printIntFun = new ir::FunctionDecl(currentIR,
                                             llvm::SMLoc(),

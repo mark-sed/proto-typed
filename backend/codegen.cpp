@@ -8,6 +8,10 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/IR/Instructions.h"
+#include "llvm/ADT/ArrayRef.h"
+#include "llvm/IR/Attributes.h"
+#include "llvm/ADT/SmallVector.h"
 
 using namespace ptc;
 
@@ -83,13 +87,13 @@ void cg::CGModule::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val
 }
 
 void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) {
-    /*if(llvm::dyn_cast<ir::VarDecl>(decl)) {
-        LOGMAX("Writing variable in module");
-        builder.CreateStore(val, getGlobals(decl));
-    } else {
-        llvm::report_fatal_error("Unsupported variable access");
-    }*/
-    llvm::report_fatal_error("UNIMPLEMENTED module var write");
+    assert(BB && "Basic block is nullptr");
+    assert(
+        (llvm::isa<ir::VarDecl>(decl) ||
+        llvm::isa<ir::FormalParamDecl>(decl)) &&
+        "Declaration must be variable or formal parameter");
+    assert(val && "Value is nullptr");
+    currDef[BB].defs[decl] = val;
 }
 
 void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) {
@@ -173,10 +177,11 @@ void cg::CGFunction::addPhiOperands(llvm::BasicBlock *BB, ir::IR *decl, llvm::PH
     for(auto i = llvm::pred_begin(BB), e = llvm::pred_end(BB); i != e; ++i) {
         phi->addIncoming(readLocalVar(*i, decl), *i);
     }
-    optimizePhi(phi);
+    //optimizePhi(phi);
 }
 
 void cg::CGFunction::optimizePhi(llvm::PHINode *phi) {
+    // FIXME: Causes crash
     llvm::Value *same = nullptr;
     for(llvm::Value *v : phi->incoming_values()) {
         if(v == same || v == phi) continue;
@@ -552,6 +557,20 @@ void cg::CGFunction::run(ir::FunctionDecl *fun) {
             }
         }
     }
+
+    /* llvm::Type *retTy = llvm::Type::getInt32Ty(ctx);
+    llvm::FunctionType* FuncTy = llvm::FunctionType::get(retTy, false);
+    llvm::Type *charTy = llvm::Type::getInt8Ty(ctx);
+    llvm::Type *charPtrTy = charTy->getPointerTo();
+    //llvm::Argument arg(charTy, "s");
+    llvm::Attribute arg = llvm::Attribute::get(ctx, llvm::Attribute::AttrKind::ByVal, charTy);
+    llvm::AttributeList atl;
+    atl.addAttributeAtIndex(ctx, 0, arg);
+    llvm::FunctionCallee putcFun = cgm.getLLVMMod()->getOrInsertFunction("puts", llvm::Type::getInt32Ty(ctx));
+    llvm::Value *v = llvm::ConstantDataArray::getString(ctx, llvm::StringRef("Hello!"));
+    llvm::ArrayRef<llvm::Value *> args{v};
+    llvm::Instruction* putcCall = llvm::CallInst::Create(putcFun, args);
+    builder.Insert(putcCall);*/
 
     auto block = fun->getDecl();
     emit(fun->getDecl());

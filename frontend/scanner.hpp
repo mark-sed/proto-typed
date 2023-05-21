@@ -47,8 +47,9 @@ private:
 public:
     ptc::Parser::location_type *loc = nullptr;     ///< Current parsing location
     ir::ModuleDecl *mainModule;
+    std::string moduleName;
 
-    Scanner(Diagnostics &diags);
+    Scanner(Diagnostics &diags, std::string moduleName);
 
     /**
      * Initializer method to be called before parsing

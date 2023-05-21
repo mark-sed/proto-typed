@@ -27,6 +27,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <filesystem>
 
 using namespace ptc;
 
@@ -180,7 +181,10 @@ int main(int argc, char *argv[]) {
         // TODO: use SourceMgr
         std::ifstream code(fileName);
 
-        auto scanner = new Scanner(diags);
+
+
+        std::string moduleName = std::filesystem::path(fileName).stem();
+        auto scanner = new Scanner(diags, moduleName);
         scanner->parse(&code);
         LOG1("Parsing done for "+fileName);
 
