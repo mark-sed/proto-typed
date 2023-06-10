@@ -475,6 +475,31 @@ void cg::CGFunction::emitStmt(ir::IfStatement *stmt) {
     bool hasElse = stmt->getElseBranch().size() > 0;
 
     llvm::BasicBlock *ifBB = llvm::BasicBlock::Create(ctx, "if.body", llvmFun);
+    llvm::BasicBlock *elseBB = hasElse ? llvm::BasicBlock::Create(ctx, "else.body", llvmFun) : nullptr;
+    llvm::BasicBlock *afterBB = llvm::BasicBlock::Create(ctx, "after.if", llvmFun);
+
+    llvm::Value *cnd = emitExpr(stmt->getCond());
+    builder.CreateCondBr(cnd, ifBB, hasElse ? elseBB : afterBB);
+
+    sealBlock(currBB);
+
+    setCurrBB(ifBB);
+    emit(stmt->getIfBranch());
+    if(!currBB->getTerminator()) {
+        builder.CreateBr(afterBB);
+    }
+    sealBlock(currBB);
+
+    if(hasElse) {
+        setCurrBB(elseBB);
+        emit(stmt->getElseBranch());
+        if(!currBB->getTerminator()) {
+            builder.CreateBr(afterBB);
+        }
+        sealBlock(currBB);
+    }
+
+    setCurrBB(afterBB);
 }
 
 void cg::CGFunction::emitStmt(ir::ReturnStmt *stmt) {
@@ -495,6 +520,9 @@ void cg::CGFunction::emit(std::vector<ir::IR *> stmts) {
             emitStmt(stmt);
         }
         else if(auto *stmt = llvm::dyn_cast<ir::ReturnStmt>(s)) {
+            emitStmt(stmt);
+        }
+        else if(auto *stmt = llvm::dyn_cast<ir::IfStatement>(s)) {
             emitStmt(stmt);
         }
         //else {
