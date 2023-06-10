@@ -458,23 +458,23 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          | expr_var LEQ expr_str
          | expr_var LEQ expr_var
 
-         | expr_int EQ expr_var
-         | expr_float EQ expr_var
+         | expr_int EQ expr_var         { $$ = scanner->parseInfixExpr(scanner->parseInt($1), $3, ir::Operator(ir::OperatorKind::OP_EQ)); }
+         | expr_float EQ expr_var       { $$ = scanner->parseInfixExpr(scanner->parseFloat($1), $3, ir::Operator(ir::OperatorKind::OP_EQ)); }
          | expr_str EQ expr_var
-         | expr_bool EQ expr_var
+         | expr_bool EQ expr_var        { $$ = scanner->parseInfixExpr(scanner->parseBool($1), $3, ir::Operator(ir::OperatorKind::OP_EQ)); }
          | expr_none EQ expr_var
          | expr_struct EQ expr_struct
          | expr_struct EQ expr_var
-         | expr_var EQ expr_int
-         | expr_var EQ expr_float
+         | expr_var EQ expr_int         { $$ = scanner->parseInfixExpr($1, scanner->parseInt($3), ir::Operator(ir::OperatorKind::OP_EQ)); }
+         | expr_var EQ expr_float       { $$ = scanner->parseInfixExpr($1, scanner->parseFloat($3), ir::Operator(ir::OperatorKind::OP_EQ)); }
          | expr_var EQ expr_str
-         | expr_var EQ expr_bool
+         | expr_var EQ expr_bool        { $$ = scanner->parseInfixExpr($1, scanner->parseBool($3), ir::Operator(ir::OperatorKind::OP_EQ)); }
          | expr_var EQ expr_none
          | expr_var EQ expr_struct
          | expr_mat EQ expr_mat
          | expr_var EQ expr_mat
          | expr_mat EQ expr_var
-         | expr_var EQ expr_var
+         | expr_var EQ expr_var         { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_EQ)); }
 
          | expr_int NEQ expr_var
          | expr_float NEQ expr_var

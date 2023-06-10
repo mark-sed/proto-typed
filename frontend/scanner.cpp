@@ -425,7 +425,23 @@ ir::IR *Scanner::parseFun(ir::IR *type, std::string name, std::vector<ir::Formal
 
 void Scanner::parseMain(std::vector<ir::IR *> body) {
     LOGMAX("Parsing main");
+    std::vector<ir::IR *> entryBody;
     for(auto i: body) {
-        this->decls.push_back(i);
+        if(llvm::isa<ir::VarDecl>(i) ||
+            llvm::isa<ir::TypeDecl>(i) ||
+            llvm::isa<ir::FunctionDecl>(i) ||
+            llvm::isa<ir::TypeDecl>(i)) {
+            this->decls.push_back(i);
+        }
+        else {
+            entryBody.push_back(i);
+        }
     }
+    std::vector<ir::FormalParamDecl *> params{};
+    this->decls.push_back(new ir::FunctionDecl(mainModule,
+                                                llvmloc,
+                                                "_entry",
+                                                voidType,
+                                                params,
+                                                entryBody));
 }
