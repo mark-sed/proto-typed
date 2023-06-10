@@ -658,6 +658,7 @@ namespace  ptc  {
       // stmts_ne
       // flowctl
       // return
+      // while
       // if
       // function
       // vardecl
@@ -1009,6 +1010,7 @@ namespace  ptc  {
       case symbol_kind::S_stmts_ne: // stmts_ne
       case symbol_kind::S_flowctl: // flowctl
       case symbol_kind::S_return: // return
+      case symbol_kind::S_while: // while
       case symbol_kind::S_if: // if
       case symbol_kind::S_function: // function
       case symbol_kind::S_vardecl: // vardecl
@@ -1237,6 +1239,7 @@ switch (yykind)
       case symbol_kind::S_stmts_ne: // stmts_ne
       case symbol_kind::S_flowctl: // flowctl
       case symbol_kind::S_return: // return
+      case symbol_kind::S_while: // while
       case symbol_kind::S_if: // if
       case symbol_kind::S_function: // function
       case symbol_kind::S_vardecl: // vardecl
@@ -2942,7 +2945,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 2946 "frontend/parser.hpp"
+#line 2949 "frontend/parser.hpp"
 
 
 

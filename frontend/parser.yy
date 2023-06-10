@@ -186,6 +186,7 @@
 %type <ptc::ir::IR *> vardef
 %type <ptc::ir::IR *> stmts_ne
 %type <ptc::ir::IR *> if
+%type <ptc::ir::IR *> while
 %type <ptc::ir::IR *> stmts
 %type <ptc::ir::IR *> function
 %type <ptc::ir::IR *> return
@@ -264,7 +265,7 @@ for : KWFOR LPAR ID COLON expr RPAR body
     ;
 
 // While loop
-while : KWWHILE LPAR expr RPAR body
+while : KWWHILE LPAR expr RPAR body { $$ = scanner->parseWhile($3, $5); }
       ;
 // Do while
 dowhile : KWDO body KWWHILE LPAR expr RPAR

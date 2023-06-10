@@ -475,8 +475,8 @@ void cg::CGFunction::emitStmt(ir::IfStatement *stmt) {
     bool hasElse = stmt->getElseBranch().size() > 0;
 
     llvm::BasicBlock *ifBB = llvm::BasicBlock::Create(ctx, "if.body", llvmFun);
-    llvm::BasicBlock *elseBB = hasElse ? llvm::BasicBlock::Create(ctx, "else.body", llvmFun) : nullptr;
-    llvm::BasicBlock *afterBB = llvm::BasicBlock::Create(ctx, "after.if", llvmFun);
+    llvm::BasicBlock *elseBB = hasElse ? llvm::BasicBlock::Create(ctx, "if.else", llvmFun) : nullptr;
+    llvm::BasicBlock *afterBB = llvm::BasicBlock::Create(ctx, "if.after", llvmFun);
 
     llvm::Value *cnd = emitExpr(stmt->getCond());
     builder.CreateCondBr(cnd, ifBB, hasElse ? elseBB : afterBB);
@@ -502,6 +502,26 @@ void cg::CGFunction::emitStmt(ir::IfStatement *stmt) {
     setCurrBB(afterBB);
 }
 
+void cg::CGFunction::emitStmt(ir::WhileStmt *stmt) {
+    llvm::BasicBlock *whileCondBB = llvm::BasicBlock::Create(ctx, "while.cond", llvmFun);
+    llvm::BasicBlock *whileBodyBB = llvm::BasicBlock::Create(ctx, "while.body", llvmFun);
+    llvm::BasicBlock *whileAfterBB = llvm::BasicBlock::Create(ctx, "while.after", llvmFun);
+
+    builder.CreateBr(whileCondBB);
+    sealBlock(currBB);
+    setCurrBB(whileCondBB);
+    llvm::Value *cond = emitExpr(stmt->getCond());
+    builder.CreateCondBr(cond, whileBodyBB, whileAfterBB);
+
+    setCurrBB(whileBodyBB);
+    emit(stmt->getBody());
+    builder.CreateBr(whileCondBB);
+    sealBlock(currBB);
+    sealBlock(whileCondBB);
+
+    setCurrBB(whileAfterBB);
+}
+
 void cg::CGFunction::emitStmt(ir::ReturnStmt *stmt) {
     if(stmt->getValue()) {
         LOGMAX("Creating return with value");
@@ -523,6 +543,9 @@ void cg::CGFunction::emit(std::vector<ir::IR *> stmts) {
             emitStmt(stmt);
         }
         else if(auto *stmt = llvm::dyn_cast<ir::IfStatement>(s)) {
+            emitStmt(stmt);
+        }
+        else if(auto *stmt = llvm::dyn_cast<ir::WhileStmt>(s)) {
             emitStmt(stmt);
         }
         //else {

@@ -412,6 +412,14 @@ ir::IR *Scanner::parseIfStmt(ir::Expr *cond, std::vector<ir::IR *> &ifBranch, st
     return ifstmt;
 }
 
+ir::IR *Scanner::parseWhile(ir::Expr *cond, std::vector<ir::IR *> &body) {
+    LOGMAX("Parsing while");
+    if(cond->getType() != boolType) {
+        diags.report(llvmloc, diag::ERR_WHILE_COND_MUST_BE_BOOL, cond->getType()->getName());
+    }
+    return new ir::WhileStmt(currentIR, llvmloc, "while", cond, body);
+}
+
 ir::IR *Scanner::parseFun(ir::IR *type, std::string name, std::vector<ir::FormalParamDecl *> params, std::vector<ir::IR *> body) {
     LOGMAX("Parsing a function "+name);
     auto ctype = llvm::dyn_cast<ir::TypeDecl>(type);

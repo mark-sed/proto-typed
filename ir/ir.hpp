@@ -40,6 +40,7 @@ enum IRKind {
     IR_FORMAL_PARAM_DECL,
     IR_FUNCTION_DECL,
     IR_IF,
+    IR_WHILE,
     IR_RETURN,
     IR_MODULE_DECL
 };
@@ -90,27 +91,6 @@ enum OperatorKind {
 };
 
 /**
- * @brief Converts a block of IRs to a debug string
- * 
- * @param block Block of IRs
- * @return Block as a debug string
- */
-/*std::string block2String(std::vector<ir::IR *> block) {
-    std::stringstream ss;
-    for(auto i : block) {
-        ss << i->debug() << std::endl;
-    }
-    return ss.str();
-}
-std::string block2String(std::vector<ir::Expr *> block) {
-    std::stringstream ss;
-    for(auto i : block) {
-        ss << i->debug() << std::endl;
-    }
-    return ss.str();
-}*/
-
-/**
  * Parent class for all IR objects - declarations
  */
 class IR {
@@ -134,6 +114,14 @@ public:
     IR *getEnclosingIR() { return enclosing_ir; }
     void setEnclosingIR(ir::IR *parent) { enclosing_ir = parent; }
 };
+
+/**
+ * @brief Converts a block of IRs to a debug string
+ * 
+ * @param block Block of IRs
+ * @return Block as a debug string
+ */
+std::string block2String(std::vector<ir::IR *> block);
 
 /**
  * Declaration of a type
@@ -236,7 +224,7 @@ public:
     }
     virtual std::string debug() const override {
         if(!prototype)
-            return returnType->getName()+" "+name+"(...) { ... }";
+            return returnType->getName()+" "+name+"(...) {\n" + block2String(decls) +"}\n";
         else
             return "unknwon-type unknown-function(?) { ... }";
     }
@@ -307,6 +295,8 @@ public:
     void setType(TypeDecl *t) { type = t; }
     bool isConst() { return is_const; }
 };
+
+std::string block2String(std::vector<ir::Expr *> block);
 
 /**
  * Expression containing 2 arguments and an operator
@@ -482,10 +472,37 @@ public:
         return ir->getKind() == IRKind::IR_IF;
     }
     virtual std::string debug() const override {
-        return "if("+cond->debug()+") {\n...} else {\n...}";
+        return "if("+cond->debug()+") {\n" + block2String(ifBranch) + "}\nelse {\n" + block2String(elseBranch) + "}\n";
     }
 };
 
+class WhileStmt : public IR {
+private:
+    Expr *cond;
+    std::vector<ir::IR *> body;
+public:
+    WhileStmt(IR *enclosing_ir, 
+              llvm::SMLoc loc,
+              std::string name,
+              Expr *cond,
+              std::vector<ir::IR *> body)
+        : IR(IRKind::IR_WHILE, enclosing_ir, loc, name),
+          cond(cond),
+          body(body) {}
+
+    Expr *getCond() { return cond; }
+    std::vector<ir::IR *> getBody() { return body; }
+    static bool classof(const IR *ir) {
+        return ir->getKind() == IRKind::IR_WHILE;
+    }
+    virtual std::string debug() const override {
+        return "while("+cond->debug()+") {\n"+ block2String(body) +"}\n";
+    }
+};
+
+/**
+ * Function return statement 
+ */
 class ReturnStmt: public IR {
 private:
     Expr *val;
@@ -498,8 +515,18 @@ public:
     static bool classof(const IR *s) {
         return s->getKind() == IRKind::IR_RETURN;
     }
+
+    virtual std::string debug() const override {
+        if(val)
+            return "return "+val->debug();
+        else
+            return "return void";
+    }
 };
 
+/**
+ * Module declaration 
+ */
 class ModuleDecl : public IR {
 private:
     std::vector<IR *> decls;
@@ -521,10 +548,7 @@ public:
 
     virtual std::string debug() const override {
         std::string dbg = "module "+name+" {\n";
-        // FIXME: Dont use string concat
-        for(auto d: decls) {
-            dbg += d->debug()+"\n";
-        }
+        dbg += block2String(decls);
         dbg+="}\n";
         return dbg;
     }

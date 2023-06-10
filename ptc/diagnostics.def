@@ -20,6 +20,7 @@ DIAG(ERR_INVALID_CONVERSION, Error, "invalid conversion from ‘{0}’ to ‘{1}
 DIAG(ERR_UNSUPPORTED_OP_TYPE, Error, "unsupported operand type(s) for ‘{0}’: ‘{1}’ and ‘{2}’.")
 DIAG(ERR_NOT_CALLABLE, Error, "‘{0}’ is not callable.")
 DIAG(ERR_IF_COND_MUST_BE_BOOL, Error, "if statement condition must be bool, but is ‘{0}’.")
+DIAG(ERR_WHILE_COND_MUST_BE_BOOL, Error, "while statement condition must be bool, but is ‘{0}’.")
 
 
 DIAG(ERR_EXPECTED, Error, "expected ‘{0}’ but found ‘{1}’.")
