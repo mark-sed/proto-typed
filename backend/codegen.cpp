@@ -237,7 +237,7 @@ llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl) {
     return nullptr;
 }
 
-llvm::Value *cg::CodeGen::emitExpr(ir::Expr *e) {
+llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
     switch(e->getKind()) {
     case ir::ExprKind::EX_BIN_INF: return emitInfixExpr(llvm::dyn_cast<ir::BinaryInfixExpr>(e));
     case ir::ExprKind::EX_VAR:
@@ -257,7 +257,7 @@ llvm::Value *cg::CodeGen::emitExpr(ir::Expr *e) {
     }
 }
 
-llvm::Value *cg::CodeGen::emitInfixExpr(ir::BinaryInfixExpr *e) {
+llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     llvm::Value *left = emitExpr(e->getLeft());
     llvm::Value *right = emitExpr(e->getRight());
     llvm::Value *result = nullptr;
@@ -466,14 +466,35 @@ llvm::Value *cg::CodeGen::emitInfixExpr(ir::BinaryInfixExpr *e) {
     return result;
 }
 
-void cg::CodeGen::emitStmt(ir::ExprStmt *stmt) {
+void cg::CGFunction::emitStmt(ir::ExprStmt *stmt) {
     ir::Expr *e = stmt->getExpr();
     emitExpr(e);
+}
+
+void cg::CGFunction::emitStmt(ir::IfStatement *stmt) {
+    bool hasElse = stmt->getElseBranch().size() > 0;
+
+    llvm::BasicBlock *ifBB = llvm::BasicBlock::Create(ctx, "if.body", llvmFun);
+}
+
+void cg::CGFunction::emitStmt(ir::ReturnStmt *stmt) {
+    if(stmt->getValue()) {
+        LOGMAX("Creating return with value");
+        llvm::Value *retVal = emitExpr(stmt->getValue());
+        builder.CreateRet(retVal);
+    }
+    else {
+        LOGMAX("Creating return void");
+        builder.CreateRetVoid();
+    }
 }
 
 void cg::CGFunction::emit(std::vector<ir::IR *> stmts) {
     for(auto *s : stmts) {
         if(auto *stmt = llvm::dyn_cast<ir::ExprStmt>(s)) {
+            emitStmt(stmt);
+        }
+        else if(auto *stmt = llvm::dyn_cast<ir::ReturnStmt>(s)) {
             emitStmt(stmt);
         }
         //else {

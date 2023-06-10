@@ -188,6 +188,8 @@
 %type <ptc::ir::IR *> if
 %type <ptc::ir::IR *> stmts
 %type <ptc::ir::IR *> function
+%type <ptc::ir::IR *> return
+%type <ptc::ir::IR *> flowctl
 %type <ptc::ir::Expr *> expr
 %type <ptc::ir::Expr *> expr_var
 %type <ptc::ir::Expr *> set
@@ -225,7 +227,7 @@ stmts_ne : set END      { $$ = scanner->parseExprStmt($1); }
          | dowhile
          | struct
          | function     { $$ = $1; }
-         | flowctl END
+         | flowctl END  { $$ = $1; }
          | expr END     { $$ = scanner->parseExprStmt($1); }
          ;
 
@@ -251,10 +253,10 @@ id_list : ID
 // Flow controll
 flowctl : KWBREAK
         | KWCONTINUE
-        | return
+        | return        { $$ = $1; }
         ;
-return : KWRETURN
-       | KWRETURN expr
+return : KWRETURN       { $$ = scanner->parseReturn(nullptr); }
+       | KWRETURN expr  { $$ = scanner->parseReturn($2); }
        ;
 
 // For loop

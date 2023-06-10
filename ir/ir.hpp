@@ -40,6 +40,7 @@ enum IRKind {
     IR_FORMAL_PARAM_DECL,
     IR_FUNCTION_DECL,
     IR_IF,
+    IR_RETURN,
     IR_MODULE_DECL
 };
 
@@ -482,6 +483,20 @@ public:
     }
     virtual std::string debug() const override {
         return "if("+cond->debug()+") {\n...} else {\n...}";
+    }
+};
+
+class ReturnStmt: public IR {
+private:
+    Expr *val;
+public:
+    ReturnStmt(Expr *val, IR *enclosing_ir, llvm::SMLoc loc, std::string name)
+        : IR(IRKind::IR_RETURN, enclosing_ir, loc, name), val(val) {}
+
+    Expr *getValue() { return val; }
+
+    static bool classof(const IR *s) {
+        return s->getKind() == IRKind::IR_RETURN;
     }
 };
 

@@ -63,11 +63,6 @@ protected:
     virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) = 0;
     virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl) = 0;
 
-    llvm::Value *emitInfixExpr(ir::BinaryInfixExpr *e);
-    llvm::Value *emitExpr(ir::Expr *e);
-
-    void emitStmt(ir::ExprStmt *stmt);
-
 public:
     llvm::Type *voidT;
     llvm::Type *int1T;
@@ -124,6 +119,12 @@ protected:
     virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) override;
     virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl) override;
 
+    llvm::Value *emitInfixExpr(ir::BinaryInfixExpr *e);
+    llvm::Value *emitExpr(ir::Expr *e);
+
+    void emitStmt(ir::ExprStmt *stmt);
+    void emitStmt(ir::ReturnStmt *stmt);
+    void emitStmt(ir::IfStatement *stmt);
     virtual void emit(std::vector<ir::IR *> stmts);
 public:
     CGFunction(CGModule &cgm) : CodeGen(cgm.getLLVMCtx(), cgm), cgm(cgm) {} 

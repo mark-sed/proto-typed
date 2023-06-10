@@ -93,6 +93,7 @@ public:
     ir::IR *parseExprStmt(ir::Expr *e);
     ir::IR *parseIfStmt(ir::Expr *cond, std::vector<ir::IR *> &ifBranch, std::vector<ir::IR *> &elseBranch);
     ir::IR *parseFun(ir::IR *type, std::string name, std::vector<ir::FormalParamDecl *> params, std::vector<ir::IR *> body);
+    ir::IR *parseReturn(ir::Expr *e);
     ir::Expr *parseInt(long v);
     ir::Expr *parseFloat(double v);
     ir::Expr *parseBool(bool v);

@@ -170,6 +170,11 @@ ir::IR *Scanner::parseExprStmt(ir::Expr *e) {
     return v;
 }
 
+ir::IR *Scanner::parseReturn(ir::Expr *e) {
+    LOGMAX("Parsing return");
+    return new ir::ReturnStmt(e, currentIR, llvmloc, "Return");
+}
+
 ir::Expr *Scanner::parseInt(long v) {
     LOGMAX("Parsing int "+std::to_string(v));
     llvm::APInt vInt(64, v, true);
