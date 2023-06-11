@@ -145,12 +145,15 @@ public:
 class VarDecl : public IR {
 private:
     TypeDecl *td;
+    Expr *initValue;
 public:
-    VarDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name, TypeDecl *td)
+    VarDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name, TypeDecl *td, Expr *initValue=nullptr)
            : IR(IRKind::IR_VAR_DECL, enclosing_ir, loc, name),
-             td(td) {}
+             td(td),
+             initValue(initValue) {}
     
     TypeDecl *getType() { return td; }
+    Expr *getInitValue() { return initValue; }
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_VAR_DECL;
     }

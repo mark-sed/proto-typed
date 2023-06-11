@@ -67,7 +67,7 @@ public:
     llvm::Type *voidT;
     llvm::Type *int1T;
     llvm::Type *int64T;
-    llvm::Type *doubleT;
+    llvm::Type *floatT;
 
     llvm::Type *mapType(ir::IR *decl);
     llvm::Type *convertType(ir::TypeDecl *type);

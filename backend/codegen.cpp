@@ -1,5 +1,6 @@
 #include "codegen.hpp"
 #include "logging.hpp"
+#include "utils.hpp"
 #include "ir.hpp"
 #include "llvm/ADT/StringExtras.h"
 #include "llvm/IR/CFG.h"
@@ -32,7 +33,7 @@ void cg::CodeGen::init() {
     voidT = llvm::Type::getVoidTy(ctx);
     int1T = llvm::Type::getInt1Ty(ctx);
     int64T = llvm::Type::getInt64Ty(ctx);
-    doubleT = llvm::Type::getDoubleTy(ctx);
+    floatT = llvm::Type::getDoubleTy(ctx);
 }
 
 llvm::Type *cg::CodeGen::convertType(ir::TypeDecl *t) {
@@ -46,7 +47,7 @@ llvm::Type *cg::CodeGen::convertType(ir::TypeDecl *t) {
         return voidT;
     }
     if(t->getName() == FLOAT_CSTR) {
-        return doubleT;
+        return floatT;
     }
     llvm::report_fatal_error("Unsupported type");
     return nullptr;
@@ -105,7 +106,7 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
             builder.CreateStore(val, cgm.getGlobals(decl));
         }
         else {
-            llvm::report_fatal_error("Unsupported variable access in module");
+            llvm::report_fatal_error("Unsupported variable access");
         }
     } else if (auto *v = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
         if(v->isByReference()) {
@@ -568,6 +569,33 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                                                                llvm::GlobalValue::PrivateLinkage,
                                                                nullptr,
                                                                mangleName(var));
+            auto value = var->getInitValue();
+            if(value) {
+                if(auto vcast = llvm::dyn_cast<ir::IntLiteral>(value)) {
+                    v->setInitializer(llvm::ConstantInt::get(ctx, vcast->getValue()));
+                }
+                else if(auto vcast = llvm::dyn_cast<ir::BoolLiteral>(value)) {
+                    v->setInitializer(llvm::ConstantInt::getBool(int1T, vcast->getValue()));
+                }
+                /*else if(auto vcast = llvm::dyn_cast<ir::FloatLiteral>(value)) {
+                    v->setInitializer(llvm::ConstantFP::get(ctx, vcast->getValue()));
+                }*/
+                else {
+                    llvm::report_fatal_error("Unknown constant in global variable assignment");
+                }
+            }
+            else if(utils::isOneOf(var->getType()->getName(), {FLOAT_CSTR, INT_CSTR, BOOL_CSTR, STRING_CSTR})) {
+                auto ty = var->getType()->getName();
+                if(ty == INT_CSTR) {
+                    v->setInitializer(llvm::ConstantInt::get(int64T, 0, true));
+                }
+                else if(ty == BOOL_CSTR) {
+                    v->setInitializer(llvm::ConstantInt::getFalse(int1T));
+                }
+                else {
+                    llvm::report_fatal_error("Unimplemented default global variable constructor");
+                }
+            }
             globals[var] = v;
         }
         break;
