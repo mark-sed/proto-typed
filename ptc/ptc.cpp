@@ -207,13 +207,13 @@ int main(int argc, char *argv[]) {
             }
         }
         else if(diags.getNumErrors() > 0) {
-            LOG1("Failure, compilation ended with "+std::to_string(diags.getNumErrors())+" error(s)")
+            LOG1("\033[91mFailure, compilation ended with "+std::to_string(diags.getNumErrors())+" error(s)\033[39m")
             return EXIT_FAILURE;
         }
 
         delete scanner;
     }
 
-    LOG1("Compilation was successful");
+    LOG1("\033[92mCompilation was successful\033[39m");
     return 0;
 }

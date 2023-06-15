@@ -14,6 +14,7 @@
 #include "llvm/Support/SMLoc.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/APSInt.h"
+#include "llvm/ADT/APFloat.h"
 #include <vector>
 #include <sstream>
 
@@ -367,6 +368,27 @@ public:
         return e->getKind() == ExprKind::EX_INT;
     }
     std::string debug() const override { return std::to_string(value.getExtValue()); }
+};
+
+/**
+ * Float value
+ */
+class FloatLiteral : public Expr {
+private:
+    llvm::SMLoc loc;
+    llvm::APFloat value;
+public:
+    FloatLiteral(llvm::SMLoc loc, const llvm::APFloat &value, TypeDecl *type)
+              : Expr(ExprKind::EX_FLOAT, type, true),
+                loc(loc),
+                value(value) {
+    }
+
+    llvm::APFloat &getValue() { return value; }
+    static bool classof(const Expr *e) {
+        return e->getKind() == ExprKind::EX_FLOAT;
+    }
+    std::string debug() const override { return std::to_string(value.convertToDouble()); }
 };
 
 /**

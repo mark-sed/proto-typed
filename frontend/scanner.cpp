@@ -172,8 +172,7 @@ ir::Expr *Scanner::parseInt(long v) {
 ir::Expr *Scanner::parseFloat(double v) {
     LOGMAX("Parsing float "+std::to_string(v));
     llvm::APFloat vFloat(v);
-    // TODO:
-    return nullptr;
+    return new ir::FloatLiteral(llvmloc, vFloat, floatType);
 }
 
 ir::Expr *Scanner::parseBool(bool v) {

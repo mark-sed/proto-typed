@@ -250,7 +250,7 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
         LOGMAX("Accessing int value");
         return llvm::ConstantInt::get(int64T, llvm::dyn_cast<ir::IntLiteral>(e)->getValue());
     case ir::ExprKind::EX_BOOL: return llvm::ConstantInt::get(int1T, llvm::dyn_cast<ir::BoolLiteral>(e)->getValue());
-    // TODO: Double
+    case ir::ExprKind::EX_FLOAT: return llvm::ConstantFP::get(floatT,llvm::dyn_cast<ir::FloatLiteral>(e)->getValue());
     // TODO: Other ones
     default:
         llvm::report_fatal_error("Unimplemented expression kind in code generation");
@@ -281,8 +281,19 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     case ir::OperatorKind::OP_ADD:
     {
         LOGMAX("Creating ADD instruction");
-        if(left->getType() == this->int64T && left->getType() == right->getType()) {
+        if(left->getType() == right->getType() && left->getType() == int64T) {
             result = builder.CreateNSWAdd(left, right);
+        }
+        else if(left->getType() == right->getType() && left->getType() == floatT) {
+            result = builder.CreateFAdd(left, right);
+        }
+        else if(left->getType() == floatT && right->getType() == int64T) {
+            auto intv = builder.CreateSIToFP(right, floatT);
+            result = builder.CreateFAdd(left, intv);
+        }
+        else if(left->getType() == int64T && right->getType() == floatT) {
+            auto intv = builder.CreateSIToFP(left, floatT);
+            result = builder.CreateFAdd(intv, right);
         }
         else {
             llvm::report_fatal_error("ADD does not supported given type");
@@ -292,8 +303,19 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     case ir::OperatorKind::OP_SUB:
     {
         LOGMAX("Creating SUB instruction");
-        if(left->getType() == this->int64T && left->getType() == right->getType()) {
+        if(left->getType() == right->getType() && left->getType() == int64T) {
             result = builder.CreateNSWSub(left, right);
+        }
+        else if(left->getType() == right->getType() && left->getType() == floatT) {
+            result = builder.CreateFSub(left, right);
+        }
+        else if(left->getType() == floatT && right->getType() == int64T) {
+            auto intv = builder.CreateSIToFP(right, floatT);
+            result = builder.CreateFSub(left, intv);
+        }
+        else if(left->getType() == int64T && right->getType() == floatT) {
+            auto intv = builder.CreateSIToFP(left, floatT);
+            result = builder.CreateFSub(intv, right);
         }
         else {
             llvm::report_fatal_error("SUB does not supported given type");
@@ -308,8 +330,19 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     case ir::OperatorKind::OP_MUL:
     {
         LOGMAX("Creating MUL instruction");
-        if(left->getType() == this->int64T && left->getType() == right->getType()) {
+        if(left->getType() == right->getType() && left->getType() == int64T) {
             result = builder.CreateNSWMul(left, right);
+        }
+        else if(left->getType() == right->getType() && left->getType() == floatT) {
+            result = builder.CreateFMul(left, right);
+        }
+        else if(left->getType() == floatT && right->getType() == int64T) {
+            auto intv = builder.CreateSIToFP(right, floatT);
+            result = builder.CreateFMul(left, intv);
+        }
+        else if(left->getType() == int64T && right->getType() == floatT) {
+            auto intv = builder.CreateSIToFP(left, floatT);
+            result = builder.CreateFMul(intv, right);
         }
         else {
             llvm::report_fatal_error("MUL does not supported given type");
@@ -319,8 +352,19 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     case ir::OperatorKind::OP_DIV:
     {
         LOGMAX("Creating DIV instruction");
-        if(left->getType() == this->int64T && left->getType() == right->getType()) {
+        if(left->getType() == right->getType() && left->getType() == int64T) {
             result = builder.CreateSDiv(left, right);
+        }
+        else if(left->getType() == right->getType() && left->getType() == floatT) {
+            result = builder.CreateFDiv(left, right);
+        }
+        else if(left->getType() == floatT && right->getType() == int64T) {
+            auto intv = builder.CreateSIToFP(right, floatT);
+            result = builder.CreateFDiv(left, intv);
+        }
+        else if(left->getType() == int64T && right->getType() == floatT) {
+            auto intv = builder.CreateSIToFP(left, floatT);
+            result = builder.CreateFDiv(intv, right);
         }
         else {
             llvm::report_fatal_error("DIV does not supported given type");
@@ -330,8 +374,19 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     case ir::OperatorKind::OP_MOD:
     {
         LOGMAX("Creating MOD instruction");
-        if(left->getType() == this->int64T && left->getType() == right->getType()) {
+        if(left->getType() == right->getType() && left->getType() == int64T) {
             result = builder.CreateSRem(left, right);
+        }
+        else if(left->getType() == right->getType() && left->getType() == floatT) {
+            result = builder.CreateFRem(left, right);
+        }
+        else if(left->getType() == floatT && right->getType() == int64T) {
+            auto intv = builder.CreateSIToFP(right, floatT);
+            result = builder.CreateFRem(left, intv);
+        }
+        else if(left->getType() == int64T && right->getType() == floatT) {
+            auto intv = builder.CreateSIToFP(left, floatT);
+            result = builder.CreateFRem(intv, right);
         }
         else {
             llvm::report_fatal_error("MOD does not supported given type");
@@ -416,17 +471,35 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     break;
     case ir::OperatorKind::OP_BAND:
     {
-
+        LOGMAX("Creating BAND instruction");
+        if(left->getType() == int64T && left->getType() == right->getType()) {
+            result = builder.CreateAnd(left, right);
+        }
+        else {
+            llvm::report_fatal_error("BAND does not supported given type");
+        }
     }
     break;
     case ir::OperatorKind::OP_BXOR:
     {
-
+        LOGMAX("Creating BXOR instruction");
+        if(left->getType() == int64T && left->getType() == right->getType()) {
+            result = builder.CreateXor(left, right);
+        }
+        else {
+            llvm::report_fatal_error("BXOR does not supported given type");
+        }
     }
     break;
     case ir::OperatorKind::OP_BOR:
     {
-
+        LOGMAX("Creating OR instruction");
+        if(left->getType() == int64T && left->getType() == right->getType()) {
+            result = builder.CreateOr(left, right);
+        }
+        else {
+            llvm::report_fatal_error("BOR does not supported given type");
+        }
     }
     break;
     case ir::OperatorKind::OP_IN:
