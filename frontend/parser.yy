@@ -207,7 +207,7 @@
 
 // Start
 start : END_FILE
-      | stmt END_FILE   { scanner->parseMain($1); }
+      | stmt END_FILE   { scanner->parseEntry($1); }
       ;
 stmt : stmts            { $$ = scanner->parseStmtBody($1); }
      | stmt stmts       { $$ = scanner->parseStmtBodyAdd($1, $2); }

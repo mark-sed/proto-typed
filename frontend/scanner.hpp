@@ -108,7 +108,7 @@ public:
     std::vector<ir::FormalParamDecl *> parseAddFunParam(std::vector<ir::FormalParamDecl *> &list, ir::IR *type, std::string name);
     std::vector<ir::IR *> parseStmtBody(ir::IR *stmt);
     std::vector<ir::IR *> parseStmtBodyAdd(std::vector<ir::IR *> &body, ir::IR *stmt);
-    void parseMain(std::vector<ir::IR *> body);
+    void parseEntry(std::vector<ir::IR *> body);
 };
 
 

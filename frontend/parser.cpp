@@ -1029,7 +1029,7 @@ namespace  ptc  {
             {
   case 3: // start: stmt "end of file"
 #line 210 "frontend/parser.yy"
-                        { scanner->parseMain(yystack_[1].value.as < std::vector<ptc::ir::IR *>  > ()); }
+                        { scanner->parseEntry(yystack_[1].value.as < std::vector<ptc::ir::IR *>  > ()); }
 #line 1034 "frontend/parser.cpp"
     break;
 

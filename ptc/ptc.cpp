@@ -167,6 +167,7 @@ int main(int argc, char *argv[]) {
 
     // Parsing
     const char *ptcName = argv[0];
+    bool parsingMain = true;
     for(const auto &fileName: inputFiles) {
         llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> fileOrErr = llvm::MemoryBuffer::getFile(fileName);
         if(std::error_code buffErr = fileOrErr.getError()) {
@@ -181,11 +182,13 @@ int main(int argc, char *argv[]) {
         // TODO: use SourceMgr
         std::ifstream code(fileName);
 
-
-
         std::string moduleName = std::filesystem::path(fileName).stem();
         auto scanner = new Scanner(diags, moduleName);
         scanner->parse(&code);
+        if(parsingMain) {
+            scanner->mainModule->setMain(true);
+            parsingMain = false;
+        }
         LOG1("Parsing done for "+fileName);
 
         // Code generation

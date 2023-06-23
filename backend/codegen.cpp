@@ -628,8 +628,25 @@ void cg::CGFunction::emit(std::vector<ir::IR *> stmts) {
     }
 }
 
+void cg::CGModule::setupExternFuncs() {
+    // TODO: Setup only when needed
+
+    // printf
+    auto bytePtrTy = builder.getInt8Ty()->getPointerTo();
+    llvmMod->getOrInsertFunction("printf",
+                                 llvm::FunctionType::get(
+                                    builder.getInt32Ty(),
+                                    bytePtrTy,
+                                    true
+                                 ));
+}
+
 void cg::CGModule::run(ir::ModuleDecl *mod) {
     this->mod = mod;
+
+    this->setupExternFuncs();
+    ir::FunctionDecl *entryFun = nullptr;
+
     for(auto *decl: mod->getDecls()) {
         auto kind = decl->getKind();
         switch(kind) {
@@ -677,12 +694,35 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
             auto *fun = llvm::dyn_cast<ir::FunctionDecl>(decl);
             CGFunction cgf(*this);
             cgf.run(fun);
+            if(fun->getName() == "_entry") {
+                entryFun = fun;
+            }
         }
         break;
         default: //llvm::report_fatal_error("Code generation invoked for not yet implemented IR");
         break;
         }
     }
+
+    // Insert _main
+    auto bytePtrPtrTy = builder.getInt8Ty()->getPointerTo()->getPointerTo();
+    llvm::Function *main = llvm::Function::Create(llvm::FunctionType::get(
+                                                builder.getInt32Ty(),
+                                                {builder.getInt32Ty(), bytePtrPtrTy},
+                                                false
+                                               ), 
+                                               llvm::GlobalValue::ExternalLinkage,
+                                               "main",
+                                               llvmMod);
+    main->setDSOLocal(true);
+    llvm::BasicBlock *bb = llvm::BasicBlock::Create(getLLVMCtx(), "", main);
+    setCurrBB(bb);
+
+    auto entryFunLLVM = llvmMod->getFunction(mangleName(entryFun));
+    std::vector<llvm::Value *> args{};
+    builder.CreateCall(entryFunLLVM, args);
+
+    builder.CreateRet(llvm::ConstantInt::get(builder.getInt32Ty(), 0));
 }
 
 llvm::FunctionType *cg::CGFunction::createFunctionType(ir::FunctionDecl *fun) {

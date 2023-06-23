@@ -419,8 +419,8 @@ ir::IR *Scanner::parseFun(ir::IR *type, std::string name, std::vector<ir::Formal
     return f;
 }
 
-void Scanner::parseMain(std::vector<ir::IR *> body) {
-    LOGMAX("Parsing main");
+void Scanner::parseEntry(std::vector<ir::IR *> body) {
+    LOGMAX("Parsing entry");
     std::vector<ir::IR *> entryBody;
     for(auto i: body) {
         if(llvm::isa<ir::VarDecl>(i) ||

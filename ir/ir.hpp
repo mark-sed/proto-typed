@@ -555,17 +555,20 @@ public:
 class ModuleDecl : public IR {
 private:
     std::vector<IR *> decls;
+    bool main;
 public:
     ModuleDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name)
-              : IR(IRKind::IR_MODULE_DECL, enclosing_ir, loc, name) {}
+              : IR(IRKind::IR_MODULE_DECL, enclosing_ir, loc, name), main(false) {}
     ModuleDecl(IR *enclosing_ir, 
                llvm::SMLoc loc,
                std::string name,
                std::vector<ir::IR *> &decls)
-              : IR(IRKind::IR_MODULE_DECL, enclosing_ir, loc, name), decls(decls) {}
+              : IR(IRKind::IR_MODULE_DECL, enclosing_ir, loc, name), decls(decls), main(false) {}
     
     std::vector<ir::IR *> getDecls() { return decls; }
     void setDecls(std::vector<ir::IR *> &decls) { this->decls = decls; }
+    void setMain(bool m) { this->main = m; }
+    bool isMain() { return this->main; }
 
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_MODULE_DECL;
