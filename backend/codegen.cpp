@@ -667,10 +667,27 @@ void cg::CGModule::setupExternFuncs() {
                                  ));
 }
 
+void cg::CGModule::setupLibFuncs() {
+    // print
+    {
+        auto funType = llvm::FunctionType::get(voidT, { stringT }, false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::ExternalLinkage,
+                                                "print",
+                                                llvmMod);
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(getLLVMCtx(), "entry", f);
+        setCurrBB(bb);
+        auto puts = llvmMod->getFunction("puts");
+        builder.CreateCall(puts, { f->getArg(0) });
+        builder.CreateRetVoid();
+    }
+}
+
 void cg::CGModule::run(ir::ModuleDecl *mod) {
     this->mod = mod;
 
     this->setupExternFuncs();
+    this->setupLibFuncs();
     ir::FunctionDecl *entryFun = nullptr;
 
     for(auto *decl: mod->getDecls()) {
@@ -708,7 +725,7 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                     v->setInitializer(llvm::ConstantArray::get(), vs)); */
                    
                     // This is also wrong, because this requires a BasicBlock
-                    //v->setInitializer(builder.CreateGlobalStringPtr(vcast->getValue().c_str()));
+                    v->setInitializer(builder.CreateGlobalStringPtr(vcast->getValue().c_str(), "", 0, llvmMod));
                 }
                 else {
                     llvm::report_fatal_error("Unknown constant in global variable assignment");

@@ -86,6 +86,7 @@ private:
     llvm::DenseMap<ir::IR *, llvm::GlobalObject *> globals;
 
     void setupExternFuncs();
+    void setupLibFuncs();
 protected:
     virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) override;
     virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl) override;

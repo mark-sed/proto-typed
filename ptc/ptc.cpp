@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
 
     log::Logger::get().set_disable(false);
     log::Logger::get().set_log_everything(true);
-    log::Logger::get().set_logging_level(MAX_LOGGING_LEVEL);
+    //log::Logger::get().set_logging_level(MAX_LOGGING_LEVEL);
 
     llvm::InitializeAllTargets();
     llvm::InitializeAllTargetMCs();

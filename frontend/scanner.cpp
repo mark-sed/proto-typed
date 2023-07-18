@@ -69,17 +69,21 @@ void Scanner::init() {
     auto printParams = std::vector<ir::FormalParamDecl *>{
         new ir::FormalParamDecl(currentIR, llvmloc, "v", this->stringType, false)
     };
-    auto printBody = std::vector<ir::IR *> {
-        // TODO
-        
-    };
-    auto printIntFun = new ir::FunctionDecl(currentIR,
+    auto printBody = std::vector<ir::IR *> {};
+    auto printFun = new ir::FunctionDecl(currentIR,
+                                            llvm::SMLoc(),
+                                            "print",
+                                            this->voidType,
+                                            printParams,
+                                            printBody);
+    currScope->insert(printFun);
+    /*auto putsFun = new ir::FunctionDecl(currentIR,
                                             llvm::SMLoc(),
                                             "puts",
                                             this->voidType,
                                             printParams,
                                             printBody);
-    currScope->insert(printIntFun);
+    currScope->insert(putsFun);*/
 }
 
 void Scanner::parse(std::istream *code) {
