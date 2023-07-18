@@ -67,7 +67,7 @@ void Scanner::init() {
     currScope->insert(voidType);
 
     auto printParams = std::vector<ir::FormalParamDecl *>{
-        new ir::FormalParamDecl(currentIR, llvmloc, "v", this->intType, false)
+        new ir::FormalParamDecl(currentIR, llvmloc, "v", this->stringType, false)
     };
     auto printBody = std::vector<ir::IR *> {
         // TODO
@@ -75,7 +75,7 @@ void Scanner::init() {
     };
     auto printIntFun = new ir::FunctionDecl(currentIR,
                                             llvm::SMLoc(),
-                                            "print",
+                                            "puts",
                                             this->voidType,
                                             printParams,
                                             printBody);
@@ -181,8 +181,8 @@ ir::Expr *Scanner::parseBool(bool v) {
 }
 
 ir::Expr *Scanner::parseString(std::string v) {
-    // TODO:
-    return nullptr;
+    LOGMAX("Parsing string "+v);
+    return new ir::StringLiteral(llvmloc, v, stringType);
 }
 
 ir::Expr *Scanner::parseVar(std::string v) {

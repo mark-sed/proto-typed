@@ -36,6 +36,7 @@ class VarAccess;
  */
 enum IRKind {
     IR_VAR_DECL,
+    IR_MATRIX,
     IR_TYPE_DECL,
     IR_EXPR_STMT,
     IR_FORMAL_PARAM_DECL,
@@ -159,6 +160,30 @@ public:
         return ir->getKind() == IRKind::IR_VAR_DECL;
     }
     virtual std::string debug() const override { return "("+td->debug()+")"+name; }
+};
+
+/**
+ * Homogeneus matrix of any type
+ */
+class Matrix : public IR {
+private:
+    TypeDecl *valueType;
+    size_t cols;
+    size_t rows;
+public:
+    Matrix(IR *enclosing_ir, llvm::SMLoc loc, TypeDecl *valueType, size_t cols, size_t rows)
+        : IR(IRKind::IR_MATRIX, enclosing_ir, loc, "list"),
+          valueType(valueType),
+          cols(cols),
+          rows(rows) {}
+    
+    TypeDecl *getValueType() { return valueType; }
+    size_t getRows() { return rows; }
+    size_t getCols() { return cols; }
+    static bool classof(const IR *ir) {
+        return ir->getKind() == IRKind::IR_MATRIX;
+    }
+    virtual std::string debug() const override { return "TODO"; }
 };
 
 /**
@@ -413,6 +438,27 @@ public:
 };
 
 /**
+ * Constant string value
+ */
+class StringLiteral : public Expr {
+private:
+    llvm::SMLoc loc;
+    std::string value;
+public:
+    StringLiteral(llvm::SMLoc loc, std::string &value, TypeDecl *type)
+              : Expr(ExprKind::EX_STRING, type, true),
+                loc(loc),
+                value(value) {
+    }
+
+    std::string &getValue() { return value; }
+    static bool classof(const Expr *e) {
+        return e->getKind() == ExprKind::EX_STRING;
+    }
+    std::string debug() const override { return value; }
+};
+
+/**
  * Access to a variable (as a variable in an expression)
  */
 class VarAccess : public Expr {
@@ -462,6 +508,7 @@ public:
                   params(params) {}
     
     FunctionDecl *getFun() { return fun; }
+    std::vector<Expr *> getParams() { return params; }
     static bool classof(const Expr *e) {
         return e->getKind() == ExprKind::EX_FUN_CALL;
     }

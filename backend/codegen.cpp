@@ -34,6 +34,8 @@ void cg::CodeGen::init() {
     int1T = llvm::Type::getInt1Ty(ctx);
     int64T = llvm::Type::getInt64Ty(ctx);
     floatT = llvm::Type::getDoubleTy(ctx);
+    stringElemT = llvm::Type::getInt8Ty(ctx);
+    stringT = stringElemT->getPointerTo();
 }
 
 llvm::Type *cg::CodeGen::convertType(ir::TypeDecl *t) {
@@ -48,6 +50,9 @@ llvm::Type *cg::CodeGen::convertType(ir::TypeDecl *t) {
     }
     if(t->getName() == FLOAT_CSTR) {
         return floatT;
+    }
+    if(t->getName() == STRING_CSTR) {
+        return stringT;
     }
     llvm::report_fatal_error("Unsupported type");
     return nullptr;
@@ -238,6 +243,18 @@ llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl) {
     return nullptr;
 }
 
+llvm::Value *cg::CGFunction::emitFunCall(ir::FunctionCall *e) {
+    ir::FunctionDecl *f = e->getFun();
+    std::vector<llvm::Value *> args{};
+    for(auto a: e->getParams()) {
+        args.push_back(emitExpr(a));
+    }
+    // TODO: Set last arg to true is argvars
+    //llvm::FunctionType *fType = llvm::FunctionType::get(voidType, argTypes, false);
+    llvm::Function *funDecl = cgm.getLLVMMod()->getFunction(f->getName());
+    return builder.CreateCall(funDecl, args);
+}
+
 llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
     switch(e->getKind()) {
     case ir::ExprKind::EX_BIN_INF: return emitInfixExpr(llvm::dyn_cast<ir::BinaryInfixExpr>(e));
@@ -249,8 +266,10 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
     case ir::ExprKind::EX_INT:
         LOGMAX("Accessing int value");
         return llvm::ConstantInt::get(int64T, llvm::dyn_cast<ir::IntLiteral>(e)->getValue());
+    case ir::ExprKind::EX_STRING: return builder.CreateGlobalStringPtr(llvm::dyn_cast<ir::StringLiteral>(e)->getValue().c_str());
     case ir::ExprKind::EX_BOOL: return llvm::ConstantInt::get(int1T, llvm::dyn_cast<ir::BoolLiteral>(e)->getValue());
     case ir::ExprKind::EX_FLOAT: return llvm::ConstantFP::get(floatT,llvm::dyn_cast<ir::FloatLiteral>(e)->getValue());
+    case ir::ExprKind::EX_FUN_CALL: return emitFunCall(llvm::dyn_cast<ir::FunctionCall>(e));
     // TODO: Other ones
     default:
         llvm::report_fatal_error("Unimplemented expression kind in code generation");
@@ -639,6 +658,13 @@ void cg::CGModule::setupExternFuncs() {
                                     bytePtrTy,
                                     true
                                  ));
+    // puts
+    llvmMod->getOrInsertFunction("puts",
+                                 llvm::FunctionType::get(
+                                    builder.getInt32Ty(),
+                                    bytePtrTy,
+                                    false
+                                 ));
 }
 
 void cg::CGModule::run(ir::ModuleDecl *mod) {
@@ -654,11 +680,11 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
         {   // new variable needs its own scope
             auto var = llvm::dyn_cast<ir::VarDecl>(decl);
             llvm::GlobalVariable *v = new llvm::GlobalVariable(*llvmMod,
-                                                               convertType(var->getType()),
-                                                               false,
-                                                               llvm::GlobalValue::PrivateLinkage,
-                                                               nullptr,
-                                                               mangleName(var));
+                                                            convertType(var->getType()),
+                                                            false,
+                                                            llvm::GlobalValue::PrivateLinkage,
+                                                            nullptr,
+                                                            mangleName(var));
             auto value = var->getInitValue();
             if(value) {
                 if(auto vcast = llvm::dyn_cast<ir::IntLiteral>(value)) {
@@ -670,6 +696,20 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                 /*else if(auto vcast = llvm::dyn_cast<ir::FloatLiteral>(value)) {
                     v->setInitializer(llvm::ConstantFP::get(ctx, vcast->getValue()));
                 }*/
+                else if(auto vcast = llvm::dyn_cast<ir::StringLiteral>(value)) {
+                    // THIS IS WRONG string is i8*, but this creates [i8 x size()] type
+                    
+                    // TODO: Handle unicode and such and make this more efficient
+                    /*std::vector<llvm::Constant *> vs;
+                    for(char l: vcast->getValue()) {
+                        vs.push_back(llvm::ConstantInt::get(stringElemT, l));
+                    }
+                    vs.push_back(llvm::ConstantInt::get(stringElemT, '\0'));
+                    v->setInitializer(llvm::ConstantArray::get(), vs)); */
+                   
+                    // This is also wrong, because this requires a BasicBlock
+                    //v->setInitializer(builder.CreateGlobalStringPtr(vcast->getValue().c_str()));
+                }
                 else {
                     llvm::report_fatal_error("Unknown constant in global variable assignment");
                 }

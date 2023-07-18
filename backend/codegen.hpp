@@ -68,6 +68,8 @@ public:
     llvm::Type *int1T;
     llvm::Type *int64T;
     llvm::Type *floatT;
+    llvm::Type *stringT;
+    llvm::Type *stringElemT;
 
     llvm::Type *mapType(ir::IR *decl);
     llvm::Type *convertType(ir::TypeDecl *type);
@@ -122,6 +124,7 @@ protected:
     virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl) override;
 
     llvm::Value *emitInfixExpr(ir::BinaryInfixExpr *e);
+    llvm::Value *emitFunCall(ir::FunctionCall *e);
     llvm::Value *emitExpr(ir::Expr *e);
 
     void emitStmt(ir::ExprStmt *stmt);
