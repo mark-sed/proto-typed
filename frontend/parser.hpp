@@ -656,6 +656,7 @@ namespace  ptc  {
 
       // stmts
       // stmts_ne
+      // import
       // flowctl
       // return
       // while
@@ -683,6 +684,9 @@ namespace  ptc  {
       // body
       // else
       char dummy9[sizeof (std::vector<ptc::ir::IR *> )];
+
+      // id_list
+      char dummy10[sizeof (std::vector<std::string> )];
     };
 
     /// The size of the largest semantic type.
@@ -1008,6 +1012,7 @@ namespace  ptc  {
 
       case symbol_kind::S_stmts: // stmts
       case symbol_kind::S_stmts_ne: // stmts_ne
+      case symbol_kind::S_import: // import
       case symbol_kind::S_flowctl: // flowctl
       case symbol_kind::S_return: // return
       case symbol_kind::S_while: // while
@@ -1039,6 +1044,10 @@ namespace  ptc  {
       case symbol_kind::S_body: // body
       case symbol_kind::S_else: // else
         value.move< std::vector<ptc::ir::IR *>  > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_id_list: // id_list
+        value.move< std::vector<std::string>  > (std::move (that.value));
         break;
 
       default:
@@ -1190,6 +1199,20 @@ namespace  ptc  {
       {}
 #endif
 
+#if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, std::vector<std::string> && v, location_type&& l)
+        : Base (t)
+        , value (std::move (v))
+        , location (std::move (l))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const std::vector<std::string> & v, const location_type& l)
+        : Base (t)
+        , value (v)
+        , location (l)
+      {}
+#endif
+
       /// Destroy the symbol.
       ~basic_symbol ()
       {
@@ -1237,6 +1260,7 @@ switch (yykind)
 
       case symbol_kind::S_stmts: // stmts
       case symbol_kind::S_stmts_ne: // stmts_ne
+      case symbol_kind::S_import: // import
       case symbol_kind::S_flowctl: // flowctl
       case symbol_kind::S_return: // return
       case symbol_kind::S_while: // while
@@ -1268,6 +1292,10 @@ switch (yykind)
       case symbol_kind::S_body: // body
       case symbol_kind::S_else: // else
         value.template destroy< std::vector<ptc::ir::IR *>  > ();
+        break;
+
+      case symbol_kind::S_id_list: // id_list
+        value.template destroy< std::vector<std::string>  > ();
         break;
 
       default:
@@ -2945,7 +2973,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 2949 "frontend/parser.hpp"
+#line 2977 "frontend/parser.hpp"
 
 
 

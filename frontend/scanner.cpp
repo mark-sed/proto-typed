@@ -322,6 +322,23 @@ std::vector<ir::Expr *> Scanner::parseAddFunCallArg(std::vector<ir::Expr *> &lis
     return list;
 }
 
+ir::IR *Scanner::parseImports(std::vector<std::string> names) {
+    LOGMAX("Parsing import list");
+    return new ir::Import(currentIR, llvmloc, names);
+}
+
+std::vector<std::string> Scanner::parseImportName(std::string name) {
+    LOGMAX("Parsing import name "+name);
+    std::vector<std::string> list{name};
+    return list;
+}
+
+std::vector<std::string> Scanner::parseAddImportName(std::vector<std::string> &list, std::string name) {
+    LOGMAX("Parsing import name "+name);
+    list.push_back(name);
+    return list;
+}
+
 std::vector<ir::FormalParamDecl *> Scanner::parseFunParam(ir::IR *type, std::string name) {
     LOGMAX("Creating new function param list with "+name);
     // TODO: Handle by reference

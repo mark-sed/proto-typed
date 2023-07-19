@@ -191,6 +191,7 @@
 %type <ptc::ir::IR *> function
 %type <ptc::ir::IR *> return
 %type <ptc::ir::IR *> flowctl
+%type <ptc::ir::IR *> import
 %type <ptc::ir::Expr *> expr
 %type <ptc::ir::Expr *> expr_var
 %type <ptc::ir::Expr *> set
@@ -199,6 +200,7 @@
 %type <std::vector<ptc::ir::IR *> > block
 %type <std::vector<ptc::ir::IR *> > else
 %type <std::vector<ptc::ir::IR *> > stmt
+%type <std::vector<std::string> > id_list
 %type <std::vector<ptc::ir::FormalParamDecl *> > funargs
 
 %locations
@@ -221,10 +223,10 @@ stmts : END      { $$ = nullptr; }
 stmts_ne : set END      { $$ = scanner->parseExprStmt($1); }
          | vardecl END  { $$ = $1; }
          | vardef END   { $$ = $1; }
-         | import END   
+         | import END   { $$ = $1; }
          | for
          | if           { $$ = $1; }
-         | while
+         | while        { $$ = $1; }
          | dowhile
          | struct
          | function     { $$ = $1; }
@@ -245,10 +247,10 @@ body : stmts_ne { $$ = scanner->parseStmtBody($1); }
      ;
 
 // Import
-import : KWIMPORT id_list
+import : KWIMPORT id_list   { $$ = scanner->parseImports($2); }
        ;
-id_list : ID
-        | id_list COMMA ID
+id_list : ID                { $$ = scanner->parseImportName($1); }
+        | ID COMMA id_list  { $$ = scanner->parseAddImportName($3, $1); }
         ;
 
 // Flow controll

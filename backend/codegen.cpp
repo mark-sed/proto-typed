@@ -627,6 +627,10 @@ void cg::CGFunction::emitStmt(ir::ReturnStmt *stmt) {
     }
 }
 
+void cg::CGFunction::emitStmt(ir::Import *stmt) {
+    llvm::report_fatal_error("Imports are not yet implemented");
+}
+
 void cg::CGFunction::emit(std::vector<ir::IR *> stmts) {
     for(auto *s : stmts) {
         if(auto *stmt = llvm::dyn_cast<ir::ExprStmt>(s)) {
@@ -641,15 +645,16 @@ void cg::CGFunction::emit(std::vector<ir::IR *> stmts) {
         else if(auto *stmt = llvm::dyn_cast<ir::WhileStmt>(s)) {
             emitStmt(stmt);
         }
-        //else {
-        //    llvm::report_fatal_error("Unknwon statement in code generation");
-        //}
+        else if(auto *stmt = llvm::dyn_cast<ir::Import>(s)) {
+            emitStmt(stmt);
+        }
+        else {
+            llvm::report_fatal_error("Unknwon statement in code generation");
+        }
     }
 }
 
 void cg::CGModule::setupExternFuncs() {
-    // TODO: Setup only when needed
-
     // printf
     auto bytePtrTy = builder.getInt8Ty()->getPointerTo();
     llvmMod->getOrInsertFunction("printf",

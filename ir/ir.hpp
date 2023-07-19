@@ -44,7 +44,8 @@ enum IRKind {
     IR_IF,
     IR_WHILE,
     IR_RETURN,
-    IR_MODULE_DECL
+    IR_MODULE_DECL,
+    IR_IMPORT
 };
 
 /**
@@ -184,6 +185,24 @@ public:
         return ir->getKind() == IRKind::IR_MATRIX;
     }
     virtual std::string debug() const override { return "TODO"; }
+};
+
+/**
+ * List of modules to import
+ */
+class Import : public IR {
+private:
+    std::vector<std::string> names;
+public:
+    Import(IR *enclosing_ir, llvm::SMLoc loc, std::vector<std::string>& names)
+        : IR(IRKind::IR_IMPORT, enclosing_ir, loc, "import"),
+          names(names) {}
+
+    std::vector<std::string> getNames() { return names; }
+    static bool classof(const IR *ir) {
+        return ir->getKind() == IRKind::IR_IMPORT;
+    }
+    virtual std::string debug() const override { return "import ...TODO"; }
 };
 
 /**

@@ -24,6 +24,7 @@
 #include "llvm/Support/ToolOutputFile.h"
 #include "llvm/Support/WithColor.h"
 #include "llvm/Support/FileSystem.h"
+//#include "llvm/AsmParser/Parser.h"
 #include <string>
 #include <sstream>
 #include <fstream>
@@ -130,13 +131,21 @@ bool emit(std::string ptcName, llvm::Module *module, llvm::TargetMachine *target
     return true;
 }
 
+/*static std::unique_ptr<llvm::Module> parseIR(llvm::LLVMContext &C, const char *IR) {
+  llvm::SMDiagnostic Err;
+  std::unique_ptr<llvm::Module> Mod = llvm::parseAssemblyString(IR, Err, C);
+  if (!Mod)
+    Err.print("UtilsTests", llvm::errs());
+  return Mod;
+}*/
+
 /** Main */
 int main(int argc, char *argv[]) {
     llvm::InitLLVM LLVMX(argc, argv);
 
     log::Logger::get().set_disable(false);
     log::Logger::get().set_log_everything(true);
-    //log::Logger::get().set_logging_level(MAX_LOGGING_LEVEL);
+    log::Logger::get().set_logging_level(MAX_LOGGING_LEVEL);
 
     llvm::InitializeAllTargets();
     llvm::InitializeAllTargetMCs();

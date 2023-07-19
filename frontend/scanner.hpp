@@ -95,6 +95,7 @@ public:
     ir::IR *parseWhile(ir::Expr *cond, std::vector<ir::IR *> &body);
     ir::IR *parseFun(ir::IR *type, std::string name, std::vector<ir::FormalParamDecl *> params, std::vector<ir::IR *> body);
     ir::IR *parseReturn(ir::Expr *e);
+    ir::IR *parseImports(std::vector<std::string> names);
     ir::Expr *parseInt(long v);
     ir::Expr *parseFloat(double v);
     ir::Expr *parseBool(bool v);
@@ -106,6 +107,8 @@ public:
     std::vector<ir::Expr *> parseAddFunCallArg(std::vector<ir::Expr *> &list, ir::Expr *e);
     std::vector<ir::FormalParamDecl *> parseFunParam(ir::IR *type, std::string name);
     std::vector<ir::FormalParamDecl *> parseAddFunParam(std::vector<ir::FormalParamDecl *> &list, ir::IR *type, std::string name);
+    std::vector<std::string> parseImportName(std::string name);
+    std::vector<std::string> parseAddImportName(std::vector<std::string> &list, std::string name);
     std::vector<ir::IR *> parseStmtBody(ir::IR *stmt);
     std::vector<ir::IR *> parseStmtBodyAdd(std::vector<ir::IR *> &body, ir::IR *stmt);
     void parseEntry(std::vector<ir::IR *> body);
