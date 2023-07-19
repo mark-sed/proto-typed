@@ -189,28 +189,37 @@ ir::Expr *Scanner::parseString(std::string v) {
     return new ir::StringLiteral(llvmloc, v, stringType);
 }
 
-ir::Expr *Scanner::parseVar(std::string v) {
+ir::Expr *Scanner::parseVar(std::string v, bool external) {
     LOGMAX("Parsing a variable "+v);
-    auto var = currScope->lookup(v);
-    if(var) {
-        if(llvm::isa<ir::VarDecl>(var)) {
-            return new ir::VarAccess(llvm::dyn_cast<ir::VarDecl>(var));
-        }
-        else if(llvm::isa<ir::FunctionDecl>(var)) {
-            return new ir::VarAccess(llvm::dyn_cast<ir::FunctionDecl>(var), this->intType);
-        }
-        else if(llvm::isa<ir::FormalParamDecl>(var)) {
-            return new ir::VarAccess(llvm::dyn_cast<ir::FormalParamDecl>(var));
+    if(!external) {
+        auto var = currScope->lookup(v);
+        if(var) {
+            if(llvm::isa<ir::VarDecl>(var)) {
+                return new ir::VarAccess(llvm::dyn_cast<ir::VarDecl>(var));
+            }
+            else if(llvm::isa<ir::FunctionDecl>(var)) {
+                return new ir::VarAccess(llvm::dyn_cast<ir::FunctionDecl>(var), this->intType);
+            }
+            else if(llvm::isa<ir::FormalParamDecl>(var)) {
+                return new ir::VarAccess(llvm::dyn_cast<ir::FormalParamDecl>(var));
+            }
+            else {
+                diags.report(llvmloc, diag::ERR_INTERNAL, "Only variable and function access is just yet implemented");
+            }
         }
         else {
-            diags.report(llvmloc, diag::ERR_INTERNAL, "Only variable and function access is just yet implemented");
+            diags.report(llvmloc, diag::ERR_UNDEFINED_VAR, v);
+            return nullptr;
         }
-    }
-    else {
-        diags.report(llvmloc, diag::ERR_UNDEFINED_VAR, v);
         return nullptr;
     }
-    return nullptr;
+    else {
+        size_t delPos = v.find(':');
+        std::string modName = v.substr(0, delPos);
+        std::string symbolName = v.substr(delPos+2, v.size()-2-delPos);
+        LOGMAX("Parsing external symbol "+symbolName+" from module "+modName);
+        return new ir::ExternalSymbolAccess(modName, symbolName);
+    }
 }
 
 ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, bool is_const) {
@@ -218,6 +227,14 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
     auto tl = l->getType();
     auto tr = r->getType();
     auto type = tl;
+    if(llvm::isa<ir::ExternalSymbolAccess>(l)) {
+        // TODO: add support
+        llvm::report_fatal_error("Expressions with external symbols are not yet supported");
+    }
+    if(llvm::isa<ir::ExternalSymbolAccess>(r)) {
+        // TODO: add support
+        llvm::report_fatal_error("Expressions with external symbols are not yet supported");
+    }
     switch(op.getKind()) {
     case ir::OperatorKind::OP_ASSIGN:
         if(tl->getName() != tr->getName()) {

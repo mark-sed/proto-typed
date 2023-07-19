@@ -669,6 +669,7 @@ namespace  ptc  {
 
       // "string"
       // "identifier"
+      // "external identifier"
       // fun_id
       // expr_str
       char dummy6[sizeof (std::string)];
@@ -809,7 +810,8 @@ namespace  ptc  {
     KWSTRUCT = 73,                 // "\"struct\""
     KWVOID = 74,                   // "\"void\""
     ID = 75,                       // "identifier"
-    NEG = 76                       // NEG
+    EXT_ID = 76,                   // "external identifier"
+    NEG = 77                       // NEG
       };
       /// Backward compatibility alias (Bison 3.6).
       typedef token_kind_type yytokentype;
@@ -826,7 +828,7 @@ namespace  ptc  {
     {
       enum symbol_kind_type
       {
-        YYNTOKENS = 77, ///< Number of tokens.
+        YYNTOKENS = 78, ///< Number of tokens.
         S_YYEMPTY = -2,
         S_YYEOF = 0,                             // "end of file"
         S_YYerror = 1,                           // error
@@ -904,55 +906,56 @@ namespace  ptc  {
         S_KWSTRUCT = 73,                         // "\"struct\""
         S_KWVOID = 74,                           // "\"void\""
         S_ID = 75,                               // "identifier"
-        S_NEG = 76,                              // NEG
-        S_YYACCEPT = 77,                         // $accept
-        S_start = 78,                            // start
-        S_stmt = 79,                             // stmt
-        S_stmts = 80,                            // stmts
-        S_stmts_ne = 81,                         // stmts_ne
-        S_block = 82,                            // block
-        S_body = 83,                             // body
-        S_import = 84,                           // import
-        S_id_list = 85,                          // id_list
-        S_flowctl = 86,                          // flowctl
-        S_return = 87,                           // return
-        S_for = 88,                              // for
-        S_while = 89,                            // while
-        S_dowhile = 90,                          // dowhile
-        S_if = 91,                               // if
-        S_else = 92,                             // else
-        S_struct = 93,                           // struct
-        S_decllist = 94,                         // decllist
-        S_declistval = 95,                       // declistval
-        S_function = 96,                         // function
-        S_fun_id = 97,                           // fun_id
-        S_funargs = 98,                          // funargs
-        S_funargdef = 99,                        // funargdef
-        S_vardecl = 100,                         // vardecl
-        S_vardef = 101,                          // vardef
-        S_set = 102,                             // set
-        S_callarglist = 103,                     // callarglist
-        S_expr = 104,                            // expr
-        S_expr_var = 105,                        // expr_var
-        S_matrix = 106,                          // matrix
-        S_matvals = 107,                         // matvals
-        S_expr_mat = 108,                        // expr_mat
-        S_range = 109,                           // range
-        S_int_val = 110,                         // int_val
-        S_slice = 111,                           // slice
-        S_expr_none = 112,                       // expr_none
-        S_expr_struct = 113,                     // expr_struct
-        S_struct_val = 114,                      // struct_val
-        S_struct_list = 115,                     // struct_list
-        S_expr_int = 116,                        // expr_int
-        S_expr_float = 117,                      // expr_float
-        S_expr_str = 118,                        // expr_str
-        S_expr_bool = 119,                       // expr_bool
-        S_funtype = 120,                         // funtype
-        S_typelist = 121,                        // typelist
-        S_mattype = 122,                         // mattype
-        S_matsize = 123,                         // matsize
-        S_type = 124                             // type
+        S_EXT_ID = 76,                           // "external identifier"
+        S_NEG = 77,                              // NEG
+        S_YYACCEPT = 78,                         // $accept
+        S_start = 79,                            // start
+        S_stmt = 80,                             // stmt
+        S_stmts = 81,                            // stmts
+        S_stmts_ne = 82,                         // stmts_ne
+        S_block = 83,                            // block
+        S_body = 84,                             // body
+        S_import = 85,                           // import
+        S_id_list = 86,                          // id_list
+        S_flowctl = 87,                          // flowctl
+        S_return = 88,                           // return
+        S_for = 89,                              // for
+        S_while = 90,                            // while
+        S_dowhile = 91,                          // dowhile
+        S_if = 92,                               // if
+        S_else = 93,                             // else
+        S_struct = 94,                           // struct
+        S_decllist = 95,                         // decllist
+        S_declistval = 96,                       // declistval
+        S_function = 97,                         // function
+        S_fun_id = 98,                           // fun_id
+        S_funargs = 99,                          // funargs
+        S_funargdef = 100,                       // funargdef
+        S_vardecl = 101,                         // vardecl
+        S_vardef = 102,                          // vardef
+        S_set = 103,                             // set
+        S_callarglist = 104,                     // callarglist
+        S_expr = 105,                            // expr
+        S_expr_var = 106,                        // expr_var
+        S_matrix = 107,                          // matrix
+        S_matvals = 108,                         // matvals
+        S_expr_mat = 109,                        // expr_mat
+        S_range = 110,                           // range
+        S_int_val = 111,                         // int_val
+        S_slice = 112,                           // slice
+        S_expr_none = 113,                       // expr_none
+        S_expr_struct = 114,                     // expr_struct
+        S_struct_val = 115,                      // struct_val
+        S_struct_list = 116,                     // struct_list
+        S_expr_int = 117,                        // expr_int
+        S_expr_float = 118,                      // expr_float
+        S_expr_str = 119,                        // expr_str
+        S_expr_bool = 120,                       // expr_bool
+        S_funtype = 121,                         // funtype
+        S_typelist = 122,                        // typelist
+        S_mattype = 123,                         // mattype
+        S_matsize = 124,                         // matsize
+        S_type = 125                             // type
       };
     };
 
@@ -1026,6 +1029,7 @@ namespace  ptc  {
 
       case symbol_kind::S_STRING: // "string"
       case symbol_kind::S_ID: // "identifier"
+      case symbol_kind::S_EXT_ID: // "external identifier"
       case symbol_kind::S_fun_id: // fun_id
       case symbol_kind::S_expr_str: // expr_str
         value.move< std::string > (std::move (that.value));
@@ -1274,6 +1278,7 @@ switch (yykind)
 
       case symbol_kind::S_STRING: // "string"
       case symbol_kind::S_ID: // "identifier"
+      case symbol_kind::S_EXT_ID: // "external identifier"
       case symbol_kind::S_fun_id: // fun_id
       case symbol_kind::S_expr_str: // expr_str
         value.template destroy< std::string > ();
@@ -2617,6 +2622,21 @@ switch (yykind)
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
+      make_EXT_ID (std::string v, location_type l)
+      {
+        return symbol_type (token::EXT_ID, std::move (v), std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_EXT_ID (const std::string& v, const location_type& l)
+      {
+        return symbol_type (token::EXT_ID, v, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
       make_NEG (location_type l)
       {
         return symbol_type (token::NEG, std::move (l));
@@ -2959,9 +2979,9 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 3134,     ///< Last index in yytable_.
+      yylast_ = 3178,     ///< Last index in yytable_.
       yynnts_ = 48,  ///< Number of nonterminal symbols.
-      yyfinal_ = 122 ///< Termination state number.
+      yyfinal_ = 127 ///< Termination state number.
     };
 
 
@@ -2973,7 +2993,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 2977 "frontend/parser.hpp"
+#line 2997 "frontend/parser.hpp"
 
 
 

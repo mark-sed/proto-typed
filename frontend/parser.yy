@@ -149,6 +149,7 @@
 
 /* Identifiers */
 %token <std::string> ID "identifier"
+%token <std::string> EXT_ID "external identifier"
 
 /* Associativity and precedence */
 %right SET
@@ -360,7 +361,9 @@ expr : expr_mat     { $$ = nullptr; }
      ;
 
 expr_var : ID { $$ = scanner->parseVar($1); }
+         | EXT_ID { $$ = scanner->parseVar($1, true); }
          | MINUS ID %prec NEG { $$ = scanner->parseInfixExpr(scanner->parseInt(0), scanner->parseVar($2), ir::Operator(ir::OperatorKind::OP_SUB)); }
+         | MINUS EXT_ID %prec NEG { $$ = scanner->parseInfixExpr(scanner->parseInt(0), scanner->parseVar($2, true), ir::Operator(ir::OperatorKind::OP_SUB)); }
          | LPAR expr_var RPAR { $$ = $2; }
 
          | expr_var LPAR RPAR             { $$ = scanner->parseFunCall($1, std::vector<ptc::ir::Expr *>{}); }
@@ -369,13 +372,16 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          | expr_str LSQ int_val RSQ
          | expr_mat LSQ int_val RSQ
          | ID LSQ int_val RSQ
+         | EXT_ID LSQ int_val RSQ
          | expr_var LSQ int_val RSQ
 
          | expr_mat slice
          | ID slice
+         | EXT_ID slice
          | expr_var slice
 
          | ID DOT expr_var
+         | EXT_ID DOT expr_var
          | expr_var DOT expr_var
 
          | expr_float POW expr_var

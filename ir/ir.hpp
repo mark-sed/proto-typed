@@ -61,7 +61,8 @@ enum ExprKind {
     EX_NONE,
     EX_VAR,
     EX_FUN_CALL,
-    EX_FUN_PTR
+    EX_FUN_PTR,
+    EX_EXT_SYMB
 };
 
 /**
@@ -493,6 +494,25 @@ public:
         return e->getKind() == ExprKind::EX_VAR;
     }
     std::string debug() const override { return var->debug(); }
+};
+
+/**
+ * Access to a variable (as a variable in an expression)
+ */
+class ExternalSymbolAccess : public Expr {
+private:
+    std::string moduleName;
+    std::string symbolName;
+public:
+    ExternalSymbolAccess(std::string moduleName, std::string symbolName) 
+        : Expr(ExprKind::EX_EXT_SYMB, nullptr, false), 
+          moduleName(moduleName), 
+          symbolName(symbolName) {}
+
+    static bool classof(const Expr *e) {
+        return e->getKind() == ExprKind::EX_EXT_SYMB;
+    }
+    std::string debug() const override { return moduleName+"::"+symbolName; }
 };
 
 /**

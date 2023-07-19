@@ -183,6 +183,8 @@ do print(".") while(a)
 ### Modules
 ```
 import Module1, Module2
+
+int b = Module1::foo(42)
 ```
 
 ## Examples

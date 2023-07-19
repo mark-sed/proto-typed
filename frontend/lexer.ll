@@ -190,6 +190,10 @@ hex     0[Xx][0-9A-Fa-f]+
                   yylval->build<double>(std::stod(yytext)); 
                   return token::FLOAT;
                 }
+{id}::{id}      {
+                    yylval->build<std::string>(yytext);
+                    return token::EXT_ID;
+                }
 {id}            {
                     yylval->build<std::string>(yytext);
                     return token::ID;

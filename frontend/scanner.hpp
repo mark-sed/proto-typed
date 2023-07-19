@@ -100,7 +100,7 @@ public:
     ir::Expr *parseFloat(double v);
     ir::Expr *parseBool(bool v);
     ir::Expr *parseString(std::string v);
-    ir::Expr *parseVar(std::string v);
+    ir::Expr *parseVar(std::string v, bool external=false);
     ir::Expr *parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, bool is_const=false);
     ir::Expr *parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params);
     std::vector<ir::Expr *> parseFunCallArg(ir::Expr *e);
