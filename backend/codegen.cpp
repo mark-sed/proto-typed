@@ -251,7 +251,10 @@ llvm::Value *cg::CGFunction::emitFunCall(ir::FunctionCall *e) {
     }
     // TODO: Set last arg to true is argvars
     //llvm::FunctionType *fType = llvm::FunctionType::get(voidType, argTypes, false);
-    llvm::Function *funDecl = cgm.getLLVMMod()->getFunction(f->getName());
+    // Try looking up non mangled function
+    llvm::Function *funDecl = cgm.getLLVMMod()->getFunction(f->getOGName());
+    if(!funDecl)
+        funDecl = cgm.getLLVMMod()->getFunction(mangleName(f));
     return builder.CreateCall(funDecl, args);
 }
 

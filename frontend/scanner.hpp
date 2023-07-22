@@ -44,6 +44,7 @@ private:
     ir::TypeDecl *stringType;
     ir::TypeDecl *boolType;
     ir::TypeDecl *voidType;
+    ir::TypeDecl *unknownType;
 public:
     ptc::Parser::location_type *loc = nullptr;     ///< Current parsing location
     ir::ModuleDecl *mainModule;

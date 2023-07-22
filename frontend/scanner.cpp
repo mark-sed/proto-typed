@@ -60,6 +60,8 @@ void Scanner::init() {
     boolType = new ir::TypeDecl(currentIR, llvm::SMLoc(), BOOL_CSTR);
     voidType = new ir::TypeDecl(currentIR, llvm::SMLoc(), VOID_CSTR);
 
+    unknownType = new ir::TypeDecl(currentIR, llvm::SMLoc(), UNKNOWN_CSTR);
+
     currScope->insert(intType);
     currScope->insert(boolType);
     currScope->insert(floatType);
@@ -73,17 +75,11 @@ void Scanner::init() {
     auto printFun = new ir::FunctionDecl(currentIR,
                                             llvm::SMLoc(),
                                             "print",
+                                            "print",
                                             this->voidType,
                                             printParams,
                                             printBody);
     currScope->insert(printFun);
-    /*auto putsFun = new ir::FunctionDecl(currentIR,
-                                            llvm::SMLoc(),
-                                            "puts",
-                                            this->voidType,
-                                            printParams,
-                                            printBody);
-    currScope->insert(putsFun);*/
 }
 
 void Scanner::parse(std::istream *code) {
@@ -193,6 +189,9 @@ ir::Expr *Scanner::parseVar(std::string v, bool external) {
     LOGMAX("Parsing a variable "+v);
     if(!external) {
         auto var = currScope->lookup(v);
+        if(!var) {
+            var = currScope->lookupPossibleFun(v);
+        }
         if(var) {
             if(llvm::isa<ir::VarDecl>(var)) {
                 return new ir::VarAccess(llvm::dyn_cast<ir::VarDecl>(var));
@@ -218,7 +217,7 @@ ir::Expr *Scanner::parseVar(std::string v, bool external) {
         std::string modName = v.substr(0, delPos);
         std::string symbolName = v.substr(delPos+2, v.size()-2-delPos);
         LOGMAX("Parsing external symbol "+symbolName+" from module "+modName);
-        return new ir::ExternalSymbolAccess(modName, symbolName);
+        return new ir::ExternalSymbolAccess(modName, symbolName, this->unknownType);
     }
 }
 
@@ -227,94 +226,91 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
     auto tl = l->getType();
     auto tr = r->getType();
     auto type = tl;
-    if(llvm::isa<ir::ExternalSymbolAccess>(l)) {
-        // TODO: add support
-        llvm::report_fatal_error("Expressions with external symbols are not yet supported");
+    if(tl == unknownType || tr == unknownType) {
+        type = unknownType;
     }
-    if(llvm::isa<ir::ExternalSymbolAccess>(r)) {
-        // TODO: add support
-        llvm::report_fatal_error("Expressions with external symbols are not yet supported");
-    }
-    switch(op.getKind()) {
-    case ir::OperatorKind::OP_ASSIGN:
-        if(tl->getName() != tr->getName()) {
-            if((tl->getName() == FLOAT_CSTR && tr->getName() == INT_CSTR)
-              || (tl->getName() == INT_CSTR && tr->getName() == FLOAT_CSTR)) {
-                type = tl;
-            }
-            else {
-                diags.report(llvmloc, diag::ERR_INVALID_CONVERSION, tr->getName(), tl->getName());
-            }
-        }
-    break;
-    case ir::OperatorKind::OP_ADD:
-        // FIXME: Handle matrices
-    case ir::OperatorKind::OP_SUB:
-    case ir::OperatorKind::OP_MUL:
-    case ir::OperatorKind::OP_DIV:
-    case ir::OperatorKind::OP_MOD:
-        if(!utils::isOneOf(tl->getName(), {INT_CSTR, FLOAT_CSTR}) || !utils::isOneOf(tr->getName(), {INT_CSTR, FLOAT_CSTR})) {
-            diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
-        }
-        else {
-            // Int or Float
+    else {
+        switch(op.getKind()) {
+        case ir::OperatorKind::OP_ASSIGN:
             if(tl->getName() != tr->getName()) {
-                // One is float
-                type = this->floatType;
+                if((tl->getName() == FLOAT_CSTR && tr->getName() == INT_CSTR)
+                || (tl->getName() == INT_CSTR && tr->getName() == FLOAT_CSTR)) {
+                    type = tl;
+                }
+                else {
+                    diags.report(llvmloc, diag::ERR_INVALID_CONVERSION, tr->getName(), tl->getName());
+                }
             }
-        }
-    break;
-    case ir::OperatorKind::OP_CONCAT:
-        type = this->stringType;
-    break;
-    case ir::OperatorKind::OP_POW:
-        if(!utils::isOneOf(tl->getName(), {FLOAT_CSTR}) || !utils::isOneOf(tr->getName(), {FLOAT_CSTR})) {
-            diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
-        }
-        type = this->floatType;
-    break;
-    case ir::OperatorKind::OP_BLSHFT:
-    case ir::OperatorKind::OP_BRSHFT:
-    case ir::OperatorKind::OP_BAND:
-    case ir::OperatorKind::OP_BXOR:
-    case ir::OperatorKind::OP_BOR:
-        if(!utils::isOneOf(tl->getName(), {INT_CSTR}) || !utils::isOneOf(tr->getName(), {INT_CSTR})) {
-            diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
-        }
-        type = this->intType;
-    break;
-    case ir::OperatorKind::OP_BT:
-    case ir::OperatorKind::OP_BEQ:
-    case ir::OperatorKind::OP_LT:
-    case ir::OperatorKind::OP_LEQ:
-        if(!utils::isOneOf(tl->getName(), {INT_CSTR, FLOAT_CSTR, STRING_CSTR}) ||
-            !utils::isOneOf(tr->getName(), {INT_CSTR, FLOAT_CSTR, STRING_CSTR})) {
-            diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
-        }
-        if(tl->getName() == STRING_CSTR || tr->getName() == STRING_CSTR) {
-            if(tl->getName() != tr->getName()) {
+        break;
+        case ir::OperatorKind::OP_ADD:
+            // FIXME: Handle matrices
+        case ir::OperatorKind::OP_SUB:
+        case ir::OperatorKind::OP_MUL:
+        case ir::OperatorKind::OP_DIV:
+        case ir::OperatorKind::OP_MOD:
+            if(!utils::isOneOf(tl->getName(), {INT_CSTR, FLOAT_CSTR}) || !utils::isOneOf(tr->getName(), {INT_CSTR, FLOAT_CSTR})) {
                 diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
             }
+            else {
+                // Int or Float
+                if(tl->getName() != tr->getName()) {
+                    // One is float
+                    type = this->floatType;
+                }
+            }
+        break;
+        case ir::OperatorKind::OP_CONCAT:
+            type = this->stringType;
+        break;
+        case ir::OperatorKind::OP_POW:
+            if(!utils::isOneOf(tl->getName(), {FLOAT_CSTR}) || !utils::isOneOf(tr->getName(), {FLOAT_CSTR})) {
+                diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+            }
+            type = this->floatType;
+        break;
+        case ir::OperatorKind::OP_BLSHFT:
+        case ir::OperatorKind::OP_BRSHFT:
+        case ir::OperatorKind::OP_BAND:
+        case ir::OperatorKind::OP_BXOR:
+        case ir::OperatorKind::OP_BOR:
+            if(!utils::isOneOf(tl->getName(), {INT_CSTR}) || !utils::isOneOf(tr->getName(), {INT_CSTR})) {
+                diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+            }
+            type = this->intType;
+        break;
+        case ir::OperatorKind::OP_BT:
+        case ir::OperatorKind::OP_BEQ:
+        case ir::OperatorKind::OP_LT:
+        case ir::OperatorKind::OP_LEQ:
+            if(!utils::isOneOf(tl->getName(), {INT_CSTR, FLOAT_CSTR, STRING_CSTR}) ||
+                !utils::isOneOf(tr->getName(), {INT_CSTR, FLOAT_CSTR, STRING_CSTR})) {
+                diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+            }
+            if(tl->getName() == STRING_CSTR || tr->getName() == STRING_CSTR) {
+                if(tl->getName() != tr->getName()) {
+                    diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+                }
+            }
+            type = this->boolType;
+        break;
+        case ir::OperatorKind::OP_EQ:
+        case ir::OperatorKind::OP_NEQ:
+            type = this->boolType;
+        break;
+        case ir::OperatorKind::OP_LAND:
+        case ir::OperatorKind::OP_LOR:
+            if(!utils::isOneOf(tl->getName(), {BOOL_CSTR}) || !utils::isOneOf(tr->getName(), {BOOL_CSTR})) {
+                diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+            }
+            type = this->boolType;
+        break;
+        case ir::OperatorKind::OP_IN:
+            // TODO: check that tr is a matrix
+            type = this->boolType;
+        break;
+        default: diags.report(llvmloc, diag::ERR_INTERNAL, "Unknown operator in an expression");
+        break;
         }
-        type = this->boolType;
-    break;
-    case ir::OperatorKind::OP_EQ:
-    case ir::OperatorKind::OP_NEQ:
-        type = this->boolType;
-    break;
-    case ir::OperatorKind::OP_LAND:
-    case ir::OperatorKind::OP_LOR:
-        if(!utils::isOneOf(tl->getName(), {BOOL_CSTR}) || !utils::isOneOf(tr->getName(), {BOOL_CSTR})) {
-            diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
-        }
-        type = this->boolType;
-    break;
-    case ir::OperatorKind::OP_IN:
-        // TODO: check that tr is a matrix
-        type = this->boolType;
-    break;
-    default: diags.report(llvmloc, diag::ERR_INTERNAL, "Unknown operator in an expression");
-    break;
     }
     return new ir::BinaryInfixExpr(l, r, op, type, is_const);
 }
@@ -408,19 +404,22 @@ ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
     // TODO: Handle when calling on return value
     auto var = llvm::dyn_cast<ir::VarAccess>(fun);
     if(var) {
-        auto fir = this->sym_lookup(var->getVar()->getName());
-        if(fir) {
-            auto f = llvm::dyn_cast<ir::FunctionDecl>(fir);
-            if(f) {
-                auto fc = new ir::FunctionCall(f, params);
-                return fc;
+        if(auto f = llvm::dyn_cast<ir::FunctionDecl>(var->getVar())) {
+            // The function chosen in parseVar could have different parameters
+            std::string properName = encodeFunction(f->getOGName(), params);
+            LOGMAX(currScope->debug());
+            LOGMAX(properName);
+            auto propFIR = currScope->lookup(properName);
+            if(!propFIR) {
+                diags.report(llvmloc, diag::ERR_INCORRECT_ARGS, f->getOGName());
             }
-            else {
-                diags.report(llvmloc, diag::ERR_NOT_CALLABLE, var->getVar()->getName());
-            }
+            auto propF = llvm::dyn_cast<ir::FunctionDecl>(propFIR);
+
+            auto fc = new ir::FunctionCall(propF, params);
+            return fc;
         }
         else {
-            diags.report(llvmloc, diag::ERR_UNDEFINED_VAR, var->getVar()->getName());
+            diags.report(llvmloc, diag::ERR_NOT_CALLABLE, var->getVar()->getName());
         }
     }
     else {
@@ -450,9 +449,9 @@ ir::IR *Scanner::parseFun(ir::IR *type, std::string name, std::vector<ir::Formal
     LOGMAX("Parsing a function "+name);
     auto ctype = llvm::dyn_cast<ir::TypeDecl>(type);
     auto f = llvm::dyn_cast<ir::FunctionDecl>(currentIR);
-    f->resolveFunction(llvmloc, encodeFunction(name, params), ctype, params, body);
-
+    f->resolveFunction(llvmloc, encodeFunction(name, params), name, ctype, params, body);
     leaveScope();
+    currScope->insert(f);
 
     return f;
 }
@@ -474,6 +473,7 @@ void Scanner::parseEntry(std::vector<ir::IR *> body) {
     std::vector<ir::FormalParamDecl *> params{};
     this->decls.push_back(new ir::FunctionDecl(mainModule,
                                                 llvmloc,
+                                                "_entry",
                                                 "_entry",
                                                 voidType,
                                                 params,

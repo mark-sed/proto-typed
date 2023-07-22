@@ -23,6 +23,7 @@
 #define BOOL_CSTR "bool"
 #define STRING_CSTR "string"
 #define VOID_CSTR "void"
+#define UNKNOWN_CSTR "*unknowntype*"
 
 namespace ptc {
 
@@ -232,6 +233,7 @@ public:
  */
 class FunctionDecl : public IR {
 private:
+    std::string og_name;
     TypeDecl *returnType;
     std::vector<FormalParamDecl *> params;
     std::vector<ir::IR *> decls;
@@ -240,10 +242,12 @@ public:
     FunctionDecl(IR *enclosing_ir, 
                  llvm::SMLoc loc,
                  std::string name,
+                 std::string og_name,
                  TypeDecl *returnType,
                  std::vector<FormalParamDecl *> params,
                  std::vector<ir::IR *> decls)
            : IR(IRKind::IR_FUNCTION_DECL, enclosing_ir, loc, name),
+             og_name(og_name),
              returnType(returnType),
              params(params),
              decls(decls),
@@ -254,17 +258,20 @@ public:
 
     void resolveFunction(llvm::SMLoc loc,
                          std::string name,
+                         std::string og_name,
                          TypeDecl *returnType,
                          std::vector<FormalParamDecl *> params,
                          std::vector<ir::IR *> decls) {
         this->loc = loc;
         this->name = name;
+        this->og_name = og_name;
         this->returnType = returnType;
         this->params = params;
         this->decls = decls;
         this->prototype = false;
     }
     
+    std::string getOGName() { return og_name; }
     TypeDecl *getReturnType() { return returnType; }
     std::vector<FormalParamDecl *> getParams() { return params; }
     std::vector<ir::IR *> getDecl() { return decls; }
@@ -504,8 +511,8 @@ private:
     std::string moduleName;
     std::string symbolName;
 public:
-    ExternalSymbolAccess(std::string moduleName, std::string symbolName) 
-        : Expr(ExprKind::EX_EXT_SYMB, nullptr, false), 
+    ExternalSymbolAccess(std::string moduleName, std::string symbolName, TypeDecl *type) 
+        : Expr(ExprKind::EX_EXT_SYMB, type, false), 
           moduleName(moduleName), 
           symbolName(symbolName) {}
 

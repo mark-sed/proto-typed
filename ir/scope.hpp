@@ -24,6 +24,7 @@ class Scope {
 private:
     Scope *parent;
     llvm::StringMap<ir::IR *> symbols;
+    llvm::StringMap<ir::IR *> funs;
 
 public:
     Scope(Scope *parent=nullptr) : parent(parent) {}
@@ -42,10 +43,20 @@ public:
      */
     ir::IR *lookup(llvm::StringRef name);
 
+    ir::IR *lookupPossibleFun(llvm::StringRef name);
+
     /**
      * @return Parent of the current scope 
      */
     Scope *getParent() { return parent; }
+
+    std::string debug() {
+        std::string keys;
+        for(auto i: symbols.keys()) {
+            keys += i;
+        }
+        return keys;
+    }
 };
 
 }
