@@ -689,6 +689,20 @@ void cg::CGModule::setupLibFuncs() {
         builder.CreateCall(puts, { f->getArg(0) });
         builder.CreateRetVoid();
     }
+    // TODO: Remove when not needed for debugging
+    {
+        auto funType = llvm::FunctionType::get(voidT, { int64T }, false);
+        llvm::Value *format = builder.CreateGlobalStringPtr("AA\n");
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::ExternalLinkage,
+                                                "print_int",
+                                                llvmMod);
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(getLLVMCtx(), "entry", f);
+        setCurrBB(bb);
+        auto printf = llvmMod->getFunction("printf");
+        builder.CreateCall(printf, { format });
+        builder.CreateRetVoid();
+    }
 }
 
 void cg::CGModule::run(ir::ModuleDecl *mod) {

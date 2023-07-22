@@ -68,18 +68,35 @@ void Scanner::init() {
     currScope->insert(stringType);
     currScope->insert(voidType);
 
-    auto printParams = std::vector<ir::FormalParamDecl *>{
-        new ir::FormalParamDecl(currentIR, llvmloc, "v", this->stringType, false)
-    };
-    auto printBody = std::vector<ir::IR *> {};
-    auto printFun = new ir::FunctionDecl(currentIR,
-                                            llvm::SMLoc(),
-                                            "print",
-                                            "print",
-                                            this->voidType,
-                                            printParams,
-                                            printBody);
-    currScope->insert(printFun);
+    {
+        auto printParams = std::vector<ir::FormalParamDecl *>{
+            new ir::FormalParamDecl(currentIR, llvmloc, "v", this->stringType, false)
+        };
+        auto printBody = std::vector<ir::IR *> {};
+        auto printFun = new ir::FunctionDecl(currentIR,
+                                                llvm::SMLoc(),
+                                                "print",
+                                                "print",
+                                                this->voidType,
+                                                printParams,
+                                                printBody);
+        currScope->insert(printFun);
+    }
+
+    {
+        auto printParams = std::vector<ir::FormalParamDecl *>{
+            new ir::FormalParamDecl(currentIR, llvmloc, "v", this->intType, false)
+        };
+        auto printBody = std::vector<ir::IR *> {};
+        auto printFun = new ir::FunctionDecl(currentIR,
+                                                llvm::SMLoc(),
+                                                "print_int",
+                                                "print_int",
+                                                this->voidType,
+                                                printParams,
+                                                printBody);
+        currScope->insert(printFun);
+    }
 }
 
 void Scanner::parse(std::istream *code) {
@@ -407,9 +424,11 @@ ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
         if(auto f = llvm::dyn_cast<ir::FunctionDecl>(var->getVar())) {
             // The function chosen in parseVar could have different parameters
             std::string properName = encodeFunction(f->getOGName(), params);
-            LOGMAX(currScope->debug());
-            LOGMAX(properName);
             auto propFIR = currScope->lookup(properName);
+            if(!propFIR) {
+                // Lib functions
+                propFIR = currScope->lookup(f->getOGName());
+            }
             if(!propFIR) {
                 diags.report(llvmloc, diag::ERR_INCORRECT_ARGS, f->getOGName());
             }
