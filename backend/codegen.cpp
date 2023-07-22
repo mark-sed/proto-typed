@@ -269,7 +269,17 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
     case ir::ExprKind::EX_INT:
         LOGMAX("Accessing int value");
         return llvm::ConstantInt::get(int64T, llvm::dyn_cast<ir::IntLiteral>(e)->getValue());
-    case ir::ExprKind::EX_STRING: return builder.CreateGlobalStringPtr(llvm::dyn_cast<ir::StringLiteral>(e)->getValue().c_str());
+    case ir::ExprKind::EX_STRING: 
+    {
+        llvm::GlobalVariable *v = new llvm::GlobalVariable(*cgm.getLLVMMod(),
+                                                            stringT,
+                                                            false,
+                                                            llvm::GlobalValue::PrivateLinkage,
+                                                            nullptr,
+                                                            "");
+        v->setInitializer(builder.CreateGlobalStringPtr(llvm::dyn_cast<ir::StringLiteral>(e)->getValue().c_str(), "", 0, cgm.getLLVMMod()));
+        return builder.CreateLoad(stringT, v);
+    }
     case ir::ExprKind::EX_BOOL: return llvm::ConstantInt::get(int1T, llvm::dyn_cast<ir::BoolLiteral>(e)->getValue());
     case ir::ExprKind::EX_FLOAT: return llvm::ConstantFP::get(floatT,llvm::dyn_cast<ir::FloatLiteral>(e)->getValue());
     case ir::ExprKind::EX_FUN_CALL: return emitFunCall(llvm::dyn_cast<ir::FunctionCall>(e));
@@ -692,15 +702,22 @@ void cg::CGModule::setupLibFuncs() {
     // TODO: Remove when not needed for debugging
     {
         auto funType = llvm::FunctionType::get(voidT, { int64T }, false);
-        llvm::Value *format = builder.CreateGlobalStringPtr("AA\n");
+        llvm::GlobalVariable *v = new llvm::GlobalVariable(*llvmMod,
+                                                            stringT,
+                                                            false,
+                                                            llvm::GlobalValue::PrivateLinkage,
+                                                            nullptr,
+                                                            "");
+        v->setInitializer(builder.CreateGlobalStringPtr("%i\n", "", 0, llvmMod));
         llvm::Function *f = llvm::Function::Create(funType, 
                                                 llvm::GlobalValue::ExternalLinkage,
                                                 "print_int",
                                                 llvmMod);
         llvm::BasicBlock *bb = llvm::BasicBlock::Create(getLLVMCtx(), "entry", f);
         setCurrBB(bb);
+        auto format = builder.CreateLoad(stringT, v);
         auto printf = llvmMod->getFunction("printf");
-        builder.CreateCall(printf, { format });
+        builder.CreateCall(printf, { format, f->getArg(0) });
         builder.CreateRetVoid();
     }
 }
