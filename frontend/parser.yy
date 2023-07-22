@@ -26,6 +26,8 @@
             class Expr;
             class FormalParamDecl;
         }
+        namespace diags {
+        }
     }
 
     #ifndef YY_NULLPTR
@@ -49,6 +51,7 @@
     #include "scanner.hpp"
     #include "logging.hpp"
     #include "ir.hpp"
+    #include "diagnostics.def"
 
     // Set correct token method
     #undef yylex
@@ -255,8 +258,8 @@ id_list : ID                { $$ = scanner->parseImportName($1); }
         ;
 
 // Flow controll
-flowctl : KWBREAK
-        | KWCONTINUE
+flowctl : KWBREAK       { $$ = scanner->parseBreak(); }
+        | KWCONTINUE    { $$ = scanner->parseContinue(); }
         | return        { $$ = $1; }
         ;
 return : KWRETURN       { $$ = scanner->parseReturn(nullptr); }
@@ -787,5 +790,5 @@ type : KWINT KWMAYBE    { $$ = nullptr; /*TODO*/ }
 /* Error method */
 void ptc::Parser::error(const location_type &l, const std::string &err_message) {
     auto msg = std::to_string(scanner->loc->begin.line) + ":" + std::to_string(scanner->loc->begin.column) + ": " + err_message;
-    ptc::log::error(msg);
+    scanner->fatal_error(ptc::diag::ERR_SYNTAX, msg);
 }

@@ -185,6 +185,7 @@ int main(int argc, char *argv[]) {
 
         llvm::SourceMgr srcMgr;
         Diagnostics diags(srcMgr);
+        log::Logger::get().clear_errors();
 
         srcMgr.AddNewSourceBuffer(std::move(*fileOrErr), llvm::SMLoc());
 
@@ -206,7 +207,7 @@ int main(int argc, char *argv[]) {
             llvm::report_fatal_error("Could not create target machine");
             exit(EXIT_FAILURE);
         }
-        if(scanner->mainModule && diags.getNumErrors() == 0) {
+        if(scanner->mainModule && diags.getNumErrors() == 0 && log::Logger::get().get_error_num() == 0) {
             LOG1("Starting code generation for "+fileName);
             // Code generation
             llvm::LLVMContext ctx;
@@ -218,8 +219,8 @@ int main(int argc, char *argv[]) {
                 delete CGHandle;
             }
         }
-        else if(diags.getNumErrors() > 0) {
-            LOG1("\033[91mFailure, compilation ended with "+std::to_string(diags.getNumErrors())+" error(s)\033[39m")
+        else if(diags.getNumErrors() > 0 ||  log::Logger::get().get_error_num() > 0) {
+            LOG1("\033[91mFailure, compilation ended with "+std::to_string(diags.getNumErrors()+log::Logger::get().get_error_num())+" error(s)\033[39m")
             return EXIT_FAILURE;
         }
 

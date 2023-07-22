@@ -200,6 +200,6 @@ hex     0[Xx][0-9A-Fa-f]+
                 }
 .               { 
                   auto msg = std::string("ERROR: Unknown token '")+ yytext + std::string("'");
-                  ptc::log::error(msg); 
+                  ptc::log::error(msg);
                 }
 %%

@@ -22,6 +22,7 @@
 #include "ir.hpp"
 #include "scope.hpp"
 #include "logging.hpp"
+#include "diagnostics.def"
 
 namespace ptc {
 
@@ -77,6 +78,7 @@ public:
     void enterScope(ir::IR *decl);
     void enterFunScope();
     void leaveScope();
+    void fatal_error(diag::diagmsg d, std::string msg);
 
     /**
      * Looks up a symbol in the current scope
@@ -96,6 +98,8 @@ public:
     ir::IR *parseWhile(ir::Expr *cond, std::vector<ir::IR *> &body);
     ir::IR *parseFun(ir::IR *type, std::string name, std::vector<ir::FormalParamDecl *> params, std::vector<ir::IR *> body);
     ir::IR *parseReturn(ir::Expr *e);
+    ir::IR *parseBreak();
+    ir::IR *parseContinue();
     ir::IR *parseImports(std::vector<std::string> names);
     ir::Expr *parseInt(long v);
     ir::Expr *parseFloat(double v);

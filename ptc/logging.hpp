@@ -29,7 +29,7 @@ namespace ptc {
  * Namespace to guard diagnostics messages
  */
 namespace diag {
-enum {
+enum diagmsg{
 #define DIAG(id, level, msg) id,
 #include "diagnostics.def"
 };
@@ -144,6 +144,7 @@ public:
 class Logger : public BaseLogger {
 private:
     std::set<std::string> enabled;
+    int error_num;
 public:
     /// Default constructor for get instance
     Logger();
@@ -162,6 +163,9 @@ public:
      */
     void debug(unsigned level, const std::string &file_func, const std::string &message);
 
+    int get_error_num() { return error_num; }
+    void add_error() { error_num += 1; }
+    void clear_errors() { error_num = 0; }
     
     /**
      * Set file::functions to output to log

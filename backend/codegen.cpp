@@ -629,6 +629,9 @@ void cg::CGFunction::emitStmt(ir::WhileStmt *stmt) {
 }
 
 void cg::CGFunction::emitStmt(ir::ReturnStmt *stmt) {
+    if(fun->getName() == "_entry") {
+        llvm::report_fatal_error("return can appear only inside of a function");
+    }
     if(stmt->getValue()) {
         LOGMAX("Creating return with value");
         llvm::Value *retVal = emitExpr(stmt->getValue());

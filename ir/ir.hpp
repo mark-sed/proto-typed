@@ -46,7 +46,9 @@ enum IRKind {
     IR_WHILE,
     IR_RETURN,
     IR_MODULE_DECL,
-    IR_IMPORT
+    IR_IMPORT,
+    IR_BREAK,
+    IR_CONTINUE
 };
 
 /**
@@ -639,6 +641,40 @@ public:
             return "return "+val->debug();
         else
             return "return void";
+    }
+};
+
+/**
+ * Break statement 
+ */
+class BreakStmt: public IR {
+public:
+    BreakStmt(IR *enclosing_ir, llvm::SMLoc loc)
+        : IR(IRKind::IR_BREAK, enclosing_ir, loc, "break") {}
+
+    static bool classof(const IR *s) {
+        return s->getKind() == IRKind::IR_BREAK;
+    }
+
+    virtual std::string debug() const override {
+        return "break";
+    }
+};
+
+/**
+ * Continue statement 
+ */
+class ContinueStmt: public IR {
+public:
+    ContinueStmt(IR *enclosing_ir, llvm::SMLoc loc)
+        : IR(IRKind::IR_CONTINUE, enclosing_ir, loc, "continue") {}
+
+    static bool classof(const IR *s) {
+        return s->getKind() == IRKind::IR_CONTINUE;
+    }
+
+    virtual std::string debug() const override {
+        return "continue";
     }
 };
 

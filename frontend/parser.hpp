@@ -54,6 +54,8 @@
             class Expr;
             class FormalParamDecl;
         }
+        namespace diags {
+        }
     }
 
     #ifndef YY_NULLPTR
@@ -64,7 +66,7 @@
         #endif
     #endif
 
-#line 68 "frontend/parser.hpp"
+#line 70 "frontend/parser.hpp"
 
 
 # include <cstdlib> // std::abort
@@ -200,7 +202,7 @@
 
 #line 14 "frontend/parser.yy"
 namespace  ptc  {
-#line 204 "frontend/parser.hpp"
+#line 206 "frontend/parser.hpp"
 
 
   /// A point in a source file.
@@ -2993,7 +2995,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 2997 "frontend/parser.hpp"
+#line 2999 "frontend/parser.hpp"
 
 
 

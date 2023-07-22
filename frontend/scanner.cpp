@@ -128,6 +128,10 @@ void Scanner::removeQuotes(char **str) {
     (*str)[std::strlen(*str)-1] = '\0';
 }
 
+void Scanner::fatal_error(diag::diagmsg d, std::string msg) {
+    diags.report(llvm::SMLoc(), d, msg);
+}
+
 void Scanner::enterScope(ir::IR *decl) {
     LOGMAX("Creating new scope");
     currScope = new Scope(currScope);
@@ -177,6 +181,16 @@ ir::IR *Scanner::parseExprStmt(ir::Expr *e) {
 ir::IR *Scanner::parseReturn(ir::Expr *e) {
     LOGMAX("Parsing return");
     return new ir::ReturnStmt(e, currentIR, llvmloc, "Return");
+}
+
+ir::IR *Scanner::parseBreak() {
+    LOGMAX("Parsing break");
+    return new ir::BreakStmt(currentIR, llvmloc);
+}
+
+ir::IR *Scanner::parseContinue() {
+    LOGMAX("Parsing break");
+    return new ir::ContinueStmt(currentIR, llvmloc);
 }
 
 ir::Expr *Scanner::parseInt(long v) {

@@ -1293,7 +1293,7 @@ YY_RULE_SETUP
 #line 202 "frontend/lexer.ll"
 { 
                   auto msg = std::string("ERROR: Unknown token '")+ yytext + std::string("'");
-                  ptc::log::error(msg); 
+                  ptc::log::error(msg);
                 }
 	YY_BREAK
 case 86:

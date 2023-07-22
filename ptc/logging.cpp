@@ -15,6 +15,7 @@ using namespace ptc;
 
 void log::error(std::string msg) {
     llvm::outs() << "ERROR: " << msg << "\n";
+    Logger::get().add_error();
 }
 
 using namespace ptc::log;
@@ -29,7 +30,7 @@ BaseLogger::~BaseLogger() {
     }
 }
 
-Logger::Logger() : BaseLogger() {
+Logger::Logger() : BaseLogger(), error_num(0) {
     streams.push_back(&std::cerr);
 }
 
