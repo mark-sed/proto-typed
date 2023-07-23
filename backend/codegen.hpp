@@ -137,10 +137,12 @@ protected:
     void emitStmt(ir::Import *stmt);
     virtual void emit(std::vector<ir::IR *> stmts);
 public:
-    CGFunction(CGModule &cgm) : CodeGen(cgm.getLLVMCtx(), cgm), cgm(cgm) {} 
+    CGFunction(CGModule &cgm, ir::FunctionDecl *fun) : CodeGen(cgm.getLLVMCtx(), cgm), cgm(cgm), fun(fun) {
+        funType = createFunctionType(fun);
+        this->llvmFun = createFunction(fun, funType);
+    } 
 
-    void run(ir::FunctionDecl *fun);
-    //void run();
+    void run();
 };
 
 }

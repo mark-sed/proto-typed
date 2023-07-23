@@ -23,7 +23,7 @@ using namespace ptc;
 
 // Helper functions
 
-std::string encodeFunction(std::string name, std::vector<ir::FormalParamDecl *> params) {
+std::string ptc::encodeFunction(std::string name, std::vector<ir::FormalParamDecl *> params) {
     assert(name.size() > 0 && "Function name cannot be empty");
     std::string paramStr;
     for(auto p : params) {
@@ -32,7 +32,7 @@ std::string encodeFunction(std::string name, std::vector<ir::FormalParamDecl *> 
     return name+"_"+std::to_string(params.size())+paramStr;
 }
 
-std::string encodeFunction(std::string name, std::vector<ir::Expr *> params) {
+std::string ptc::encodeFunction(std::string name, std::vector<ir::Expr *> params) {
     assert(name.size() > 0 && "Function name cannot be empty");
     std::string paramStr;
     for(auto p : params) {
@@ -46,8 +46,13 @@ Scanner::Scanner(Diagnostics &diags, std::string moduleName) : currentIR(nullptr
     init();
 }
 
+Scanner::~Scanner() {
+    delete globalScope;
+}
+
 void Scanner::init() {
     currScope = new Scope();
+    globalScope = currScope; // This will be overriden by module scope
 
     llvmloc = llvm::SMLoc();
 
@@ -105,6 +110,7 @@ void Scanner::parse(std::istream *code) {
     auto parser = new Parser(this);
 
     enterScope(mainModule);
+    globalScope = currScope;
     if(parser->parse() != 0) {
         // TODO: ERROR
         log::error("Could not parse the source code.");
@@ -147,7 +153,8 @@ void Scanner::enterFunScope() {
 void Scanner::leaveScope() {
     LOGMAX("Leaving current scope");
     Scope *parent = currScope->getParent();
-    delete currScope;
+    if(currScope != globalScope)
+        delete currScope;
     currScope = parent;
     currentIR = currentIR->getEnclosingIR();
 }
@@ -238,8 +245,7 @@ ir::Expr *Scanner::parseVar(std::string v, bool external) {
             }
         }
         else {
-            diags.report(llvmloc, diag::ERR_UNDEFINED_VAR, v);
-            return nullptr;
+            return new ir::UnresolvedSymbolAccess(v, this->unknownType);
         }
         return nullptr;
     }
@@ -456,7 +462,12 @@ ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
         }
     }
     else {
-        diags.report(llvmloc, diag::ERR_INTERNAL, "Function call is not implemented for expressions");
+        if(auto symb = llvm::dyn_cast<ir::UnresolvedSymbolAccess>(fun)) {
+            return new ir::FunctionCall(symb, params);
+        }
+        else {
+            diags.report(llvmloc, diag::ERR_INTERNAL, "Function call is not implemented for expressions");
+        }
     }
     return nullptr;
 }

@@ -11,6 +11,7 @@
 #include "scanner.hpp"
 #include "logging.hpp"
 #include "codegen.hpp"
+#include "resolver.hpp"
 #include "llvm/Support/InitLLVM.h"
 #include "llvm/CodeGen/CommandFlags.h"
 #include "llvm/IR/IRPrintingPasses.h"
@@ -200,6 +201,11 @@ int main(int argc, char *argv[]) {
             parsingMain = false;
         }
         LOG1("Parsing done for "+fileName);
+
+        LOG1("Running resolver on "+fileName);
+        auto unresolvedResolver = new UnresolvedSymbolResolver(scanner->mainModule, scanner->globalScope, diags);
+        unresolvedResolver->run();
+        delete unresolvedResolver;
 
         // Code generation
         llvm::TargetMachine *target = createTargetMachine(ptcName);

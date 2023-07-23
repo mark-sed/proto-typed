@@ -349,7 +349,7 @@ set : expr SETCONCAT expr { $$ = scanner->parseInfixExpr($1, scanner->parseInfix
 
 // Function call arguments
 callarglist : expr                    { $$ = scanner->parseFunCallArg($1); }
-            | callarglist COMMA expr  { $$ = scanner->parseAddFunCallArg($1, $3); }
+            | expr COMMA callarglist  { $$ = scanner->parseAddFunCallArg($3, $1); }
             ;
 
 // Expressions

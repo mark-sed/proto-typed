@@ -66,7 +66,8 @@ enum ExprKind {
     EX_VAR,
     EX_FUN_CALL,
     EX_FUN_PTR,
-    EX_EXT_SYMB
+    EX_EXT_SYMB,
+    EX_UNRESOLVED_SYMB
 };
 
 /**
@@ -526,6 +527,25 @@ public:
 };
 
 /**
+ * Access to a not yet resolved symbol (as a variable in an expression)
+ */
+class UnresolvedSymbolAccess : public Expr {
+private:
+    std::string symbolName;
+public:
+    UnresolvedSymbolAccess(std::string symbolName, TypeDecl *type) 
+        : Expr(ExprKind::EX_UNRESOLVED_SYMB, type, false),
+          symbolName(symbolName) {}
+
+    std::string getName() { return symbolName; }
+
+    static bool classof(const Expr *e) {
+        return e->getKind() == ExprKind::EX_UNRESOLVED_SYMB;
+    }
+    std::string debug() const override { return "(unresolved)"+symbolName; }
+};
+
+/**
  * Standalone expression (statement)
  */
 class ExprStmt : public IR {
@@ -549,20 +569,36 @@ public:
 class FunctionCall : public Expr {
 private:
     FunctionDecl *fun;
+    UnresolvedSymbolAccess *unresF;
     std::vector<Expr *> params;
+    bool unresolved;
 public:
     FunctionCall(FunctionDecl *fun, std::vector<Expr *> params) 
                 : Expr(ExprKind::EX_FUN_CALL, fun->getReturnType(), false),
                   fun(fun),
-                  params(params) {}
+                  unresF(nullptr),
+                  params(params),
+                  unresolved(false) {}
+    FunctionCall(UnresolvedSymbolAccess *unresF, std::vector<Expr *> params)
+                : Expr(ExprKind::EX_FUN_CALL, unresF->getType(), false),
+                  fun(nullptr),
+                  unresF(unresF),
+                  params(params),
+                  unresolved(true) {}
     
     FunctionDecl *getFun() { return fun; }
+    void setFun(FunctionDecl *f) { fun = f; }
+    bool isUnresolved() { return unresolved; }
+    void setUnresolved(bool s) { unresolved = s; }
+    UnresolvedSymbolAccess *getUnresolvedFun() { return unresF; }
     std::vector<Expr *> getParams() { return params; }
     static bool classof(const Expr *e) {
         return e->getKind() == ExprKind::EX_FUN_CALL;
     }
     std::string debug() const override {
-        return fun->getName()+"(...)";
+        if(!unresolved)
+            return fun->getName()+"(...)";
+        return "(unresolved)"+unresF->getName()+"(...)";
     }
 };
 

@@ -244,6 +244,9 @@ llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl) {
 }
 
 llvm::Value *cg::CGFunction::emitFunCall(ir::FunctionCall *e) {
+    if(e->isUnresolved()) {
+        llvm::report_fatal_error("Function call was not resolved by a resolver");
+    }
     ir::FunctionDecl *f = e->getFun();
     std::vector<llvm::Value *> args{};
     for(auto a: e->getParams()) {
@@ -255,6 +258,10 @@ llvm::Value *cg::CGFunction::emitFunCall(ir::FunctionCall *e) {
     llvm::Function *funDecl = cgm.getLLVMMod()->getFunction(f->getOGName());
     if(!funDecl)
         funDecl = cgm.getLLVMMod()->getFunction(mangleName(f));
+    if(!funDecl) {
+        auto msg = "Somehow function "+f->getOGName()+" could not be found";
+        llvm::report_fatal_error(msg.c_str());
+    }
     return builder.CreateCall(funDecl, args);
 }
 
@@ -776,6 +783,7 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
     this->setupExternFuncs();
     this->setupLibFuncs();
     ir::FunctionDecl *entryFun = nullptr;
+    std::vector<CGFunction *> funs;
 
     for(auto *decl: mod->getDecls()) {
         auto kind = decl->getKind();
@@ -836,16 +844,22 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
         case ir::IRKind::IR_FUNCTION_DECL:
         {
             auto *fun = llvm::dyn_cast<ir::FunctionDecl>(decl);
-            CGFunction cgf(*this);
-            cgf.run(fun);
+            // This also creates forward declaration
+            CGFunction *cgf = new CGFunction(*this, fun);
             if(fun->getName() == "_entry") {
                 entryFun = fun;
             }
+            funs.push_back(cgf);
         }
         break;
         default: //llvm::report_fatal_error("Code generation invoked for not yet implemented IR");
         break;
         }
+    }
+
+    // Create function bodies
+    for(auto f: funs) {
+        f->run();
     }
 
     // Insert _main
@@ -897,11 +911,7 @@ llvm::Function *cg::CGFunction::createFunction(ir::FunctionDecl *fun, llvm::Func
     return f;
 }
 
-void cg::CGFunction::run(ir::FunctionDecl *fun) {
-    this->fun = fun;
-    funType = createFunctionType(fun);
-    this->llvmFun = createFunction(fun, funType);
-
+void cg::CGFunction::run() {
     llvm::BasicBlock *bb = llvm::BasicBlock::Create(cgm.getLLVMCtx(), "entry", llvmFun);
     setCurrBB(bb);
 
