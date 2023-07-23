@@ -613,6 +613,9 @@ void cg::CGFunction::emitStmt(ir::WhileStmt *stmt) {
     llvm::BasicBlock *whileBodyBB = llvm::BasicBlock::Create(ctx, "while.body", llvmFun);
     llvm::BasicBlock *whileAfterBB = llvm::BasicBlock::Create(ctx, "while.after", llvmFun);
 
+    stmt->setAfterBB(whileAfterBB);
+    stmt->setCondBB(whileCondBB);
+
     builder.CreateBr(whileCondBB);
     sealBlock(currBB);
     setCurrBB(whileCondBB);
@@ -643,6 +646,42 @@ void cg::CGFunction::emitStmt(ir::ReturnStmt *stmt) {
     }
 }
 
+void cg::CGFunction::emitStmt(ir::BreakStmt *stmt) {
+    LOGMAX("Creating break");
+    ir::IR *cycle = stmt->getEnclosingIR();
+    // TODO: Add for when implemented
+    while(cycle && !llvm::isa<ir::WhileStmt>(cycle)) {
+        cycle = cycle->getEnclosingIR();
+    }
+    if(!cycle) {
+        llvm::report_fatal_error("break can appear only inside of a while or a for loop");
+    }
+    if(auto loop = llvm::dyn_cast<ir::WhileStmt>(cycle)) {
+        builder.CreateBr(loop->getAfterBB());
+    }
+    /*else if(auto loop = llvm::dyn_cast<ir::ForStmt>(cycle)) {
+        builder.CreateBr(loop->getAfterBB());
+    }*/
+}
+
+void cg::CGFunction::emitStmt(ir::ContinueStmt *stmt) {
+    LOGMAX("Creating continue");
+    ir::IR *cycle = stmt->getEnclosingIR();
+    // TODO: Add for when implemented
+    while(cycle && !llvm::isa<ir::WhileStmt>(cycle)) {
+        cycle = cycle->getEnclosingIR();
+    }
+    if(!cycle) {
+        llvm::report_fatal_error("continue can appear only inside of a while or a for loop");
+    }
+    if(auto loop = llvm::dyn_cast<ir::WhileStmt>(cycle)) {
+        builder.CreateBr(loop->getCondBB());
+    }
+    /*else if(auto loop = llvm::dyn_cast<ir::ForStmt>(cycle)) {
+        builder.CreateBr(loop->getAfterBB());
+    }*/
+}
+
 void cg::CGFunction::emitStmt(ir::Import *stmt) {
     llvm::report_fatal_error("Imports are not yet implemented");
 }
@@ -662,6 +701,12 @@ void cg::CGFunction::emit(std::vector<ir::IR *> stmts) {
             emitStmt(stmt);
         }
         else if(auto *stmt = llvm::dyn_cast<ir::Import>(s)) {
+            emitStmt(stmt);
+        }
+        else if(auto *stmt = llvm::dyn_cast<ir::BreakStmt>(s)) {
+            emitStmt(stmt);
+        }
+        else if(auto *stmt = llvm::dyn_cast<ir::ContinueStmt>(s)) {
             emitStmt(stmt);
         }
         else {

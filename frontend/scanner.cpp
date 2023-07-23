@@ -467,6 +467,13 @@ ir::IR *Scanner::parseIfStmt(ir::Expr *cond, std::vector<ir::IR *> &ifBranch, st
         diags.report(llvmloc, diag::ERR_IF_COND_MUST_BE_BOOL, cond->getType()->getName());
     }
     auto ifstmt = new ir::IfStatement(currentIR, llvmloc, "if", cond, ifBranch, elseBranch);
+    // Set enclosing IR for all statements in the body to this
+    for(auto i : ifBranch) {
+        i->setEnclosingIR(ifstmt);
+    }
+    for(auto i : elseBranch) {
+        i->setEnclosingIR(ifstmt);
+    }
     return ifstmt;
 }
 
@@ -475,7 +482,12 @@ ir::IR *Scanner::parseWhile(ir::Expr *cond, std::vector<ir::IR *> &body) {
     if(cond->getType() != boolType) {
         diags.report(llvmloc, diag::ERR_WHILE_COND_MUST_BE_BOOL, cond->getType()->getName());
     }
-    return new ir::WhileStmt(currentIR, llvmloc, "while", cond, body);
+    auto whl = new ir::WhileStmt(currentIR, llvmloc, "while", cond, body);
+    // Set enclosing IR for all statements in the body to this
+    for(auto i : body) {
+        i->setEnclosingIR(whl);
+    }
+    return whl;
 }
 
 ir::IR *Scanner::parseFun(ir::IR *type, std::string name, std::vector<ir::FormalParamDecl *> params, std::vector<ir::IR *> body) {

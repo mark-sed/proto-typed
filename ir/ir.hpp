@@ -15,6 +15,7 @@
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/APSInt.h"
 #include "llvm/ADT/APFloat.h"
+#include "llvm/IR/IRBuilder.h"
 #include <vector>
 #include <sstream>
 
@@ -600,6 +601,8 @@ class WhileStmt : public IR {
 private:
     Expr *cond;
     std::vector<ir::IR *> body;
+    llvm::BasicBlock *afterBB;
+    llvm::BasicBlock *condBB;
 public:
     WhileStmt(IR *enclosing_ir, 
               llvm::SMLoc loc,
@@ -612,6 +615,10 @@ public:
 
     Expr *getCond() { return cond; }
     std::vector<ir::IR *> getBody() { return body; }
+    void setAfterBB(llvm::BasicBlock *bb) { afterBB = bb; }
+    void setCondBB(llvm::BasicBlock *bb) { condBB = bb; }
+    llvm::BasicBlock *getAfterBB() { return afterBB; }
+    llvm::BasicBlock *getCondBB() { return condBB; }
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_WHILE;
     }
