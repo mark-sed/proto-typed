@@ -26,7 +26,7 @@
             class Expr;
             class FormalParamDecl;
         }
-        namespace diags {
+        namespace diag {
         }
     }
 

@@ -29,6 +29,22 @@ void UnresolvedSymbolResolver::resolve(ir::Expr * expr, llvm::SMLoc loc) {
             }
         }
     }
+    else if(auto e = llvm::dyn_cast<ir::BinaryInfixExpr>(expr)) {
+        resolve(e->getLeft(), loc);
+        resolve(e->getRight(), loc);
+    }
+    else if(auto e = llvm::dyn_cast<ir::UnaryPrefixExpr>(expr)) {
+        resolve(e->getExpr(), loc);
+    }
+    else if(auto e = llvm::dyn_cast<ir::UnresolvedSymbolAccess>(expr)) {
+        // TODO: Handle function pointer
+        if(globalScope->lookupPossibleFun(e->getName())) {
+            diags.report(loc, diag::ERR_INTERNAL, "Function pointers are not yet implemented in resolver");
+        }
+        else {
+            diags.report(loc, diag::ERR_UNDEFINED_VAR, e->getName());
+        }
+    }
 }
 
 void UnresolvedSymbolResolver::resolve(std::vector<ir::IR *> body) {
@@ -39,6 +55,9 @@ void UnresolvedSymbolResolver::resolve(std::vector<ir::IR *> body) {
         }
         else if(auto stmt = llvm::dyn_cast<ir::FunctionDecl>(i)) {
             resolve(stmt->getDecl());
+        }
+        else if(auto stmt = llvm::dyn_cast<ir::WhileStmt>(i)) {
+            resolve(stmt->getBody());
         }
         else if(auto stmt = llvm::dyn_cast<ir::ExprStmt>(i)) {
             resolve(stmt->getExpr(), stmt->getLocation());   

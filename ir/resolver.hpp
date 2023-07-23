@@ -12,7 +12,7 @@ class UnresolvedSymbolResolver {
 private:
     ir::ModuleDecl *mod;
     Scope *globalScope;
-    Diagnostics diags;
+    Diagnostics &diags;
 
     void resolve(std::vector<ir::IR *> body);
     void resolve(ir::Expr * expr, llvm::SMLoc loc);
