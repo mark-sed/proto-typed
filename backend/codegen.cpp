@@ -763,7 +763,7 @@ void cg::CGModule::setupLibFuncs() {
                                                             llvm::GlobalValue::PrivateLinkage,
                                                             nullptr,
                                                             "");
-        v->setInitializer(builder.CreateGlobalStringPtr("%i\n", "", 0, llvmMod));
+        v->setInitializer(builder.CreateGlobalStringPtr("%ld\n", "", 0, llvmMod));
         llvm::Function *f = llvm::Function::Create(funType, 
                                                 llvm::GlobalValue::ExternalLinkage,
                                                 "print_int",
