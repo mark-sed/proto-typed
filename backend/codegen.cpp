@@ -690,7 +690,7 @@ void cg::CGFunction::emitStmt(ir::ContinueStmt *stmt) {
 }
 
 void cg::CGFunction::emitStmt(ir::Import *stmt) {
-    llvm::report_fatal_error("Imports are not yet implemented");
+    //llvm::report_fatal_error("Imports are not yet implemented");
 }
 
 void cg::CGFunction::emit(std::vector<ir::IR *> stmts) {

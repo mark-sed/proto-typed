@@ -11,6 +11,10 @@
 #ifndef _PTC_HPP_
 #define _PTC_HPP_
 
+#include "scanner.hpp"
+#include <vector>
+#include <string>
+
 #define MACRO_TO_STR_HELPER(x) #x
 /** Macro to convert INT macro value into string value */
 #define MACRO_TO_STR(x) MACRO_TO_STR_HELPER(x)
@@ -21,5 +25,34 @@
 
 /** PTC version as a string */
 #define PTC_VERSION MACRO_TO_STR(PTC_VERSION_MAJOR) "." MACRO_TO_STR(PTC_VERSION_MINOR) "." MACRO_TO_STR(PTC_VERSION_PATCH)
+
+namespace ptc {
+
+class ModuleInfo {
+private:
+    std::string name;
+    std::string path;
+    Scanner *scanner;
+    bool parsed;
+public:
+    ModuleInfo(std::string name, bool pathSent=false);
+    ~ModuleInfo() {
+        if(scanner)
+            delete scanner;
+    }
+
+    std::string getPath() { return path; }
+    std::string getName() { return name; }
+    Scanner *getScanner() { return scanner; }
+    void setScanner(Scanner *s) { scanner = s; }
+    bool isParsed() { return parsed; }
+    void setParsed(bool p) { parsed = p; }
+};
+
+extern std::vector<ModuleInfo *> modulesToCompile;
+
+void addModuleToCompile(std::string name);
+
+}
 
 #endif//_PTC_HPP_

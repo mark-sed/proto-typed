@@ -40,6 +40,33 @@ static llvm::cl::opt<bool> emitLLVM("emit-llvm", llvm::cl::desc("Emit IR code in
 
 static const char *head = "Proto-typed compiler";
 
+std::vector<ptc::ModuleInfo *> ptc::modulesToCompile;
+
+ModuleInfo::ModuleInfo(std::string name, bool pathSent) : parsed(false) {
+    // Find module file
+    // TODO: Search or possible paths
+    if(pathSent) {
+        path = name;
+        this->name = std::filesystem::path(path).stem();
+    }
+    else {
+        // Main file has the main dir to search
+        this->name = name;
+        std::string mainPath = std::filesystem::path(modulesToCompile.front()->getPath()).parent_path();
+        path = mainPath+"/"+name+".pt";
+    }
+    LOGMAX("Added module for parsing - name: "+name+", path: "+path);
+}
+
+void ptc::addModuleToCompile(std::string name) {
+    for(auto p : modulesToCompile) {
+        if(p->getName() == name) {
+            return;
+        }
+    }
+    modulesToCompile.push_back(new ModuleInfo(name));
+}
+
 void printVersion(llvm::raw_ostream &OS) {
     // TODO: print version
     OS << head << " " << PTC_VERSION << "\n";
@@ -140,13 +167,22 @@ bool emit(std::string ptcName, llvm::Module *module, llvm::TargetMachine *target
   return Mod;
 }*/
 
+static ModuleInfo *getNextModuleForParsing() {
+    for(auto a: modulesToCompile) {
+        if(!a->isParsed()) {
+            return a;
+        }
+    }
+    return nullptr;
+}
+
 /** Main */
 int main(int argc, char *argv[]) {
     llvm::InitLLVM LLVMX(argc, argv);
 
     log::Logger::get().set_disable(false);
     log::Logger::get().set_log_everything(true);
-    log::Logger::get().set_logging_level(MAX_LOGGING_LEVEL);
+    //log::Logger::get().set_logging_level(MAX_LOGGING_LEVEL);
 
     llvm::InitializeAllTargets();
     llvm::InitializeAllTargetMCs();
@@ -178,15 +214,22 @@ int main(int argc, char *argv[]) {
     // Parsing
     const char *ptcName = argv[0];
     bool parsingMain = true;
-    for(const auto &fileName: inputFiles) {
+    if(inputFiles.size() > 0) {
+        // TOOD: Disallow multiple files here
+        modulesToCompile.push_back(new ModuleInfo(*inputFiles.begin(), true));
+    }
+
+    llvm::SourceMgr srcMgr;
+    Diagnostics diags(srcMgr);
+    log::Logger::get().clear_errors();
+    while(auto moduleInfo = getNextModuleForParsing()) {
+        const auto &fileName = moduleInfo->getPath();
+        //const auto moduleName = moduleInfo->getName();
+        LOGMAX("Parsing module "+fileName);
         llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> fileOrErr = llvm::MemoryBuffer::getFile(fileName);
         if(std::error_code buffErr = fileOrErr.getError()) {
             llvm::WithColor::error(llvm::errs(), ptcName) << "Error reading " << fileName << ": " << buffErr.message() << "\n";
         }
-
-        llvm::SourceMgr srcMgr;
-        Diagnostics diags(srcMgr);
-        log::Logger::get().clear_errors();
 
         srcMgr.AddNewSourceBuffer(std::move(*fileOrErr), llvm::SMLoc());
 
@@ -195,30 +238,39 @@ int main(int argc, char *argv[]) {
 
         std::string moduleName = std::filesystem::path(fileName).stem();
         auto scanner = new Scanner(diags, moduleName);
+        moduleInfo->setScanner(scanner);
         scanner->parse(&code);
         if(parsingMain) {
             scanner->mainModule->setMain(true);
             parsingMain = false;
         }
+        moduleInfo->setParsed(true);
         LOG1("Parsing done for "+fileName);
+    }
 
+    // Resolver
+    for(auto mi: modulesToCompile) {
+        const auto &fileName = mi->getPath();
         LOG1("Running resolver on "+fileName);
-        auto unresolvedResolver = new UnresolvedSymbolResolver(scanner->mainModule, scanner->globalScope, diags);
+        auto unresolvedResolver = new UnresolvedSymbolResolver(mi->getScanner()->mainModule, mi->getScanner()->globalScope, diags);
         unresolvedResolver->run();
         delete unresolvedResolver;
+    }
 
+    for(auto mi: modulesToCompile) {
+        const auto &fileName = mi->getPath();
         // Code generation
         llvm::TargetMachine *target = createTargetMachine(ptcName);
         if (!target) {
             llvm::report_fatal_error("Could not create target machine");
             exit(EXIT_FAILURE);
         }
-        if(scanner->mainModule && diags.getNumErrors() == 0 && log::Logger::get().get_error_num() == 0) {
+        if(mi->getScanner()->mainModule && diags.getNumErrors() == 0 && log::Logger::get().get_error_num() == 0) {
             LOG1("Starting code generation for "+fileName);
             // Code generation
             llvm::LLVMContext ctx;
             if(cg::CodeGenHandler *CGHandle = cg::CodeGenHandler::create(ctx, target)) {
-                std::unique_ptr<llvm::Module> mainMod = CGHandle->run(scanner->mainModule, fileName);
+                std::unique_ptr<llvm::Module> mainMod = CGHandle->run(mi->getScanner()->mainModule, fileName);
                 if(!emit(ptcName, mainMod.get(), target, fileName)) {
                     llvm::WithColor::error(llvm::errs(), ptcName) << "error writing output\n";
                 }
@@ -229,8 +281,10 @@ int main(int argc, char *argv[]) {
             LOG1("\033[91mFailure, compilation ended with "+std::to_string(diags.getNumErrors()+log::Logger::get().get_error_num())+" error(s)\033[39m")
             return EXIT_FAILURE;
         }
+    }
 
-        delete scanner;
+    for(auto mi: modulesToCompile) {
+        delete mi;
     }
 
     LOG1("\033[92mCompilation was successful\033[39m");

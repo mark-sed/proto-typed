@@ -12,6 +12,7 @@
 #include "scanner.hpp"
 #include "logging.hpp"
 #include "utils.hpp"
+#include "ptc.hpp"
 #include "llvm/Support/Casting.h"
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/APSInt.h"
@@ -374,6 +375,9 @@ std::vector<ir::Expr *> Scanner::parseAddFunCallArg(std::vector<ir::Expr *> &lis
 
 ir::IR *Scanner::parseImports(std::vector<std::string> names) {
     LOGMAX("Parsing import list");
+    for(auto n: names) {
+        addModuleToCompile(n);
+    }
     return new ir::Import(currentIR, llvmloc, names);
 }
 
