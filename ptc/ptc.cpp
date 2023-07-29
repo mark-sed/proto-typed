@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) {
 
     log::Logger::get().set_disable(false);
     log::Logger::get().set_log_everything(true);
-    //log::Logger::get().set_logging_level(MAX_LOGGING_LEVEL);
+    log::Logger::get().set_logging_level(MAX_LOGGING_LEVEL);
 
     llvm::InitializeAllTargets();
     llvm::InitializeAllTargetMCs();
@@ -222,6 +222,8 @@ int main(int argc, char *argv[]) {
     llvm::SourceMgr srcMgr;
     Diagnostics diags(srcMgr);
     log::Logger::get().clear_errors();
+    
+    // Parser
     while(auto moduleInfo = getNextModuleForParsing()) {
         const auto &fileName = moduleInfo->getPath();
         //const auto moduleName = moduleInfo->getName();
@@ -257,6 +259,7 @@ int main(int argc, char *argv[]) {
         delete unresolvedResolver;
     }
 
+    // Codegen
     for(auto mi: modulesToCompile) {
         const auto &fileName = mi->getPath();
         // Code generation
