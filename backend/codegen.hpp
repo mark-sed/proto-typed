@@ -63,13 +63,15 @@ protected:
     virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) = 0;
     virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl) = 0;
 
+    llvm::StructType *getStringIR();
+
 public:
     llvm::Type *voidT;
     llvm::Type *int1T;
     llvm::Type *int64T;
     llvm::Type *floatT;
-    llvm::Type *stringT;
-    llvm::Type *stringElemT;
+    //llvm::Type *stringT;
+    llvm::StructType *stringT;
 
     llvm::Type *mapType(ir::IR *decl);
     llvm::Type *convertType(ir::TypeDecl *type);

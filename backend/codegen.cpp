@@ -13,6 +13,7 @@
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/IR/Attributes.h"
 #include "llvm/ADT/SmallVector.h"
+#include <vector>
 
 using namespace ptc;
 
@@ -34,8 +35,14 @@ void cg::CodeGen::init() {
     int1T = llvm::Type::getInt1Ty(ctx);
     int64T = llvm::Type::getInt64Ty(ctx);
     floatT = llvm::Type::getDoubleTy(ctx);
-    stringElemT = llvm::Type::getInt8Ty(ctx);
-    stringT = stringElemT->getPointerTo();
+
+    std::vector<llvm::Type*> structElements{
+        builder.getInt8Ty()->getPointerTo(),
+        builder.getInt32Ty(),
+        builder.getInt32Ty(),
+        builder.getInt32Ty()
+    };
+    stringT = llvm::StructType::create(ctx, structElements, "string");
 }
 
 llvm::Type *cg::CodeGen::convertType(ir::TypeDecl *t) {
@@ -279,13 +286,36 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
     case ir::ExprKind::EX_STRING: 
     {
         llvm::GlobalVariable *v = new llvm::GlobalVariable(*cgm.getLLVMMod(),
-                                                            stringT,
+                                                            builder.getInt8Ty()->getPointerTo(),
                                                             false,
                                                             llvm::GlobalValue::PrivateLinkage,
-                                                            nullptr,
-                                                            "");
+                                                            nullptr);
         v->setInitializer(builder.CreateGlobalStringPtr(llvm::dyn_cast<ir::StringLiteral>(e)->getValue().c_str(), "", 0, cgm.getLLVMMod()));
-        return builder.CreateLoad(stringT, v);
+        
+        auto strobj = builder.CreateAlloca(stringT);
+
+        auto stringInitF = cgm.getLLVMMod()->getOrInsertFunction("string_Create_Default", 
+                                                    llvm::FunctionType::get(
+                                                        voidT,
+                                                        stringT->getPointerTo(),
+                                                        false
+                                                    ));
+        auto stringSetText = cgm.getLLVMMod()->getOrInsertFunction("string_Add_CStr", 
+                                                        llvm::FunctionType::get(
+                                                            voidT,
+                                                            { 
+                                                                stringT->getPointerTo(),
+                                                                builder.getInt8Ty()->getPointerTo()
+                                                            },
+                                                            false
+                                                        ));
+        // Init string
+        auto vloaded = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), v);
+        builder.CreateCall(stringInitF, { strobj });
+        builder.CreateCall(stringSetText, { strobj, vloaded });
+        
+        return strobj;
+
     }
     case ir::ExprKind::EX_BOOL: return llvm::ConstantInt::get(int1T, llvm::dyn_cast<ir::BoolLiteral>(e)->getValue());
     case ir::ExprKind::EX_FLOAT: return llvm::ConstantFP::get(floatT,llvm::dyn_cast<ir::FloatLiteral>(e)->getValue());
@@ -743,7 +773,7 @@ void cg::CGModule::setupExternFuncs() {
 void cg::CGModule::setupLibFuncs() {
     // print
     {
-        auto funType = llvm::FunctionType::get(voidT, { stringT }, false);
+        auto funType = llvm::FunctionType::get(voidT, { stringT->getPointerTo() }, false);
         llvm::Function *f = llvm::Function::Create(funType, 
                                                 llvm::GlobalValue::ExternalLinkage,
                                                 "print",
@@ -751,14 +781,17 @@ void cg::CGModule::setupLibFuncs() {
         llvm::BasicBlock *bb = llvm::BasicBlock::Create(getLLVMCtx(), "entry", f);
         setCurrBB(bb);
         auto puts = llvmMod->getFunction("puts");
-        builder.CreateCall(puts, { f->getArg(0) });
+        llvm::Value* zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), 0);
+        llvm::Value* cstr = builder.CreateGEP(stringT, f->getArg(0), {zero, zero});
+        auto buffer = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), cstr);
+        builder.CreateCall(puts, { buffer });
         builder.CreateRetVoid();
     }
     // TODO: Remove when not needed for debugging
     {
         auto funType = llvm::FunctionType::get(voidT, { int64T }, false);
         llvm::GlobalVariable *v = new llvm::GlobalVariable(*llvmMod,
-                                                            stringT,
+                                                            builder.getInt8Ty()->getPointerTo(),
                                                             false,
                                                             llvm::GlobalValue::PrivateLinkage,
                                                             nullptr,
@@ -770,11 +803,12 @@ void cg::CGModule::setupLibFuncs() {
                                                 llvmMod);
         llvm::BasicBlock *bb = llvm::BasicBlock::Create(getLLVMCtx(), "entry", f);
         setCurrBB(bb);
-        auto format = builder.CreateLoad(stringT, v);
+        auto format = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), v);
         auto printf = llvmMod->getFunction("printf");
         builder.CreateCall(printf, { format, f->getArg(0) });
         builder.CreateRetVoid();
     }
+
 }
 
 void cg::CGModule::run(ir::ModuleDecl *mod) {
@@ -784,6 +818,8 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
     this->setupLibFuncs();
     ir::FunctionDecl *entryFun = nullptr;
     std::vector<CGFunction *> funs;
+
+    std::vector<std::pair<llvm::GlobalVariable *, llvm::GlobalVariable *>> stringsToInit;
 
     for(auto *decl: mod->getDecls()) {
         auto kind = decl->getKind();
@@ -809,18 +845,19 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                     v->setInitializer(llvm::ConstantFP::get(ctx, vcast->getValue()));
                 }*/
                 else if(auto vcast = llvm::dyn_cast<ir::StringLiteral>(value)) {
-                    // THIS IS WRONG string is i8*, but this creates [i8 x size()] type
-                    
-                    // TODO: Handle unicode and such and make this more efficient
-                    /*std::vector<llvm::Constant *> vs;
-                    for(char l: vcast->getValue()) {
-                        vs.push_back(llvm::ConstantInt::get(stringElemT, l));
-                    }
-                    vs.push_back(llvm::ConstantInt::get(stringElemT, '\0'));
-                    v->setInitializer(llvm::ConstantArray::get(), vs)); */
-                   
-                    // This is also wrong, because this requires a BasicBlock
-                    v->setInitializer(builder.CreateGlobalStringPtr(vcast->getValue().c_str(), "", 0, llvmMod));
+                    llvm::GlobalVariable *str_txt = new llvm::GlobalVariable(*llvmMod,
+                                                            builder.getInt8Ty()->getPointerTo(),
+                                                            false,
+                                                            llvm::GlobalValue::PrivateLinkage,
+                                                            nullptr);
+                    str_txt->setInitializer(builder.CreateGlobalStringPtr(vcast->getValue().c_str(), "", 0, llvmMod));
+                    stringsToInit.push_back(std::make_pair(v, str_txt));
+                    v->setInitializer(llvm::ConstantStruct::get(stringT, {
+                        llvm::ConstantPointerNull::get(builder.getInt8Ty()->getPointerTo()),
+                        llvm::ConstantInt::get(builder.getInt32Ty(), 0, true),
+                        llvm::ConstantInt::get(builder.getInt32Ty(), 0, true),
+                        llvm::ConstantInt::get(builder.getInt32Ty(), 0, true)
+                     }));
                 }
                 else {
                     llvm::report_fatal_error("Unknown constant in global variable assignment");
@@ -875,6 +912,27 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
     main->setDSOLocal(true);
     llvm::BasicBlock *bb = llvm::BasicBlock::Create(getLLVMCtx(), "", main);
     setCurrBB(bb);
+
+    auto stringInitF = llvmMod->getOrInsertFunction("string_Create_Default", 
+                                                    llvm::FunctionType::get(
+                                                        voidT,
+                                                        stringT->getPointerTo(),
+                                                        false
+                                                    ));
+    auto stringSetText = llvmMod->getOrInsertFunction("string_Add_CStr", 
+                                                    llvm::FunctionType::get(
+                                                        voidT,
+                                                        { 
+                                                            stringT->getPointerTo(),
+                                                            builder.getInt8Ty()->getPointerTo()
+                                                        },
+                                                        false
+                                                    ));
+    // Init strings
+    for(auto s: stringsToInit) {
+        builder.CreateCall(stringInitF, { s.first });
+        builder.CreateCall(stringSetText, { s.first, s.second });
+    }
 
     auto entryFunLLVM = llvmMod->getFunction(mangleName(entryFun));
     std::vector<llvm::Value *> args{};
