@@ -263,9 +263,9 @@ llvm::Value *cg::CGFunction::emitFunCall(ir::FunctionCall *e) {
     // TODO: Set last arg to true is argvars
     //llvm::FunctionType *fType = llvm::FunctionType::get(voidType, argTypes, false);
     // Try looking up non mangled function
-    llvm::Function *funDecl = cgm.getLLVMMod()->getFunction(f->getOGName());
+    llvm::Function *funDecl = cgm.getLLVMMod()->getFunction(mangleName(f));
     if(!funDecl)
-        funDecl = cgm.getLLVMMod()->getFunction(mangleName(f));
+        funDecl = cgm.getLLVMMod()->getFunction(f->getOGName());
     if(!funDecl) {
         auto msg = "Somehow function "+f->getOGName()+" could not be found";
         llvm::report_fatal_error(msg.c_str());
@@ -845,6 +845,75 @@ void cg::CGModule::setupLibFuncs() {
         auto rval = builder.CreateLoad(stringT, strobj);
         builder.CreateRet(strobj);
     }
+    // to_string(bool)
+    {
+        auto funType = llvm::FunctionType::get(stringT, { int1T }, false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::ExternalLinkage,
+                                                "to_string",
+                                                llvmMod);
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(getLLVMCtx(), "entry", f);
+        setCurrBB(bb);
+
+        auto strobj = builder.CreateAlloca(stringT);
+        auto stringInitF = getLLVMMod()->getOrInsertFunction("string_Create_Default", 
+                                                    llvm::FunctionType::get(
+                                                        voidT,
+                                                        stringTPtr,
+                                                        false
+                                                    ));
+        auto stringAdd = getLLVMMod()->getOrInsertFunction("string_Add_CStr", 
+                                                        llvm::FunctionType::get(
+                                                            voidT,
+                                                            { 
+                                                                stringTPtr,
+                                                                builder.getInt32Ty()
+                                                            },
+                                                            false
+                                                        ));
+        // Init string
+        builder.CreateCall(stringInitF, { strobj });
+
+        llvm::GlobalVariable *trueStr = new llvm::GlobalVariable(*llvmMod,
+                                                            builder.getInt8Ty()->getPointerTo(),
+                                                            false,
+                                                            llvm::GlobalValue::PrivateLinkage,
+                                                            nullptr,
+                                                            "");
+        trueStr->setInitializer(builder.CreateGlobalStringPtr("true", "", 0, llvmMod));
+        llvm::GlobalVariable *falseStr = new llvm::GlobalVariable(*llvmMod,
+                                                            builder.getInt8Ty()->getPointerTo(),
+                                                            false,
+                                                            llvm::GlobalValue::PrivateLinkage,
+                                                            nullptr,
+                                                            "");
+        falseStr->setInitializer(builder.CreateGlobalStringPtr("false", "", 0, llvmMod));
+        
+        auto trueBB = llvm::BasicBlock::Create(getLLVMCtx(), "truestr", f);
+        auto falseBB = llvm::BasicBlock::Create(getLLVMCtx(), "falsestr", f);
+        auto endBB = llvm::BasicBlock::Create(getLLVMCtx(), "end", f);
+
+        auto cmp = builder.CreateICmpEQ(f->getArg(0), llvm::ConstantInt::get(llvm::Type::getInt1Ty(getLLVMCtx()), 1));
+        builder.CreateCondBr(cmp, trueBB, falseBB);
+
+        // True
+        setCurrBB(trueBB);
+        auto cstr = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), trueStr);
+        builder.CreateCall(stringAdd, { strobj, cstr });
+        builder.CreateBr(endBB);
+        
+        // False
+        setCurrBB(falseBB);
+        auto cstrf = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), falseStr);
+        builder.CreateCall(stringAdd, { strobj, cstrf });
+        builder.CreateBr(endBB);
+        
+        // End
+        setCurrBB(endBB);
+        auto rval = builder.CreateLoad(stringT, strobj);
+        builder.CreateRet(strobj);
+    }
+
     // TODO: Remove when not needed for debugging
     {
         auto funType = llvm::FunctionType::get(voidT, { int64T }, false);
