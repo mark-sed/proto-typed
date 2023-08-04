@@ -264,8 +264,10 @@ llvm::Value *cg::CGFunction::emitFunCall(ir::FunctionCall *e) {
     //llvm::FunctionType *fType = llvm::FunctionType::get(voidType, argTypes, false);
     // Try looking up non mangled function
     llvm::Function *funDecl = cgm.getLLVMMod()->getFunction(mangleName(f));
-    if(!funDecl)
-        funDecl = cgm.getLLVMMod()->getFunction(f->getOGName());
+    if(!funDecl) {
+        // Lib functions
+        funDecl = cgm.getLLVMMod()->getFunction(f->getName());
+    }
     if(!funDecl) {
         auto msg = "Somehow function "+f->getOGName()+" could not be found";
         llvm::report_fatal_error(msg.c_str());
@@ -794,7 +796,7 @@ void cg::CGModule::setupLibFuncs() {
         auto funType = llvm::FunctionType::get(stringT, { int64T }, false);
         llvm::Function *f = llvm::Function::Create(funType, 
                                                 llvm::GlobalValue::ExternalLinkage,
-                                                "to_string",
+                                                "to_string_int",
                                                 llvmMod);
         llvm::BasicBlock *bb = llvm::BasicBlock::Create(getLLVMCtx(), "entry", f);
         setCurrBB(bb);
@@ -850,7 +852,7 @@ void cg::CGModule::setupLibFuncs() {
         auto funType = llvm::FunctionType::get(stringT, { int1T }, false);
         llvm::Function *f = llvm::Function::Create(funType, 
                                                 llvm::GlobalValue::ExternalLinkage,
-                                                "to_string",
+                                                "to_string_bool",
                                                 llvmMod);
         llvm::BasicBlock *bb = llvm::BasicBlock::Create(getLLVMCtx(), "entry", f);
         setCurrBB(bb);

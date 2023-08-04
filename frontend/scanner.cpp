@@ -96,7 +96,7 @@ void Scanner::init() {
         auto body = std::vector<ir::IR *> {};
         auto fun = new ir::FunctionDecl(currentIR,
                                                 llvm::SMLoc(),
-                                                "to_string",
+                                                "to_string_int",
                                                 "to_string",
                                                 this->stringType,
                                                 params,
@@ -111,7 +111,7 @@ void Scanner::init() {
         auto body = std::vector<ir::IR *> {};
         auto fun = new ir::FunctionDecl(currentIR,
                                                 llvm::SMLoc(),
-                                                "to_string",
+                                                "to_string_bool",
                                                 "to_string",
                                                 this->stringType,
                                                 params,
@@ -481,7 +481,15 @@ ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
             auto propFIR = currScope->lookup(properName);
             if(!propFIR) {
                 // Lib functions
-                propFIR = currScope->lookup(f->getOGName());
+                // first try adding the arguments to the name
+                std::string appendix = "";
+                for(auto p: params) {
+                    appendix+="_"+p->getType()->getName();
+                }
+                propFIR = currScope->lookup(f->getOGName()+appendix);
+                if(!propFIR) {
+                    propFIR = currScope->lookup(f->getName());
+                }
             }
             if(!propFIR) {
                 diags.report(llvmloc, diag::ERR_INCORRECT_ARGS, f->getOGName());
