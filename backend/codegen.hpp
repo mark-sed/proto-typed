@@ -72,6 +72,7 @@ public:
     llvm::Type *floatT;
     //llvm::Type *stringT;
     llvm::StructType *stringT;
+    llvm::PointerType *stringTPtr;
 
     llvm::Type *mapType(ir::IR *decl);
     llvm::Type *convertType(ir::TypeDecl *type);

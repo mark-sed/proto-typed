@@ -90,6 +90,21 @@ void Scanner::init() {
     }
 
     {
+        auto params = std::vector<ir::FormalParamDecl *>{
+            new ir::FormalParamDecl(currentIR, llvmloc, "v", this->intType, false)
+        };
+        auto body = std::vector<ir::IR *> {};
+        auto fun = new ir::FunctionDecl(currentIR,
+                                                llvm::SMLoc(),
+                                                "to_string",
+                                                "to_string",
+                                                this->stringType,
+                                                params,
+                                                body);
+        currScope->insert(fun);
+    }
+
+    {
         auto printParams = std::vector<ir::FormalParamDecl *>{
             new ir::FormalParamDecl(currentIR, llvmloc, "v", this->intType, false)
         };
