@@ -487,9 +487,9 @@ ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
                     appendix+="_"+p->getType()->getName();
                 }
                 propFIR = currScope->lookup(f->getOGName()+appendix);
-                if(!propFIR) {
+                /*if(!propFIR) {
                     propFIR = currScope->lookup(f->getName());
-                }
+                }*/
             }
             if(!propFIR) {
                 diags.report(llvmloc, diag::ERR_INCORRECT_ARGS, f->getOGName());
