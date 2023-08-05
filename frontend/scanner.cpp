@@ -106,6 +106,21 @@ void Scanner::init() {
 
     {
         auto params = std::vector<ir::FormalParamDecl *>{
+            new ir::FormalParamDecl(currentIR, llvmloc, "v", this->floatType, false)
+        };
+        auto body = std::vector<ir::IR *> {};
+        auto fun = new ir::FunctionDecl(currentIR,
+                                                llvm::SMLoc(),
+                                                "to_string_float",
+                                                "to_string",
+                                                this->stringType,
+                                                params,
+                                                body);
+        currScope->insert(fun);
+    }
+
+    {
+        auto params = std::vector<ir::FormalParamDecl *>{
             new ir::FormalParamDecl(currentIR, llvmloc, "v", this->boolType, false)
         };
         auto body = std::vector<ir::IR *> {};

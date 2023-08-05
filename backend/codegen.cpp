@@ -297,25 +297,18 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
         
         auto strobj = builder.CreateAlloca(stringT);
 
-        auto stringInitF = cgm.getLLVMMod()->getOrInsertFunction("string_Create_Default", 
+        auto stringInitF = cgm.getLLVMMod()->getOrInsertFunction("string_Create_Init", 
                                                     llvm::FunctionType::get(
                                                         voidT,
-                                                        stringTPtr,
+                                                        {
+                                                            stringTPtr,
+                                                            builder.getInt8Ty()->getPointerTo()
+                                                        },
                                                         false
                                                     ));
-        auto stringSetText = cgm.getLLVMMod()->getOrInsertFunction("string_Add_CStr", 
-                                                        llvm::FunctionType::get(
-                                                            voidT,
-                                                            { 
-                                                                stringTPtr,
-                                                                builder.getInt8Ty()->getPointerTo()
-                                                            },
-                                                            false
-                                                        ));
         // Init string
         auto vloaded = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), v);
-        builder.CreateCall(stringInitF, { strobj });
-        builder.CreateCall(stringSetText, { strobj, vloaded });
+        builder.CreateCall(stringInitF, { strobj, vloaded });
         
         return strobj;
 
@@ -858,6 +851,73 @@ void cg::CGModule::setupLibFuncs() {
         //auto rval = builder.CreateLoad(stringT, strobj);
         builder.CreateRet(strobj);
     }
+    // to_string(float)
+    {
+        auto funType = llvm::FunctionType::get(stringT, { floatT }, false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::ExternalLinkage,
+                                                "to_string_float",
+                                                llvmMod);
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(getLLVMCtx(), "entry", f);
+        setCurrBB(bb);
+
+        auto strobj = builder.CreateAlloca(stringT);
+        auto stringInitF = getLLVMMod()->getOrInsertFunction("string_Create_Default", 
+                                                    llvm::FunctionType::get(
+                                                        voidT,
+                                                        stringTPtr,
+                                                        false
+                                                    ));
+        auto stringResize = getLLVMMod()->getOrInsertFunction("string_Resize", 
+                                                        llvm::FunctionType::get(
+                                                            voidT,
+                                                            { 
+                                                                stringTPtr,
+                                                                builder.getInt32Ty()
+                                                            },
+                                                            false
+                                                        ));
+        // Init string
+        builder.CreateCall(stringInitF, { strobj });
+        // int64 can be up to 20 characters, but log10 could be used to get the size
+        builder.CreateCall(stringResize, { strobj, llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), 24) });
+
+        auto snprintff = llvmMod->getOrInsertFunction("sprintf",
+                                 llvm::FunctionType::get(
+                                    builder.getInt32Ty(),
+                                    { 
+                                        builder.getInt8Ty()->getPointerTo(),
+                                        builder.getInt8Ty()->getPointerTo()
+                                    },
+                                    true
+                                 ));
+        auto strlenf = llvmMod->getOrInsertFunction("strlen",
+                                 llvm::FunctionType::get(
+                                    builder.getInt32Ty(),
+                                    builder.getInt8Ty()->getPointerTo(),
+                                    true
+                                 ));
+        llvm::GlobalVariable *format = new llvm::GlobalVariable(*llvmMod,
+                                                            builder.getInt8Ty()->getPointerTo(),
+                                                            false,
+                                                            llvm::GlobalValue::PrivateLinkage,
+                                                            nullptr,
+                                                            "");
+        format->setInitializer(builder.CreateGlobalStringPtr("%.16g", "", 0, llvmMod));
+        llvm::Value* zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), 0);
+        llvm::Value* one = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), 1);
+        llvm::Value* cstr = builder.CreateGEP(stringT, strobj, {zero, zero});
+        //llvm::Value* cstr = builder.CreateExtractValue(rval, 0);
+        auto buffer = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), cstr);
+        auto formatloaded = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), format);
+        builder.CreateCall(snprintff, { buffer,  formatloaded, f->getArg(0)});
+        auto newlen = builder.CreateCall(strlenf, { buffer });
+        llvm::Value* len = builder.CreateGEP(stringT, strobj, {zero, one});
+        builder.CreateStore(newlen, len);
+        // TODO: returning pointer, but should be struct
+        //auto rval = builder.CreateLoad(stringT, strobj);
+        builder.CreateRet(strobj);
+    }
     // to_string(bool)
     {
         auto funType = llvm::FunctionType::get(stringT, { int1T }, false);
@@ -960,9 +1020,9 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                 else if(auto vcast = llvm::dyn_cast<ir::BoolLiteral>(value)) {
                     v->setInitializer(llvm::ConstantInt::getBool(int1T, vcast->getValue()));
                 }
-                /*else if(auto vcast = llvm::dyn_cast<ir::FloatLiteral>(value)) {
+                else if(auto vcast = llvm::dyn_cast<ir::FloatLiteral>(value)) {
                     v->setInitializer(llvm::ConstantFP::get(ctx, vcast->getValue()));
-                }*/
+                }
                 else if(auto vcast = llvm::dyn_cast<ir::StringLiteral>(value)) {
                     llvm::GlobalVariable *str_txt = new llvm::GlobalVariable(*llvmMod,
                                                             builder.getInt8Ty()->getPointerTo(),
@@ -1032,16 +1092,10 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
     llvm::BasicBlock *bb = llvm::BasicBlock::Create(getLLVMCtx(), "", main);
     setCurrBB(bb);
 
-    auto stringInitF = llvmMod->getOrInsertFunction("string_Create_Default", 
+    auto stringInitF = llvmMod->getOrInsertFunction("string_Create_Init", 
                                                     llvm::FunctionType::get(
                                                         voidT,
-                                                        stringTPtr,
-                                                        false
-                                                    ));
-    auto stringSetText = llvmMod->getOrInsertFunction("string_Add_CStr", 
-                                                    llvm::FunctionType::get(
-                                                        voidT,
-                                                        { 
+                                                        {
                                                             stringTPtr,
                                                             builder.getInt8Ty()->getPointerTo()
                                                         },
@@ -1049,8 +1103,7 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                                                     ));
     // Init strings
     for(auto s: stringsToInit) {
-        builder.CreateCall(stringInitF, { s.first });
-        builder.CreateCall(stringSetText, { s.first, s.second });
+        builder.CreateCall(stringInitF, { s.first, s.second });
     }
 
     auto entryFunLLVM = llvmMod->getFunction(mangleName(entryFun));
