@@ -554,19 +554,19 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          | expr_struct CONCAT expr_bool
          | expr_struct CONCAT expr_none
          | expr_struct CONCAT expr_struct
-         | expr_int CONCAT expr_var
+         | expr_int CONCAT expr_var       { $$ = scanner->parseInfixExpr(scanner->parseInt($1), $3, ir::Operator(ir::OperatorKind::OP_CONCAT)); }
          | expr_float CONCAT expr_var
          | expr_str CONCAT expr_var
          | expr_bool CONCAT expr_var
          | expr_none CONCAT expr_var
          | expr_struct CONCAT expr_var
-         | expr_var CONCAT expr_int
+         | expr_var CONCAT expr_int       { $$ = scanner->parseInfixExpr($1, scanner->parseInt($3), ir::Operator(ir::OperatorKind::OP_CONCAT)); }
          | expr_var CONCAT expr_float
-         | expr_var CONCAT expr_str
+         | expr_var CONCAT expr_str       { $$ = scanner->parseInfixExpr($1, scanner->parseString($3), ir::Operator(ir::OperatorKind::OP_CONCAT)); }
          | expr_var CONCAT expr_bool
          | expr_var CONCAT expr_none
          | expr_var CONCAT expr_struct
-         | expr_var CONCAT expr_var
+         | expr_var CONCAT expr_var       { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_CONCAT)); }
          ;
 
 // Matrix value

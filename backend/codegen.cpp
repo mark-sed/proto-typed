@@ -13,6 +13,7 @@
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/IR/Attributes.h"
 #include "llvm/ADT/SmallVector.h"
+#include "llvm/ADT/APFloat.h"
 #include <vector>
 
 using namespace ptc;
@@ -309,8 +310,9 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
         // Init string
         auto vloaded = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), v);
         builder.CreateCall(stringInitF, { strobj, vloaded });
+        auto strval = builder.CreateLoad(stringT, strobj);
         
-        return strobj;
+        return strval;
 
     }
     case ir::ExprKind::EX_BOOL: return llvm::ConstantInt::get(int1T, llvm::dyn_cast<ir::BoolLiteral>(e)->getValue());
@@ -596,7 +598,48 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     break;
     case ir::OperatorKind::OP_CONCAT:
     {
-        // TODO:
+        LOGMAX("Creating CONCAT instruction");
+        llvm::Value *lval = left;
+        llvm::Value *rval = right;
+        auto to_str_int = cgm.getLLVMMod()->getOrInsertFunction("to_string_int",
+                                 llvm::FunctionType::get(
+                                    stringT,
+                                    int64T,
+                                    false
+                                 ));
+        auto to_str_float = cgm.getLLVMMod()->getOrInsertFunction("to_string_float",
+                                 llvm::FunctionType::get(
+                                    stringT,
+                                    floatT,
+                                    false
+                                 ));
+        auto to_str_bool = cgm.getLLVMMod()->getOrInsertFunction("to_string_bool",
+                                 llvm::FunctionType::get(
+                                    stringT,
+                                    int1T,
+                                    false
+                                 ));
+        auto str_concat = cgm.getLLVMMod()->getOrInsertFunction("string_Add_Str",
+                                 llvm::FunctionType::get(
+                                    voidT,
+                                    {
+                                        stringT->getPointerTo(),
+                                        stringT,
+                                        stringT
+                                    },
+                                    false
+                                 ));
+        if(left->getType() == int64T) {
+            lval = builder.CreateCall(to_str_int, { left });
+        }
+
+        if(right->getType() == int64T) {
+            rval = builder.CreateCall(to_str_int, { right });
+        }
+
+        auto res = builder.CreateAlloca(stringT);
+        builder.CreateCall(str_concat, {res, lval, rval});
+        result = builder.CreateLoad(stringT, res);
     }
     break;
     // TODO: implement rest
@@ -940,7 +983,7 @@ void cg::CGModule::setupLibFuncs() {
                                                             voidT,
                                                             { 
                                                                 stringTPtr,
-                                                                builder.getInt32Ty()
+                                                                builder.getInt8Ty()->getPointerTo()
                                                             },
                                                             false
                                                         ));
@@ -999,6 +1042,7 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
     std::vector<CGFunction *> funs;
 
     std::vector<std::pair<llvm::GlobalVariable *, llvm::GlobalVariable *>> stringsToInit;
+    llvm::GlobalVariable *str_empty = nullptr;
 
     for(auto *decl: mod->getDecls()) {
         auto kind = decl->getKind();
@@ -1050,6 +1094,27 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                 else if(ty == BOOL_CSTR) {
                     v->setInitializer(llvm::ConstantInt::getFalse(int1T));
                 }
+                else if(ty == FLOAT_CSTR) {
+                    v->setInitializer(llvm::ConstantFP::get(floatT, 0.0));
+                }
+                else if(ty == STRING_CSTR) {
+                    if(!str_empty) {
+                        str_empty = new llvm::GlobalVariable(*llvmMod,
+                                                            builder.getInt8Ty()->getPointerTo(),
+                                                            false,
+                                                            llvm::GlobalValue::PrivateLinkage,
+                                                            nullptr);
+                        str_empty->setInitializer(builder.CreateGlobalStringPtr("", "", 0, llvmMod));
+                    }
+
+                    v->setInitializer(llvm::ConstantStruct::get(stringT, {
+                      llvm::ConstantPointerNull::get(builder.getInt8Ty()->getPointerTo()),
+                      llvm::ConstantInt::get(builder.getInt32Ty(), 0, true),
+                      llvm::ConstantInt::get(builder.getInt32Ty(), 0, true),
+                      llvm::ConstantInt::get(builder.getInt32Ty(), 0, true)
+                    }));
+                    stringsToInit.push_back(std::make_pair(v, str_empty));
+                }
                 else {
                     llvm::report_fatal_error("Unimplemented default global variable constructor");
                 }
@@ -1097,7 +1162,7 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                                                         voidT,
                                                         {
                                                             stringTPtr,
-                                                            builder.getInt8Ty()->getPointerTo()
+                                                            builder.getInt8Ty()->getPointerTo()->getPointerTo()
                                                         },
                                                         false
                                                     ));

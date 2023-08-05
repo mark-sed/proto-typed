@@ -173,10 +173,11 @@ grow_end:
     ret void
 }
 
-define fastcc void @string_Add_Str(%string* %this, %string* %v) {
-	%bufferptr = getelementptr %string, %string* %v, i32 0, i32 0
-	%buffer = load i8*, i8** %bufferptr
-	call void @string_Add_CStr(%string* %this, i8* %buffer)
+define fastcc void @string_Add_Str(%string* %res, %string %src1, %string %src2) {
+	%buffer = extractvalue %string %src1, 0
+	call void @string_Create_Init(%string* %res, i8* %buffer)
+	%buffer2 = extractvalue %string %src2, 0
+	call void @string_Add_CStr(%string* %res, i8* %buffer2)
 	ret void
 }
 
