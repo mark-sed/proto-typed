@@ -641,9 +641,21 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         if(left->getType() == int64T) {
             lval = builder.CreateCall(to_str_int, { left });
         }
+        else if(left->getType() == floatT) {
+            lval = builder.CreateCall(to_str_float, { left });
+        }
+        else if(left->getType() == int1T) {
+            lval = builder.CreateCall(to_str_bool, { left });
+        }
 
         if(right->getType() == int64T) {
             rval = builder.CreateCall(to_str_int, { right });
+        }
+        else if(right->getType() == floatT) {
+            rval = builder.CreateCall(to_str_float, { right });
+        }
+        else if(right->getType() == int1T) {
+            rval = builder.CreateCall(to_str_bool, { right });
         }
 
         auto res = builder.CreateAlloca(stringT);
@@ -832,8 +844,8 @@ void cg::CGModule::setupLibFuncs() {
         //llvm::Value* zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), 0);
         //llvm::Value* cstr = builder.CreateGEP(stringT, f->getArg(0), {zero, zero});
         llvm::Value *cstr = builder.CreateExtractValue(f->getArg(0), 0);
-        auto buffer = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), cstr);
-        builder.CreateCall(puts, { buffer });
+        //auto buffer = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), cstr);
+        builder.CreateCall(puts, { cstr });
         builder.CreateRetVoid();
     }
     // to_string(int)
@@ -899,9 +911,8 @@ void cg::CGModule::setupLibFuncs() {
         auto newlen = builder.CreateCall(strlenf, { buffer });
         llvm::Value* len = builder.CreateGEP(stringT, strobj, {zero, one});
         builder.CreateStore(newlen, len);
-        // TODO: returning pointer, but should be struct
-        //auto rval = builder.CreateLoad(stringT, strobj);
-        builder.CreateRet(strobj);
+        auto rval = builder.CreateLoad(stringT, strobj);
+        builder.CreateRet(rval);
     }
     // to_string(float)
     {
@@ -966,9 +977,8 @@ void cg::CGModule::setupLibFuncs() {
         auto newlen = builder.CreateCall(strlenf, { buffer });
         llvm::Value* len = builder.CreateGEP(stringT, strobj, {zero, one});
         builder.CreateStore(newlen, len);
-        // TODO: returning pointer, but should be struct
-        //auto rval = builder.CreateLoad(stringT, strobj);
-        builder.CreateRet(strobj);
+        auto rval = builder.CreateLoad(stringT, strobj);
+        builder.CreateRet(rval);
     }
     // to_string(bool)
     {
@@ -1035,9 +1045,8 @@ void cg::CGModule::setupLibFuncs() {
         
         // End
         setCurrBB(endBB);
-        // TODO: returning pointer, but should be struct
-        //auto rval = builder.CreateLoad(stringT, strobj);
-        builder.CreateRet(strobj);
+        auto rval = builder.CreateLoad(stringT, strobj);
+        builder.CreateRet(rval);
     }
 }
 
@@ -1189,7 +1198,8 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                                                     ));
     // Init strings
     for(auto s: stringsToInit) {
-        builder.CreateCall(stringInitF, { s.first, s.second });
+        auto secloaded = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), s.second);
+        builder.CreateCall(stringInitF, { s.first, secloaded});
     }
 
     auto entryFunLLVM = llvmMod->getFunction(mangleName(entryFun));
