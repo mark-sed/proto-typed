@@ -191,6 +191,10 @@ void Scanner::leaveScope() {
 }
 
 ir::IR *Scanner::parseVarDecl(ir::IR *type, const std::string name, ir::Expr *value) {
+    if(!type) {
+        LOGMAX("Type for vardecl is nullptr");
+        return nullptr;
+    }
     LOGMAX(type->getName()+" "+name);
     ir::TypeDecl *t = llvm::dyn_cast<ir::TypeDecl>(type);
     if(t) {
@@ -463,6 +467,20 @@ std::vector<ir::IR *> Scanner::parseStmtBodyAdd(std::vector<ir::IR *> &body, ir:
     }
     LOGMAX("Adding to a statement body "+stmt->debug());
     body.push_back(stmt);
+    return body;
+}
+
+ir::IR *Scanner::parseStruct(std::string name, std::vector<ir::IR *> body) {
+    LOGMAX("Parsing struct "+name);
+    auto structDecl = new ir::StructDecl(currentIR, llvmloc, name, body);
+    auto structType = new ir::TypeDecl(currentIR, llvm::SMLoc(), name, structDecl);
+    currScope->insert(structType);
+    return structDecl;
+}
+
+std::vector<ir::IR *> Scanner::parseAddStructElement(ir::IR *elem, std::vector<ir::IR *> body) {
+    LOGMAX("Adding struct element to struct declaration list");
+    body.insert(body.begin(), elem);
     return body;
 }
 

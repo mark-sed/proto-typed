@@ -663,6 +663,8 @@ namespace  ptc  {
       // return
       // while
       // if
+      // struct
+      // declistval
       // function
       // vardecl
       // vardef
@@ -686,6 +688,7 @@ namespace  ptc  {
       // block
       // body
       // else
+      // decllist
       char dummy9[sizeof (std::vector<ptc::ir::IR *> )];
 
       // id_list
@@ -1022,6 +1025,8 @@ namespace  ptc  {
       case symbol_kind::S_return: // return
       case symbol_kind::S_while: // while
       case symbol_kind::S_if: // if
+      case symbol_kind::S_struct: // struct
+      case symbol_kind::S_declistval: // declistval
       case symbol_kind::S_function: // function
       case symbol_kind::S_vardecl: // vardecl
       case symbol_kind::S_vardef: // vardef
@@ -1049,6 +1054,7 @@ namespace  ptc  {
       case symbol_kind::S_block: // block
       case symbol_kind::S_body: // body
       case symbol_kind::S_else: // else
+      case symbol_kind::S_decllist: // decllist
         value.move< std::vector<ptc::ir::IR *>  > (std::move (that.value));
         break;
 
@@ -1271,6 +1277,8 @@ switch (yykind)
       case symbol_kind::S_return: // return
       case symbol_kind::S_while: // while
       case symbol_kind::S_if: // if
+      case symbol_kind::S_struct: // struct
+      case symbol_kind::S_declistval: // declistval
       case symbol_kind::S_function: // function
       case symbol_kind::S_vardecl: // vardecl
       case symbol_kind::S_vardef: // vardef
@@ -1298,6 +1306,7 @@ switch (yykind)
       case symbol_kind::S_block: // block
       case symbol_kind::S_body: // body
       case symbol_kind::S_else: // else
+      case symbol_kind::S_decllist: // decllist
         value.template destroy< std::vector<ptc::ir::IR *>  > ();
         break;
 
@@ -2995,7 +3004,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 2999 "frontend/parser.hpp"
+#line 3008 "frontend/parser.hpp"
 
 
 

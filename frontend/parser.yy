@@ -196,6 +196,8 @@
 %type <ptc::ir::IR *> return
 %type <ptc::ir::IR *> flowctl
 %type <ptc::ir::IR *> import
+%type <ptc::ir::IR *> struct
+%type <ptc::ir::IR *> declistval
 %type <ptc::ir::Expr *> expr
 %type <ptc::ir::Expr *> expr_var
 %type <ptc::ir::Expr *> set
@@ -204,6 +206,7 @@
 %type <std::vector<ptc::ir::IR *> > block
 %type <std::vector<ptc::ir::IR *> > else
 %type <std::vector<ptc::ir::IR *> > stmt
+%type <std::vector<ptc::ir::IR *> > decllist
 %type <std::vector<std::string> > id_list
 %type <std::vector<ptc::ir::FormalParamDecl *> > funargs
 
@@ -232,7 +235,7 @@ stmts_ne : set END      { $$ = scanner->parseExprStmt($1); }
          | if           { $$ = $1; }
          | while        { $$ = $1; }
          | dowhile
-         | struct
+         | struct       { $$ = $1; }
          | function     { $$ = $1; }
          | flowctl END  { $$ = $1; }
          | expr END     { $$ = scanner->parseExprStmt($1); }
@@ -289,23 +292,23 @@ else : KWELSE body  { $$ = $2; }
      ;
 
 // Struct definition
-struct : KWSTRUCT ID LBR RBR
-       | KWSTRUCT ID LBR decllist RBR
-       | KWSTRUCT ID END LBR decllist RBR
+struct : KWSTRUCT ID LBR RBR              { $$ = scanner->parseStruct($2, std::vector<ptc::ir::IR *>{}); }
+       | KWSTRUCT ID LBR decllist RBR     { $$ = scanner->parseStruct($2, $4); }
+       | KWSTRUCT ID END LBR decllist RBR { $$ = scanner->parseStruct($2, $5); }
        ;
 decllist : END
-         | END decllist
-         | declistval END
-         | declistval END decllist
+         | END decllist            { $$ = $2; }
+         | declistval END          { $$ = scanner->parseAddStructElement($1, std::vector<ptc::ir::IR *>{}); }
+         | declistval END decllist { $$ = scanner->parseAddStructElement($1, $3); }
          ;
-declistval : vardecl
-           | type ID SET expr
+declistval : vardecl            { $$ = $1; }
+           | type ID SET expr   { $$ = scanner->parseVarDef($1, $2, $4); }
            | KWVAR ID SET expr
            ;
 
 // Function definition
-function : type fun_id LPAR RPAR block               { $$ = scanner->parseFun($1, $2, std::vector<ptc::ir::FormalParamDecl *>{}, $5); }
-         | type fun_id LPAR funargs RPAR block       { $$ = scanner->parseFun($1, $2, $4, $6); }
+function : type fun_id LPAR RPAR block           { $$ = scanner->parseFun($1, $2, std::vector<ptc::ir::FormalParamDecl *>{}, $5); }
+         | type fun_id LPAR funargs RPAR block   { $$ = scanner->parseFun($1, $2, $4, $6); }
          | KWVOID fun_id LPAR RPAR block         { $$ = scanner->parseFun(scanner->sym_lookup("void"), $2, std::vector<ptc::ir::FormalParamDecl *>{}, $5); }
          | KWVOID fun_id LPAR funargs RPAR block { $$ = scanner->parseFun(scanner->sym_lookup("void"), $2, $4, $6); }
          ;
@@ -776,11 +779,11 @@ type : KWINT KWMAYBE    { $$ = nullptr; /*TODO*/ }
      | ID KWMAYBE       { $$ = nullptr; /*TODO*/ }
      | funtype KWMAYBE  { $$ = nullptr; /*TODO*/ }
      | mattype KWMAYBE  { $$ = nullptr; /*TODO*/ }
-     | KWINT            { $$ = scanner->sym_lookup("int"); }
-     | KWFLOAT          { $$ = scanner->sym_lookup("float"); }
-     | KWSTRING         { $$ = scanner->sym_lookup("string"); }
-     | KWBOOL           { $$ = scanner->sym_lookup("bool"); }
-     | ID               { $$ = scanner->sym_lookup($1); }
+     | KWINT            { $$ = scanner->sym_lookup("int", true); }
+     | KWFLOAT          { $$ = scanner->sym_lookup("float", true); }
+     | KWSTRING         { $$ = scanner->sym_lookup("string", true); }
+     | KWBOOL           { $$ = scanner->sym_lookup("bool", true); }
+     | ID               { $$ = scanner->sym_lookup($1, true); }
      | funtype          { $$ = nullptr; /*TODO*/ }
      | mattype          { $$ = nullptr; /*TODO*/ }
      ;

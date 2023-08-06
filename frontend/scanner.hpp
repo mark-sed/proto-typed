@@ -90,9 +90,13 @@ public:
      * @param name Symbol to lookup
      * @return The symbol if it is found or nullptr
      */
-    ir::IR *sym_lookup(llvm::StringRef name) {
+    ir::IR *sym_lookup(llvm::StringRef name, bool fail_if_not_found=false) {
         LOGMAX("Symbol lookup: "+name.str());
-        return currScope->lookup(name);
+        auto rval = currScope->lookup(name);
+        if(!rval && fail_if_not_found) {
+            diags.report(llvmloc, diag::ERR_UNDEFINED_TYPE, name);
+        }
+        return rval;
     }
 
     // Parsing methods
@@ -121,6 +125,8 @@ public:
     std::vector<std::string> parseAddImportName(std::vector<std::string> &list, std::string name);
     std::vector<ir::IR *> parseStmtBody(ir::IR *stmt);
     std::vector<ir::IR *> parseStmtBodyAdd(std::vector<ir::IR *> &body, ir::IR *stmt);
+    ir::IR *parseStruct(std::string name, std::vector<ir::IR *> body);
+    std::vector<ir::IR *> parseAddStructElement(ir::IR *elem, std::vector<ir::IR *> body);
     void parseEntry(std::vector<ir::IR *> body);
 };
 

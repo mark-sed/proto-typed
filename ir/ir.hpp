@@ -40,6 +40,7 @@ enum IRKind {
     IR_VAR_DECL,
     IR_MATRIX,
     IR_TYPE_DECL,
+    IR_STRUCT_DECL,
     IR_EXPR_STMT,
     IR_FORMAL_PARAM_DECL,
     IR_FUNCTION_DECL,
@@ -133,14 +134,33 @@ public:
 std::string block2String(std::vector<ir::IR *> block);
 
 /**
+ * Declaration of a struct type
+ */
+class StructDecl : public IR {
+private:
+    std::vector<ir::IR *> elements;
+public:
+    StructDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name, std::vector<ir::IR *> elements)
+            : IR(IRKind::IR_STRUCT_DECL, enclosing_ir, loc, name),
+              elements(elements) {}
+
+    static bool classof(const IR *ir) {
+        return ir->getKind() == IRKind::IR_STRUCT_DECL;
+    }
+    std::string debug() const override { return "struct "+name+" {\n"+block2String(elements)+"}"; }
+};
+
+/**
  * Declaration of a type
  */
 class TypeDecl : public IR {
 private:
+    IR *decl;
     bool is_maybe;
 public:
-    TypeDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name)
-            : IR(IRKind::IR_TYPE_DECL, enclosing_ir, loc, name) {}
+    TypeDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name, IR *decl=nullptr)
+            : IR(IRKind::IR_TYPE_DECL, enclosing_ir, loc, name),
+              decl(decl) {}
 
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_TYPE_DECL;

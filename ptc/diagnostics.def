@@ -15,6 +15,7 @@
 DIAG(ERR_VARDECL_REQUIRES_TYPE, Error, "variable declaration requires type.")
 DIAG(ERR_SYM_ALREADY_DECLARED, Error, "symbol ‘{0}’ is already declared.")
 DIAG(ERR_UNDEFINED_VAR, Error, "‘{0}’ is not defined.")
+DIAG(ERR_UNDEFINED_TYPE, Error, "type ‘{0}’ is not defined.")
 DIAG(ERR_INCORRECT_ARGS, Error, "incorrect arguments in a function call to ‘{0}’")
 DIAG(ERR_INTERNAL, Error, "internal error. {0}.")
 DIAG(ERR_INVALID_CONVERSION, Error, "invalid conversion from ‘{0}’ to ‘{1}’.")
