@@ -148,6 +148,7 @@ public:
         return ir->getKind() == IRKind::IR_STRUCT_DECL;
     }
     std::string debug() const override { return "struct "+name+" {\n"+block2String(elements)+"}"; }
+    std::vector<ir::IR *> getElements() { return elements; }
 };
 
 /**
@@ -165,6 +166,7 @@ public:
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_TYPE_DECL;
     }
+    IR *getDecl() { return decl; }
     std::string debug() const override { return name; }
 };
 

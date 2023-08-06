@@ -579,7 +579,8 @@ void Scanner::parseEntry(std::vector<ir::IR *> body) {
         if(llvm::isa<ir::VarDecl>(i) ||
             llvm::isa<ir::TypeDecl>(i) ||
             llvm::isa<ir::FunctionDecl>(i) ||
-            llvm::isa<ir::TypeDecl>(i)) {
+            llvm::isa<ir::TypeDecl>(i) ||
+            llvm::isa<ir::StructDecl>(i)) {
             this->decls.push_back(i);
         }
         else {

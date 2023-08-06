@@ -14,6 +14,7 @@
 #include "llvm/IR/Attributes.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/APFloat.h"
+#include "llvm/ADT/StringMap.h"
 #include <vector>
 
 using namespace ptc;
@@ -21,6 +22,8 @@ using namespace ptc;
 cg::CodeGenHandler *cg::CodeGenHandler::create(llvm::LLVMContext &ctx, llvm::TargetMachine *target) {
     return new CodeGenHandler(ctx, target);
 }
+
+llvm::StringMap<llvm::Type *> cg::CodeGen::userTypes{};
 
 std::unique_ptr<llvm::Module> cg::CodeGenHandler::run(ir::ModuleDecl *module, std::string fileName) {
     std::unique_ptr<llvm::Module> m = std::make_unique<llvm::Module>(fileName, ctx);
@@ -62,6 +65,12 @@ llvm::Type *cg::CodeGen::convertType(ir::TypeDecl *t) {
     }
     if(t->getName() == STRING_CSTR) {
         return stringT;
+    }
+    if(t->getDecl()) {
+        if(auto *v = llvm::dyn_cast<ir::StructDecl>(t->getDecl())) {
+            std::string manName = mangleName(v);
+            return userTypes[manName];
+        }
     }
     llvm::report_fatal_error("Unsupported type");
     return nullptr;
@@ -1030,7 +1039,16 @@ void cg::CGModule::setupLibFuncs() {
         //auto rval = builder.CreateLoad(stringT, strobj);
         builder.CreateRet(strobj);
     }
+}
 
+void cg::CGModule::defineStruct(ir::StructDecl *decl) {
+    std::vector<llvm::Type*> structElements;
+    for(auto elem: decl->getElements()) {
+        auto vard = llvm::dyn_cast<ir::VarDecl>(elem);
+        structElements.push_back(mapType(vard->getType()));
+    }
+    std::string name = mangleName(decl);
+    userTypes[name] = llvm::StructType::create(getLLVMCtx(), structElements, name);
 }
 
 void cg::CGModule::run(ir::ModuleDecl *mod) {
@@ -1051,7 +1069,7 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
         {   // new variable needs its own scope
             auto var = llvm::dyn_cast<ir::VarDecl>(decl);
             llvm::GlobalVariable *v = new llvm::GlobalVariable(*llvmMod,
-                                                            convertType(var->getType()),
+                                                            mapType(var),
                                                             false,
                                                             llvm::GlobalValue::PrivateLinkage,
                                                             nullptr,
@@ -1133,7 +1151,10 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
             funs.push_back(cgf);
         }
         break;
-        default: //llvm::report_fatal_error("Code generation invoked for not yet implemented IR");
+        case ir::IRKind::IR_STRUCT_DECL:
+            defineStruct(llvm::dyn_cast<ir::StructDecl>(decl));
+        break;
+        default: llvm::report_fatal_error("Code generation invoked for not yet implemented IR");
         break;
         }
     }

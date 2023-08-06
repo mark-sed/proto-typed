@@ -8,6 +8,8 @@
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Value.h"
+#include "llvm/ADT/StringMap.h"
+#include <map>
 
 namespace ptc {
 
@@ -78,6 +80,8 @@ public:
     llvm::Type *convertType(ir::TypeDecl *type);
     std::string mangleName(ir::IR *ir);
 
+    static llvm::StringMap<llvm::Type *> userTypes;
+
     void init();
 };
 
@@ -101,6 +105,7 @@ public:
     llvm::Module *getLLVMMod() { return llvmMod; }
     ir::ModuleDecl *getModuleDecl() { return mod; }
 
+    void defineStruct(ir::StructDecl *decl);
     llvm::GlobalObject *getGlobals(ir::IR *ir) { return globals[ir]; }
     void run(ir::ModuleDecl *module);
 };
