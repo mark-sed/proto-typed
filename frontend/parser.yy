@@ -301,8 +301,8 @@ decllist : END
          | declistval END          { $$ = scanner->parseAddStructElement($1, std::vector<ptc::ir::IR *>{}); }
          | declistval END decllist { $$ = scanner->parseAddStructElement($1, $3); }
          ;
-declistval : vardecl            { $$ = $1; }
-           | type ID SET expr   { $$ = scanner->parseVarDef($1, $2, $4); }
+declistval : type ID            { $$ = scanner->parseStructElement($1, $2, nullptr); }
+           | type ID SET expr   { $$ = scanner->parseStructElement($1, $2, $4); }
            | KWVAR ID SET expr
            ;
 

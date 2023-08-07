@@ -80,7 +80,7 @@ public:
     llvm::Type *convertType(ir::TypeDecl *type);
     std::string mangleName(ir::IR *ir);
 
-    static llvm::StringMap<llvm::Type *> userTypes;
+    static llvm::StringMap<std::pair<llvm::Type *, llvm::Constant *>> userTypes;
 
     void init();
 };

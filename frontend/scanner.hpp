@@ -126,6 +126,7 @@ public:
     std::vector<ir::IR *> parseStmtBody(ir::IR *stmt);
     std::vector<ir::IR *> parseStmtBodyAdd(std::vector<ir::IR *> &body, ir::IR *stmt);
     ir::IR *parseStruct(std::string name, std::vector<ir::IR *> body);
+    ir::IR *parseStructElement(ir::IR *type, const std::string name, ir::Expr *value=nullptr);
     std::vector<ir::IR *> parseAddStructElement(ir::IR *elem, std::vector<ir::IR *> body);
     void parseEntry(std::vector<ir::IR *> body);
 };

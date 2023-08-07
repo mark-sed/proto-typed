@@ -134,24 +134,6 @@ public:
 std::string block2String(std::vector<ir::IR *> block);
 
 /**
- * Declaration of a struct type
- */
-class StructDecl : public IR {
-private:
-    std::vector<ir::IR *> elements;
-public:
-    StructDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name, std::vector<ir::IR *> elements)
-            : IR(IRKind::IR_STRUCT_DECL, enclosing_ir, loc, name),
-              elements(elements) {}
-
-    static bool classof(const IR *ir) {
-        return ir->getKind() == IRKind::IR_STRUCT_DECL;
-    }
-    std::string debug() const override { return "struct "+name+" {\n"+block2String(elements)+"}"; }
-    std::vector<ir::IR *> getElements() { return elements; }
-};
-
-/**
  * Declaration of a type
  */
 class TypeDecl : public IR {
@@ -189,6 +171,33 @@ public:
         return ir->getKind() == IRKind::IR_VAR_DECL;
     }
     virtual std::string debug() const override { return "("+td->debug()+")"+name; }
+};
+
+/**
+ * Declaration of a struct type
+ */
+class StructDecl : public IR {
+private:
+    std::vector<ir::IR *> elements;
+    bool zero_init;
+public:
+    StructDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name, std::vector<ir::IR *> elements)
+            : IR(IRKind::IR_STRUCT_DECL, enclosing_ir, loc, name),
+              elements(elements),
+              zero_init(true) {
+        for(auto v: elements) {
+            if(llvm::dyn_cast<VarDecl>(v)->getInitValue()) {
+                zero_init = false;
+            }
+        }
+    }
+
+    static bool classof(const IR *ir) {
+        return ir->getKind() == IRKind::IR_STRUCT_DECL;
+    }
+    std::string debug() const override { return "struct "+name+" {\n"+block2String(elements)+"}"; }
+    std::vector<ir::IR *> getElements() { return elements; }
+    bool is_zero_init() { return zero_init; }
 };
 
 /**

@@ -474,8 +474,40 @@ ir::IR *Scanner::parseStruct(std::string name, std::vector<ir::IR *> body) {
     LOGMAX("Parsing struct "+name);
     auto structDecl = new ir::StructDecl(currentIR, llvmloc, name, body);
     auto structType = new ir::TypeDecl(currentIR, llvm::SMLoc(), name, structDecl);
+    for(auto b = body.begin(), end = body.end(); b != end; ++b) {
+        auto e = *b;
+        if(ir::VarDecl *elem = llvm::dyn_cast<ir::VarDecl>(e)) {
+            if(std::count_if(b, body.end(), 
+                [elem](ir::IR *i) { 
+                    return llvm::isa<ir::VarDecl>(i) && 
+                    (llvm::dyn_cast<ir::VarDecl>(i)->getName() == elem->getName()); 
+                }) != 1) {
+                diags.report(llvmloc, diag::ERR_DUPL_STRUCT_MEMBER, elem->getName(), name);
+            }
+        }
+        else {
+            diags.report(llvmloc, diag::ERR_SYNTAX, "Unknown construct inside of struct declaration");
+        }
+    }
     currScope->insert(structType);
     return structDecl;
+}
+
+ir::IR *Scanner::parseStructElement(ir::IR *type, const std::string name, ir::Expr *value) {
+    if(!type) {
+        LOGMAX("Type for vardecl is nullptr");
+        return nullptr;
+    }
+    LOGMAX("struct element "+type->getName()+" "+name);
+    ir::TypeDecl *t = llvm::dyn_cast<ir::TypeDecl>(type);
+    if(t) {
+        auto v = new ir::VarDecl(currentIR, type->getLocation(), name, t, value);
+        return v;
+    }
+    else {
+        diags.report(type->getLocation(), diag::ERR_VARDECL_REQUIRES_TYPE);
+    }
+    return nullptr;
 }
 
 std::vector<ir::IR *> Scanner::parseAddStructElement(ir::IR *elem, std::vector<ir::IR *> body) {

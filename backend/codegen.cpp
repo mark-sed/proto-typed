@@ -23,7 +23,7 @@ cg::CodeGenHandler *cg::CodeGenHandler::create(llvm::LLVMContext &ctx, llvm::Tar
     return new CodeGenHandler(ctx, target);
 }
 
-llvm::StringMap<llvm::Type *> cg::CodeGen::userTypes{};
+llvm::StringMap<std::pair<llvm::Type *, llvm::Constant *>> cg::CodeGen::userTypes{};
 
 std::unique_ptr<llvm::Module> cg::CodeGenHandler::run(ir::ModuleDecl *module, std::string fileName) {
     std::unique_ptr<llvm::Module> m = std::make_unique<llvm::Module>(fileName, ctx);
@@ -69,7 +69,7 @@ llvm::Type *cg::CodeGen::convertType(ir::TypeDecl *t) {
     if(t->getDecl()) {
         if(auto *v = llvm::dyn_cast<ir::StructDecl>(t->getDecl())) {
             std::string manName = mangleName(v);
-            return userTypes[manName];
+            return userTypes[manName].first;
         }
     }
     llvm::report_fatal_error("Unsupported type");
@@ -1053,11 +1053,59 @@ void cg::CGModule::setupLibFuncs() {
 void cg::CGModule::defineStruct(ir::StructDecl *decl) {
     std::vector<llvm::Type*> structElements;
     for(auto elem: decl->getElements()) {
-        auto vard = llvm::dyn_cast<ir::VarDecl>(elem);
-        structElements.push_back(mapType(vard->getType()));
+        structElements.push_back(mapType(elem));
     }
     std::string name = mangleName(decl);
-    userTypes[name] = llvm::StructType::create(getLLVMCtx(), structElements, name);
+    auto tp = llvm::StructType::create(getLLVMCtx(), structElements, name);
+
+    llvm::Constant *init;
+
+    if(decl->is_zero_init()) {
+        init = llvm::ConstantAggregateZero::get(tp);
+    }
+    else {
+        llvm::SmallVector<llvm::Constant *> vals; //{ llvm::ConstantInt::get(builder.getInt32Ty(), 0, true) };
+        for(auto e : decl->getElements()) {
+            auto evar = llvm::dyn_cast<ir::VarDecl>(e);
+            if(auto ival = evar->getInitValue()) {
+                if(auto vcast = llvm::dyn_cast<ir::IntLiteral>(ival)) {
+                    vals.push_back(llvm::ConstantInt::get(ctx, vcast->getValue()));
+                }
+                else if(auto vcast = llvm::dyn_cast<ir::BoolLiteral>(ival)) {
+                    vals.push_back(llvm::ConstantInt::getBool(int1T, vcast->getValue()));
+                }
+                else if(auto vcast = llvm::dyn_cast<ir::FloatLiteral>(ival)) {
+                    vals.push_back(llvm::ConstantFP::get(ctx, vcast->getValue()));
+                }
+                else if(auto vcast = llvm::dyn_cast<ir::StringLiteral>(ival)) {
+                    (void)vcast;
+                    llvm::report_fatal_error("String intializer is not yet implemented");
+                }
+                else {
+                    // TODO: Handle structs
+                    llvm::report_fatal_error("Global variable initializer is not a constant");
+                }
+            }
+            else {
+                auto ty = evar->getType()->getName();
+                if(ty == INT_CSTR) {
+                    vals.push_back(llvm::ConstantInt::get(int64T, 0, true));
+                }
+                else if(ty == BOOL_CSTR) {
+                    vals.push_back(llvm::ConstantInt::getFalse(int1T));
+                }
+                else if(ty == FLOAT_CSTR) {
+                    vals.push_back(llvm::ConstantFP::get(floatT, 0.0));
+                }
+                else if(ty == STRING_CSTR) {
+                    llvm::report_fatal_error("String intializer is not yet implemented");
+                }
+            }
+        }
+        init = llvm::ConstantStruct::get(tp, vals);
+    }
+
+    userTypes[name] = std::make_pair(tp, init);
 }
 
 void cg::CGModule::run(ir::ModuleDecl *mod) {
@@ -1102,18 +1150,20 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                                                             nullptr);
                     str_txt->setInitializer(builder.CreateGlobalStringPtr(vcast->getValue().c_str(), "", 0, llvmMod));
                     stringsToInit.push_back(std::make_pair(v, str_txt));
-                    v->setInitializer(llvm::ConstantStruct::get(stringT, {
+                    /*v->setInitializer(llvm::ConstantStruct::get(stringT, {
                         llvm::ConstantPointerNull::get(builder.getInt8Ty()->getPointerTo()),
                         llvm::ConstantInt::get(builder.getInt32Ty(), 0, true),
                         llvm::ConstantInt::get(builder.getInt32Ty(), 0, true),
                         llvm::ConstantInt::get(builder.getInt32Ty(), 0, true)
-                     }));
+                     }));*/
+                    auto init = llvm::ConstantAggregateZero::get(stringT);
+                    v->setInitializer(init);
                 }
                 else {
-                    llvm::report_fatal_error("Unknown constant in global variable assignment");
+                    llvm::report_fatal_error("Global variable initializer is not a constant");
                 }
             }
-            else if(utils::isOneOf(var->getType()->getName(), {FLOAT_CSTR, INT_CSTR, BOOL_CSTR, STRING_CSTR})) {
+            else { //if(utils::isOneOf(var->getType()->getName(), {FLOAT_CSTR, INT_CSTR, BOOL_CSTR, STRING_CSTR})) {
                 auto ty = var->getType()->getName();
                 if(ty == INT_CSTR) {
                     v->setInitializer(llvm::ConstantInt::get(int64T, 0, true));
@@ -1134,16 +1184,19 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                         str_empty->setInitializer(builder.CreateGlobalStringPtr("", "", 0, llvmMod));
                     }
 
-                    v->setInitializer(llvm::ConstantStruct::get(stringT, {
+                    /*v->setInitializer(llvm::ConstantStruct::get(stringT, {
                       llvm::ConstantPointerNull::get(builder.getInt8Ty()->getPointerTo()),
                       llvm::ConstantInt::get(builder.getInt32Ty(), 0, true),
                       llvm::ConstantInt::get(builder.getInt32Ty(), 0, true),
                       llvm::ConstantInt::get(builder.getInt32Ty(), 0, true)
-                    }));
+                    }));*/
+                    auto init = llvm::ConstantAggregateZero::get(stringT);
+                    v->setInitializer(init);
                     stringsToInit.push_back(std::make_pair(v, str_empty));
                 }
                 else {
-                    llvm::report_fatal_error("Unimplemented default global variable constructor");
+                    // struct
+                    v->setInitializer(userTypes[mangleName(var->getType()->getDecl())].second);
                 }
             }
             globals[var] = v;
