@@ -4,6 +4,7 @@
 #include "ir.hpp"
 #include "logging.hpp"
 #include "scope.hpp"
+#include "scanner.hpp"
 #include "llvm/Support/SMLoc.h"
 
 namespace ptc {
@@ -13,13 +14,14 @@ private:
     ir::ModuleDecl *mod;
     Scope *globalScope;
     Diagnostics &diags;
+    Scanner *scanner;
 
     void resolve(std::vector<ir::IR *> body);
     void resolve(ir::Expr * expr, llvm::SMLoc loc);
 
 public:
-    UnresolvedSymbolResolver(ir::ModuleDecl *mod, Scope *globalScope, Diagnostics &diags) 
-        : mod(mod), globalScope(globalScope), diags(diags) {}
+    UnresolvedSymbolResolver(ir::ModuleDecl *mod, Scope *globalScope, Diagnostics &diags, Scanner *scanner) 
+        : mod(mod), globalScope(globalScope), diags(diags), scanner(scanner) {}
 
     void run();
 };

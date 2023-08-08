@@ -33,9 +33,12 @@ void UnresolvedSymbolResolver::resolve(ir::Expr * expr, llvm::SMLoc loc) {
     else if(auto e = llvm::dyn_cast<ir::BinaryInfixExpr>(expr)) {
         resolve(e->getLeft(), loc);
         resolve(e->getRight(), loc);
+        auto newe = scanner->parseInfixExpr(e->getLeft(), e->getRight(), e->getOperator(), e->isConst());
+        expr->setType(newe->getType());
     }
     else if(auto e = llvm::dyn_cast<ir::UnaryPrefixExpr>(expr)) {
         resolve(e->getExpr(), loc);
+        e->setType(e->getExpr()->getType());
     }
     else if(auto e = llvm::dyn_cast<ir::UnresolvedSymbolAccess>(expr)) {
         // TODO: Handle function pointer

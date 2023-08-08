@@ -916,51 +916,52 @@ namespace  ptc  {
         S_YYACCEPT = 78,                         // $accept
         S_start = 79,                            // start
         S_stmt = 80,                             // stmt
-        S_stmts = 81,                            // stmts
-        S_stmts_ne = 82,                         // stmts_ne
-        S_block = 83,                            // block
-        S_body = 84,                             // body
-        S_import = 85,                           // import
-        S_id_list = 86,                          // id_list
-        S_flowctl = 87,                          // flowctl
-        S_return = 88,                           // return
-        S_for = 89,                              // for
-        S_while = 90,                            // while
-        S_dowhile = 91,                          // dowhile
-        S_if = 92,                               // if
-        S_else = 93,                             // else
-        S_struct = 94,                           // struct
-        S_decllist = 95,                         // decllist
-        S_declistval = 96,                       // declistval
-        S_function = 97,                         // function
-        S_fun_id = 98,                           // fun_id
-        S_funargs = 99,                          // funargs
-        S_funargdef = 100,                       // funargdef
-        S_vardecl = 101,                         // vardecl
-        S_vardef = 102,                          // vardef
-        S_set = 103,                             // set
-        S_callarglist = 104,                     // callarglist
-        S_expr = 105,                            // expr
-        S_expr_var = 106,                        // expr_var
-        S_matrix = 107,                          // matrix
-        S_matvals = 108,                         // matvals
-        S_expr_mat = 109,                        // expr_mat
-        S_range = 110,                           // range
-        S_int_val = 111,                         // int_val
-        S_slice = 112,                           // slice
-        S_expr_none = 113,                       // expr_none
-        S_expr_struct = 114,                     // expr_struct
-        S_struct_val = 115,                      // struct_val
-        S_struct_list = 116,                     // struct_list
-        S_expr_int = 117,                        // expr_int
-        S_expr_float = 118,                      // expr_float
-        S_expr_str = 119,                        // expr_str
-        S_expr_bool = 120,                       // expr_bool
-        S_funtype = 121,                         // funtype
-        S_typelist = 122,                        // typelist
-        S_mattype = 123,                         // mattype
-        S_matsize = 124,                         // matsize
-        S_type = 125                             // type
+        S_stmt_end = 81,                         // stmt_end
+        S_stmts = 82,                            // stmts
+        S_stmts_ne = 83,                         // stmts_ne
+        S_block = 84,                            // block
+        S_body = 85,                             // body
+        S_import = 86,                           // import
+        S_id_list = 87,                          // id_list
+        S_flowctl = 88,                          // flowctl
+        S_return = 89,                           // return
+        S_for = 90,                              // for
+        S_while = 91,                            // while
+        S_dowhile = 92,                          // dowhile
+        S_if = 93,                               // if
+        S_else = 94,                             // else
+        S_struct = 95,                           // struct
+        S_decllist = 96,                         // decllist
+        S_declistval = 97,                       // declistval
+        S_function = 98,                         // function
+        S_fun_id = 99,                           // fun_id
+        S_funargs = 100,                         // funargs
+        S_funargdef = 101,                       // funargdef
+        S_vardecl = 102,                         // vardecl
+        S_vardef = 103,                          // vardef
+        S_set = 104,                             // set
+        S_callarglist = 105,                     // callarglist
+        S_expr = 106,                            // expr
+        S_expr_var = 107,                        // expr_var
+        S_matrix = 108,                          // matrix
+        S_matvals = 109,                         // matvals
+        S_expr_mat = 110,                        // expr_mat
+        S_range = 111,                           // range
+        S_int_val = 112,                         // int_val
+        S_slice = 113,                           // slice
+        S_expr_none = 114,                       // expr_none
+        S_expr_struct = 115,                     // expr_struct
+        S_struct_val = 116,                      // struct_val
+        S_struct_list = 117,                     // struct_list
+        S_expr_int = 118,                        // expr_int
+        S_expr_float = 119,                      // expr_float
+        S_expr_str = 120,                        // expr_str
+        S_expr_bool = 121,                       // expr_bool
+        S_funtype = 122,                         // funtype
+        S_typelist = 123,                        // typelist
+        S_mattype = 124,                         // mattype
+        S_matsize = 125,                         // matsize
+        S_type = 126                             // type
       };
     };
 
@@ -2990,8 +2991,8 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 3221,     ///< Last index in yytable_.
-      yynnts_ = 48,  ///< Number of nonterminal symbols.
+      yylast_ = 3178,     ///< Last index in yytable_.
+      yynnts_ = 49,  ///< Number of nonterminal symbols.
       yyfinal_ = 127 ///< Termination state number.
     };
 
@@ -3004,7 +3005,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 3008 "frontend/parser.hpp"
+#line 3009 "frontend/parser.hpp"
 
 
 

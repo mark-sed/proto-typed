@@ -383,7 +383,7 @@ private:
     bool is_const;
 protected:
     Expr(ExprKind kind, TypeDecl *type, bool is_const) : kind(kind), type(type), is_const(is_const) {}
-
+    virtual ~Expr() {}
 public:
     ExprKind getKind() const { return kind; }
     TypeDecl *getType() { return type; }

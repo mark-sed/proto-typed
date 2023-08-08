@@ -254,7 +254,7 @@ int main(int argc, char *argv[]) {
     for(auto mi: modulesToCompile) {
         const auto &fileName = mi->getPath();
         LOG1("Running resolver on "+fileName);
-        auto unresolvedResolver = new UnresolvedSymbolResolver(mi->getScanner()->mainModule, mi->getScanner()->globalScope, diags);
+        auto unresolvedResolver = new UnresolvedSymbolResolver(mi->getScanner()->mainModule, mi->getScanner()->globalScope, diags, mi->getScanner());
         unresolvedResolver->run();
         delete unresolvedResolver;
     }

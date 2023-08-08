@@ -223,22 +223,25 @@ stmt : stmts            { $$ = scanner->parseStmtBody($1); }
      | stmt error stmts { $$ = scanner->parseStmtBodyAdd($1, $3); }
      ;
 
+stmt_end : END
+         | END_FILE
+         ;
 // Statements
 stmts : END      { $$ = nullptr; }
       | stmts_ne { $$ = $1; }
       ;
-stmts_ne : set END      { $$ = scanner->parseExprStmt($1); }
-         | vardecl END  { $$ = $1; }
-         | vardef END   { $$ = $1; }
-         | import END   { $$ = $1; }
+stmts_ne : set stmt_end      { $$ = scanner->parseExprStmt($1); }
+         | vardecl stmt_end  { $$ = $1; }
+         | vardef stmt_end   { $$ = $1; }
+         | import stmt_end   { $$ = $1; }
          | for
          | if           { $$ = $1; }
          | while        { $$ = $1; }
          | dowhile
          | struct       { $$ = $1; }
          | function     { $$ = $1; }
-         | flowctl END  { $$ = $1; }
-         | expr END     { $$ = scanner->parseExprStmt($1); }
+         | flowctl stmt_end  { $$ = $1; }
+         | expr stmt_end     { $$ = scanner->parseExprStmt($1); }
          ;
 
 // Code block
