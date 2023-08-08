@@ -80,6 +80,8 @@ public:
      */
     void removeQuotes(char **str);
 
+    std::string escapeString(char **str);
+
     void enterScope(ir::IR *decl);
     void enterFunScope();
     void leaveScope();

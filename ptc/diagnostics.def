@@ -27,6 +27,7 @@ DIAG(ERR_INCORRECT_RETURN_TYPE, Error, "Incorrect return type. Expected ‘{0}�
 DIAG(ERR_IF_COND_MUST_BE_BOOL, Error, "if statement condition must be bool, but is ‘{0}’.")
 DIAG(ERR_WHILE_COND_MUST_BE_BOOL, Error, "while statement condition must be bool, but is ‘{0}’.")
 DIAG(ERR_DUPL_STRUCT_MEMBER, Error, "duplicate member ‘{0}’ in struct ‘{1}’.")
+DIAG(ERR_UNKNOWN_ESC_SEQ, Error, "Unknown escape sequence ‘{0}’.")
 
 
 DIAG(ERR_EXPECTED, Error, "expected ‘{0}’ but found ‘{1}’.")

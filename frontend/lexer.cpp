@@ -1229,8 +1229,8 @@ YY_RULE_SETUP
 #line 164 "frontend/lexer.ll"
 { /* String */
                   removeQuotes(&yytext);
-                  // TODO: Process escape chars
-                  yylval->build<std::string>(yytext);
+                  std::string txt = escapeString(&yytext);
+                  yylval->build<std::string>(txt);
                   return token::STRING;
                 }
 	YY_BREAK

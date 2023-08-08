@@ -19,6 +19,7 @@
 #include <cstring>
 #include <initializer_list>
 #include <algorithm>
+#include <iostream>
 
 using namespace ptc;
 
@@ -163,6 +164,72 @@ void Scanner::removeQuotes(char **str) {
     *str = &(*str)[1];
     // Remove last quote
     (*str)[std::strlen(*str)-1] = '\0';
+}
+
+std::string Scanner::escapeString(char **str) {
+    std::string s(*str);
+    std::stringstream res;
+    bool backslash = false;
+    for(int i = 0; (*str)[i] != '\0'; ++i) {
+        char c = (*str)[i];
+        if(backslash) {
+            switch(c) {
+            case '\"': 
+                res << '\"';
+            break;
+            case '\\': 
+                res << '\\';
+            break;
+            case 'a': 
+                res << '\a';
+            break;
+            case 'b': 
+                res << '\b';
+            break;
+            case 'f': 
+                res << '\f';
+            break;
+            case 'n': 
+                res << '\n';
+            break;
+            case 'r': 
+                res << '\r';
+            break;
+            case 't': 
+                res << '\t';
+            break;
+            case 'v': 
+                res << '\v';
+            break;
+            // TODO: https://en.cppreference.com/w/cpp/language/escape
+            case 'x':
+                diags.report(llvmloc, diag::ERR_INTERNAL, "Hexadecimal escape sequences are not yet implemented");
+            break;
+            case 'o':
+                diags.report(llvmloc, diag::ERR_INTERNAL, "Octal escape sequences are not yet implemented");
+            break;
+            case 'u':
+                diags.report(llvmloc, diag::ERR_INTERNAL, "Unicode escape sequences are not yet implemented");
+            break;
+            case 'U':
+                diags.report(llvmloc, diag::ERR_INTERNAL, "Unicode escape sequences are not yet implemented");
+            break;
+            case 'N':
+                diags.report(llvmloc, diag::ERR_INTERNAL, "Unicode escape sequences are not yet implemented");
+            break;
+            default:
+                diags.report(llvmloc, diag::ERR_UNKNOWN_ESC_SEQ, std::string("\\")+c);
+            }
+            backslash = false;
+            continue;
+        }
+        if(c == '\\') {
+            backslash = true;
+            continue;
+        }
+        res << c;
+    }
+    return res.str();
 }
 
 void Scanner::fatal_error(diag::diagmsg d, std::string msg) {
