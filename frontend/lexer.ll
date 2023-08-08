@@ -33,7 +33,6 @@ using token = ptc::Parser::token;
 %option yyclass="ptc::Scanner"
 
 ws      [ \t]
-string	\"[^\n"]*\"
 id      [a-zA-Z_][a-zA-Z0-9_]*
 hex     0[Xx][0-9A-Fa-f]+
 bin     0[Bb][01]+

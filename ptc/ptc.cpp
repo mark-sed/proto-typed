@@ -258,6 +258,17 @@ int main(int argc, char *argv[]) {
         unresolvedResolver->run();
         delete unresolvedResolver;
     }
+    // Analysis
+    for(auto mi: modulesToCompile) {
+        auto decls = mi->getScanner()->mainModule->getDecls();
+        for(auto decl : decls) {
+            if(auto f = llvm::dyn_cast<ir::FunctionDecl>(decl)) {
+                LOG1("Running function analysis on "+f->getName());
+                FunctionAnalyzer fcheck(f, diags);
+                fcheck.run();
+            }
+        }
+    }
 
     // Codegen
     for(auto mi: modulesToCompile) {

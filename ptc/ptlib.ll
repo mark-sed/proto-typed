@@ -148,7 +148,6 @@ grow_close:
     store i32 0, i32* %icharptr
     ; this->length = lennew
     br label %grow_loop
-    ; TODO: zero length string will mess this up
 grow_loop:
     ; int ival = *i
     %ichar = load i32, i32* %icharptr

@@ -143,12 +143,12 @@
 %token KWCONTINUE "continue"
 %token KWCONST "const"
 %token KWMAYBE "?"
-%token KWINT "\"int\""
-%token KWFLOAT "\"float\""
-%token KWSTRING "\"string\""
-%token KWBOOL "\"bool\""
-%token KWSTRUCT "\"struct\""
-%token KWVOID "\"void\""
+%token KWINT "'int'"
+%token KWFLOAT "'float'"
+%token KWSTRING "'string'"
+%token KWBOOL "'bool'"
+%token KWSTRUCT "'struct'"
+%token KWVOID "'void'"
 
 /* Identifiers */
 %token <std::string> ID "identifier"

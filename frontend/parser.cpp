@@ -1301,19 +1301,19 @@ namespace  ptc  {
 #line 1302 "frontend/parser.cpp"
     break;
 
-  case 42: // struct: "\"struct\"" "identifier" "{" "}"
+  case 42: // struct: "'struct'" "identifier" "{" "}"
 #line 295 "frontend/parser.yy"
                                           { yylhs.value.as < ptc::ir::IR * > () = scanner->parseStruct(yystack_[2].value.as < std::string > (), std::vector<ptc::ir::IR *>{}); }
 #line 1308 "frontend/parser.cpp"
     break;
 
-  case 43: // struct: "\"struct\"" "identifier" "{" decllist "}"
+  case 43: // struct: "'struct'" "identifier" "{" decllist "}"
 #line 296 "frontend/parser.yy"
                                           { yylhs.value.as < ptc::ir::IR * > () = scanner->parseStruct(yystack_[3].value.as < std::string > (), yystack_[1].value.as < std::vector<ptc::ir::IR *>  > ()); }
 #line 1314 "frontend/parser.cpp"
     break;
 
-  case 44: // struct: "\"struct\"" "identifier" "terminator (\\n or ;)" "{" decllist "}"
+  case 44: // struct: "'struct'" "identifier" "terminator (\\n or ;)" "{" decllist "}"
 #line 297 "frontend/parser.yy"
                                           { yylhs.value.as < ptc::ir::IR * > () = scanner->parseStruct(yystack_[4].value.as < std::string > (), yystack_[1].value.as < std::vector<ptc::ir::IR *>  > ()); }
 #line 1320 "frontend/parser.cpp"
@@ -1361,13 +1361,13 @@ namespace  ptc  {
 #line 1362 "frontend/parser.cpp"
     break;
 
-  case 54: // function: "\"void\"" fun_id "(" ")" block
+  case 54: // function: "'void'" fun_id "(" ")" block
 #line 312 "frontend/parser.yy"
                                                  { yylhs.value.as < ptc::ir::IR * > () = scanner->parseFun(scanner->sym_lookup("void"), yystack_[3].value.as < std::string > (), std::vector<ptc::ir::FormalParamDecl *>{}, yystack_[0].value.as < std::vector<ptc::ir::IR *>  > ()); }
 #line 1368 "frontend/parser.cpp"
     break;
 
-  case 55: // function: "\"void\"" fun_id "(" funargs ")" block
+  case 55: // function: "'void'" fun_id "(" funargs ")" block
 #line 313 "frontend/parser.yy"
                                                  { yylhs.value.as < ptc::ir::IR * > () = scanner->parseFun(scanner->sym_lookup("void"), yystack_[4].value.as < std::string > (), yystack_[2].value.as < std::vector<ptc::ir::FormalParamDecl *>  > (), yystack_[0].value.as < std::vector<ptc::ir::IR *>  > ()); }
 #line 1374 "frontend/parser.cpp"
@@ -2879,25 +2879,25 @@ namespace  ptc  {
 #line 2880 "frontend/parser.cpp"
     break;
 
-  case 424: // type: "\"int\"" "?"
+  case 424: // type: "'int'" "?"
 #line 775 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = nullptr; /*TODO*/ }
 #line 2886 "frontend/parser.cpp"
     break;
 
-  case 425: // type: "\"float\"" "?"
+  case 425: // type: "'float'" "?"
 #line 776 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = nullptr; /*TODO*/ }
 #line 2892 "frontend/parser.cpp"
     break;
 
-  case 426: // type: "\"string\"" "?"
+  case 426: // type: "'string'" "?"
 #line 777 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = nullptr; /*TODO*/ }
 #line 2898 "frontend/parser.cpp"
     break;
 
-  case 427: // type: "\"bool\"" "?"
+  case 427: // type: "'bool'" "?"
 #line 778 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = nullptr; /*TODO*/ }
 #line 2904 "frontend/parser.cpp"
@@ -2921,25 +2921,25 @@ namespace  ptc  {
 #line 2922 "frontend/parser.cpp"
     break;
 
-  case 431: // type: "\"int\""
+  case 431: // type: "'int'"
 #line 782 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = scanner->sym_lookup("int", true); }
 #line 2928 "frontend/parser.cpp"
     break;
 
-  case 432: // type: "\"float\""
+  case 432: // type: "'float'"
 #line 783 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = scanner->sym_lookup("float", true); }
 #line 2934 "frontend/parser.cpp"
     break;
 
-  case 433: // type: "\"string\""
+  case 433: // type: "'string'"
 #line 784 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = scanner->sym_lookup("string", true); }
 #line 2940 "frontend/parser.cpp"
     break;
 
-  case 434: // type: "\"bool\""
+  case 434: // type: "'bool'"
 #line 785 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = scanner->sym_lookup("bool", true); }
 #line 2946 "frontend/parser.cpp"
@@ -4388,17 +4388,16 @@ namespace  ptc  {
   "\"&=\"", "\"|=\"", "\"^=\"", "\"~=\"", "\"<<=\"", "\">>=\"", "\"var\"",
   "\"import\"", "\"if\"", "\"elif\"", "\"else\"", "\"for\"", "\"while\"",
   "\"do\"", "\"return\"", "\"break\"", "\"continue\"", "\"const\"",
-  "\"?\"", "\"\\\"int\\\"\"", "\"\\\"float\\\"\"", "\"\\\"string\\\"\"",
-  "\"\\\"bool\\\"\"", "\"\\\"struct\\\"\"", "\"\\\"void\\\"\"",
-  "\"identifier\"", "\"external identifier\"", "NEG", "$accept", "start",
-  "stmt", "stmts", "stmts_ne", "block", "body", "import", "id_list",
-  "flowctl", "return", "for", "while", "dowhile", "if", "else", "struct",
-  "decllist", "declistval", "function", "fun_id", "funargs", "funargdef",
-  "vardecl", "vardef", "set", "callarglist", "expr", "expr_var", "matrix",
-  "matvals", "expr_mat", "range", "int_val", "slice", "expr_none",
-  "expr_struct", "struct_val", "struct_list", "expr_int", "expr_float",
-  "expr_str", "expr_bool", "funtype", "typelist", "mattype", "matsize",
-  "type", YY_NULLPTR
+  "\"?\"", "\"'int'\"", "\"'float'\"", "\"'string'\"", "\"'bool'\"",
+  "\"'struct'\"", "\"'void'\"", "\"identifier\"",
+  "\"external identifier\"", "NEG", "$accept", "start", "stmt", "stmts",
+  "stmts_ne", "block", "body", "import", "id_list", "flowctl", "return",
+  "for", "while", "dowhile", "if", "else", "struct", "decllist",
+  "declistval", "function", "fun_id", "funargs", "funargdef", "vardecl",
+  "vardef", "set", "callarglist", "expr", "expr_var", "matrix", "matvals",
+  "expr_mat", "range", "int_val", "slice", "expr_none", "expr_struct",
+  "struct_val", "struct_list", "expr_int", "expr_float", "expr_str",
+  "expr_bool", "funtype", "typelist", "mattype", "matsize", "type", YY_NULLPTR
   };
 #endif
 
@@ -4488,7 +4487,7 @@ namespace  ptc  {
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 4492 "frontend/parser.cpp"
+#line 4491 "frontend/parser.cpp"
 
 #line 791 "frontend/parser.yy"
 

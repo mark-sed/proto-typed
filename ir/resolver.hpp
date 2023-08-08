@@ -24,6 +24,20 @@ public:
     void run();
 };
 
+class FunctionAnalyzer {
+private:
+    ir::FunctionDecl *fun;
+    Diagnostics &diags;
+
+    void checkReturnType(std::vector<ir::IR *> decls, int *num_found, int *nested_ret, ir::TypeDecl * expected);
+public:
+    FunctionAnalyzer(ir::FunctionDecl *fun, Diagnostics &diags)
+        : fun(fun), diags(diags) {}
+
+    void checkReturns();
+    void run();
+};
+
 }
 
 #endif//_RESOLVER_HPP_
