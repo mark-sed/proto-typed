@@ -72,15 +72,7 @@ public:
      */
     void parse(std::istream *code);
 
-    /**
-     * Removes quotes from a string
-     * @param str String with quotes
-     * @note The method does no checking, it just removes
-     *       the first and last character
-     */
-    void removeQuotes(char **str);
-
-    std::string escapeString(char **str);
+    std::string escapeString(std::string str);
 
     void enterScope(ir::IR *decl);
     void enterFunScope();

@@ -159,19 +159,11 @@ void Scanner::parse(std::istream *code) {
     }*/
 }
 
-void Scanner::removeQuotes(char **str) {
-    // Remove first quote
-    *str = &(*str)[1];
-    // Remove last quote
-    (*str)[std::strlen(*str)-1] = '\0';
-}
-
-std::string Scanner::escapeString(char **str) {
-    std::string s(*str);
+std::string Scanner::escapeString(std::string str) {
     std::stringstream res;
     bool backslash = false;
-    for(int i = 0; (*str)[i] != '\0'; ++i) {
-        char c = (*str)[i];
+    for(int i = 0; str[i] != '\0'; ++i) {
+        char c = str[i];
         if(backslash) {
             switch(c) {
             case '\"': 

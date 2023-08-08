@@ -41,11 +41,11 @@ oct     0[Qq][0-7]+
 
 %%
 %{
-    yylval = lval;    
+    yylval = lval;
 %}
 
 {ws}            { /* Ignore spaces and tabs */; }
-"/*"        	{   /* Multiline comment */
+"/*"        	  { /* Multiline comment */
                     int c; 
                     while((c = yyinput()) != 0) {
                         if(c == '\n') {
@@ -73,20 +73,20 @@ oct     0[Qq][0-7]+
 "{"             { return token::LBR; }
 "}"             { return token::RBR; }
 
-"++="            { return token::SETCONCAT; }
-"**="            { return token::SETPOW; }
-"+="             { return token::SETPLUS; }
-"-="             { return token::SETMINUS; }
-"/="             { return token::SETDIV; }
-"*="             { return token::SETMUL; }
-"%="             { return token::SETMOD; }
+"++="           { return token::SETCONCAT; }
+"**="           { return token::SETPOW; }
+"+="            { return token::SETPLUS; }
+"-="            { return token::SETMINUS; }
+"/="            { return token::SETDIV; }
+"*="            { return token::SETMUL; }
+"%="            { return token::SETMOD; }
 
-"&="             { return token::SETBAND; }
-"|="             { return token::SETBOR; }
-"^="             { return token::SETBXOR; }
-"~="             { return token::SETBNOT; }
-"<<="            { return token::SETBLSHFT; }
-">>="            { return token::SETBRSHFT; }
+"&="            { return token::SETBAND; }
+"|="            { return token::SETBOR; }
+"^="            { return token::SETBXOR; }
+"~="            { return token::SETBNOT; }
+"<<="           { return token::SETBLSHFT; }
+">>="           { return token::SETBRSHFT; }
 
 "++"            { return token::CONCAT; }
 "**"            { return token::POW; }
@@ -142,30 +142,61 @@ oct     0[Qq][0-7]+
 "struct"        { return token::KWSTRUCT; }
 "void"          { return token::KWVOID; }
 
-"true"          { 
+"true"          {
                   yylval->emplace<bool>(true);
                   return token::BOOL; 
                 }
-"false"         { 
+"false"         {
                   yylval->emplace<bool>(false);
                   return token::BOOL; 
                 }
-"none"          { 
+"none"          {
                   //yylval->emplace<>();
                   return token::NONE; 
                 }
-"r"{string}     { /* Raw string */
-                  auto no_pref = (yytext + 1);
-                  removeQuotes(&no_pref);
-                  yylval->build<std::string>(yytext);
-                  return token::STRING;
-                }
-{string}        { /* String */
-                  removeQuotes(&yytext);
-                  std::string txt = escapeString(&yytext);
+"r\""           { // Raw string
+                  std::string txt;
+                  int c;
+                  bool esc = false;
+                  while((c = yyinput()) != 0) {
+                      if(static_cast<char>(c) == '\"' && !esc) {
+                        break;
+                      }
+                      if(esc && static_cast<char>(c) != '\"') {
+                        txt += '\\';
+                      }
+                      if(!esc && static_cast<char>(c) == '\\') {
+                        esc = true;
+                        continue;
+                      }
+                      else {
+                        esc = false;
+                      }
+                      txt += c;
+                  }
                   yylval->build<std::string>(txt);
                   return token::STRING;
                 }
+"\""            { // String
+                  std::string txt;
+                  int c;
+                  bool esc = false;
+                  while((c = yyinput()) != 0) {
+                      if(static_cast<char>(c) == '\"' && !esc) {
+                        break;
+                      }
+                      if(!esc && static_cast<char>(c) == '\\') {
+                        esc = true;
+                      }
+                      else {
+                        esc = false;
+                      }
+                      txt += c;
+                  }
+                  yylval->build<std::string>(escapeString(txt));
+                  return token::STRING;
+                }
+
 [-]?[0-9]+      { /* Integer (long) */
                   // atol can be used since syntactical analysis was done here
                   yylval->emplace<long>(atol(yytext));
@@ -210,7 +241,7 @@ oct     0[Qq][0-7]+
                     yylval->build<std::string>(yytext);
                     return token::ID;
                 }
-.               { 
+.               {
                   auto msg = std::string("ERROR: Unknown token '")+ yytext + std::string("'");
                   ptc::log::error(msg);
                 }

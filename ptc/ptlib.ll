@@ -110,6 +110,10 @@ declare i32 @strlen(i8*)
 
 define fastcc void @string_Add_CStr(%string* %this, i8* %value) {
     %vlen = call i32 @strlen(i8* %value)
+	; Check if it's an empty string
+	%empty = icmp eq i32 %vlen, 0
+	br i1 %empty, label %end, label %add_str
+add_str:
     ; Check if we need to grow the string.
 	%1 = getelementptr %string, %string* %this, i32 0, i32 1
 	%length = load i32, i32* %1
@@ -170,6 +174,8 @@ grow_end:
     ; Store zero as the last value
     %9 = getelementptr i8, i8* %buffer, i32 %lennew
     store i8 0, i8* %9
+	br label %end
+end:
     ret void
 }
 
