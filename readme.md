@@ -13,6 +13,9 @@
 ### Int
 ```
 int a = 42
+int ahex = 0x2A
+int aoct = 0q52
+int abin = 0b101010
 ```
 
 ### Float
@@ -91,6 +94,20 @@ struct MD {
 
 MD md2
 print(md2.x)
+```
+
+Structs can also have default values for elements.
+If no value is provided then the default value for given type is used.
+
+```
+struct Pixel {
+    int R = 255
+    int G = 255
+    int B = 255
+    bool visible
+}
+
+Pixel p;
 ```
 
 ### Maybe types

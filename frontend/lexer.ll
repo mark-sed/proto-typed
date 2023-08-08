@@ -36,6 +36,8 @@ ws      [ \t]
 string	\"[^\n"]*\"
 id      [a-zA-Z_][a-zA-Z0-9_]*
 hex     0[Xx][0-9A-Fa-f]+
+bin     0[Bb][01]+
+oct     0[Qq][0-7]+
 
 %%
 %{
@@ -172,6 +174,16 @@ hex     0[Xx][0-9A-Fa-f]+
 [-]?{hex}       { /* Hex Integer (long) */
                   // atol can be used since syntactical analysis was done here
                   yylval->emplace<long>(std::strtol(yytext, nullptr, 16));
+                  return token::INT;
+                }
+[-]?{bin}       { /* Binary Integer (long) */
+                  // atol can be used since syntactical analysis was done here
+                  yylval->emplace<long>(std::strtol(&(yytext[2]), nullptr, 2));
+                  return token::INT;
+                }
+[-]?{oct}       { /* Octal Integer (long) */
+                  // atol can be used since syntactical analysis was done here
+                  yylval->emplace<long>(std::strtol(&(yytext[2]), nullptr, 8));
                   return token::INT;
                 }
 [-]?[0-9]+\.?[0-9]*[eE][+-]?[0-9]+ {   // Float in scientific notation

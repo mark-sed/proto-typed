@@ -1083,7 +1083,7 @@ void cg::CGModule::defineStruct(ir::StructDecl *decl) {
                 }
                 else {
                     // TODO: Handle structs
-                    llvm::report_fatal_error("Global variable initializer is not a constant");
+                    llvm::report_fatal_error("Struct element initializer is not a constant");
                 }
             }
             else {
@@ -1099,6 +1099,9 @@ void cg::CGModule::defineStruct(ir::StructDecl *decl) {
                 }
                 else if(ty == STRING_CSTR) {
                     llvm::report_fatal_error("String intializer is not yet implemented");
+                }
+                else {
+                    llvm::report_fatal_error("Struct nested intializer is not yet implemented");
                 }
             }
         }
@@ -1150,12 +1153,6 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                                                             nullptr);
                     str_txt->setInitializer(builder.CreateGlobalStringPtr(vcast->getValue().c_str(), "", 0, llvmMod));
                     stringsToInit.push_back(std::make_pair(v, str_txt));
-                    /*v->setInitializer(llvm::ConstantStruct::get(stringT, {
-                        llvm::ConstantPointerNull::get(builder.getInt8Ty()->getPointerTo()),
-                        llvm::ConstantInt::get(builder.getInt32Ty(), 0, true),
-                        llvm::ConstantInt::get(builder.getInt32Ty(), 0, true),
-                        llvm::ConstantInt::get(builder.getInt32Ty(), 0, true)
-                     }));*/
                     auto init = llvm::ConstantAggregateZero::get(stringT);
                     v->setInitializer(init);
                 }
@@ -1183,13 +1180,6 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                                                             nullptr);
                         str_empty->setInitializer(builder.CreateGlobalStringPtr("", "", 0, llvmMod));
                     }
-
-                    /*v->setInitializer(llvm::ConstantStruct::get(stringT, {
-                      llvm::ConstantPointerNull::get(builder.getInt8Ty()->getPointerTo()),
-                      llvm::ConstantInt::get(builder.getInt32Ty(), 0, true),
-                      llvm::ConstantInt::get(builder.getInt32Ty(), 0, true),
-                      llvm::ConstantInt::get(builder.getInt32Ty(), 0, true)
-                    }));*/
                     auto init = llvm::ConstantAggregateZero::get(stringT);
                     v->setInitializer(init);
                     stringsToInit.push_back(std::make_pair(v, str_empty));

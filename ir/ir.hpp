@@ -186,8 +186,13 @@ public:
               elements(elements),
               zero_init(true) {
         for(auto v: elements) {
-            if(llvm::dyn_cast<VarDecl>(v)->getInitValue()) {
+            // zero_init is set only if no element has assigned value
+            // and all the struct elements are also zero_init
+            if(llvm::dyn_cast<VarDecl>(v)->getInitValue() ||
+                (llvm::dyn_cast<VarDecl>(v)->getType()->getDecl() && 
+                !llvm::dyn_cast<StructDecl>(llvm::dyn_cast<VarDecl>(v)->getType()->getDecl())->is_zero_init())) {
                 zero_init = false;
+                break;
             }
         }
     }
