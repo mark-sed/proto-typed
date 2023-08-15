@@ -48,7 +48,10 @@ string a = r"\n\n Still one line \t\n"
 
 ### Matrix (1D-nD)
 ```
-int[4, 3] m = [[1, 1, 0, 1], 
+int[3][4] m = [[1, 1, 0, 1], 
+               [1, 1, 1, 0],
+               [1, 1, 1, 1]]
+int[][] m2 = [[1, 1, 0, 1], 
               [1, 1, 1, 0],
               [1, 1, 1, 1]]
 float[] n = [0.0, 1.0]
@@ -64,7 +67,7 @@ When the size of the matrix is used in the type, then
 the matrix cannot be appended to or removed from
 (it has static size).
 
-When `[]` is used then its a dynamic matrix.
+When `[]` or `[0]` is used then its a dynamic matrix.
 
 Matrix is also a product of slicing:
 ```
@@ -166,7 +169,7 @@ if(x < 42) {
     print("small")
 }
 
-if (a in [1,4,8]) print("a") elif(a > 100) print("b") else print("c")
+if (a in [1,4,8]) print("a"); else if(a > 100) print("b"); else print("c")
 ```
 
 ### Foreach loop

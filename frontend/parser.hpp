@@ -654,6 +654,7 @@ namespace  ptc  {
       // set
       // expr
       // expr_var
+      // int_val
       char dummy4[sizeof (ptc::ir::Expr *)];
 
       // stmts
@@ -668,6 +669,7 @@ namespace  ptc  {
       // function
       // vardecl
       // vardef
+      // mattype
       // type
       char dummy5[sizeof (ptc::ir::IR *)];
 
@@ -679,6 +681,7 @@ namespace  ptc  {
       char dummy6[sizeof (std::string)];
 
       // callarglist
+      // matsq
       char dummy7[sizeof (std::vector<ptc::ir::Expr *> )];
 
       // funargs
@@ -960,7 +963,7 @@ namespace  ptc  {
         S_funtype = 122,                         // funtype
         S_typelist = 123,                        // typelist
         S_mattype = 124,                         // mattype
-        S_matsize = 125,                         // matsize
+        S_matsq = 125,                           // matsq
         S_type = 126                             // type
       };
     };
@@ -1016,6 +1019,7 @@ namespace  ptc  {
       case symbol_kind::S_set: // set
       case symbol_kind::S_expr: // expr
       case symbol_kind::S_expr_var: // expr_var
+      case symbol_kind::S_int_val: // int_val
         value.move< ptc::ir::Expr * > (std::move (that.value));
         break;
 
@@ -1031,6 +1035,7 @@ namespace  ptc  {
       case symbol_kind::S_function: // function
       case symbol_kind::S_vardecl: // vardecl
       case symbol_kind::S_vardef: // vardef
+      case symbol_kind::S_mattype: // mattype
       case symbol_kind::S_type: // type
         value.move< ptc::ir::IR * > (std::move (that.value));
         break;
@@ -1044,6 +1049,7 @@ namespace  ptc  {
         break;
 
       case symbol_kind::S_callarglist: // callarglist
+      case symbol_kind::S_matsq: // matsq
         value.move< std::vector<ptc::ir::Expr *>  > (std::move (that.value));
         break;
 
@@ -1268,6 +1274,7 @@ switch (yykind)
       case symbol_kind::S_set: // set
       case symbol_kind::S_expr: // expr
       case symbol_kind::S_expr_var: // expr_var
+      case symbol_kind::S_int_val: // int_val
         value.template destroy< ptc::ir::Expr * > ();
         break;
 
@@ -1283,6 +1290,7 @@ switch (yykind)
       case symbol_kind::S_function: // function
       case symbol_kind::S_vardecl: // vardecl
       case symbol_kind::S_vardef: // vardef
+      case symbol_kind::S_mattype: // mattype
       case symbol_kind::S_type: // type
         value.template destroy< ptc::ir::IR * > ();
         break;
@@ -1296,6 +1304,7 @@ switch (yykind)
         break;
 
       case symbol_kind::S_callarglist: // callarglist
+      case symbol_kind::S_matsq: // matsq
         value.template destroy< std::vector<ptc::ir::Expr *>  > ();
         break;
 
@@ -2991,9 +3000,9 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 3178,     ///< Last index in yytable_.
+      yylast_ = 3040,     ///< Last index in yytable_.
       yynnts_ = 49,  ///< Number of nonterminal symbols.
-      yyfinal_ = 127 ///< Termination state number.
+      yyfinal_ = 129 ///< Termination state number.
     };
 
 
@@ -3005,7 +3014,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 3009 "frontend/parser.hpp"
+#line 3018 "frontend/parser.hpp"
 
 
 

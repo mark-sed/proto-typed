@@ -30,6 +30,7 @@ DIAG(ERR_UNKNOWN_ESC_SEQ, Error, "unknown escape sequence ‘{0}’.")
 DIAG(ERR_INCORRECT_RET_TYPE, Error, "incorrect return type in function ‘{0}’. Expected ‘{1}’, but got ‘{2}’")
 DIAG(ERR_MISSING_RETURN, Error, "Missing return in function ‘{0}’.")
 DIAG(ERR_MISSING_RETURN_IN_BRANCH, Error, "Missing return in a flow path in a function ‘{0}’.")
+DIAG(ERR_NOT_A_TYPE, Error, "‘{0}’ is not a type.")
 
 DIAG(ERR_EXPECTED, Error, "expected ‘{0}’ but found ‘{1}’.")
 //DIAG(note_module_identifier_declaration, Note, "module identifier declared here")

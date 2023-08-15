@@ -100,6 +100,7 @@ public:
     ir::IR *parseIfStmt(ir::Expr *cond, std::vector<ir::IR *> &ifBranch, std::vector<ir::IR *> &elseBranch);
     ir::IR *parseWhile(ir::Expr *cond, std::vector<ir::IR *> &body);
     ir::IR *parseFun(ir::IR *type, std::string name, std::vector<ir::FormalParamDecl *> params, std::vector<ir::IR *> body);
+    ir::IR *parseMatrixType(std::string name, std::vector<ir::Expr *> &matsize);
     ir::IR *parseReturn(ir::Expr *e);
     ir::IR *parseBreak();
     ir::IR *parseContinue();
@@ -113,6 +114,8 @@ public:
     ir::Expr *parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params);
     std::vector<ir::Expr *> parseFunCallArg(ir::Expr *e);
     std::vector<ir::Expr *> parseAddFunCallArg(std::vector<ir::Expr *> &list, ir::Expr *e);
+    std::vector<ir::Expr *> parseMatrixSize(ir::Expr *e);
+    std::vector<ir::Expr *> parseAddMatrixSize(std::vector<ir::Expr *> &list, ir::Expr *e);
     std::vector<ir::FormalParamDecl *> parseFunParam(ir::IR *type, std::string name);
     std::vector<ir::FormalParamDecl *> parseAddFunParam(std::vector<ir::FormalParamDecl *> &list, ir::IR *type, std::string name);
     std::vector<std::string> parseImportName(std::string name);

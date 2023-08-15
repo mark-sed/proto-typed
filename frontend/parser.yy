@@ -186,6 +186,7 @@
 %type <bool> expr_bool
 
 %type <ptc::ir::IR *> type
+%type <ptc::ir::IR *> mattype
 %type <ptc::ir::IR *> vardecl
 %type <ptc::ir::IR *> vardef
 %type <ptc::ir::IR *> stmts_ne
@@ -199,9 +200,11 @@
 %type <ptc::ir::IR *> struct
 %type <ptc::ir::IR *> declistval
 %type <ptc::ir::Expr *> expr
+%type <ptc::ir::Expr *> int_val
 %type <ptc::ir::Expr *> expr_var
 %type <ptc::ir::Expr *> set
 %type <std::vector<ptc::ir::Expr *> > callarglist
+%type <std::vector<ptc::ir::Expr *> > matsq
 %type <std::vector<ptc::ir::IR *> > body
 %type <std::vector<ptc::ir::IR *> > block
 %type <std::vector<ptc::ir::IR *> > else
@@ -283,13 +286,9 @@ while : KWWHILE LPAR expr RPAR body { $$ = scanner->parseWhile($3, $5); }
 dowhile : KWDO body KWWHILE LPAR expr RPAR
         ;
 
-// If-elif-else statement
+// If-else statement (works also as else if)
 if : KWIF LPAR expr RPAR body else { $$ = scanner->parseIfStmt($3, $5, $6); }
    ;
-//elif : KWELIF LPAR expr RPAR body
-//     | elif KWELIF LPAR expr RPAR body
-//     |
-//     ;
 else : KWELSE body  { $$ = $2; }
      |              { $$ = scanner->parseStmtBody(nullptr); }
      ;
@@ -596,8 +595,8 @@ expr_mat : matrix
 range : LPAR int_val RANGE int_val RPAR
       | LPAR int_val COMMA int_val RANGE int_val RPAR
       ;
-int_val : expr_int
-        | expr_var
+int_val : expr_int  { $$ = scanner->parseInt($1); }
+        | expr_var  { $$ = $1; }
         ;
 slice : LSQ COLON RSQ
       | LSQ int_val COLON RSQ
@@ -759,20 +758,24 @@ typelist : type
          ;
 
 // Matrix type
-mattype : ID LSQ matsize RSQ
-        | ID LSQ RSQ
-        | KWINT LSQ matsize RSQ
-        | KWINT LSQ RSQ
-        | KWFLOAT LSQ matsize RSQ
-        | KWFLOAT LSQ RSQ
-        | KWSTRING LSQ matsize RSQ
-        | KWSTRING LSQ RSQ
-        | KWBOOL LSQ matsize RSQ
-        | KWBOOL LSQ RSQ
+mattype : ID matsq               { $$ = scanner->parseMatrixType($1, $2); }
+        | KWINT matsq            { $$ = scanner->parseMatrixType(INT_CSTR, $2); }
+        | KWFLOAT matsq          { $$ = scanner->parseMatrixType(FLOAT_CSTR, $2); }
+        | KWSTRING matsq         { $$ = scanner->parseMatrixType(STRING_CSTR, $2); }
+        | KWBOOL matsq           { $$ = scanner->parseMatrixType(BOOL_CSTR, $2); }
+        | funtype matsq
+        | ID KWMAYBE matsq
+        | KWINT KWMAYBE matsq
+        | KWFLOAT KWMAYBE matsq
+        | KWSTRING KWMAYBE matsq 
+        | KWBOOL KWMAYBE matsq
+        | funtype KWMAYBE matsq
         ;
-matsize : int_val
-        | int_val COMMA matsize
-        ;
+matsq : LSQ RSQ                 { $$ = scanner->parseMatrixSize(scanner->parseInt(0)); }
+      | LSQ int_val RSQ         { $$ = scanner->parseMatrixSize($2); }
+      | LSQ RSQ matsq           { $$ = scanner->parseAddMatrixSize($3, scanner->parseInt(0)); }
+      | LSQ int_val RSQ matsq   { $$ = scanner->parseAddMatrixSize($4, $2); }
+      ;
 
 // Variable types
 type : KWINT KWMAYBE    { $$ = nullptr; /*TODO*/ }
@@ -782,13 +785,13 @@ type : KWINT KWMAYBE    { $$ = nullptr; /*TODO*/ }
      | ID KWMAYBE       { $$ = nullptr; /*TODO*/ }
      | funtype KWMAYBE  { $$ = nullptr; /*TODO*/ }
      | mattype KWMAYBE  { $$ = nullptr; /*TODO*/ }
-     | KWINT            { $$ = scanner->sym_lookup("int", true); }
-     | KWFLOAT          { $$ = scanner->sym_lookup("float", true); }
-     | KWSTRING         { $$ = scanner->sym_lookup("string", true); }
-     | KWBOOL           { $$ = scanner->sym_lookup("bool", true); }
+     | KWINT            { $$ = scanner->sym_lookup(INT_CSTR, true); }
+     | KWFLOAT          { $$ = scanner->sym_lookup(FLOAT_CSTR, true); }
+     | KWSTRING         { $$ = scanner->sym_lookup(STRING_CSTR, true); }
+     | KWBOOL           { $$ = scanner->sym_lookup(BOOL_CSTR, true); }
      | ID               { $$ = scanner->sym_lookup($1, true); }
      | funtype          { $$ = nullptr; /*TODO*/ }
-     | mattype          { $$ = nullptr; /*TODO*/ }
+     | mattype          { $$ = $1; }
      ;
 
 %%

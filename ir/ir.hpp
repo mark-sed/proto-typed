@@ -133,6 +133,8 @@ public:
  */
 std::string block2String(std::vector<ir::IR *> block);
 
+class Expr;
+
 /**
  * Declaration of a type
  */
@@ -140,16 +142,29 @@ class TypeDecl : public IR {
 private:
     IR *decl;
     bool is_maybe;
+    std::vector<Expr *> matrixSize;
 public:
     TypeDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name, IR *decl=nullptr)
             : IR(IRKind::IR_TYPE_DECL, enclosing_ir, loc, name),
-              decl(decl) {}
+              decl(decl),
+              matrixSize{} {}
+    TypeDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name, std::vector<Expr *> matsize, IR *decl=nullptr)
+            : IR(IRKind::IR_TYPE_DECL, enclosing_ir, loc, name),
+              decl(decl),
+              matrixSize(matsize) {}
 
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_TYPE_DECL;
     }
+    bool isMatrix() { return !matrixSize.empty(); }
+    std::vector<Expr *> getMatrixSize() { return matrixSize; }
     IR *getDecl() { return decl; }
-    std::string debug() const override { return name; }
+    std::string debug() const override { 
+        if(!matrixSize.empty()) {
+            return name + "[...]"; // TODO
+        }
+        return name; 
+    }
 };
 
 /**
@@ -208,7 +223,7 @@ public:
 /**
  * Homogeneus matrix of any type
  */
-class Matrix : public IR {
+/*class Matrix : public IR {
 private:
     TypeDecl *valueType;
     size_t cols;
@@ -227,7 +242,7 @@ public:
         return ir->getKind() == IRKind::IR_MATRIX;
     }
     virtual std::string debug() const override { return "TODO"; }
-};
+};*/
 
 /**
  * List of modules to import

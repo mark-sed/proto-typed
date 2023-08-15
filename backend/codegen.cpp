@@ -51,6 +51,9 @@ void cg::CodeGen::init() {
 }
 
 llvm::Type *cg::CodeGen::convertType(ir::TypeDecl *t) {
+    if(t->isMatrix()) {
+        llvm::report_fatal_error("Matrix type is not yet implemented");
+    }
     if(t->getName() == INT_CSTR) {
         return int64T;
     }

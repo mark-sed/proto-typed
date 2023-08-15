@@ -466,6 +466,28 @@ std::vector<ir::Expr *> Scanner::parseAddFunCallArg(std::vector<ir::Expr *> &lis
     return list;
 }
 
+std::vector<ir::Expr *> Scanner::parseMatrixSize(ir::Expr *e) {
+    LOGMAX("Creating new matrix size list with "+e->debug());
+    std::vector<ir::Expr *> list{e};
+    return list;    
+}
+
+std::vector<ir::Expr *> Scanner::parseAddMatrixSize(std::vector<ir::Expr *> &list, ir::Expr *e) {
+    LOGMAX("Pushing new matrix size "+e->debug());
+    list.push_back(e);
+    return list;
+}
+
+ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &matsize) {
+    LOGMAX("Creating matrix type "+name+"[...]");
+    auto rootType = sym_lookup(name, true);
+    if(auto rootDecl = llvm::dyn_cast<ir::TypeDecl>(rootType)) {
+        return new ir::TypeDecl(currentIR, llvmloc, name, matsize, rootDecl->getDecl());
+    }
+    diags.report(llvmloc, diag::ERR_NOT_A_TYPE, name);
+    return nullptr;
+}
+
 ir::IR *Scanner::parseImports(std::vector<std::string> names) {
     LOGMAX("Parsing import list");
     for(auto n: names) {
