@@ -771,26 +771,26 @@ mattype : ID matsq               { $$ = scanner->parseMatrixType($1, $2); }
         | KWBOOL KWMAYBE matsq
         | funtype KWMAYBE matsq
         ;
-matsq : LSQ RSQ                 { $$ = scanner->parseMatrixSize(scanner->parseInt(0)); }
+matsq : LSQ RSQ                 { $$ = scanner->parseMatrixSize(scanner->parseInt(-1)); }
       | LSQ int_val RSQ         { $$ = scanner->parseMatrixSize($2); }
-      | LSQ RSQ matsq           { $$ = scanner->parseAddMatrixSize($3, scanner->parseInt(0)); }
+      | LSQ RSQ matsq           { $$ = scanner->parseAddMatrixSize($3, scanner->parseInt(-1)); }
       | LSQ int_val RSQ matsq   { $$ = scanner->parseAddMatrixSize($4, $2); }
       ;
 
 // Variable types
-type : KWINT KWMAYBE    { $$ = nullptr; /*TODO*/ }
-     | KWFLOAT KWMAYBE  { $$ = nullptr; /*TODO*/ }
-     | KWSTRING KWMAYBE { $$ = nullptr; /*TODO*/ }
-     | KWBOOL KWMAYBE   { $$ = nullptr; /*TODO*/ }
-     | ID KWMAYBE       { $$ = nullptr; /*TODO*/ }
-     | funtype KWMAYBE  { $$ = nullptr; /*TODO*/ }
-     | mattype KWMAYBE  { $$ = nullptr; /*TODO*/ }
+type : KWINT KWMAYBE
+     | KWFLOAT KWMAYBE
+     | KWSTRING KWMAYBE
+     | KWBOOL KWMAYBE
+     | ID KWMAYBE
+     | funtype KWMAYBE
+     | mattype KWMAYBE
      | KWINT            { $$ = scanner->sym_lookup(INT_CSTR, true); }
      | KWFLOAT          { $$ = scanner->sym_lookup(FLOAT_CSTR, true); }
      | KWSTRING         { $$ = scanner->sym_lookup(STRING_CSTR, true); }
      | KWBOOL           { $$ = scanner->sym_lookup(BOOL_CSTR, true); }
      | ID               { $$ = scanner->sym_lookup($1, true); }
-     | funtype          { $$ = nullptr; /*TODO*/ }
+     | funtype
      | mattype          { $$ = $1; }
      ;
 

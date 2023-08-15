@@ -67,7 +67,7 @@ When the size of the matrix is used in the type, then
 the matrix cannot be appended to or removed from
 (it has static size).
 
-When `[]` or `[0]` is used then its a dynamic matrix.
+When `[]` or negative value is used then its a dynamic matrix.
 
 Matrix is also a product of slicing:
 ```

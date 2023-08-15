@@ -38,7 +38,6 @@ class VarAccess;
  */
 enum IRKind {
     IR_VAR_DECL,
-    IR_MATRIX,
     IR_TYPE_DECL,
     IR_STRUCT_DECL,
     IR_EXPR_STMT,
@@ -63,6 +62,7 @@ enum ExprKind {
     EX_BOOL,
     EX_FLOAT,
     EX_STRING,
+    EX_MATRIX,
     EX_NONE,
     EX_VAR,
     EX_FUN_CALL,
@@ -219,30 +219,6 @@ public:
     std::vector<ir::IR *> getElements() { return elements; }
     bool is_zero_init() { return zero_init; }
 };
-
-/**
- * Homogeneus matrix of any type
- */
-/*class Matrix : public IR {
-private:
-    TypeDecl *valueType;
-    size_t cols;
-    size_t rows;
-public:
-    Matrix(IR *enclosing_ir, llvm::SMLoc loc, TypeDecl *valueType, size_t cols, size_t rows)
-        : IR(IRKind::IR_MATRIX, enclosing_ir, loc, "list"),
-          valueType(valueType),
-          cols(cols),
-          rows(rows) {}
-    
-    TypeDecl *getValueType() { return valueType; }
-    size_t getRows() { return rows; }
-    size_t getCols() { return cols; }
-    static bool classof(const IR *ir) {
-        return ir->getKind() == IRKind::IR_MATRIX;
-    }
-    virtual std::string debug() const override { return "TODO"; }
-};*/
 
 /**
  * List of modules to import
@@ -538,6 +514,27 @@ public:
         return e->getKind() == ExprKind::EX_STRING;
     }
     std::string debug() const override { return value; }
+};
+
+/**
+ * Homogeneus matrix of any type
+ */
+class MatrixLiteral : public Expr {
+private:
+    llvm::SMLoc loc;
+    std::vector<Expr *> value;
+public:
+    MatrixLiteral(llvm::SMLoc loc, std::vector<Expr *> &value, TypeDecl *type)
+              : Expr(ExprKind::EX_MATRIX, type, true),
+                loc(loc),
+                value(value) {
+    }
+
+    std::vector<Expr *> &getValue() { return value; }
+    static bool classof(const Expr *e) {
+        return e->getKind() == ExprKind::EX_MATRIX;
+    }
+    std::string debug() const override { return "[TODO]"; }
 };
 
 /**

@@ -2944,7 +2944,7 @@ namespace  ptc  {
 
   case 426: // matsq: "[" "]"
 #line 774 "frontend/parser.yy"
-                                { yylhs.value.as < std::vector<ptc::ir::Expr *>  > () = scanner->parseMatrixSize(scanner->parseInt(0)); }
+                                { yylhs.value.as < std::vector<ptc::ir::Expr *>  > () = scanner->parseMatrixSize(scanner->parseInt(-1)); }
 #line 2949 "frontend/parser.cpp"
     break;
 
@@ -2956,7 +2956,7 @@ namespace  ptc  {
 
   case 428: // matsq: "[" "]" matsq
 #line 776 "frontend/parser.yy"
-                                { yylhs.value.as < std::vector<ptc::ir::Expr *>  > () = scanner->parseAddMatrixSize(yystack_[0].value.as < std::vector<ptc::ir::Expr *>  > (), scanner->parseInt(0)); }
+                                { yylhs.value.as < std::vector<ptc::ir::Expr *>  > () = scanner->parseAddMatrixSize(yystack_[0].value.as < std::vector<ptc::ir::Expr *>  > (), scanner->parseInt(-1)); }
 #line 2961 "frontend/parser.cpp"
     break;
 
@@ -2966,92 +2966,50 @@ namespace  ptc  {
 #line 2967 "frontend/parser.cpp"
     break;
 
-  case 430: // type: "'int'" "?"
-#line 781 "frontend/parser.yy"
-                        { yylhs.value.as < ptc::ir::IR * > () = nullptr; /*TODO*/ }
-#line 2973 "frontend/parser.cpp"
-    break;
-
-  case 431: // type: "'float'" "?"
-#line 782 "frontend/parser.yy"
-                        { yylhs.value.as < ptc::ir::IR * > () = nullptr; /*TODO*/ }
-#line 2979 "frontend/parser.cpp"
-    break;
-
-  case 432: // type: "'string'" "?"
-#line 783 "frontend/parser.yy"
-                        { yylhs.value.as < ptc::ir::IR * > () = nullptr; /*TODO*/ }
-#line 2985 "frontend/parser.cpp"
-    break;
-
-  case 433: // type: "'bool'" "?"
-#line 784 "frontend/parser.yy"
-                        { yylhs.value.as < ptc::ir::IR * > () = nullptr; /*TODO*/ }
-#line 2991 "frontend/parser.cpp"
-    break;
-
-  case 434: // type: "identifier" "?"
-#line 785 "frontend/parser.yy"
-                        { yylhs.value.as < ptc::ir::IR * > () = nullptr; /*TODO*/ }
-#line 2997 "frontend/parser.cpp"
-    break;
-
-  case 435: // type: funtype "?"
-#line 786 "frontend/parser.yy"
-                        { yylhs.value.as < ptc::ir::IR * > () = nullptr; /*TODO*/ }
-#line 3003 "frontend/parser.cpp"
-    break;
-
   case 436: // type: mattype "?"
 #line 787 "frontend/parser.yy"
-                        { yylhs.value.as < ptc::ir::IR * > () = nullptr; /*TODO*/ }
-#line 3009 "frontend/parser.cpp"
+       { yylhs.value.as < ptc::ir::IR * > () = yystack_[1].value.as < ptc::ir::IR * > (); }
+#line 2973 "frontend/parser.cpp"
     break;
 
   case 437: // type: "'int'"
 #line 788 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = scanner->sym_lookup(INT_CSTR, true); }
-#line 3015 "frontend/parser.cpp"
+#line 2979 "frontend/parser.cpp"
     break;
 
   case 438: // type: "'float'"
 #line 789 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = scanner->sym_lookup(FLOAT_CSTR, true); }
-#line 3021 "frontend/parser.cpp"
+#line 2985 "frontend/parser.cpp"
     break;
 
   case 439: // type: "'string'"
 #line 790 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = scanner->sym_lookup(STRING_CSTR, true); }
-#line 3027 "frontend/parser.cpp"
+#line 2991 "frontend/parser.cpp"
     break;
 
   case 440: // type: "'bool'"
 #line 791 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = scanner->sym_lookup(BOOL_CSTR, true); }
-#line 3033 "frontend/parser.cpp"
+#line 2997 "frontend/parser.cpp"
     break;
 
   case 441: // type: "identifier"
 #line 792 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = scanner->sym_lookup(yystack_[0].value.as < std::string > (), true); }
-#line 3039 "frontend/parser.cpp"
-    break;
-
-  case 442: // type: funtype
-#line 793 "frontend/parser.yy"
-                        { yylhs.value.as < ptc::ir::IR * > () = nullptr; /*TODO*/ }
-#line 3045 "frontend/parser.cpp"
+#line 3003 "frontend/parser.cpp"
     break;
 
   case 443: // type: mattype
 #line 794 "frontend/parser.yy"
                         { yylhs.value.as < ptc::ir::IR * > () = yystack_[0].value.as < ptc::ir::IR * > (); }
-#line 3051 "frontend/parser.cpp"
+#line 3009 "frontend/parser.cpp"
     break;
 
 
-#line 3055 "frontend/parser.cpp"
+#line 3013 "frontend/parser.cpp"
 
             default:
               break;
@@ -4538,7 +4496,7 @@ namespace  ptc  {
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 4542 "frontend/parser.cpp"
+#line 4500 "frontend/parser.cpp"
 
 #line 797 "frontend/parser.yy"
 
