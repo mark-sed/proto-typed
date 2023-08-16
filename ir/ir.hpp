@@ -68,6 +68,7 @@ enum ExprKind {
     EX_FUN_CALL,
     EX_FUN_PTR,
     EX_EXT_SYMB,
+    EX_MEMBER_ACCESS,
     EX_UNRESOLVED_SYMB
 };
 
@@ -97,6 +98,7 @@ enum OperatorKind {
     OP_LOR,
     OP_CONCAT,
     OP_ASSIGN,
+    OP_ACCESS,
     OP_UNKNOWN
 };
 
@@ -357,6 +359,7 @@ public:
         case OP_LOR: return "or";
         case OP_CONCAT: return "++";
         case OP_ASSIGN: return "=";
+        case OP_ACCESS: return ".";
         case OP_UNKNOWN: return "unknown";
         default: return "not-listed-op";
         }
@@ -591,6 +594,28 @@ public:
         return e->getKind() == ExprKind::EX_UNRESOLVED_SYMB;
     }
     std::string debug() const override { return "(unresolved)"+symbolName; }
+};
+
+/**
+ * Access a memeber of a struct
+ */
+class MemberAccess : public Expr {
+private:
+    IR *decl;
+    int index;
+public:
+    MemberAccess(IR *decl, int index, TypeDecl *type) 
+        : Expr(ExprKind::EX_MEMBER_ACCESS, type, false),
+          decl(decl),
+          index(index) {}
+
+    IR *getDecl() { return decl; }
+    int getIndex() { return index; }
+
+    static bool classof(const Expr *e) {
+        return e->getKind() == ExprKind::EX_MEMBER_ACCESS;
+    }
+    std::string debug() const override { return decl->debug(); }
 };
 
 /**

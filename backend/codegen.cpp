@@ -330,10 +330,60 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
     case ir::ExprKind::EX_BOOL: return llvm::ConstantInt::get(int1T, llvm::dyn_cast<ir::BoolLiteral>(e)->getValue());
     case ir::ExprKind::EX_FLOAT: return llvm::ConstantFP::get(floatT,llvm::dyn_cast<ir::FloatLiteral>(e)->getValue());
     case ir::ExprKind::EX_FUN_CALL: return emitFunCall(llvm::dyn_cast<ir::FunctionCall>(e));
+    case ir::ExprKind::EX_MEMBER_ACCESS: return nullptr; // Member access is handeled by the left hand side
     // TODO: Other ones
     default:
-        llvm::report_fatal_error("Unimplemented expression kind in code generation");
+        llvm::report_fatal_error(("Unimplemented expression kind in code generation "+e->debug()).c_str());
         return nullptr;
+    }
+}
+
+void cg::CGFunction::emitMemberAssignment(ir::BinaryInfixExpr *l, llvm::Value *r) {
+    auto left = l->getLeft();
+    auto right = l->getRight();
+
+    if(auto var = llvm::dyn_cast<ir::VarAccess>(left)) {
+        if(auto elem = llvm::dyn_cast<ir::MemberAccess>(right)) {
+            auto strucType = left->getType();
+            if(!strucType->getDecl() || !llvm::isa<ir::StructDecl>(strucType->getDecl())) {
+                llvm::report_fatal_error("Assignment variable is not a struct");
+            }
+            llvm::Value* zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(cgm.getLLVMCtx()), 0);
+            llvm::Value* stIndex = llvm::ConstantInt::get(llvm::Type::getInt32Ty(cgm.getLLVMCtx()), elem->getIndex());
+            
+            llvm::Value *llvar = nullptr;
+            if(auto v = llvm::dyn_cast<ir::VarDecl>(var->getVar())) {
+                if(v->getEnclosingIR() == cgm.getModuleDecl()) {
+                    llvar = cgm.getGlobals(var->getVar());
+                }
+                else if(v->getEnclosingIR() == fun) {
+                    llvar = currDef[currBB].defs[var->getVar()];
+                }
+                else {
+                    llvm::report_fatal_error("Unknown variable scope");
+                }
+            }
+            else if(auto v = llvm::dyn_cast<ir::FormalParamDecl>(var->getVar())) {
+                if(v->isByReference()) {
+                    llvar = formalParams[v];
+                }
+                else {
+                    llvar = builder.CreateAlloca(mapType(strucType));
+                    builder.CreateStore(currDef[currBB].defs[var->getVar()], llvar);
+                }
+            }
+            else {
+                llvm::report_fatal_error("Unknown variable type for assignment");
+            }
+            llvm::Value *elemPtr = builder.CreateGEP(mapType(strucType), llvar, {zero, stIndex});
+            builder.CreateStore(r, elemPtr);
+        }
+        else {
+            llvm::report_fatal_error("Left hand side is not assignable");
+        }
+    }
+    else {
+        llvm::report_fatal_error("NOT YET IMPLEMENTED nested struct assignment");
     }
 }
 
@@ -345,15 +395,22 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     case ir::OperatorKind::OP_ASSIGN:
     {
         LOGMAX("Creating assignment instruction");
-        auto *var = llvm::dyn_cast<ir::VarAccess>(e->getLeft());
-        if(auto *varDecl = llvm::dyn_cast<ir::VarDecl>(var->getVar())) {
-            writeVar(currBB, varDecl, right);
+        if(auto *var = llvm::dyn_cast<ir::VarAccess>(e->getLeft())) {
+            if(auto *varDecl = llvm::dyn_cast<ir::VarDecl>(var->getVar())) {
+                writeVar(currBB, varDecl, right);
+            }
+            else if(auto *fp = llvm::dyn_cast<ir::FormalParamDecl>(var->getVar())) {
+                writeVar(currBB, fp, right);
+            }
+            else {
+                llvm::report_fatal_error("Unknown left value in an assignment");
+            }
         }
-        else if(auto *fp = llvm::dyn_cast<ir::FormalParamDecl>(var->getVar())) {
-            writeVar(currBB, fp, right);
+        else if(auto *var = llvm::dyn_cast<ir::BinaryInfixExpr>(e->getLeft())) {
+            emitMemberAssignment(var, right);
         }
         else {
-            llvm::report_fatal_error("Unknown left value in an assignment");
+            llvm::report_fatal_error("Left hand side of an assignment is not assignable");
         }
     }
     break;
@@ -665,6 +722,17 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         builder.CreateCall(str_concat, {res, lval, rval});
         result = builder.CreateLoad(stringT, res);
     }
+    break;
+    case ir::OperatorKind::OP_ACCESS:
+        // FIXME: this creates unnecessary extract for assignment where
+        // access is no the left side a.c = 4. 
+        // Although it can will be removed as an unused var
+        if(auto rMemAcc = llvm::dyn_cast<ir::MemberAccess>(e->getRight())) {
+            result = builder.CreateExtractValue(left, rMemAcc->getIndex());
+        }
+        else {
+            llvm::report_fatal_error("Member access is of a different type");
+        }
     break;
     // TODO: implement rest
     default: llvm::report_fatal_error("Uknown operator in code generation");

@@ -388,9 +388,9 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          | EXT_ID slice
          | expr_var slice
 
-         | ID DOT expr_var
-         | EXT_ID DOT expr_var
-         | expr_var DOT expr_var
+         | ID DOT expr_var         { $$ = scanner->parseInfixExpr(scanner->parseVar($1), $3, ir::Operator(ir::OperatorKind::OP_ACCESS)); }
+         | EXT_ID DOT expr_var     { $$ = scanner->parseInfixExpr(scanner->parseVar($1), $3, ir::Operator(ir::OperatorKind::OP_ACCESS)); }
+         | expr_var DOT expr_var   { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_ACCESS)); }
 
          | expr_float POW expr_var
          | expr_var POW expr_float

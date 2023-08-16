@@ -136,6 +136,7 @@ protected:
     llvm::Value *emitFunCall(ir::FunctionCall *e);
     llvm::Value *emitExpr(ir::Expr *e);
 
+    void emitMemberAssignment(ir::BinaryInfixExpr *l, llvm::Value *r);
     void emitStmt(ir::ExprStmt *stmt);
     void emitStmt(ir::ReturnStmt *stmt);
     void emitStmt(ir::BreakStmt *stmt);

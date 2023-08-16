@@ -357,7 +357,7 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
     auto tl = l->getType();
     auto tr = r->getType();
     auto type = tl;
-    if(tl == unknownType || tr == unknownType) {
+    if(op.getKind() != ir::OperatorKind::OP_ACCESS && (tl == unknownType || tr == unknownType)) {
         type = unknownType;
     }
     else {
@@ -438,6 +438,66 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
         case ir::OperatorKind::OP_IN:
             // TODO: check that tr is a matrix
             type = this->boolType;
+        break;
+        case ir::OperatorKind::OP_ACCESS:
+        {
+            std::string elemName;
+            if(auto elem = llvm::dyn_cast<ir::UnresolvedSymbolAccess>(r)) {
+                elemName = elem->getName();
+            }
+            else if(auto elem = llvm::dyn_cast<ir::VarAccess>(r)) { 
+                elemName = elem->getVar()->getName();
+            }
+            else if(auto elem = llvm::dyn_cast<ir::MemberAccess>(r)) { 
+                elemName = elem->getDecl()->getName();
+            }
+            else {
+                diags.report(llvmloc, diag::ERR_BAD_STRUCT_ELEM);
+            }
+            // TODO: this can be also an expr (nested access) or a function call
+            // TODO: Allow also structLiteral?
+            ir::TypeDecl *struType = l->getType();
+            if(struType->getDecl()) {
+                auto struDecl = llvm::dyn_cast<ir::StructDecl>(struType->getDecl());
+                if(struDecl) {
+                    // Check if the element is present in the struct
+                    ir::IR *found = nullptr;
+                    int index = 0;
+                    for(index = 0; static_cast<size_t>(index) < struDecl->getElements().size(); ++index) {
+                        if(struDecl->getElements()[index]->getName() == elemName) {
+                            found = struDecl->getElements()[index];
+                            break;
+                        }
+                    }
+                    if(found) {
+                        if(auto fvar = llvm::dyn_cast<ir::VarDecl>(found)) {
+                            type = fvar->getType();
+                            //auto oldR = r;
+                            r = new ir::MemberAccess(found, index, type);
+                            // FIXME: delete oldR
+                            //delete oldR;
+                        }
+                        else if(auto fvar = llvm::dyn_cast<ir::StructDecl>(found)) {
+                            //TODO: Handle and set r correctly
+                            (void)fvar;
+                            diags.report(llvmloc, diag::ERR_INTERNAL, "NOT YET IMPLEMENTED Structs inside of structs access");
+                        }
+                        else {
+                            diags.report(llvmloc, diag::ERR_INTERNAL, "unknown element type in a struct");
+                        }
+                    }
+                    else {
+                        diags.report(llvmloc, diag::ERR_HAS_NO_MEMBER, "struct "+struDecl->getName(), elemName);
+                    }
+                }
+                else {
+                    diags.report(llvmloc, diag::ERR_TYPE_NOT_STRUCT, struType->getName());
+                }
+            }
+            else {
+                diags.report(llvmloc, diag::ERR_TYPE_NOT_STRUCT, struType->getName());
+            }
+        }
         break;
         default: diags.report(llvmloc, diag::ERR_INTERNAL, "Unknown operator in an expression");
         break;
