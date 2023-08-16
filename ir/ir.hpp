@@ -205,7 +205,9 @@ public:
         for(auto v: elements) {
             // zero_init is set only if no element has assigned value
             // and all the struct elements are also zero_init
+            // String have implicit initvalue
             if(llvm::dyn_cast<VarDecl>(v)->getInitValue() ||
+                llvm::dyn_cast<VarDecl>(v)->getType()->getName() == STRING_CSTR ||
                 (llvm::dyn_cast<VarDecl>(v)->getType()->getDecl() && 
                 !llvm::dyn_cast<StructDecl>(llvm::dyn_cast<VarDecl>(v)->getType()->getDecl())->is_zero_init())) {
                 zero_init = false;

@@ -91,6 +91,8 @@ private:
     llvm::Module *llvmMod;
     ir::ModuleDecl *mod;
     llvm::DenseMap<ir::IR *, llvm::GlobalObject *> globals;
+    llvm::GlobalVariable *str_empty;
+    std::vector<std::pair<llvm::Value *, llvm::GlobalVariable *>> stringsToInit;
 
     void setupExternFuncs();
     void setupLibFuncs();

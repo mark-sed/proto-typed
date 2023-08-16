@@ -1148,9 +1148,10 @@ void cg::CGModule::defineStruct(ir::StructDecl *decl) {
                 else if(auto vcast = llvm::dyn_cast<ir::FloatLiteral>(ival)) {
                     vals.push_back(llvm::ConstantFP::get(ctx, vcast->getValue()));
                 }
-                else if(auto vcast = llvm::dyn_cast<ir::StringLiteral>(ival)) {
-                    (void)vcast;
-                    llvm::report_fatal_error("String intializer is not yet implemented");
+                else if(llvm::dyn_cast<ir::StringLiteral>(ival)) {
+                    // Initialization is handeled when new instance is created
+                    auto init = llvm::ConstantAggregateZero::get(stringT);
+                    vals.push_back(init);
                 }
                 else {
                     // TODO: Handle structs
@@ -1169,7 +1170,9 @@ void cg::CGModule::defineStruct(ir::StructDecl *decl) {
                     vals.push_back(llvm::ConstantFP::get(floatT, 0.0));
                 }
                 else if(ty == STRING_CSTR) {
-                    llvm::report_fatal_error("String intializer is not yet implemented");
+                    // Initialization is handeled when new instance is created
+                    auto init = llvm::ConstantAggregateZero::get(stringT);
+                    vals.push_back(init);
                 }
                 else {
                     llvm::report_fatal_error("Struct nested intializer is not yet implemented");
@@ -1190,8 +1193,12 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
     ir::FunctionDecl *entryFun = nullptr;
     std::vector<CGFunction *> funs;
 
-    std::vector<std::pair<llvm::GlobalVariable *, llvm::GlobalVariable *>> stringsToInit;
-    llvm::GlobalVariable *str_empty = nullptr;
+    str_empty = new llvm::GlobalVariable(*llvmMod,
+                                        builder.getInt8Ty()->getPointerTo(),
+                                        false,
+                                        llvm::GlobalValue::PrivateLinkage,
+                                        nullptr);
+    str_empty->setInitializer(builder.CreateGlobalStringPtr("", "", 0, llvmMod));
 
     for(auto *decl: mod->getDecls()) {
         auto kind = decl->getKind();
@@ -1243,14 +1250,6 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                     v->setInitializer(llvm::ConstantFP::get(floatT, 0.0));
                 }
                 else if(ty == STRING_CSTR) {
-                    if(!str_empty) {
-                        str_empty = new llvm::GlobalVariable(*llvmMod,
-                                                            builder.getInt8Ty()->getPointerTo(),
-                                                            false,
-                                                            llvm::GlobalValue::PrivateLinkage,
-                                                            nullptr);
-                        str_empty->setInitializer(builder.CreateGlobalStringPtr("", "", 0, llvmMod));
-                    }
                     auto init = llvm::ConstantAggregateZero::get(stringT);
                     v->setInitializer(init);
                     stringsToInit.push_back(std::make_pair(v, str_empty));
@@ -1258,6 +1257,44 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                 else {
                     // struct
                     v->setInitializer(userTypes[mangleName(var->getType()->getDecl())].second);
+                    // TODO: Handle nested structs
+                    // Initialize all strings
+                    if(auto struDecl = llvm::dyn_cast<ir::StructDecl>(var->getType()->getDecl())) {
+                        int index = 0;
+                        for(auto e: struDecl->getElements()) {
+                            if(auto eVar = llvm::dyn_cast<ir::VarDecl>(e)) {
+                                if(eVar->getType()->getName() == STRING_CSTR) {
+                                    if(auto val = eVar->getInitValue()) {
+                                        llvm::Value* zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), 0);
+                                        llvm::Value* stIndex = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), index);
+                                        llvm::Value *elemPtr = builder.CreateGEP(mapType(var->getType()), v, {zero, stIndex});
+
+                                        auto vcast = llvm::dyn_cast<ir::StringLiteral>(val);
+                                        llvm::GlobalVariable *str_txt = new llvm::GlobalVariable(*llvmMod,
+                                                                                                builder.getInt8Ty()->getPointerTo(),
+                                                                                                false,
+                                                                                                llvm::GlobalValue::PrivateLinkage,
+                                                                                                nullptr);
+                                        str_txt->setInitializer(builder.CreateGlobalStringPtr(vcast->getValue().c_str(), "", 0, llvmMod));
+
+                                        stringsToInit.push_back(std::make_pair(elemPtr, str_txt));
+                                    }
+                                    else {
+                                        // Default
+                                        llvm::Value* zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), 0);
+                                        llvm::Value* stIndex = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), index);
+                                        llvm::Value *elemPtr = builder.CreateGEP(mapType(var->getType()), v, {zero, stIndex});
+                                        stringsToInit.push_back(std::make_pair(elemPtr, str_empty));
+                                    }
+                                }
+                            }
+                            // TODO: make this function and recursively go deeper if e is StructDecl
+                            ++index;
+                        }
+                    }
+                    else {
+                        llvm::report_fatal_error("Global variable is of unknown type");
+                    }
                 }
             }
             globals[var] = v;

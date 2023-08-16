@@ -454,8 +454,6 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
             else {
                 diags.report(llvmloc, diag::ERR_BAD_STRUCT_ELEM);
             }
-            // TODO: this can be also an expr (nested access) or a function call
-            // TODO: Allow also structLiteral?
             ir::TypeDecl *struType = l->getType();
             if(struType->getDecl()) {
                 auto struDecl = llvm::dyn_cast<ir::StructDecl>(struType->getDecl());
@@ -494,7 +492,13 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
                     diags.report(llvmloc, diag::ERR_TYPE_NOT_STRUCT, struType->getName());
                 }
             }
+            /*else if(auto lmem = llvm::dyn_cast<ir::UnresolvedSymbolAccess>(l)) {
+                
+            }*/
             else {
+                // TODO: this can be also an expr (nested access) or a function call
+                // TODO: Allow also structLiteral?
+                // Split access into var assignments
                 diags.report(llvmloc, diag::ERR_TYPE_NOT_STRUCT, struType->getName());
             }
         }
