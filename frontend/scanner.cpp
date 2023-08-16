@@ -634,7 +634,9 @@ ir::IR *Scanner::parseStruct(std::string name, std::vector<ir::IR *> body) {
             diags.report(llvmloc, diag::ERR_SYNTAX, "Unknown construct inside of struct declaration");
         }
     }
-    currScope->insert(structType);
+    if(!currScope->insert(structType)) {
+        diags.report(llvmloc, diag::ERR_SYM_ALREADY_DECLARED, name);
+    }
     return structDecl;
 }
 
