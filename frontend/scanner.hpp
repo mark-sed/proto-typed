@@ -95,7 +95,6 @@ public:
 
     // Parsing methods
     ir::IR *parseVarDecl(ir::IR *type, const std::string name, ir::Expr *value=nullptr);
-    ir::IR *parseVarDef(ir::IR *type, std::string name, ir::Expr *value);
     ir::IR *parseExprStmt(ir::Expr *e);
     ir::IR *parseIfStmt(ir::Expr *cond, std::vector<ir::IR *> &ifBranch, std::vector<ir::IR *> &elseBranch);
     ir::IR *parseWhile(ir::Expr *cond, std::vector<ir::IR *> &body);

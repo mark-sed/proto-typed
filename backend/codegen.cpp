@@ -854,6 +854,36 @@ void cg::CGFunction::emitStmt(ir::Import *stmt) {
     //llvm::report_fatal_error("Imports are not yet implemented");
 }
 
+void cg::CGFunction::emitStmt(ir::VarDecl *stmt) {
+    LOGMAX("Local variable declaration");
+    auto value = stmt->getInitValue();
+    llvm::Value *v = nullptr;
+    if(value) {
+        v = emitExpr(value);
+    }
+    else {
+        auto ty = stmt->getType()->getName();
+        if(ty == INT_CSTR) {
+            v = llvm::ConstantInt::get(int64T, 0, true);
+        }
+        else if(ty == BOOL_CSTR) {
+            v = llvm::ConstantInt::getFalse(int1T);
+        }
+        else if(ty == FLOAT_CSTR) {
+            v = llvm::ConstantFP::get(floatT, 0.0);
+        }
+        else if(ty == STRING_CSTR) {
+            std::string s = "";
+            ir::StringLiteral *empt = new ir::StringLiteral(stmt->getLocation(), s, stmt->getType());
+            v = emitExpr(empt);
+        }
+        else {
+            llvm::report_fatal_error("Local struct intializer not yet implemented");
+        }
+    }
+    writeVar(currBB, stmt, v);
+}
+
 void cg::CGFunction::emit(std::vector<ir::IR *> stmts) {
     for(auto *s : stmts) {
         if(auto *stmt = llvm::dyn_cast<ir::ExprStmt>(s)) {
@@ -875,6 +905,9 @@ void cg::CGFunction::emit(std::vector<ir::IR *> stmts) {
             emitStmt(stmt);
         }
         else if(auto *stmt = llvm::dyn_cast<ir::ContinueStmt>(s)) {
+            emitStmt(stmt);
+        }
+        else if(auto *stmt = llvm::dyn_cast<ir::VarDecl>(s)) {
             emitStmt(stmt);
         }
         else {

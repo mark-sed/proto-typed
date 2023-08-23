@@ -80,6 +80,14 @@ for(a : (1..100)) {}
 a = (1,3 .. 500)
 ```
 
+There are built in functions for working with matrices
+```
+int[] values
+values[-1] = 42
+append(values, 43)
+insert(values, 0, 41)
+```
+
 ### Struct
 ```
 struct MyData {

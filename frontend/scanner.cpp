@@ -510,14 +510,6 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
     return new ir::BinaryInfixExpr(l, r, op, type, is_const);
 }
 
-ir::IR *Scanner::parseVarDef(ir::IR *type, std::string name, ir::Expr *value) {
-    LOGMAX("Variable definition");
-    auto vdecl = this->parseVarDecl(type, name, value);
-    this->decls.push_back(vdecl);
-    auto e = this->parseInfixExpr(this->parseVar(name), value, ir::Operator(ir::OperatorKind::OP_ASSIGN));
-    return this->parseExprStmt(e);
-}
-
 std::vector<ir::Expr *> Scanner::parseFunCallArg(ir::Expr *e) {
     LOGMAX("Creating new function call list with "+e->debug());
     std::vector<ir::Expr *> list{e};

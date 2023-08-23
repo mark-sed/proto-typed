@@ -330,7 +330,7 @@ vardecl : type ID { $$ = scanner->parseVarDecl($1, $2); }
 
 // Definition
 vardef : type ID SET struct_val
-       | type ID SET expr        { scanner->parseVarDef($1, $2, $4); }
+       | type ID SET expr        { $$ = scanner->parseVarDecl($1, $2, $4); }
        | KWCONST ID SET expr
        | KWVAR ID SET expr
        ;

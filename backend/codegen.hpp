@@ -146,6 +146,7 @@ protected:
     void emitStmt(ir::IfStatement *stmt);
     void emitStmt(ir::WhileStmt *stmt);
     void emitStmt(ir::Import *stmt);
+    void emitStmt(ir::VarDecl *stmt);
     virtual void emit(std::vector<ir::IR *> stmts);
 public:
     CGFunction(CGModule &cgm, ir::FunctionDecl *fun) : CodeGen(cgm.getLLVMCtx(), cgm), cgm(cgm), fun(fun) {

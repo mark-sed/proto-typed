@@ -1426,7 +1426,7 @@ namespace  ptc  {
 
   case 66: // vardef: type "identifier" "=" expr
 #line 333 "frontend/parser.yy"
-                                 { scanner->parseVarDef(yystack_[3].value.as < ptc::ir::IR * > (), yystack_[2].value.as < std::string > (), yystack_[0].value.as < ptc::ir::Expr * > ()); }
+                                 { yylhs.value.as < ptc::ir::IR * > () = scanner->parseVarDecl(yystack_[3].value.as < ptc::ir::IR * > (), yystack_[2].value.as < std::string > (), yystack_[0].value.as < ptc::ir::Expr * > ()); }
 #line 1431 "frontend/parser.cpp"
     break;
 
