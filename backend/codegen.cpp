@@ -125,14 +125,11 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
 
 void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) {
     if(auto *v = llvm::dyn_cast<ir::VarDecl>(decl)) {
-        if(v->getEnclosingIR() == fun) {
-            writeLocalVar(BB, decl, val);
-        }
-        else if(v->getEnclosingIR() == cgm.getModuleDecl()) {
+        if(v->getEnclosingIR() == cgm.getModuleDecl()) {
             builder.CreateStore(val, cgm.getGlobals(decl));
         }
         else {
-            llvm::report_fatal_error("Unsupported variable access");
+            writeLocalVar(BB, decl, val);
         }
     } else if (auto *v = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
         if(v->isByReference()) {
@@ -246,12 +243,12 @@ llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl) {
         if(v->getEnclosingIR()->getKind() == ir::IRKind::IR_MODULE_DECL) {
             return builder.CreateLoad(mapType(v), currModule.getGlobals(decl));
         }
-        else if(v->getEnclosingIR() == fun) {
+        else {
             return readLocalVar(BB, decl);
         }
-        else {
+        /*else {
             llvm::report_fatal_error("Nested functions are not supported");
-        }
+        }*/
     } else if(auto *v = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
         if(v->isByReference()) {
             return builder.CreateLoad(mapType(v)->getNonOpaquePointerElementType(), formalParams[v]);
@@ -791,7 +788,20 @@ void cg::CGFunction::emitStmt(ir::WhileStmt *stmt) {
     builder.CreateCondBr(cond, whileBodyBB, whileAfterBB);
 
     setCurrBB(whileBodyBB);
+    auto stacksave = cgm.getLLVMMod()->getOrInsertFunction("llvm.stacksave", 
+                                                    llvm::FunctionType::get(
+                                                        builder.getInt8Ty()->getPointerTo(),
+                                                        false
+                                                    ));
+    auto stackrestore = cgm.getLLVMMod()->getOrInsertFunction("llvm.stackrestore", 
+                                                    llvm::FunctionType::get(
+                                                        voidT,
+                                                        builder.getInt8Ty()->getPointerTo(),
+                                                        false
+                                                    ));
+    auto stp = builder.CreateCall(stacksave);
     emit(stmt->getBody());
+    builder.CreateCall(stackrestore, { stp });
     builder.CreateBr(whileCondBB);
     sealBlock(currBB);
     sealBlock(whileCondBB);
@@ -911,7 +921,7 @@ void cg::CGFunction::emit(std::vector<ir::IR *> stmts) {
             emitStmt(stmt);
         }
         else {
-            llvm::report_fatal_error("Unknwon statement in code generation");
+            llvm::report_fatal_error("Unknown statement in code generation");
         }
     }
 }

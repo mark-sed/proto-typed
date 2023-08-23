@@ -690,6 +690,7 @@ namespace  ptc  {
       // stmt
       // block
       // body
+      // scope_body
       // else
       // decllist
       char dummy9[sizeof (std::vector<ptc::ir::IR *> )];
@@ -801,25 +802,24 @@ namespace  ptc  {
     KWVAR = 56,                    // "var"
     KWIMPORT = 57,                 // "import"
     KWIF = 58,                     // "if"
-    KWELIF = 59,                   // "elif"
-    KWELSE = 60,                   // "else"
-    KWFOR = 61,                    // "for"
-    KWWHILE = 62,                  // "while"
-    KWDO = 63,                     // "do"
-    KWRETURN = 64,                 // "return"
-    KWBREAK = 65,                  // "break"
-    KWCONTINUE = 66,               // "continue"
-    KWCONST = 67,                  // "const"
-    KWMAYBE = 68,                  // "?"
-    KWINT = 69,                    // "'int'"
-    KWFLOAT = 70,                  // "'float'"
-    KWSTRING = 71,                 // "'string'"
-    KWBOOL = 72,                   // "'bool'"
-    KWSTRUCT = 73,                 // "'struct'"
-    KWVOID = 74,                   // "'void'"
-    ID = 75,                       // "identifier"
-    EXT_ID = 76,                   // "external identifier"
-    NEG = 77                       // NEG
+    KWELSE = 59,                   // "else"
+    KWFOR = 60,                    // "for"
+    KWWHILE = 61,                  // "while"
+    KWDO = 62,                     // "do"
+    KWRETURN = 63,                 // "return"
+    KWBREAK = 64,                  // "break"
+    KWCONTINUE = 65,               // "continue"
+    KWCONST = 66,                  // "const"
+    KWMAYBE = 67,                  // "?"
+    KWINT = 68,                    // "'int'"
+    KWFLOAT = 69,                  // "'float'"
+    KWSTRING = 70,                 // "'string'"
+    KWBOOL = 71,                   // "'bool'"
+    KWSTRUCT = 72,                 // "'struct'"
+    KWVOID = 73,                   // "'void'"
+    ID = 74,                       // "identifier"
+    EXT_ID = 75,                   // "external identifier"
+    NEG = 76                       // NEG
       };
       /// Backward compatibility alias (Bison 3.6).
       typedef token_kind_type yytokentype;
@@ -836,7 +836,7 @@ namespace  ptc  {
     {
       enum symbol_kind_type
       {
-        YYNTOKENS = 78, ///< Number of tokens.
+        YYNTOKENS = 77, ///< Number of tokens.
         S_YYEMPTY = -2,
         S_YYEOF = 0,                             // "end of file"
         S_YYerror = 1,                           // error
@@ -897,74 +897,78 @@ namespace  ptc  {
         S_KWVAR = 56,                            // "var"
         S_KWIMPORT = 57,                         // "import"
         S_KWIF = 58,                             // "if"
-        S_KWELIF = 59,                           // "elif"
-        S_KWELSE = 60,                           // "else"
-        S_KWFOR = 61,                            // "for"
-        S_KWWHILE = 62,                          // "while"
-        S_KWDO = 63,                             // "do"
-        S_KWRETURN = 64,                         // "return"
-        S_KWBREAK = 65,                          // "break"
-        S_KWCONTINUE = 66,                       // "continue"
-        S_KWCONST = 67,                          // "const"
-        S_KWMAYBE = 68,                          // "?"
-        S_KWINT = 69,                            // "'int'"
-        S_KWFLOAT = 70,                          // "'float'"
-        S_KWSTRING = 71,                         // "'string'"
-        S_KWBOOL = 72,                           // "'bool'"
-        S_KWSTRUCT = 73,                         // "'struct'"
-        S_KWVOID = 74,                           // "'void'"
-        S_ID = 75,                               // "identifier"
-        S_EXT_ID = 76,                           // "external identifier"
-        S_NEG = 77,                              // NEG
-        S_YYACCEPT = 78,                         // $accept
-        S_start = 79,                            // start
-        S_stmt = 80,                             // stmt
-        S_stmt_end = 81,                         // stmt_end
-        S_stmts = 82,                            // stmts
-        S_stmts_ne = 83,                         // stmts_ne
-        S_block = 84,                            // block
-        S_body = 85,                             // body
+        S_KWELSE = 59,                           // "else"
+        S_KWFOR = 60,                            // "for"
+        S_KWWHILE = 61,                          // "while"
+        S_KWDO = 62,                             // "do"
+        S_KWRETURN = 63,                         // "return"
+        S_KWBREAK = 64,                          // "break"
+        S_KWCONTINUE = 65,                       // "continue"
+        S_KWCONST = 66,                          // "const"
+        S_KWMAYBE = 67,                          // "?"
+        S_KWINT = 68,                            // "'int'"
+        S_KWFLOAT = 69,                          // "'float'"
+        S_KWSTRING = 70,                         // "'string'"
+        S_KWBOOL = 71,                           // "'bool'"
+        S_KWSTRUCT = 72,                         // "'struct'"
+        S_KWVOID = 73,                           // "'void'"
+        S_ID = 74,                               // "identifier"
+        S_EXT_ID = 75,                           // "external identifier"
+        S_NEG = 76,                              // NEG
+        S_YYACCEPT = 77,                         // $accept
+        S_start = 78,                            // start
+        S_stmt = 79,                             // stmt
+        S_stmt_end = 80,                         // stmt_end
+        S_stmts = 81,                            // stmts
+        S_stmts_ne = 82,                         // stmts_ne
+        S_block = 83,                            // block
+        S_body = 84,                             // body
+        S_scope_body = 85,                       // scope_body
         S_import = 86,                           // import
         S_id_list = 87,                          // id_list
         S_flowctl = 88,                          // flowctl
         S_return = 89,                           // return
         S_for = 90,                              // for
         S_while = 91,                            // while
-        S_dowhile = 92,                          // dowhile
-        S_if = 93,                               // if
-        S_else = 94,                             // else
-        S_struct = 95,                           // struct
-        S_decllist = 96,                         // decllist
-        S_declistval = 97,                       // declistval
-        S_function = 98,                         // function
-        S_fun_id = 99,                           // fun_id
-        S_funargs = 100,                         // funargs
-        S_funargdef = 101,                       // funargdef
-        S_vardecl = 102,                         // vardecl
-        S_vardef = 103,                          // vardef
-        S_set = 104,                             // set
-        S_callarglist = 105,                     // callarglist
-        S_expr = 106,                            // expr
-        S_expr_var = 107,                        // expr_var
-        S_matrix = 108,                          // matrix
-        S_matvals = 109,                         // matvals
-        S_expr_mat = 110,                        // expr_mat
-        S_range = 111,                           // range
-        S_int_val = 112,                         // int_val
-        S_slice = 113,                           // slice
-        S_expr_none = 114,                       // expr_none
-        S_expr_struct = 115,                     // expr_struct
-        S_struct_val = 116,                      // struct_val
-        S_struct_list = 117,                     // struct_list
-        S_expr_int = 118,                        // expr_int
-        S_expr_float = 119,                      // expr_float
-        S_expr_str = 120,                        // expr_str
-        S_expr_bool = 121,                       // expr_bool
-        S_funtype = 122,                         // funtype
-        S_typelist = 123,                        // typelist
-        S_mattype = 124,                         // mattype
-        S_matsq = 125,                           // matsq
-        S_type = 126                             // type
+        S_wh_kw = 92,                            // wh_kw
+        S_dowhile = 93,                          // dowhile
+        S_do_kw = 94,                            // do_kw
+        S_if = 95,                               // if
+        S_else = 96,                             // else
+        S_if_kw = 97,                            // if_kw
+        S_el_kw = 98,                            // el_kw
+        S_struct = 99,                           // struct
+        S_decllist = 100,                        // decllist
+        S_declistval = 101,                      // declistval
+        S_function = 102,                        // function
+        S_fun_id = 103,                          // fun_id
+        S_funargs = 104,                         // funargs
+        S_funargdef = 105,                       // funargdef
+        S_vardecl = 106,                         // vardecl
+        S_vardef = 107,                          // vardef
+        S_set = 108,                             // set
+        S_callarglist = 109,                     // callarglist
+        S_expr = 110,                            // expr
+        S_expr_var = 111,                        // expr_var
+        S_matrix = 112,                          // matrix
+        S_matvals = 113,                         // matvals
+        S_expr_mat = 114,                        // expr_mat
+        S_range = 115,                           // range
+        S_int_val = 116,                         // int_val
+        S_slice = 117,                           // slice
+        S_expr_none = 118,                       // expr_none
+        S_expr_struct = 119,                     // expr_struct
+        S_struct_val = 120,                      // struct_val
+        S_struct_list = 121,                     // struct_list
+        S_expr_int = 122,                        // expr_int
+        S_expr_float = 123,                      // expr_float
+        S_expr_str = 124,                        // expr_str
+        S_expr_bool = 125,                       // expr_bool
+        S_funtype = 126,                         // funtype
+        S_typelist = 127,                        // typelist
+        S_mattype = 128,                         // mattype
+        S_matsq = 129,                           // matsq
+        S_type = 130                             // type
       };
     };
 
@@ -1060,6 +1064,7 @@ namespace  ptc  {
       case symbol_kind::S_stmt: // stmt
       case symbol_kind::S_block: // block
       case symbol_kind::S_body: // body
+      case symbol_kind::S_scope_body: // scope_body
       case symbol_kind::S_else: // else
       case symbol_kind::S_decllist: // decllist
         value.move< std::vector<ptc::ir::IR *>  > (std::move (that.value));
@@ -1315,6 +1320,7 @@ switch (yykind)
       case symbol_kind::S_stmt: // stmt
       case symbol_kind::S_block: // block
       case symbol_kind::S_body: // body
+      case symbol_kind::S_scope_body: // scope_body
       case symbol_kind::S_else: // else
       case symbol_kind::S_decllist: // decllist
         value.template destroy< std::vector<ptc::ir::IR *>  > ();
@@ -2388,21 +2394,6 @@ switch (yykind)
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
-      make_KWELIF (location_type l)
-      {
-        return symbol_type (token::KWELIF, std::move (l));
-      }
-#else
-      static
-      symbol_type
-      make_KWELIF (const location_type& l)
-      {
-        return symbol_type (token::KWELIF, l);
-      }
-#endif
-#if 201103L <= YY_CPLUSPLUS
-      static
-      symbol_type
       make_KWELSE (location_type l)
       {
         return symbol_type (token::KWELSE, std::move (l));
@@ -2762,10 +2753,10 @@ switch (yykind)
 
     // YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
     // state STATE-NUM.
-    static const signed char yystos_[];
+    static const unsigned char yystos_[];
 
     // YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.
-    static const signed char yyr1_[];
+    static const unsigned char yyr1_[];
 
     // YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.
     static const signed char yyr2_[];
@@ -3000,9 +2991,9 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 3040,     ///< Last index in yytable_.
-      yynnts_ = 49,  ///< Number of nonterminal symbols.
-      yyfinal_ = 129 ///< Termination state number.
+      yylast_ = 3013,     ///< Last index in yytable_.
+      yynnts_ = 54,  ///< Number of nonterminal symbols.
+      yyfinal_ = 125 ///< Termination state number.
     };
 
 
@@ -3014,7 +3005,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 3018 "frontend/parser.hpp"
+#line 3009 "frontend/parser.hpp"
 
 
 

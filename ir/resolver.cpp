@@ -64,6 +64,10 @@ void UnresolvedSymbolResolver::resolve(std::vector<ir::IR *> body) {
         else if(auto stmt = llvm::dyn_cast<ir::WhileStmt>(i)) {
             resolve(stmt->getBody());
         }
+        else if(auto stmt = llvm::dyn_cast<ir::IfStatement>(i)) {
+            resolve(stmt->getIfBranch());
+            resolve(stmt->getElseBranch());
+        }
         else if(auto stmt = llvm::dyn_cast<ir::ExprStmt>(i)) {
             resolve(stmt->getExpr(), stmt->getLocation());   
         }

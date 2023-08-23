@@ -76,6 +76,7 @@ public:
 
     void enterScope(ir::IR *decl);
     void enterFunScope();
+    void enterBlockScope();
     void leaveScope();
     void fatal_error(diag::diagmsg d, std::string msg);
 

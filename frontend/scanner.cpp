@@ -240,6 +240,13 @@ void Scanner::enterFunScope() {
     currentIR = new ir::FunctionDecl(currentIR);
 }
 
+void Scanner::enterBlockScope() {
+    LOGMAX("Creating new block scope");
+    currScope = new Scope(currScope);
+    // PlaceHolder IR
+    currentIR = new ir::FunctionDecl(currentIR);
+}
+
 void Scanner::leaveScope() {
     LOGMAX("Leaving current scope");
     Scope *parent = currScope->getParent();

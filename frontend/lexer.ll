@@ -125,7 +125,6 @@ oct     0[Qq][0-7]+
 "var"           { return token::KWVAR; }
 "import"        { return token::KWIMPORT; }
 "if"            { return token::KWIF; }
-"elif"          { return token::KWELIF; }
 "else"          { return token::KWELSE; }
 "for"           { return token::KWFOR; }
 "while"         { return token::KWWHILE; }

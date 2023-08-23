@@ -133,7 +133,6 @@
 %token KWVAR "var"
 %token KWIMPORT "import"
 %token KWIF "if"
-%token KWELIF "elif"
 %token KWELSE "else"
 %token KWFOR "for"
 %token KWWHILE "while"
@@ -206,6 +205,7 @@
 %type <std::vector<ptc::ir::Expr *> > callarglist
 %type <std::vector<ptc::ir::Expr *> > matsq
 %type <std::vector<ptc::ir::IR *> > body
+%type <std::vector<ptc::ir::IR *> > scope_body
 %type <std::vector<ptc::ir::IR *> > block
 %type <std::vector<ptc::ir::IR *> > else
 %type <std::vector<ptc::ir::IR *> > stmt
@@ -258,6 +258,10 @@ block : LBR RBR                 { $$ = scanner->parseStmtBody(nullptr); }
 body : stmts_ne { $$ = scanner->parseStmtBody($1); }
      | block    { $$ = $1; }
      ;
+// Code block or single statement
+scope_body : stmts_ne { $$ = scanner->parseStmtBody($1); scanner->leaveScope(); }
+           | block    { $$ = $1; scanner->leaveScope(); }
+           ;
 
 // Import
 import : KWIMPORT id_list   { $$ = scanner->parseImports($2); }
@@ -280,18 +284,22 @@ for : KWFOR LPAR ID COLON expr RPAR body
     ;
 
 // While loop
-while : KWWHILE LPAR expr RPAR body { $$ = scanner->parseWhile($3, $5); }
+while : wh_kw LPAR expr RPAR scope_body { $$ = scanner->parseWhile($3, $5); }
       ;
+wh_kw : KWWHILE { scanner->enterBlockScope(); }
 // Do while
-dowhile : KWDO body KWWHILE LPAR expr RPAR
+dowhile : do_kw scope_body KWWHILE LPAR expr RPAR
         ;
+do_kw : KWDO { /*scanner->enterBlockScope();*/ }
 
 // If-else statement (works also as else if)
-if : KWIF LPAR expr RPAR body else { $$ = scanner->parseIfStmt($3, $5, $6); }
+if : if_kw LPAR expr RPAR scope_body else { $$ = scanner->parseIfStmt($3, $5, $6); }
    ;
-else : KWELSE body  { $$ = $2; }
+else : el_kw scope_body  { $$ = $2; }
      |              { $$ = scanner->parseStmtBody(nullptr); }
      ;
+if_kw : KWIF { scanner->enterBlockScope(); }
+el_kw : KWELSE { scanner->enterBlockScope(); }
 
 // Struct definition
 struct : KWSTRUCT ID LBR RBR              { $$ = scanner->parseStruct($2, std::vector<ptc::ir::IR *>{}); }
