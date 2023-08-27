@@ -34,6 +34,7 @@ DIAG(ERR_NOT_A_TYPE, Error, "‘{0}’ is not a type.")
 DIAG(ERR_BAD_STRUCT_ELEM, Error, "struct element access must be an identifier.")
 DIAG(ERR_TYPE_NOT_STRUCT, Error, "type ‘{0}’ does not have members.")
 DIAG(ERR_HAS_NO_MEMBER, Error, "‘{0}’ has no member ‘{1}’.")
+DIAG(ERR_CANNOT_INFER_TYPE, Error, "Cannot infer type for ‘{0}’.")
 
 DIAG(ERR_EXPECTED, Error, "expected ‘{0}’ but found ‘{1}’.")
 //DIAG(note_module_identifier_declaration, Note, "module identifier declared here")

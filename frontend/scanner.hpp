@@ -85,8 +85,11 @@ public:
      * @param name Symbol to lookup
      * @return The symbol if it is found or nullptr
      */
-    ir::IR *sym_lookup(llvm::StringRef name, bool fail_if_not_found=false) {
-        LOGMAX("Symbol lookup: "+name.str());
+    ir::IR *sym_lookup(std::string name, bool fail_if_not_found=false) {
+        LOGMAX("Symbol lookup: "+name);
+        // Remove matrix brackets
+        name.erase(std::remove(name.begin(), name.end(), '['), name.end());
+        name.erase(std::remove(name.begin(), name.end(), ']'), name.end());
         auto rval = currScope->lookup(name);
         if(!rval && fail_if_not_found) {
             diags.report(llvmloc, diag::ERR_UNDEFINED_TYPE, name);
@@ -110,12 +113,15 @@ public:
     ir::Expr *parseBool(bool v);
     ir::Expr *parseString(std::string v);
     ir::Expr *parseVar(std::string v, bool external=false);
+    ir::Expr *parseMatrix(std::vector<ir::Expr *> values);
     ir::Expr *parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, bool is_const=false);
     ir::Expr *parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params);
     std::vector<ir::Expr *> parseFunCallArg(ir::Expr *e);
     std::vector<ir::Expr *> parseAddFunCallArg(std::vector<ir::Expr *> &list, ir::Expr *e);
     std::vector<ir::Expr *> parseMatrixSize(ir::Expr *e);
     std::vector<ir::Expr *> parseAddMatrixSize(std::vector<ir::Expr *> &list, ir::Expr *e);
+    std::vector<ir::Expr *> parseMatrixValue(ir::Expr *e);
+    std::vector<ir::Expr *> parseAddMatrixValue(std::vector<ir::Expr *> &list, ir::Expr *e);
     std::vector<ir::FormalParamDecl *> parseFunParam(ir::IR *type, std::string name);
     std::vector<ir::FormalParamDecl *> parseAddFunParam(std::vector<ir::FormalParamDecl *> &list, ir::IR *type, std::string name);
     std::vector<std::string> parseImportName(std::string name);

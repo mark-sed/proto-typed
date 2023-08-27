@@ -654,6 +654,8 @@ namespace  ptc  {
       // set
       // expr
       // expr_var
+      // matrix
+      // expr_mat
       // int_val
       char dummy4[sizeof (ptc::ir::Expr *)];
 
@@ -681,6 +683,7 @@ namespace  ptc  {
       char dummy6[sizeof (std::string)];
 
       // callarglist
+      // matvals
       // matsq
       char dummy7[sizeof (std::vector<ptc::ir::Expr *> )];
 
@@ -1023,6 +1026,8 @@ namespace  ptc  {
       case symbol_kind::S_set: // set
       case symbol_kind::S_expr: // expr
       case symbol_kind::S_expr_var: // expr_var
+      case symbol_kind::S_matrix: // matrix
+      case symbol_kind::S_expr_mat: // expr_mat
       case symbol_kind::S_int_val: // int_val
         value.move< ptc::ir::Expr * > (std::move (that.value));
         break;
@@ -1053,6 +1058,7 @@ namespace  ptc  {
         break;
 
       case symbol_kind::S_callarglist: // callarglist
+      case symbol_kind::S_matvals: // matvals
       case symbol_kind::S_matsq: // matsq
         value.move< std::vector<ptc::ir::Expr *>  > (std::move (that.value));
         break;
@@ -1279,6 +1285,8 @@ switch (yykind)
       case symbol_kind::S_set: // set
       case symbol_kind::S_expr: // expr
       case symbol_kind::S_expr_var: // expr_var
+      case symbol_kind::S_matrix: // matrix
+      case symbol_kind::S_expr_mat: // expr_mat
       case symbol_kind::S_int_val: // int_val
         value.template destroy< ptc::ir::Expr * > ();
         break;
@@ -1309,6 +1317,7 @@ switch (yykind)
         break;
 
       case symbol_kind::S_callarglist: // callarglist
+      case symbol_kind::S_matvals: // matvals
       case symbol_kind::S_matsq: // matsq
         value.template destroy< std::vector<ptc::ir::Expr *>  > ();
         break;
@@ -2991,7 +3000,7 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 3013,     ///< Last index in yytable_.
+      yylast_ = 2994,     ///< Last index in yytable_.
       yynnts_ = 54,  ///< Number of nonterminal symbols.
       yyfinal_ = 125 ///< Termination state number.
     };
@@ -3005,7 +3014,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 3009 "frontend/parser.hpp"
+#line 3018 "frontend/parser.hpp"
 
 
 

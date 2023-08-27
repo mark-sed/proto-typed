@@ -542,13 +542,38 @@ std::vector<ir::Expr *> Scanner::parseAddMatrixSize(std::vector<ir::Expr *> &lis
 }
 
 ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &matsize) {
-    LOGMAX("Creating matrix type "+name+"[...]");
+    for(size_t i = 0; i < matsize.size(); ++i) {
+        name += "[]";
+    }
+    LOGMAX("Creating matrix type "+name);
     auto rootType = sym_lookup(name, true);
     if(auto rootDecl = llvm::dyn_cast<ir::TypeDecl>(rootType)) {
         return new ir::TypeDecl(currentIR, llvmloc, name, matsize, rootDecl->getDecl());
     }
     diags.report(llvmloc, diag::ERR_NOT_A_TYPE, name);
     return nullptr;
+}
+
+std::vector<ir::Expr *> Scanner::parseMatrixValue(ir::Expr *e) {
+    LOGMAX("Creating new matrix with "+e->debug());
+    std::vector<ir::Expr *> list{e};
+    return list;
+}
+
+std::vector<ir::Expr *> Scanner::parseAddMatrixValue(std::vector<ir::Expr *> &list, ir::Expr *e) {
+    LOGMAX("Pushing new matrix value "+e->debug());
+    list.push_back(e);
+    return list;
+}
+
+ir::Expr *Scanner::parseMatrix(std::vector<ir::Expr *> values) {
+    LOGMAX("Creating new matrix literal");
+    ir::TypeDecl *t = unknownType;
+    if(!values.empty()) {
+        ir::TypeDecl *elT = values[0]->getType();
+        t = new ir::TypeDecl(elT->getEnclosingIR(), elT->getLocation(), elT->getName()+"[]", elT);
+    }
+    return new ir::MatrixLiteral(llvmloc, values, t);
 }
 
 ir::IR *Scanner::parseImports(std::vector<std::string> names) {

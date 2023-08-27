@@ -33,12 +33,26 @@ void UnresolvedSymbolResolver::resolve(ir::Expr * expr, llvm::SMLoc loc) {
     else if(auto e = llvm::dyn_cast<ir::BinaryInfixExpr>(expr)) {
         resolve(e->getLeft(), loc);
         resolve(e->getRight(), loc);
+        // Unknown matrix type
+        if(e->getOperator().getKind() == ir::OperatorKind::OP_ASSIGN &&
+                llvm::isa<ir::MatrixLiteral>(e->getRight()) &&
+                e->getRight()->getType()->getName() == UNKNOWN_CSTR) {
+            if(e->getLeft()->getType()->getName() == UNKNOWN_CSTR) {
+                diags.report(loc, diag::ERR_CANNOT_INFER_TYPE, e->getLeft()->debug());
+            }
+            e->getRight()->setType(e->getLeft()->getType());
+        }
         auto newe = scanner->parseInfixExpr(e->getLeft(), e->getRight(), e->getOperator(), e->isConst());
         expr->setType(newe->getType());
     }
     else if(auto e = llvm::dyn_cast<ir::UnaryPrefixExpr>(expr)) {
         resolve(e->getExpr(), loc);
         e->setType(e->getExpr()->getType());
+    }
+    else if(auto e = llvm::dyn_cast<ir::MatrixLiteral>(expr)) {
+        for(auto v: e->getValue()) {
+            resolve(v, loc);
+        }
     }
     else if(auto e = llvm::dyn_cast<ir::UnresolvedSymbolAccess>(expr)) {
         // TODO: Handle function pointer
@@ -52,24 +66,33 @@ void UnresolvedSymbolResolver::resolve(ir::Expr * expr, llvm::SMLoc loc) {
 }
 
 void UnresolvedSymbolResolver::resolve(std::vector<ir::IR *> body) {
-    for(auto i : body) {
+    for(auto *i : body) {
         // Statements to resolve further
-        if(auto stmt = llvm::dyn_cast<ir::ReturnStmt>(i)) {
+        if(auto *stmt = llvm::dyn_cast<ir::ReturnStmt>(i)) {
             if(stmt->getValue())
                 resolve(stmt->getValue(), stmt->getLocation());
         }
-        else if(auto stmt = llvm::dyn_cast<ir::FunctionDecl>(i)) {
+        else if(auto *stmt = llvm::dyn_cast<ir::FunctionDecl>(i)) {
             resolve(stmt->getDecl());
         }
-        else if(auto stmt = llvm::dyn_cast<ir::WhileStmt>(i)) {
+        else if(auto *stmt = llvm::dyn_cast<ir::WhileStmt>(i)) {
             resolve(stmt->getBody());
         }
-        else if(auto stmt = llvm::dyn_cast<ir::IfStatement>(i)) {
+        else if(auto *stmt = llvm::dyn_cast<ir::IfStatement>(i)) {
             resolve(stmt->getIfBranch());
             resolve(stmt->getElseBranch());
         }
-        else if(auto stmt = llvm::dyn_cast<ir::ExprStmt>(i)) {
+        else if(auto *stmt = llvm::dyn_cast<ir::ExprStmt>(i)) {
             resolve(stmt->getExpr(), stmt->getLocation());   
+        }
+        else if(auto *stmt = llvm::dyn_cast<ir::VarDecl>(i)) {
+            if(stmt->getInitValue() && stmt->getInitValue()->getType()->getName() == UNKNOWN_CSTR) {
+                auto *e = stmt->getInitValue();
+                e->setType(stmt->getType());
+                LOGMAX(stmt->getType()->getName());
+                LOGMAX(stmt->getInitValue()->getType()->getName());
+                LOGMAX(i->debug());
+            }   
         }
     }
 }

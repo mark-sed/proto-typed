@@ -137,6 +137,8 @@ std::string block2String(std::vector<ir::IR *> block);
 
 class Expr;
 
+std::string block2List(std::vector<ir::Expr *> block);
+
 /**
  * Declaration of a type
  */
@@ -163,7 +165,7 @@ public:
     IR *getDecl() { return decl; }
     std::string debug() const override { 
         if(!matrixSize.empty()) {
-            return name + "[...]"; // TODO
+            return name + "<" + block2List(matrixSize) + ">";
         }
         return name; 
     }
@@ -187,7 +189,7 @@ public:
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_VAR_DECL;
     }
-    virtual std::string debug() const override { return "("+td->debug()+")"+name; }
+    virtual std::string debug() const override;
 };
 
 /**
@@ -375,10 +377,10 @@ public:
 class Expr {
 private:
     const ExprKind kind;
-    TypeDecl *type;
     bool is_const;
 protected:
-    Expr(ExprKind kind, TypeDecl *type, bool is_const) : kind(kind), type(type), is_const(is_const) {}
+    TypeDecl *type;
+    Expr(ExprKind kind, TypeDecl *type, bool is_const) : kind(kind), is_const(is_const), type(type) {}
     virtual ~Expr() {}
 public:
     ExprKind getKind() const { return kind; }
@@ -539,7 +541,7 @@ public:
     static bool classof(const Expr *e) {
         return e->getKind() == ExprKind::EX_MATRIX;
     }
-    std::string debug() const override { return "[TODO]"; }
+    std::string debug() const override { return "("+type->getName()+")["+block2List(value)+"]"; }
 };
 
 /**
@@ -672,7 +674,7 @@ public:
     }
     std::string debug() const override {
         if(!unresolved)
-            return fun->getName()+"(...)";
+            return "("+fun->getReturnType()->getName()+")"+fun->getName()+"(...)";
         return "(unresolved)"+unresF->getName()+"(...)";
     }
 };

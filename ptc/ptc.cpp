@@ -270,6 +270,11 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    LOGMAX("Generated IRs after resolver:\n----------");
+    for(auto mi: modulesToCompile) {
+        LOGMAX(mi->getScanner()->mainModule->debug());
+    }
+
     // Codegen
     for(auto mi: modulesToCompile) {
         const auto &fileName = mi->getPath();

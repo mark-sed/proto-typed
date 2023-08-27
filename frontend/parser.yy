@@ -201,9 +201,12 @@
 %type <ptc::ir::Expr *> expr
 %type <ptc::ir::Expr *> int_val
 %type <ptc::ir::Expr *> expr_var
+%type <ptc::ir::Expr *> expr_mat
 %type <ptc::ir::Expr *> set
+%type <ptc::ir::Expr *> matrix
 %type <std::vector<ptc::ir::Expr *> > callarglist
 %type <std::vector<ptc::ir::Expr *> > matsq
+%type <std::vector<ptc::ir::Expr *> > matvals
 %type <std::vector<ptc::ir::IR *> > body
 %type <std::vector<ptc::ir::IR *> > scope_body
 %type <std::vector<ptc::ir::IR *> > block
@@ -366,10 +369,10 @@ callarglist : expr                    { $$ = scanner->parseFunCallArg($1); }
             ;
 
 // Expressions
-expr : expr_mat     { $$ = nullptr; }
+expr : expr_mat     { $$ = $1; }
      | expr_var     { $$ = $1; }
-     | expr_none    { $$ = nullptr; }
-     | expr_struct  { $$ = nullptr; }
+     | expr_none
+     | expr_struct
      | expr_int     { $$ = scanner->parseInt($1); }
      | expr_float   { $$ = scanner->parseFloat($1); }
      | expr_str     { $$ = scanner->parseString($1); }
@@ -583,15 +586,15 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          ;
 
 // Matrix value
-matrix : LSQ RSQ
-       | LSQ matvals RSQ
-       | LSQ END matvals RSQ
-       | LSQ matvals END RSQ
-       | LSQ END matvals END RSQ
+matrix : LSQ RSQ                 { $$ = scanner->parseMatrix(std::vector<ptc::ir::Expr *>{}); }
+       | LSQ matvals RSQ         { $$ = scanner->parseMatrix($2); }
+       | LSQ END matvals RSQ     { $$ = scanner->parseMatrix($3); }
+       | LSQ matvals END RSQ     { $$ = scanner->parseMatrix($2); }
+       | LSQ END matvals END RSQ { $$ = scanner->parseMatrix($3); }
        ;
-matvals : expr
-        | expr COMMA matvals
-        | expr COMMA END matvals
+matvals : expr                   { $$ = scanner->parseMatrixValue($1); }
+        | matvals COMMA expr     { $$ = scanner->parseAddMatrixValue($1, $3); }
+        | matvals COMMA END expr { $$ = scanner->parseAddMatrixValue($1, $4); }
         ;
 
 // Matrix expression
