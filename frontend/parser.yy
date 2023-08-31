@@ -191,6 +191,7 @@
 %type <ptc::ir::IR *> stmts_ne
 %type <ptc::ir::IR *> if
 %type <ptc::ir::IR *> while
+%type <ptc::ir::IR *> dowhile
 %type <ptc::ir::IR *> stmts
 %type <ptc::ir::IR *> function
 %type <ptc::ir::IR *> return
@@ -243,7 +244,7 @@ stmts_ne : set stmt_end      { $$ = scanner->parseExprStmt($1); }
          | for
          | if           { $$ = $1; }
          | while        { $$ = $1; }
-         | dowhile
+         | dowhile      { $$ = $1; }
          | struct       { $$ = $1; }
          | function     { $$ = $1; }
          | flowctl stmt_end  { $$ = $1; }
@@ -291,9 +292,9 @@ while : wh_kw LPAR expr RPAR scope_body { $$ = scanner->parseWhile($3, $5); }
       ;
 wh_kw : KWWHILE { scanner->enterBlockScope(); }
 // Do while
-dowhile : do_kw scope_body KWWHILE LPAR expr RPAR
+dowhile : do_kw scope_body KWWHILE LPAR expr RPAR { $$ = scanner->parseDoWhile($5, $2); }
         ;
-do_kw : KWDO { /*scanner->enterBlockScope();*/ }
+do_kw : KWDO { scanner->enterBlockScope(); }
 
 // If-else statement (works also as else if)
 if : if_kw LPAR expr RPAR scope_body else { $$ = scanner->parseIfStmt($3, $5, $6); }

@@ -764,6 +764,19 @@ ir::IR *Scanner::parseWhile(ir::Expr *cond, std::vector<ir::IR *> &body) {
     return whl;
 }
 
+ir::IR *Scanner::parseDoWhile(ir::Expr *cond, std::vector<ir::IR *> &body) {
+    LOGMAX("Parsing do while");
+    if(cond->getType() != boolType) {
+        diags.report(llvmloc, diag::ERR_WHILE_COND_MUST_BE_BOOL, cond->getType()->getName());
+    }
+    auto whl = new ir::WhileStmt(currentIR, llvmloc, "do", cond, body, true);
+    // Set enclosing IR for all statements in the body to this
+    for(auto i : body) {
+        i->setEnclosingIR(whl);
+    }
+    return whl;
+}
+
 ir::IR *Scanner::parseFun(ir::IR *type, std::string name, std::vector<ir::FormalParamDecl *> params, std::vector<ir::IR *> body) {
     LOGMAX("Parsing a function "+name);
     auto ctype = llvm::dyn_cast<ir::TypeDecl>(type);

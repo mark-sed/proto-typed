@@ -781,7 +781,12 @@ void cg::CGFunction::emitStmt(ir::WhileStmt *stmt) {
     stmt->setAfterBB(whileAfterBB);
     stmt->setCondBB(whileCondBB);
 
-    builder.CreateBr(whileCondBB);
+    if(stmt->isDoWhile()) {
+        builder.CreateBr(whileBodyBB);
+    }
+    else {
+        builder.CreateBr(whileCondBB);
+    }
     sealBlock(currBB);
     setCurrBB(whileCondBB);
     llvm::Value *cond = emitExpr(stmt->getCond());

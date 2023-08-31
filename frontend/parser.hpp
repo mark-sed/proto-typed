@@ -665,6 +665,7 @@ namespace  ptc  {
       // flowctl
       // return
       // while
+      // dowhile
       // if
       // struct
       // declistval
@@ -1038,6 +1039,7 @@ namespace  ptc  {
       case symbol_kind::S_flowctl: // flowctl
       case symbol_kind::S_return: // return
       case symbol_kind::S_while: // while
+      case symbol_kind::S_dowhile: // dowhile
       case symbol_kind::S_if: // if
       case symbol_kind::S_struct: // struct
       case symbol_kind::S_declistval: // declistval
@@ -1297,6 +1299,7 @@ switch (yykind)
       case symbol_kind::S_flowctl: // flowctl
       case symbol_kind::S_return: // return
       case symbol_kind::S_while: // while
+      case symbol_kind::S_dowhile: // dowhile
       case symbol_kind::S_if: // if
       case symbol_kind::S_struct: // struct
       case symbol_kind::S_declistval: // declistval
@@ -3014,7 +3017,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 3018 "frontend/parser.hpp"
+#line 3021 "frontend/parser.hpp"
 
 
 

@@ -716,17 +716,21 @@ private:
     std::vector<ir::IR *> body;
     llvm::BasicBlock *afterBB;
     llvm::BasicBlock *condBB;
+    bool doWhile;
 public:
     WhileStmt(IR *enclosing_ir, 
               llvm::SMLoc loc,
               std::string name,
               Expr *cond,
-              std::vector<ir::IR *> body)
+              std::vector<ir::IR *> body,
+              bool doWhile=false)
         : IR(IRKind::IR_WHILE, enclosing_ir, loc, name),
           cond(cond),
-          body(body) {}
+          body(body),
+          doWhile(doWhile) {}
 
     Expr *getCond() { return cond; }
+    bool isDoWhile() { return doWhile; }
     std::vector<ir::IR *> getBody() { return body; }
     void setAfterBB(llvm::BasicBlock *bb) { afterBB = bb; }
     void setCondBB(llvm::BasicBlock *bb) { condBB = bb; }
