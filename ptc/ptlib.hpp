@@ -43,6 +43,7 @@ private:
     void to_string_intInit();
     void to_string_floatInit();
     void to_string_boolInit();
+    void length_stringInit();
 public:
     PTLib(CGModule *mod, llvm::Module *llvmMod, llvm::LLVMContext &ctx);
 
@@ -50,6 +51,7 @@ public:
     void setupLib();
     
     void appendInit(std::string name, llvm::Type *mt, llvm::Type *vt);
+    void length_matrixInit(std::string name, llvm::Type *mt);
 };
 
 }

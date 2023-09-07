@@ -134,6 +134,21 @@ void Scanner::init() {
                                                 body);
         currScope->insert(fun);
     }
+
+    {
+        auto params = std::vector<ir::FormalParamDecl *>{
+            new ir::FormalParamDecl(currentIR, llvmloc, "v", this->stringType, false)
+        };
+        auto body = std::vector<ir::IR *> {};
+        auto fun = new ir::FunctionDecl(currentIR,
+                                                llvm::SMLoc(),
+                                                "length_string",
+                                                "length",
+                                                this->intType,
+                                                params,
+                                                body);
+        currScope->insert(fun);
+    }
 }
 
 void Scanner::parse(std::istream *code) {
@@ -565,15 +580,28 @@ void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT) {
         new ir::FormalParamDecl(currentIR, llvmloc, "v", elemT, false)
     };
     auto body = std::vector<ir::IR *> {};
-    auto fun = new ir::FunctionDecl(currentIR,
+    auto funAppend = new ir::FunctionDecl(currentIR,
                                             llvm::SMLoc(),
                                             "append_"+t->getName()+"_"+elemT->getName(),
                                             "append",
                                             this->voidType,
                                             params,
                                             body);
-    globalScope->insert(fun);
-    mainModule->addLibFunction(fun);
+    globalScope->insert(funAppend);
+    mainModule->addLibFunction(funAppend);
+
+    auto paramsMat = std::vector<ir::FormalParamDecl *>{
+        new ir::FormalParamDecl(currentIR, llvmloc, "m", t, false)
+    };
+    auto funLength = new ir::FunctionDecl(currentIR,
+                                            llvm::SMLoc(),
+                                            "length_"+t->getName(),
+                                            "length",
+                                            this->intType,
+                                            paramsMat,
+                                            body);
+    globalScope->insert(funLength);
+    mainModule->addLibFunction(funLength);
 }
 
 ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &matsize) {

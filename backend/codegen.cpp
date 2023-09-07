@@ -1227,6 +1227,9 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
         if(f->getOGName() == "append") {
             ptlibLoader->appendInit(f->getName(), mapType(f->getParams()[0]), mapType(f->getParams()[1]));
         }
+        else if(f->getOGName() == "length") {
+            ptlibLoader->length_matrixInit(f->getName(), mapType(f->getParams()[0]));
+        }
         else {
             llvm::report_fatal_error(("Missing code for function "+f->getOGName()).c_str()); 
         }

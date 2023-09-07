@@ -233,6 +233,19 @@ void PTLib::to_string_boolInit() {
     builder.CreateRet(rval);
 }
 
+void PTLib::length_stringInit() {
+    auto funType = llvm::FunctionType::get(int64T, { stringT }, false);
+    llvm::Function *f = llvm::Function::Create(funType, 
+                                            llvm::GlobalValue::ExternalLinkage,
+                                            "length_string",
+                                            llvmMod);
+    llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+    setCurrBB(bb);
+    llvm::Value *len32 = builder.CreateExtractValue(f->getArg(0), 1);
+    auto len64 = builder.CreateSExt(len32, int64T);
+    builder.CreateRet(len64);
+}
+
 void PTLib::appendInit(std::string name, llvm::Type *mt, llvm::Type *vt) {
     auto funType = llvm::FunctionType::get(voidT, { mt, vt }, false);
     llvm::Function *f = llvm::Function::Create(funType, 
@@ -269,11 +282,25 @@ void PTLib::appendInit(std::string name, llvm::Type *mt, llvm::Type *vt) {
     builder.CreateRetVoid();
 }
 
+void PTLib::length_matrixInit(std::string name, llvm::Type *mt) {
+    auto funType = llvm::FunctionType::get(int64T, { mt }, false);
+    llvm::Function *f = llvm::Function::Create(funType, 
+                                            llvm::GlobalValue::ExternalLinkage,
+                                            name,
+                                            llvmMod);
+    llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+    setCurrBB(bb);
+    llvm::Value *len32 = builder.CreateExtractValue(f->getArg(0), 1);
+    auto len64 = builder.CreateSExt(len32, int64T);
+    builder.CreateRet(len64);
+}
+
 void PTLib::setupLib() {
     print_stringInit();
     to_string_intInit();
     to_string_floatInit();
     to_string_boolInit();
+    length_stringInit();
 }
 
 void PTLib::setupExternLib() {
