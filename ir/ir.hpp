@@ -137,8 +137,12 @@ public:
 std::string block2String(std::vector<ir::IR *> block);
 
 class Expr;
+class FormalParamDecl;
 
+// TODO: Dont be lazy and template this
 std::string block2List(std::vector<ir::Expr *> block);
+std::string block2List(std::vector<ir::IR *> block);
+std::string block2List(std::vector<ir::FormalParamDecl *> block);
 
 /**
  * Declaration of a type
@@ -318,7 +322,7 @@ public:
     }
     virtual std::string debug() const override {
         if(!prototype)
-            return returnType->getName()+" "+name+"(...) {\n" + block2String(decls) +"}\n";
+            return returnType->getName()+" "+name+"("+ block2List(params) +") {\n" + block2String(decls) +"}\n";
         else
             return "unknwon-type unknown-function(?) { ... }";
     }

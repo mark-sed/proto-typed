@@ -42,12 +42,13 @@ private:
     void to_string_intInit();
     void to_string_floatInit();
     void to_string_boolInit();
-
 public:
     PTLib(CGModule *mod, llvm::Module *llvmMod, llvm::LLVMContext &ctx);
 
     void setupExternLib();
     void setupLib();
+    
+    //void setupMatrix(llvm::Type *t);
 };
 
 }

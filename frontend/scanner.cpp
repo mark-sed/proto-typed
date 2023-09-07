@@ -548,7 +548,26 @@ ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &mats
     LOGMAX("Creating matrix type "+name);
     auto rootType = sym_lookup(name, true);
     if(auto rootDecl = llvm::dyn_cast<ir::TypeDecl>(rootType)) {
-        return new ir::TypeDecl(currentIR, llvmloc, name, matsize, rootDecl->getDecl());
+        auto t = new ir::TypeDecl(currentIR, llvmloc, name, matsize, rootDecl->getDecl());
+
+        // Add all the templated matrix functions to the symtable
+        {
+            auto params = std::vector<ir::FormalParamDecl *>{
+                new ir::FormalParamDecl(currentIR, llvmloc, "m", t, false),
+                new ir::FormalParamDecl(currentIR, llvmloc, "v", rootDecl, false)
+            };
+            auto body = std::vector<ir::IR *> {};
+            auto fun = new ir::FunctionDecl(currentIR,
+                                                    llvm::SMLoc(),
+                                                    "append_"+t->getName()+"_"+rootDecl->getName(),
+                                                    "append",
+                                                    this->voidType,
+                                                    params,
+                                                    body);
+            globalScope->insert(fun);
+        }
+
+        return t;
     }
     diags.report(llvmloc, diag::ERR_NOT_A_TYPE, name);
     return nullptr;
@@ -714,6 +733,7 @@ ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
             }
             if(!propFIR) {
                 diags.report(llvmloc, diag::ERR_INCORRECT_ARGS, f->getOGName());
+                return nullptr;
             }
             auto propF = llvm::dyn_cast<ir::FunctionDecl>(propFIR);
 

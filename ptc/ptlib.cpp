@@ -233,6 +233,10 @@ void PTLib::to_string_boolInit() {
     builder.CreateRet(rval);
 }
 
+/*void PTLib::setupMatrix(llvm::Type *t) {
+
+}*/
+
 void PTLib::setupLib() {
     print_stringInit();
     to_string_intInit();

@@ -38,6 +38,26 @@ std::string ir::block2List(std::vector<ir::Expr *> block) {
     return ss.str();
 }
 
+std::string ir::block2List(std::vector<ir::IR *> block) {
+    std::stringstream ss;
+    std::string separator = "";
+    for(auto i : block) {
+        ss << separator << i->debug();
+        separator = ",";
+    }
+    return ss.str();
+}
+
+std::string ir::block2List(std::vector<ir::FormalParamDecl *> block) {
+    std::stringstream ss;
+    std::string separator = "";
+    for(auto i : block) {
+        ss << separator << i->debug();
+        separator = ",";
+    }
+    return ss.str();
+}
+
 std::string ir::VarDecl::debug() const {
     if(!initValue)
         return "("+td->debug()+")"+name;
