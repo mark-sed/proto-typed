@@ -1689,7 +1689,7 @@ namespace  ptc  {
 
   case 107: // expr_var: expr_mat "[" int_val "]"
 #line 393 "frontend/parser.yy"
-           { yylhs.value.as < ptc::ir::Expr * > () = yystack_[3].value.as < ptc::ir::Expr * > (); }
+                                    { yylhs.value.as < ptc::ir::Expr * > () = scanner->parseInfixExpr(yystack_[3].value.as < ptc::ir::Expr * > (), yystack_[1].value.as < ptc::ir::Expr * > (), ir::Operator(ir::OperatorKind::OP_SUBSCR)); }
 #line 1694 "frontend/parser.cpp"
     break;
 

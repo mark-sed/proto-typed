@@ -355,6 +355,27 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
     }
     case ir::ExprKind::EX_BOOL: return llvm::ConstantInt::get(int1T, llvm::dyn_cast<ir::BoolLiteral>(e)->getValue());
     case ir::ExprKind::EX_FLOAT: return llvm::ConstantFP::get(floatT,llvm::dyn_cast<ir::FloatLiteral>(e)->getValue());
+    case ir::ExprKind::EX_MATRIX:
+    {
+        auto matobj = builder.CreateAlloca(matrixT);
+        auto matrixCreateF = cgm.getLLVMMod()->getOrInsertFunction("matrix_Create_Default", 
+                                                      llvm::FunctionType::get(
+                                                        voidT,
+                                                        matrixTPtr,
+                                                        false
+                                                      ));
+        builder.CreateCall(matrixCreateF, matobj);
+        auto mex = llvm::dyn_cast<ir::MatrixLiteral>(e);
+        // TODO: change to non cyclic call once add matrix is created or init matrix
+        auto matrixAppend = cgm.getLLVMMod()->getFunction("append_"+mex->getType()->getName()+"_"+mex->getType()->getDecl()->getName());
+        if(!matrixAppend) {
+            llvm::report_fatal_error(("Somehow correctly templated append function was not generated: append_"+mex->getType()->getName()+"_"+mex->getType()->getDecl()->getName()).c_str());
+        }
+        for(auto v: mex->getValue()) {
+            builder.CreateCall(matrixAppend, {matobj, emitExpr(v)});
+        }
+        return builder.CreateLoad(matrixT, matobj);
+    }
     case ir::ExprKind::EX_FUN_CALL: return emitFunCall(llvm::dyn_cast<ir::FunctionCall>(e));
     case ir::ExprKind::EX_MEMBER_ACCESS: return nullptr; // Member access is handeled by the left hand side
     // TODO: Other ones
@@ -1177,6 +1198,7 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
 
     // Generate templated libFunctions
     for(auto f: mod->getLibFunctions()) {
+        LOGMAX("Generating templated function: "+f->getName());
         if(f->getOGName() == "append") {
             ptlibLoader->appendInit(f->getName(), mapType(f->getParams()[0]), mapType(f->getParams()[1]));
         }

@@ -49,6 +49,8 @@ private:
     ir::TypeDecl *boolType;
     ir::TypeDecl *voidType;
     ir::TypeDecl *unknownType;
+
+    void addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT);
 public:
     ptc::Parser::location_type *loc = nullptr;     ///< Current parsing location
     ir::ModuleDecl *mainModule;

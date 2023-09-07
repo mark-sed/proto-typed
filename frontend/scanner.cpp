@@ -553,6 +553,23 @@ std::vector<ir::Expr *> Scanner::parseAddMatrixSize(std::vector<ir::Expr *> &lis
     return list;
 }
 
+void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT) {
+    auto params = std::vector<ir::FormalParamDecl *>{
+        new ir::FormalParamDecl(currentIR, llvmloc, "m", t, true),
+        new ir::FormalParamDecl(currentIR, llvmloc, "v", elemT, false)
+    };
+    auto body = std::vector<ir::IR *> {};
+    auto fun = new ir::FunctionDecl(currentIR,
+                                            llvm::SMLoc(),
+                                            "append_"+t->getName()+"_"+elemT->getName(),
+                                            "append",
+                                            this->voidType,
+                                            params,
+                                            body);
+    globalScope->insert(fun);
+    mainModule->addLibFunction(fun);
+}
+
 ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &matsize) {
     auto ogName = name;
     for(size_t i = 0; i < matsize.size(); ++i) {
@@ -573,23 +590,7 @@ ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &mats
         }
         auto t = new ir::TypeDecl(currentIR, llvmloc, name, matsize, elemT);
 
-        // Add all the templated matrix functions to the symtable
-        {
-            auto params = std::vector<ir::FormalParamDecl *>{
-                new ir::FormalParamDecl(currentIR, llvmloc, "m", t, true),
-                new ir::FormalParamDecl(currentIR, llvmloc, "v", elemT, false)
-            };
-            auto body = std::vector<ir::IR *> {};
-            auto fun = new ir::FunctionDecl(currentIR,
-                                                    llvm::SMLoc(),
-                                                    "append_"+t->getName()+"_"+elemT->getName(),
-                                                    "append",
-                                                    this->voidType,
-                                                    params,
-                                                    body);
-            globalScope->insert(fun);
-            mainModule->addLibFunction(fun);
-        }
+        addMatrixTemplatedFunction(t, elemT);
 
         return t;
     }
@@ -614,7 +615,8 @@ ir::Expr *Scanner::parseMatrix(std::vector<ir::Expr *> values) {
     ir::TypeDecl *t = unknownType;
     if(!values.empty()) {
         ir::TypeDecl *elT = values[0]->getType();
-        t = new ir::TypeDecl(elT->getEnclosingIR(), elT->getLocation(), elT->getName()+"[]", elT);
+        t = new ir::TypeDecl(elT->getEnclosingIR(), elT->getLocation(), elT->getName()+"[]", values, elT);
+        addMatrixTemplatedFunction(t, elT);
     }
     return new ir::MatrixLiteral(llvmloc, values, t);
 }

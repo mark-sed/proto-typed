@@ -390,7 +390,7 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          | expr_var LPAR callarglist RPAR { $$ = scanner->parseFunCall($1, $3); }
 
          | expr_str LSQ int_val RSQ 
-         | expr_mat LSQ int_val RSQ
+         | expr_mat LSQ int_val RSQ { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_SUBSCR)); }
          | ID LSQ int_val RSQ       { $$ = scanner->parseInfixExpr(scanner->parseVar($1), $3, ir::Operator(ir::OperatorKind::OP_SUBSCR)); }
          | EXT_ID LSQ int_val RSQ   { $$ = scanner->parseInfixExpr(scanner->parseVar($1), $3, ir::Operator(ir::OperatorKind::OP_SUBSCR)); }
          | expr_var LSQ int_val RSQ { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_SUBSCR)); }
