@@ -18,6 +18,7 @@
 #include "llvm/IR/IRBuilder.h"
 #include <vector>
 #include <sstream>
+#include <unordered_set>
 
 #define INT_CSTR "int"
 #define FLOAT_CSTR "float"
@@ -814,6 +815,7 @@ class ModuleDecl : public IR {
 private:
     std::vector<IR *> decls;
     bool main;
+    std::unordered_set<FunctionDecl *> libFunctions;
 public:
     ModuleDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name)
               : IR(IRKind::IR_MODULE_DECL, enclosing_ir, loc, name), main(false) {}
@@ -827,6 +829,9 @@ public:
     void setDecls(std::vector<ir::IR *> &decls) { this->decls = decls; }
     void setMain(bool m) { this->main = m; }
     bool isMain() { return this->main; }
+    void setLibFunctions(std::unordered_set<FunctionDecl *> fs) { libFunctions = fs; }
+    std::unordered_set<FunctionDecl *> getLibFunctions() { return libFunctions; }
+    void addLibFunction(FunctionDecl *f) { libFunctions.insert(f); }
 
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_MODULE_DECL;

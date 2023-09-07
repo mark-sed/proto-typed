@@ -285,8 +285,19 @@ llvm::Value *cg::CGFunction::emitFunCall(ir::FunctionCall *e) {
     }
     ir::FunctionDecl *f = e->getFun();
     std::vector<llvm::Value *> args{};
+    int index = 0;
     for(auto a: e->getParams()) {
-        args.push_back(emitExpr(a));
+        auto emEx = emitExpr(a);
+        if(f->getParams()[index]->isByReference()) {
+            if(auto li = llvm::dyn_cast<llvm::LoadInst>(emEx)) {
+                emEx = li->getOperand(0);
+            }
+            else {
+                llvm::report_fatal_error("Argument in a function call cannot be passed in by a reference");
+            }
+        }
+        args.push_back(emEx);
+        ++index;
     }
     // TODO: Set last arg to true is argvars
     //llvm::FunctionType *fType = llvm::FunctionType::get(voidType, argTypes, false);
@@ -1152,6 +1163,16 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
         break;
         default: llvm::report_fatal_error("Code generation invoked for not yet implemented IR");
         break;
+        }
+    }
+
+    // Generate templated libFunctions
+    for(auto f: mod->getLibFunctions()) {
+        if(f->getOGName() == "append") {
+            ptlibLoader->appendInit(f->getName(), mapType(f->getParams()[0]), mapType(f->getParams()[1]));
+        }
+        else {
+            llvm::report_fatal_error(("Missing code for function "+f->getOGName()).c_str()); 
         }
     }
 

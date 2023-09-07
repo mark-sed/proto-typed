@@ -553,7 +553,7 @@ ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &mats
         // Add all the templated matrix functions to the symtable
         {
             auto params = std::vector<ir::FormalParamDecl *>{
-                new ir::FormalParamDecl(currentIR, llvmloc, "m", t, false),
+                new ir::FormalParamDecl(currentIR, llvmloc, "m", t, true),
                 new ir::FormalParamDecl(currentIR, llvmloc, "v", rootDecl, false)
             };
             auto body = std::vector<ir::IR *> {};
@@ -565,6 +565,7 @@ ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &mats
                                                     params,
                                                     body);
             globalScope->insert(fun);
+            mainModule->addLibFunction(fun);
         }
 
         return t;

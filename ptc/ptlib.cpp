@@ -233,9 +233,41 @@ void PTLib::to_string_boolInit() {
     builder.CreateRet(rval);
 }
 
-/*void PTLib::setupMatrix(llvm::Type *t) {
+void PTLib::appendInit(std::string name, llvm::Type *mt, llvm::Type *vt) {
+    auto funType = llvm::FunctionType::get(voidT, { mt, vt }, false);
+    llvm::Function *f = llvm::Function::Create(funType, 
+                                            llvm::GlobalValue::ExternalLinkage,
+                                            name,
+                                            llvmMod);
+    llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+    setCurrBB(bb);
 
-}*/
+    auto appendPrepF = llvmMod->getOrInsertFunction("matrix_Append_Prepare", 
+                                                llvm::FunctionType::get(
+                                                    voidT,
+                                                    matrixTPtr,
+                                                    false
+                                                ));
+
+    builder.CreateCall(appendPrepF, { f->getArg(0) });
+    
+    llvm::Value* zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 0);
+    llvm::Value* one = llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 1);
+    llvm::Value* bufferPtr = builder.CreateGEP(matrixT, f->getArg(0), {zero, zero});
+    auto buffer = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), bufferPtr);
+
+    auto casted = builder.CreateBitCast(buffer, vt->getPointerTo());
+    
+    //get length and subtract 1
+    auto indexPtr = builder.CreateGEP(matrixT, f->getArg(0), {zero, one});
+    auto length = builder.CreateLoad(builder.getInt32Ty(), indexPtr);
+    auto index = builder.CreateSub(length, one);
+
+    auto valptr = builder.CreateGEP(vt, casted, index);
+    builder.CreateStore(f->getArg(1), valptr);
+    
+    builder.CreateRetVoid();
+}
 
 void PTLib::setupLib() {
     print_stringInit();

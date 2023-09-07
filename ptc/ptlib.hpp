@@ -2,6 +2,7 @@
 #define _PTLIB_HPP_
 
 #include "codegen.hpp"
+#include "ir.hpp"
 #include "llvm/Support/Casting.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
@@ -48,7 +49,7 @@ public:
     void setupExternLib();
     void setupLib();
     
-    //void setupMatrix(llvm::Type *t);
+    void appendInit(std::string name, llvm::Type *mt, llvm::Type *vt);
 };
 
 }
