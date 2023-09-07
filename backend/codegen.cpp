@@ -760,6 +760,15 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             llvm::report_fatal_error("Member access is of a different type");
         }
     break;
+    case ir::OperatorKind::OP_SUBSCR:
+    {
+        auto elT = mapType(e->getLeft()->getType()->getDecl());
+        llvm::Value* buffer = builder.CreateExtractValue(left, 0);
+        auto casted = builder.CreateBitCast(buffer, elT->getPointerTo());
+        auto valptr = builder.CreateGEP(elT, casted, right);
+        result = builder.CreateLoad(elT, valptr);
+    }
+    break;
     // TODO: implement rest
     default: llvm::report_fatal_error("Uknown operator in code generation");
     }

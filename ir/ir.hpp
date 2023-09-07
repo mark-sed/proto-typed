@@ -101,6 +101,7 @@ enum OperatorKind {
     OP_CONCAT,
     OP_ASSIGN,
     OP_ACCESS,
+    OP_SUBSCR,
     OP_UNKNOWN
 };
 
@@ -370,6 +371,7 @@ public:
         case OP_CONCAT: return "++";
         case OP_ASSIGN: return "=";
         case OP_ACCESS: return ".";
+        case OP_SUBSCR: return "[]";
         case OP_UNKNOWN: return "unknown";
         default: return "not-listed-op";
         }

@@ -446,6 +446,18 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
             // TODO: check that tr is a matrix
             type = this->boolType;
         break;
+        case ir::OperatorKind::OP_SUBSCR:
+            if(!tl->isMatrix() || !utils::isOneOf(tr->getName(), {INT_CSTR})) {
+                diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+            }
+            if(!tl->getDecl()) {
+                diags.report(llvmloc, diag::ERR_INTERNAL, "Somehow root type for matrix was not set");
+            }
+            type = llvm::dyn_cast<ir::TypeDecl>(tl->getDecl());
+            if(!type) {
+                diags.report(llvmloc, diag::ERR_INTERNAL, "Somehow root type for matrix is incorrect");
+            }
+        break;
         case ir::OperatorKind::OP_ACCESS:
         {
             std::string elemName;
@@ -542,20 +554,24 @@ std::vector<ir::Expr *> Scanner::parseAddMatrixSize(std::vector<ir::Expr *> &lis
 }
 
 ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &matsize) {
+    auto ogName = name;
     for(size_t i = 0; i < matsize.size(); ++i) {
         name += "[]";
     }
     LOGMAX("Creating matrix type "+name);
     auto rootType = sym_lookup(name, true);
     if(auto rootDecl = llvm::dyn_cast<ir::TypeDecl>(rootType)) {
-        auto t = new ir::TypeDecl(currentIR, llvmloc, name, matsize, rootDecl->getDecl());
         auto elemT = rootDecl;
-        if(matsize.size() > 1) {
-            auto elemName = name.substr(0, name.size()-2);
-            std::vector<ir::Expr *> elemSize(matsize);
-            elemSize.pop_back();
-            elemT = new ir::TypeDecl(currentIR, llvmloc, elemName, elemSize, rootDecl->getDecl());
+        auto elemName = ogName;
+        for(size_t i = 0; i < matsize.size()-1; ++i) {
+            elemName += "[]";
+            std::vector<ir::Expr *> elemSize;
+            for(size_t j = 0; j <= i; ++j) {
+                elemSize.push_back(matsize[j]);
+            }
+            elemT = new ir::TypeDecl(currentIR, llvmloc, elemName, elemSize, elemT);
         }
+        auto t = new ir::TypeDecl(currentIR, llvmloc, name, matsize, elemT);
 
         // Add all the templated matrix functions to the symtable
         {
