@@ -549,17 +549,24 @@ ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &mats
     auto rootType = sym_lookup(name, true);
     if(auto rootDecl = llvm::dyn_cast<ir::TypeDecl>(rootType)) {
         auto t = new ir::TypeDecl(currentIR, llvmloc, name, matsize, rootDecl->getDecl());
+        auto elemT = rootDecl;
+        if(matsize.size() > 1) {
+            auto elemName = name.substr(0, name.size()-2);
+            std::vector<ir::Expr *> elemSize(matsize);
+            elemSize.pop_back();
+            elemT = new ir::TypeDecl(currentIR, llvmloc, elemName, elemSize, rootDecl->getDecl());
+        }
 
         // Add all the templated matrix functions to the symtable
         {
             auto params = std::vector<ir::FormalParamDecl *>{
                 new ir::FormalParamDecl(currentIR, llvmloc, "m", t, true),
-                new ir::FormalParamDecl(currentIR, llvmloc, "v", rootDecl, false)
+                new ir::FormalParamDecl(currentIR, llvmloc, "v", elemT, false)
             };
             auto body = std::vector<ir::IR *> {};
             auto fun = new ir::FunctionDecl(currentIR,
                                                     llvm::SMLoc(),
-                                                    "append_"+t->getName()+"_"+rootDecl->getName(),
+                                                    "append_"+t->getName()+"_"+elemT->getName(),
                                                     "append",
                                                     this->voidType,
                                                     params,
@@ -733,7 +740,7 @@ ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
                 }*/
             }
             if(!propFIR) {
-                diags.report(llvmloc, diag::ERR_INCORRECT_ARGS, f->getOGName());
+                diags.report(llvmloc, diag::ERR_INCORRECT_ARGS_DET, f->getOGName(), ir::block2List(f->getParams()), ir::block2List(params));
                 return nullptr;
             }
             auto propF = llvm::dyn_cast<ir::FunctionDecl>(propFIR);
