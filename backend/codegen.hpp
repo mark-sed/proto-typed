@@ -2,6 +2,7 @@
 #define _CODE_GEN_HPP_
 
 #include "ir.hpp"
+#include "ptlib.hpp"
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
@@ -14,6 +15,8 @@
 namespace ptc {
 
 namespace cg {
+
+class PTLib;
 
 class CodeGenHandler {
 private:
@@ -72,9 +75,10 @@ public:
     llvm::Type *int1T;
     llvm::Type *int64T;
     llvm::Type *floatT;
-    //llvm::Type *stringT;
     llvm::StructType *stringT;
     llvm::PointerType *stringTPtr;
+    llvm::StructType *matrixT;
+    llvm::PointerType *matrixTPtr;
 
     llvm::Type *mapType(ir::IR *decl);
     llvm::Type *convertType(ir::TypeDecl *type);
@@ -93,15 +97,16 @@ private:
     llvm::DenseMap<ir::IR *, llvm::GlobalObject *> globals;
     llvm::GlobalVariable *str_empty;
     std::vector<std::pair<llvm::Value *, llvm::GlobalVariable *>> stringsToInit;
+    std::vector<std::pair<llvm::Value *, ir::MatrixLiteral *>> matricesToInit;
 
-    void setupExternFuncs();
-    void setupLibFuncs();
+    PTLib *ptlibLoader;
 protected:
     virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) override;
     virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl) override;
 
 public:
-    CGModule(llvm::Module *llvmMod) : CodeGen(llvmMod->getContext(), *this), llvmMod(llvmMod) {}
+    CGModule(llvm::Module *llvmMod);
+    ~CGModule();
 
     llvm::LLVMContext &getLLVMCtx() { return llvmMod->getContext(); }
     llvm::Module *getLLVMMod() { return llvmMod; }

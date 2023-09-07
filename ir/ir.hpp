@@ -23,6 +23,7 @@
 #define FLOAT_CSTR "float"
 #define BOOL_CSTR "bool"
 #define STRING_CSTR "string"
+#define MATRIX_CSTR "matrix"
 #define VOID_CSTR "void"
 #define UNKNOWN_CSTR "*unknowntype*"
 
