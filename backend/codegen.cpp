@@ -783,11 +783,36 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     break;
     case ir::OperatorKind::OP_SUBSCR:
     {
-        auto elT = mapType(e->getLeft()->getType()->getDecl());
-        llvm::Value* buffer = builder.CreateExtractValue(left, 0);
-        auto casted = builder.CreateBitCast(buffer, elT->getPointerTo());
-        auto valptr = builder.CreateGEP(elT, casted, right);
-        result = builder.CreateLoad(elT, valptr);
+        if(e->getLeft()->getType()->isMatrix()) {
+            // matrix
+            auto elT = mapType(e->getLeft()->getType()->getDecl());
+            llvm::Value* buffer = builder.CreateExtractValue(left, 0);
+            auto casted = builder.CreateBitCast(buffer, elT->getPointerTo());
+            auto valptr = builder.CreateGEP(elT, casted, right);
+            result = builder.CreateLoad(elT, valptr);
+        }
+        else {
+            // string
+            std::string emstr = "";
+            auto resStrIR = new ir::StringLiteral(llvm::SMLoc(), emstr, e->getLeft()->getType());
+            auto resStr = emitExpr(resStrIR);
+            auto resStrPtr = llvm::dyn_cast<llvm::LoadInst>(resStr)->getOperand(0);
+            auto str_add = cgm.getLLVMMod()->getOrInsertFunction("string_Add_Char",
+                                 llvm::FunctionType::get(
+                                    voidT,
+                                    {
+                                        stringT->getPointerTo(),
+                                        builder.getInt8Ty()
+                                    },
+                                    false
+                                 ));
+            llvm::Value* buffer = builder.CreateExtractValue(left, 0);
+            auto valptr = builder.CreateGEP(builder.getInt8Ty(), buffer, right);
+            auto charextr = builder.CreateLoad(builder.getInt8Ty(), valptr);
+
+            builder.CreateCall(str_add, {resStrPtr, charextr});
+            return builder.CreateLoad(stringT, resStrPtr);
+        }
     }
     break;
     // TODO: implement rest

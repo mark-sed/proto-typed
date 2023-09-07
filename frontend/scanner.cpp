@@ -447,15 +447,21 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
             type = this->boolType;
         break;
         case ir::OperatorKind::OP_SUBSCR:
-            if(!tl->isMatrix() || !utils::isOneOf(tr->getName(), {INT_CSTR})) {
+            if((!tl->isMatrix() && !utils::isOneOf(tl->getName(), {STRING_CSTR})) || !utils::isOneOf(tr->getName(), {INT_CSTR})) {
                 diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
             }
-            if(!tl->getDecl()) {
-                diags.report(llvmloc, diag::ERR_INTERNAL, "Somehow root type for matrix was not set");
+
+            if(tl->isMatrix()) {
+                if(!tl->getDecl()) {
+                    diags.report(llvmloc, diag::ERR_INTERNAL, "Somehow root type for matrix was not set");
+                }
+                type = llvm::dyn_cast<ir::TypeDecl>(tl->getDecl());
+                if(!type) {
+                    diags.report(llvmloc, diag::ERR_INTERNAL, "Somehow root type for matrix is incorrect");
+                }
             }
-            type = llvm::dyn_cast<ir::TypeDecl>(tl->getDecl());
-            if(!type) {
-                diags.report(llvmloc, diag::ERR_INTERNAL, "Somehow root type for matrix is incorrect");
+            else {
+                type = tl;
             }
         break;
         case ir::OperatorKind::OP_ACCESS:

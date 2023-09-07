@@ -84,6 +84,7 @@ define fastcc void @string_Add_Char(%string* %this, i8 %value) {
 	%length = load i32, i32* %1
 	%2 = getelementptr %string, %string* %this, i32 0, i32 2
 	%maxlen = load i32, i32* %2
+	; TODO: increment length
 	; if length == maxlen:
 	%3 = icmp eq i32 %length, %maxlen
 	br i1 %3, label %grow_begin, label %grow_close
@@ -102,6 +103,9 @@ grow_close:
 	store i8 %value, i8* %7
 	%8 = add i32 %length, 1
 	store i32 %8, i32* %1
+	; store also \0
+	%9 = getelementptr i8, i8* %buffer, i32 %8
+	store i8 0, i8* %9
 
 	ret void
 }
