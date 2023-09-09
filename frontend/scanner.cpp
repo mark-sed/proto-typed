@@ -857,6 +857,40 @@ ir::IR *Scanner::parseDoWhile(ir::Expr *cond, std::vector<ir::IR *> &body) {
     return whl;
 }
 
+ir::IR *Scanner::parseForeach(ir::Expr *i, ir::Expr *collection, std::vector<ir::IR *> &body) {
+    LOGMAX("Parsing foreach");
+    if(collection->getType()->getName() == STRING_CSTR && i->getType()->getName() != STRING_CSTR) {
+        diags.report(llvmloc, diag::ERR_MISMATCHED_FOR_TYPES, i->getType()->getName(), collection->getType()->getName());
+    }
+    else if(collection->getType()->isMatrix()) {
+        if(!collection->getType()->getDecl()) {
+            diags.report(llvmloc, diag::ERR_MISMATCHED_FOR_TYPES, i->getType()->getName(), collection->getType()->getName());
+        }
+        else if(collection->getType()->getDecl()->getName() != i->getType()->getName()) {
+            diags.report(llvmloc, diag::ERR_MISMATCHED_FOR_TYPES, i->getType()->getName(), collection->getType()->getName());
+        }
+    }
+    else {
+        diags.report(llvmloc, diag::ERR_UNSUPPORTED_FOR_TYPE, collection->getType()->getName());
+    }
+    auto freach = new ir::ForeachStmt(currentIR, llvmloc, "for", i, collection, body);
+    // Set enclosing IR for all statements in the body to this
+    for(auto i : body) {
+        i->setEnclosingIR(freach);
+    }
+    return freach;
+}
+
+ir::IR *Scanner::parseForeach(ir::IR *i, ir::Expr *collection, std::vector<ir::IR *> &body) {
+    if(auto ivd = llvm::dyn_cast<ir::VarDecl>(i)) {
+        return parseForeach(new ir::VarAccess(ivd), collection, body);
+    }
+    else {
+        diags.report(llvmloc, diag::ERR_INCORRECT_FOR_CONSTRUCT);
+        return nullptr;
+    }
+}
+
 ir::IR *Scanner::parseFun(ir::IR *type, std::string name, std::vector<ir::FormalParamDecl *> params, std::vector<ir::IR *> body) {
     LOGMAX("Parsing a function "+name);
     auto ctype = llvm::dyn_cast<ir::TypeDecl>(type);

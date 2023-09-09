@@ -104,6 +104,8 @@ public:
     ir::IR *parseExprStmt(ir::Expr *e);
     ir::IR *parseIfStmt(ir::Expr *cond, std::vector<ir::IR *> &ifBranch, std::vector<ir::IR *> &elseBranch);
     ir::IR *parseWhile(ir::Expr *cond, std::vector<ir::IR *> &body);
+    ir::IR *parseForeach(ir::Expr *i, ir::Expr *collection, std::vector<ir::IR *> &body);
+    ir::IR *parseForeach(ir::IR *i, ir::Expr *collection, std::vector<ir::IR *> &body);
     ir::IR *parseDoWhile(ir::Expr *cond, std::vector<ir::IR *> &body);
     ir::IR *parseFun(ir::IR *type, std::string name, std::vector<ir::FormalParamDecl *> params, std::vector<ir::IR *> body);
     ir::IR *parseMatrixType(std::string name, std::vector<ir::Expr *> &matsize);

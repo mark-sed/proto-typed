@@ -664,6 +664,7 @@ namespace  ptc  {
       // import
       // flowctl
       // return
+      // for
       // while
       // dowhile
       // if
@@ -1038,6 +1039,7 @@ namespace  ptc  {
       case symbol_kind::S_import: // import
       case symbol_kind::S_flowctl: // flowctl
       case symbol_kind::S_return: // return
+      case symbol_kind::S_for: // for
       case symbol_kind::S_while: // while
       case symbol_kind::S_dowhile: // dowhile
       case symbol_kind::S_if: // if
@@ -1298,6 +1300,7 @@ switch (yykind)
       case symbol_kind::S_import: // import
       case symbol_kind::S_flowctl: // flowctl
       case symbol_kind::S_return: // return
+      case symbol_kind::S_for: // for
       case symbol_kind::S_while: // while
       case symbol_kind::S_dowhile: // dowhile
       case symbol_kind::S_if: // if
@@ -3003,7 +3006,7 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 2994,     ///< Last index in yytable_.
+      yylast_ = 3077,     ///< Last index in yytable_.
       yynnts_ = 54,  ///< Number of nonterminal symbols.
       yyfinal_ = 125 ///< Termination state number.
     };
@@ -3017,7 +3020,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 3021 "frontend/parser.hpp"
+#line 3024 "frontend/parser.hpp"
 
 
 

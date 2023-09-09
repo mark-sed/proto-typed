@@ -47,6 +47,7 @@ enum IRKind {
     IR_FUNCTION_DECL,
     IR_IF,
     IR_WHILE,
+    IR_FOREACH,
     IR_RETURN,
     IR_MODULE_DECL,
     IR_IMPORT,
@@ -749,6 +750,34 @@ public:
     }
     virtual std::string debug() const override {
         return "while("+cond->debug()+") {\n"+ block2String(body) +"}\n";
+    }
+};
+
+class ForeachStmt : public IR {
+private:
+    Expr *i;
+    Expr *collection;
+    std::vector<ir::IR *> body;
+public:
+    ForeachStmt(IR *enclosing_ir,
+                llvm::SMLoc loc,
+                std::string name,
+                Expr *i,
+                Expr *collection,
+                std::vector<ir::IR *> body)
+        : IR(IRKind::IR_FOREACH, enclosing_ir, loc, name),
+          i(i),
+          collection(collection),
+          body(body) {}
+    
+    Expr *getI() { return i; }
+    Expr *getCollection() { return collection; }
+    std::vector<ir::IR *> getBody() { return body; }
+    static bool classof(const IR *ir) {
+        return ir->getKind() == IRKind::IR_FOREACH;
+    }
+    virtual std::string debug() const override {
+        return "for("+i->debug()+" : "+ collection->debug() +") {\n"+ block2String(body) +"}\n";
     }
 };
 

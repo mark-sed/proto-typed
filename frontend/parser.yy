@@ -191,6 +191,7 @@
 %type <ptc::ir::IR *> stmts_ne
 %type <ptc::ir::IR *> if
 %type <ptc::ir::IR *> while
+%type <ptc::ir::IR *> for
 %type <ptc::ir::IR *> dowhile
 %type <ptc::ir::IR *> stmts
 %type <ptc::ir::IR *> function
@@ -241,7 +242,7 @@ stmts_ne : set stmt_end      { $$ = scanner->parseExprStmt($1); }
          | vardecl stmt_end  { $$ = $1; }
          | vardef stmt_end   { $$ = $1; }
          | import stmt_end   { $$ = $1; }
-         | for
+         | for          { $$ = $1; }
          | if           { $$ = $1; }
          | while        { $$ = $1; }
          | dowhile      { $$ = $1; }
@@ -284,7 +285,8 @@ return : KWRETURN       { $$ = scanner->parseReturn(nullptr); }
        ;
 
 // For loop
-for : KWFOR LPAR ID COLON expr RPAR body
+for : KWFOR LPAR vardecl COLON expr RPAR body { $$ = scanner->parseForeach($3, $5, $7); }
+    | KWFOR LPAR EXT_ID COLON expr RPAR body  { $$ = scanner->parseForeach(scanner->parseVar($3), $5, $7); }
     ;
 
 // While loop

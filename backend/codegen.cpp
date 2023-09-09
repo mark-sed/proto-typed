@@ -796,6 +796,7 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             std::string emstr = "";
             auto resStrIR = new ir::StringLiteral(llvm::SMLoc(), emstr, e->getLeft()->getType());
             auto resStr = emitExpr(resStrIR);
+            delete resStrIR;
             auto resStrPtr = llvm::dyn_cast<llvm::LoadInst>(resStr)->getOperand(0);
             auto str_add = cgm.getLLVMMod()->getOrInsertFunction("string_Add_Char",
                                  llvm::FunctionType::get(
