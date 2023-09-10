@@ -76,9 +76,16 @@ void UnresolvedSymbolResolver::resolve(std::vector<ir::IR *> body) {
             resolve(stmt->getDecl());
         }
         else if(auto *stmt = llvm::dyn_cast<ir::WhileStmt>(i)) {
+            resolve(stmt->getCond(), stmt->getLocation());
+            resolve(stmt->getBody());
+        }
+        else if(auto *stmt = llvm::dyn_cast<ir::ForeachStmt>(i)) {
+            resolve(stmt->getI(), stmt->getLocation());
+            resolve(stmt->getCollection(), stmt->getLocation());
             resolve(stmt->getBody());
         }
         else if(auto *stmt = llvm::dyn_cast<ir::IfStatement>(i)) {
+            resolve(stmt->getCond(), stmt->getLocation());
             resolve(stmt->getIfBranch());
             resolve(stmt->getElseBranch());
         }
@@ -107,7 +114,7 @@ void FunctionAnalyzer::checkReturnType(std::vector<ir::IR *> decls, int *num_fou
         if(auto stmt = llvm::dyn_cast<ir::ReturnStmt>(decl)) {
             *num_found += 1;
             auto encl = stmt->getEnclosingIR();
-            if(llvm::isa<ir::WhileStmt>(encl)) { // TODO: Add for loop
+            if(llvm::isa<ir::WhileStmt>(encl) || llvm::isa<ir::ForeachStmt>(encl)) { 
                 *nested_ret += 1;
             }
             else if(auto ifs = llvm::dyn_cast<ir::IfStatement>(encl)) {
@@ -144,7 +151,9 @@ void FunctionAnalyzer::checkReturnType(std::vector<ir::IR *> decls, int *num_fou
         else if(auto stmt = llvm::dyn_cast<ir::WhileStmt>(decl)) {
             checkReturnType(stmt->getBody(), num_found, nested_ret, expected);
         }
-        // TODO: Add for loop
+        else if(auto stmt = llvm::dyn_cast<ir::ForeachStmt>(decl)) {
+            checkReturnType(stmt->getBody(), num_found, nested_ret, expected);
+        }
     }
 }
 

@@ -191,7 +191,7 @@ int main(int argc, char *argv[]) {
     llvm::cl::SetVersionPrinter(&printVersion);
     llvm::cl::ParseCommandLineOptions(argc, argv, head);
 
-    log::Logger::get().set_disable(false);
+    log::Logger::get().set_disable(verboseLevel == 0);
     log::Logger::get().set_log_everything(true);
     log::Logger::get().set_logging_level(verboseLevel);
 
