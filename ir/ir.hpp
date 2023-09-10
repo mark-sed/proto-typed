@@ -758,21 +758,29 @@ private:
     Expr *i;
     Expr *collection;
     std::vector<ir::IR *> body;
+    bool defineI;
+    llvm::BasicBlock *afterBB;
+    llvm::BasicBlock *condBB;
 public:
     ForeachStmt(IR *enclosing_ir,
                 llvm::SMLoc loc,
                 std::string name,
                 Expr *i,
                 Expr *collection,
-                std::vector<ir::IR *> body)
+                std::vector<ir::IR *> body,
+                bool defineI)
         : IR(IRKind::IR_FOREACH, enclosing_ir, loc, name),
           i(i),
           collection(collection),
-          body(body) {}
+          body(body),
+          defineI(defineI) {}
     
     Expr *getI() { return i; }
     Expr *getCollection() { return collection; }
     std::vector<ir::IR *> getBody() { return body; }
+    void setAfterBB(llvm::BasicBlock *bb) { afterBB = bb; }
+    void setCondBB(llvm::BasicBlock *bb) { condBB = bb; }
+    bool getDefineI() { return defineI; }
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_FOREACH;
     }

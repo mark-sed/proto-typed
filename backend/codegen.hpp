@@ -150,6 +150,7 @@ protected:
     void emitStmt(ir::ContinueStmt *stmt);
     void emitStmt(ir::IfStatement *stmt);
     void emitStmt(ir::WhileStmt *stmt);
+    void emitStmt(ir::ForeachStmt *stmt);
     void emitStmt(ir::Import *stmt);
     void emitStmt(ir::VarDecl *stmt);
     virtual void emit(std::vector<ir::IR *> stmts);

@@ -857,7 +857,7 @@ ir::IR *Scanner::parseDoWhile(ir::Expr *cond, std::vector<ir::IR *> &body) {
     return whl;
 }
 
-ir::IR *Scanner::parseForeach(ir::Expr *i, ir::Expr *collection, std::vector<ir::IR *> &body) {
+ir::IR *Scanner::parseForeach(ir::Expr *i, ir::Expr *collection, std::vector<ir::IR *> &body, bool defineI) {
     LOGMAX("Parsing foreach");
     if(collection->getType()->getName() == STRING_CSTR && i->getType()->getName() != STRING_CSTR) {
         diags.report(llvmloc, diag::ERR_MISMATCHED_FOR_TYPES, i->getType()->getName(), collection->getType()->getName());
@@ -873,17 +873,21 @@ ir::IR *Scanner::parseForeach(ir::Expr *i, ir::Expr *collection, std::vector<ir:
     else {
         diags.report(llvmloc, diag::ERR_UNSUPPORTED_FOR_TYPE, collection->getType()->getName());
     }
-    auto freach = new ir::ForeachStmt(currentIR, llvmloc, "for", i, collection, body);
+    auto freach = new ir::ForeachStmt(currentIR, llvmloc, "for", i, collection, body, defineI);
     // Set enclosing IR for all statements in the body to this
     for(auto i : body) {
         i->setEnclosingIR(freach);
+    }
+    if(defineI) {
+        auto vracc = llvm::dyn_cast<ir::VarAccess>(i);
+        vracc->getVar()->setEnclosingIR(freach);
     }
     return freach;
 }
 
 ir::IR *Scanner::parseForeach(ir::IR *i, ir::Expr *collection, std::vector<ir::IR *> &body) {
     if(auto ivd = llvm::dyn_cast<ir::VarDecl>(i)) {
-        return parseForeach(new ir::VarAccess(ivd), collection, body);
+        return parseForeach(new ir::VarAccess(ivd), collection, body, true);
     }
     else {
         diags.report(llvmloc, diag::ERR_INCORRECT_FOR_CONSTRUCT);

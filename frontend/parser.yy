@@ -286,6 +286,7 @@ return : KWRETURN       { $$ = scanner->parseReturn(nullptr); }
 
 // For loop
 for : KWFOR LPAR vardecl COLON expr RPAR body { $$ = scanner->parseForeach($3, $5, $7); }
+    | KWFOR LPAR ID COLON expr RPAR body  { $$ = scanner->parseForeach(scanner->parseVar($3), $5, $7); }
     | KWFOR LPAR EXT_ID COLON expr RPAR body  { $$ = scanner->parseForeach(scanner->parseVar($3), $5, $7); }
     ;
 

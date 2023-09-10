@@ -320,6 +320,7 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
     case ir::ExprKind::EX_VAR:
     {
         auto *decl = llvm::dyn_cast<ir::VarAccess>(e)->getVar();
+        LOGMAX("Accessing variable: "+e->debug());
         return readVar(currBB, decl);
     }
     case ir::ExprKind::EX_INT:
@@ -899,6 +900,84 @@ void cg::CGFunction::emitStmt(ir::WhileStmt *stmt) {
     setCurrBB(whileAfterBB);
 }
 
+void cg::CGFunction::emitStmt(ir::ForeachStmt *stmt) {
+    llvm::BasicBlock *forCondBB = llvm::BasicBlock::Create(ctx, "for.cond", llvmFun);
+    llvm::BasicBlock *forBodyBB = llvm::BasicBlock::Create(ctx, "for.body", llvmFun);
+    llvm::BasicBlock *forAfterBB = llvm::BasicBlock::Create(ctx, "for.after", llvmFun);
+
+    stmt->setAfterBB(forAfterBB);
+    stmt->setCondBB(forCondBB);
+
+    auto indexPtr = builder.CreateAlloca(int64T);
+    builder.CreateStore(llvm::ConstantInt::get(int64T, 0, true), indexPtr);
+    llvm::Value *iPtr = nullptr;
+    if(stmt->getDefineI()) {
+        iPtr = builder.CreateAlloca(mapType(stmt->getI()->getType()));
+    }
+    builder.CreateBr(forCondBB);
+
+    sealBlock(currBB);
+    setCurrBB(forCondBB);
+
+    llvm::Value *coll = emitExpr(stmt->getCollection());
+    auto lengthF = cgm.getLLVMMod()->getOrInsertFunction("length_"+stmt->getCollection()->getType()->getName(), 
+                                                    llvm::FunctionType::get(
+                                                        int64T,
+                                                        mapType(stmt->getCollection()->getType()),
+                                                        false
+                                                    ));
+    auto lengthVal = builder.CreateCall(lengthF, coll);
+    auto index = builder.CreateLoad(int64T, indexPtr);
+    auto cmplen = builder.CreateICmpSLT(index, lengthVal);
+    builder.CreateCondBr(cmplen, forBodyBB, forAfterBB);
+
+    setCurrBB(forBodyBB);
+    auto stacksave = cgm.getLLVMMod()->getOrInsertFunction("llvm.stacksave", 
+                                                    llvm::FunctionType::get(
+                                                        builder.getInt8Ty()->getPointerTo(),
+                                                        false
+                                                    ));
+    auto stackrestore = cgm.getLLVMMod()->getOrInsertFunction("llvm.stackrestore", 
+                                                    llvm::FunctionType::get(
+                                                        voidT,
+                                                        builder.getInt8Ty()->getPointerTo(),
+                                                        false
+                                                    ));
+    auto stp = builder.CreateCall(stacksave);
+    
+    if(stmt->getCollection()->getType()->isMatrix()) {
+        // matrix
+        auto elT = mapType(stmt->getCollection()->getType()->getDecl());
+        llvm::Value* buffer = builder.CreateExtractValue(coll, 0);
+        auto casted = builder.CreateBitCast(buffer, elT->getPointerTo());
+        auto valptr = builder.CreateGEP(elT, casted, index);
+        auto result = builder.CreateLoad(elT, valptr);
+        if(!stmt->getDefineI()) {
+            auto iLd = emitExpr(stmt->getI());
+            iPtr = llvm::dyn_cast<llvm::LoadInst>(iLd)->getOperand(0);
+        }
+        if(!iPtr) {
+            llvm::report_fatal_error("Somehow for loop value is not being loaded");
+        }
+        builder.CreateStore(result, iPtr);
+    }
+    else {
+        // string
+        
+    }
+
+    emit(stmt->getBody());
+    
+    auto newIndex = builder.CreateNSWAdd(index, llvm::ConstantInt::get(int64T, 1, true));
+    builder.CreateStore(newIndex, indexPtr);
+    builder.CreateCall(stackrestore, { stp });
+    builder.CreateBr(forCondBB);
+    sealBlock(currBB);
+    sealBlock(forCondBB);
+    setCurrBB(forAfterBB);
+
+}
+
 void cg::CGFunction::emitStmt(ir::ReturnStmt *stmt) {
     if(fun->getName() == "_entry") {
         llvm::report_fatal_error("return can appear only inside of a function");
@@ -996,6 +1075,9 @@ void cg::CGFunction::emit(std::vector<ir::IR *> stmts) {
             emitStmt(stmt);
         }
         else if(auto *stmt = llvm::dyn_cast<ir::WhileStmt>(s)) {
+            emitStmt(stmt);
+        }
+        else if(auto *stmt = llvm::dyn_cast<ir::ForeachStmt>(s)) {
             emitStmt(stmt);
         }
         else if(auto *stmt = llvm::dyn_cast<ir::Import>(s)) {
