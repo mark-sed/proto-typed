@@ -48,6 +48,7 @@ private:
     ir::TypeDecl *stringType;
     ir::TypeDecl *boolType;
     ir::TypeDecl *voidType;
+    ir::TypeDecl *rangeType;
     ir::TypeDecl *unknownType;
 
     void addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT);
@@ -121,6 +122,8 @@ public:
     ir::Expr *parseMatrix(std::vector<ir::Expr *> values);
     ir::Expr *parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, bool is_const=false);
     ir::Expr *parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params);
+    ir::Expr *parseRange(ir::Expr *start, ir::Expr *second, ir::Expr *end);
+    ir::Expr *parseRange(ir::Expr *start, ir::Expr *end);
     std::vector<ir::Expr *> parseFunCallArg(ir::Expr *e);
     std::vector<ir::Expr *> parseAddFunCallArg(std::vector<ir::Expr *> &list, ir::Expr *e);
     std::vector<ir::Expr *> parseMatrixSize(ir::Expr *e);

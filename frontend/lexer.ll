@@ -215,20 +215,20 @@ oct     0[Qq][0-7]+
                   yylval->emplace<long>(std::strtol(&(yytext[2]), nullptr, 8));
                   return token::INT;
                 }
-[-]?[0-9]+\.?[0-9]*[eE][+-]?[0-9]+ {   // Float in scientific notation
+[-]?[0-9]+\.?[0-9]+[eE][+-]?[0-9]+ {   // Float in scientific notation
                   yylval->build<double>(std::stod(yytext)); 
                   return token::FLOAT;
                 }
-[-]?[0-9]*\.?[0-9]+[eE][+-]?[0-9]+ {   // Float in scientific notation
+[-]?[0-9]+\.?[0-9]+[eE][+-]?[0-9]+ {   // Float in scientific notation
                   yylval->build<double>(std::stod(yytext)); 
                   return token::FLOAT;
                 }
-[-]?[0-9]*\.[0-9]+ {   // Float
+[-]?[0-9]+\.[0-9]+ {   // Float
                   yylval->build<double>(std::stod(yytext)); 
                   return token::FLOAT;
                 }
-[-]?[0-9]+\.[0-9]* {   // Float
-                  yylval->build<double>(std::stod(yytext)); 
+[-]?[0-9]+\.[0-9]+ {   // Float
+                  yylval->build<double>(std::stod(yytext));
                   return token::FLOAT;
                 }
 {id}::{id}      {

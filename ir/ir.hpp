@@ -26,6 +26,7 @@
 #define STRING_CSTR "string"
 #define MATRIX_CSTR "matrix"
 #define VOID_CSTR "void"
+#define RANGE_CSTR "range"
 #define UNKNOWN_CSTR "*unknowntype*"
 
 namespace ptc {
@@ -72,6 +73,7 @@ enum ExprKind {
     EX_FUN_PTR,
     EX_EXT_SYMB,
     EX_MEMBER_ACCESS,
+    EX_RANGE,
     EX_UNRESOLVED_SYMB
 };
 
@@ -629,6 +631,33 @@ public:
         return e->getKind() == ExprKind::EX_MEMBER_ACCESS;
     }
     std::string debug() const override { return decl->debug(); }
+};
+
+/**
+ * Access a memeber of a struct
+ */
+class Range : public Expr {
+private:
+    Expr *start;
+    Expr *step;
+    Expr *end;
+public:
+    Range(Expr *start, Expr *step, Expr *end, TypeDecl *type) 
+        : Expr(ExprKind::EX_RANGE, type, false),
+          start(start),
+          step(step),
+          end(end) {}
+
+    Expr *getStart() { return start; }
+    Expr *getStep() { return step; }
+    Expr *getEnd() { return end; }
+
+    static bool classof(const Expr *e) {
+        return e->getKind() == ExprKind::EX_RANGE;
+    }
+    std::string debug() const override { 
+        return "["+start->debug()+" step: "+step->debug()+" .. "+end->debug()+"]"; 
+    }
 };
 
 /**

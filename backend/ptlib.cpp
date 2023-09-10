@@ -20,6 +20,22 @@ PTLib::PTLib(CGModule *mod, llvm::Module *llvmMod, llvm::LLVMContext &ctx)
 }
 
 void PTLib::print_stringInit() {
+    auto printff = llvmMod->getOrInsertFunction("printf",
+                                llvm::FunctionType::get(
+                                builder.getInt32Ty(),
+                                { 
+                                    builder.getInt8Ty()->getPointerTo(),
+                                    builder.getInt8Ty()->getPointerTo()
+                                },
+                                true
+                                ));
+    llvm::GlobalVariable *format = new llvm::GlobalVariable(*llvmMod,
+                                                        builder.getInt8Ty()->getPointerTo(),
+                                                        false,
+                                                        llvm::GlobalValue::PrivateLinkage,
+                                                        nullptr,
+                                                        "");
+    format->setInitializer(builder.CreateGlobalStringPtr("%s", "", 0, llvmMod));
     auto funType = llvm::FunctionType::get(voidT, { stringT }, false);
     llvm::Function *f = llvm::Function::Create(funType, 
                                             llvm::GlobalValue::ExternalLinkage,
@@ -27,9 +43,9 @@ void PTLib::print_stringInit() {
                                             llvmMod);
     llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
     setCurrBB(bb);
-    auto puts = llvmMod->getFunction("puts");
     llvm::Value *cstr = builder.CreateExtractValue(f->getArg(0), 0);
-    builder.CreateCall(puts, { cstr });
+    auto formatloaded = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), format);
+    builder.CreateCall(printff, { formatloaded, cstr });
     builder.CreateRetVoid();
 }
 

@@ -656,6 +656,7 @@ namespace  ptc  {
       // expr_var
       // matrix
       // expr_mat
+      // range
       // int_val
       char dummy4[sizeof (ptc::ir::Expr *)];
 
@@ -1030,6 +1031,7 @@ namespace  ptc  {
       case symbol_kind::S_expr_var: // expr_var
       case symbol_kind::S_matrix: // matrix
       case symbol_kind::S_expr_mat: // expr_mat
+      case symbol_kind::S_range: // range
       case symbol_kind::S_int_val: // int_val
         value.move< ptc::ir::Expr * > (std::move (that.value));
         break;
@@ -1291,6 +1293,7 @@ switch (yykind)
       case symbol_kind::S_expr_var: // expr_var
       case symbol_kind::S_matrix: // matrix
       case symbol_kind::S_expr_mat: // expr_mat
+      case symbol_kind::S_range: // range
       case symbol_kind::S_int_val: // int_val
         value.template destroy< ptc::ir::Expr * > ();
         break;
@@ -3006,9 +3009,9 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 3234,     ///< Last index in yytable_.
+      yylast_ = 3392,     ///< Last index in yytable_.
       yynnts_ = 54,  ///< Number of nonterminal symbols.
-      yyfinal_ = 125 ///< Termination state number.
+      yyfinal_ = 122 ///< Termination state number.
     };
 
 
@@ -3020,7 +3023,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 3024 "frontend/parser.hpp"
+#line 3027 "frontend/parser.hpp"
 
 
 

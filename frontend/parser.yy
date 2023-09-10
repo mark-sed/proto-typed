@@ -206,6 +206,7 @@
 %type <ptc::ir::Expr *> expr_mat
 %type <ptc::ir::Expr *> set
 %type <ptc::ir::Expr *> matrix
+%type <ptc::ir::Expr *> range
 %type <std::vector<ptc::ir::Expr *> > callarglist
 %type <std::vector<ptc::ir::Expr *> > matsq
 %type <std::vector<ptc::ir::Expr *> > matvals
@@ -288,6 +289,9 @@ return : KWRETURN       { $$ = scanner->parseReturn(nullptr); }
 for : KWFOR LPAR vardecl COLON expr RPAR body { $$ = scanner->parseForeach($3, $5, $7); }
     | KWFOR LPAR ID COLON expr RPAR body  { $$ = scanner->parseForeach(scanner->parseVar($3), $5, $7); }
     | KWFOR LPAR EXT_ID COLON expr RPAR body  { $$ = scanner->parseForeach(scanner->parseVar($3), $5, $7); }
+    | KWFOR LPAR vardecl COLON range RPAR body { $$ = scanner->parseForeach($3, $5, $7); }
+    | KWFOR LPAR ID COLON range RPAR body  { $$ = scanner->parseForeach(scanner->parseVar($3), $5, $7); }
+    | KWFOR LPAR EXT_ID COLON range RPAR body  { $$ = scanner->parseForeach(scanner->parseVar($3), $5, $7); }
     ;
 
 // While loop
@@ -595,6 +599,7 @@ matrix : LSQ RSQ                 { $$ = scanner->parseMatrix(std::vector<ptc::ir
        | LSQ END matvals RSQ     { $$ = scanner->parseMatrix($3); }
        | LSQ matvals END RSQ     { $$ = scanner->parseMatrix($2); }
        | LSQ END matvals END RSQ { $$ = scanner->parseMatrix($3); }
+       //| //TODO: [1,2..5] = [1,2,3,4,5] not [[1,2,3,4,5]]
        ;
 matvals : expr                   { $$ = scanner->parseMatrixValue($1); }
         | matvals COMMA expr     { $$ = scanner->parseAddMatrixValue($1, $3); }
@@ -602,13 +607,12 @@ matvals : expr                   { $$ = scanner->parseMatrixValue($1); }
         ;
 
 // Matrix expression
-expr_mat : matrix
-         | range
-         | LPAR matrix RPAR
-         | LPAR range RPAR
+expr_mat : matrix           { $$ = $1; }
+         | LPAR matrix RPAR { $$ = $2; }
          ; // TODO: Add compile time matrix simplification?
-range : LPAR int_val RANGE int_val RPAR
-      | LPAR int_val COMMA int_val RANGE int_val RPAR
+range : LPAR range RPAR                     { $$ = $2; }
+      | int_val RANGE int_val               { $$ = scanner->parseRange($1, $3); }
+      | int_val COMMA int_val RANGE int_val { $$ = scanner->parseRange($1, $3, $5); }
       ;
 int_val : expr_int  { $$ = scanner->parseInt($1); }
         | expr_var  { $$ = $1; }

@@ -21,7 +21,6 @@ add_ptc_tool(ptc
   ptc.cpp
   logging.cpp
   utils.cpp
-  ptlib.cpp
 )
 
 target_link_libraries(ptc

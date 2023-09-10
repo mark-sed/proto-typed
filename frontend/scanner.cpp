@@ -66,6 +66,7 @@ void Scanner::init() {
     stringType = new ir::TypeDecl(currentIR, llvm::SMLoc(), STRING_CSTR);
     boolType = new ir::TypeDecl(currentIR, llvm::SMLoc(), BOOL_CSTR);
     voidType = new ir::TypeDecl(currentIR, llvm::SMLoc(), VOID_CSTR);
+    rangeType = new ir::TypeDecl(currentIR, llvm::SMLoc(), RANGE_CSTR);
 
     unknownType = new ir::TypeDecl(currentIR, llvm::SMLoc(), UNKNOWN_CSTR);
 
@@ -74,6 +75,7 @@ void Scanner::init() {
     currScope->insert(floatType);
     currScope->insert(stringType);
     currScope->insert(voidType);
+    currScope->insert(rangeType);
 
     {
         auto printParams = std::vector<ir::FormalParamDecl *>{
@@ -655,6 +657,41 @@ ir::Expr *Scanner::parseMatrix(std::vector<ir::Expr *> values) {
     return new ir::MatrixLiteral(llvmloc, values, t);
 }
 
+static bool isIntvalExpr(ir::Expr *e) {
+    if(e->getType()->getName() == UNKNOWN_CSTR) {
+        return true;
+    }
+    if(e->getType()->getName() == INT_CSTR) {
+        return true;
+    }
+    return false;
+}
+
+ir::Expr *Scanner::parseRange(ir::Expr *start, ir::Expr *second, ir::Expr *end) {
+    LOGMAX("Parsing range ["+start->debug()+","+second->debug()+".."+end->debug()+"]");
+    if(!isIntvalExpr(start)) {
+        diags.report(llvmloc, diag::ERR_INCORRECT_RANGE_TYPE, "first", start->getType()->getName());
+    }
+    if(!isIntvalExpr(second)) {
+        diags.report(llvmloc, diag::ERR_INCORRECT_RANGE_TYPE, "second", second->getType()->getName());
+    }
+    if(!isIntvalExpr(end)) {
+        diags.report(llvmloc, diag::ERR_INCORRECT_RANGE_TYPE, "last", end->getType()->getName());
+    }
+    return new ir::Range(start, parseInfixExpr(second, start, ir::Operator(ir::OperatorKind::OP_SUB), false), end, rangeType);
+}
+
+ir::Expr *Scanner::parseRange(ir::Expr *start, ir::Expr *end) {
+    LOGMAX("Parsing range ["+start->debug()+".."+end->debug()+"]");
+    if(!isIntvalExpr(start)) {
+        diags.report(llvmloc, diag::ERR_INCORRECT_RANGE_TYPE, "first", start->getType()->getName());
+    }
+    if(!isIntvalExpr(end)) {
+        diags.report(llvmloc, diag::ERR_INCORRECT_RANGE_TYPE, "last", end->getType()->getName());
+    }
+    return new ir::Range(start, parseInt(1), end, rangeType);
+}
+
 ir::IR *Scanner::parseImports(std::vector<std::string> names) {
     LOGMAX("Parsing import list");
     for(auto n: names) {
@@ -868,6 +905,11 @@ ir::IR *Scanner::parseForeach(ir::Expr *i, ir::Expr *collection, std::vector<ir:
         }
         else if(collection->getType()->getDecl()->getName() != i->getType()->getName()) {
             diags.report(llvmloc, diag::ERR_MISMATCHED_FOR_TYPES, i->getType()->getName(), collection->getType()->getName());
+        }
+    }
+    else if(collection->getType()->getName() == RANGE_CSTR) {
+        if(i->getType()->getName() != INT_CSTR) {
+            diags.report(llvmloc, diag::ERR_MISMATCHED_RANGE_TYPE);
         }
     }
     else if(collection->getType()->getName() != STRING_CSTR && i->getType()->getName() != STRING_CSTR){

@@ -429,6 +429,7 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
     }
     case ir::ExprKind::EX_FUN_CALL: return emitFunCall(llvm::dyn_cast<ir::FunctionCall>(e));
     case ir::ExprKind::EX_MEMBER_ACCESS: return nullptr; // Member access is handeled by the left hand side
+    case ir::ExprKind::EX_RANGE: return nullptr; // For loop handles this
     // TODO: Other ones
     default:
         llvm::report_fatal_error(("Unimplemented expression kind in code generation "+e->debug()).c_str());
@@ -958,8 +959,15 @@ void cg::CGFunction::emitStmt(ir::ForeachStmt *stmt) {
     stmt->setAfterBB(forAfterBB);
     stmt->setCondBB(forCondBB);
 
+    auto range = llvm::dyn_cast<ir::Range>(stmt->getCollection());
+
     auto indexPtr = builder.CreateAlloca(int64T);
-    builder.CreateStore(llvm::ConstantInt::get(int64T, 0, true), indexPtr);
+
+    if(range) {
+        builder.CreateStore(emitExpr(range->getStart()), indexPtr);
+    } else {
+        builder.CreateStore(llvm::ConstantInt::get(int64T, 0, true), indexPtr);
+    }
     if(stmt->getDefineI()) {
         auto vracc = llvm::dyn_cast<ir::VarAccess>(stmt->getI());
         auto vrdcl = llvm::dyn_cast<ir::VarDecl>(vracc->getVar());
@@ -970,73 +978,98 @@ void cg::CGFunction::emitStmt(ir::ForeachStmt *stmt) {
     sealBlock(currBB);
     setCurrBB(forCondBB);
 
-    llvm::Value *coll = emitExpr(stmt->getCollection());
-    auto lengthF = cgm.getLLVMMod()->getOrInsertFunction("length_"+stmt->getCollection()->getType()->getName(), 
-                                                    llvm::FunctionType::get(
-                                                        int64T,
-                                                        mapType(stmt->getCollection()->getType()),
-                                                        false
-                                                    ));
-    auto lengthVal = builder.CreateCall(lengthF, coll);
-    auto index = builder.CreateLoad(int64T, indexPtr);
-    auto cmplen = builder.CreateICmpSLT(index, lengthVal);
-    builder.CreateCondBr(cmplen, forBodyBB, forAfterBB);
-
-    setCurrBB(forBodyBB);
     auto stacksave = cgm.getLLVMMod()->getOrInsertFunction("llvm.stacksave", 
-                                                    llvm::FunctionType::get(
-                                                        builder.getInt8Ty()->getPointerTo(),
-                                                        false
-                                                    ));
+                                                        llvm::FunctionType::get(
+                                                            builder.getInt8Ty()->getPointerTo(),
+                                                            false
+                                                        ));
     auto stackrestore = cgm.getLLVMMod()->getOrInsertFunction("llvm.stackrestore", 
                                                     llvm::FunctionType::get(
                                                         voidT,
                                                         builder.getInt8Ty()->getPointerTo(),
                                                         false
                                                     ));
-    auto stp = builder.CreateCall(stacksave);
-    
-    if(stmt->getCollection()->getType()->isMatrix()) {
-        // matrix
-        auto elT = mapType(stmt->getCollection()->getType()->getDecl());
-        llvm::Value* buffer = builder.CreateExtractValue(coll, 0);
-        auto casted = builder.CreateBitCast(buffer, elT->getPointerTo());
-        auto valptr = builder.CreateGEP(elT, casted, index);
-        auto result = builder.CreateLoad(elT, valptr);
+
+    auto index = builder.CreateLoad(int64T, indexPtr);
+    llvm::Value *stp = nullptr;
+
+    if(range) {
+        auto endVal = emitExpr(range->getEnd());
+        auto cmpEnd = builder.CreateICmpSLT(index, endVal);
+        builder.CreateCondBr(cmpEnd, forBodyBB, forAfterBB);
+
+        setCurrBB(forBodyBB);
+        
+        stp = builder.CreateCall(stacksave);
+
         auto iLd = emitExpr(stmt->getI());
         auto iPtr = llvm::dyn_cast<llvm::LoadInst>(iLd)->getOperand(0);
-        builder.CreateStore(result, iPtr);
+        builder.CreateStore(index, iPtr);
     }
     else {
-        // string
-        std::string emstr = "";
-        auto resStrIR = new ir::StringLiteral(llvm::SMLoc(), emstr, stmt->getCollection()->getType());
-        auto resStr = emitExpr(resStrIR);
-        delete resStrIR;
-        auto resStrPtr = llvm::dyn_cast<llvm::LoadInst>(resStr)->getOperand(0);
-        auto str_add = cgm.getLLVMMod()->getOrInsertFunction("string_Add_Char",
-                                llvm::FunctionType::get(
-                                voidT,
-                                {
-                                    stringT->getPointerTo(),
-                                    builder.getInt8Ty()
-                                },
-                                false
-                                ));
-        llvm::Value* buffer = builder.CreateExtractValue(coll, 0);
-        auto valptr = builder.CreateGEP(builder.getInt8Ty(), buffer, index);
-        auto charextr = builder.CreateLoad(builder.getInt8Ty(), valptr);
+        llvm::Value *coll = emitExpr(stmt->getCollection());
+        auto lengthF = cgm.getLLVMMod()->getOrInsertFunction("length_"+stmt->getCollection()->getType()->getName(), 
+                                                        llvm::FunctionType::get(
+                                                            int64T,
+                                                            mapType(stmt->getCollection()->getType()),
+                                                            false
+                                                        ));
+        auto lengthVal = builder.CreateCall(lengthF, coll);
+        auto cmplen = builder.CreateICmpSLT(index, lengthVal);
+        builder.CreateCondBr(cmplen, forBodyBB, forAfterBB);
 
-        builder.CreateCall(str_add, {resStrPtr, charextr});
-        auto result = builder.CreateLoad(stringT, resStrPtr);
-        auto iLd = emitExpr(stmt->getI());
-        auto iPtr = llvm::dyn_cast<llvm::LoadInst>(iLd)->getOperand(0);
-        builder.CreateStore(result, iPtr);
+        setCurrBB(forBodyBB);
+
+        stp = builder.CreateCall(stacksave);
+
+        if(stmt->getCollection()->getType()->isMatrix()) {
+            // matrix
+            auto elT = mapType(stmt->getCollection()->getType()->getDecl());
+            llvm::Value* buffer = builder.CreateExtractValue(coll, 0);
+            auto casted = builder.CreateBitCast(buffer, elT->getPointerTo());
+            auto valptr = builder.CreateGEP(elT, casted, index);
+            auto result = builder.CreateLoad(elT, valptr);
+            auto iLd = emitExpr(stmt->getI());
+            auto iPtr = llvm::dyn_cast<llvm::LoadInst>(iLd)->getOperand(0);
+            builder.CreateStore(result, iPtr);
+        }
+        else {
+            // string
+            std::string emstr = "";
+            auto resStrIR = new ir::StringLiteral(llvm::SMLoc(), emstr, stmt->getCollection()->getType());
+            auto resStr = emitExpr(resStrIR);
+            delete resStrIR;
+            auto resStrPtr = llvm::dyn_cast<llvm::LoadInst>(resStr)->getOperand(0);
+            auto str_add = cgm.getLLVMMod()->getOrInsertFunction("string_Add_Char",
+                                    llvm::FunctionType::get(
+                                    voidT,
+                                    {
+                                        stringT->getPointerTo(),
+                                        builder.getInt8Ty()
+                                    },
+                                    false
+                                    ));
+            llvm::Value* buffer = builder.CreateExtractValue(coll, 0);
+            auto valptr = builder.CreateGEP(builder.getInt8Ty(), buffer, index);
+            auto charextr = builder.CreateLoad(builder.getInt8Ty(), valptr);
+
+            builder.CreateCall(str_add, {resStrPtr, charextr});
+            auto result = builder.CreateLoad(stringT, resStrPtr);
+            auto iLd = emitExpr(stmt->getI());
+            auto iPtr = llvm::dyn_cast<llvm::LoadInst>(iLd)->getOperand(0);
+            builder.CreateStore(result, iPtr);
+        }
     }
 
     emit(stmt->getBody());
     
-    auto newIndex = builder.CreateNSWAdd(index, llvm::ConstantInt::get(int64T, 1, true));
+    llvm::Value *newIndex = nullptr;
+    if(range) {
+        newIndex = builder.CreateNSWAdd(index, emitExpr(range->getStep()));
+    }
+    else {
+        newIndex = builder.CreateNSWAdd(index, llvm::ConstantInt::get(int64T, 1, true));
+    }
     builder.CreateStore(newIndex, indexPtr);
     builder.CreateCall(stackrestore, { stp });
     builder.CreateBr(forCondBB);
