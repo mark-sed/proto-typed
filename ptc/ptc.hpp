@@ -21,7 +21,7 @@
 
 #define PTC_VERSION_MAJOR 0  ///< Compiler's major version
 #define PTC_VERSION_MINOR 3  ///< Compiler's minor version
-#define PTC_VERSION_PATCH 0  ///< Compiler's patch
+#define PTC_VERSION_PATCH 1  ///< Compiler's patch
 
 /** PTC version as a string */
 #define PTC_VERSION MACRO_TO_STR(PTC_VERSION_MAJOR) "." MACRO_TO_STR(PTC_VERSION_MINOR) "." MACRO_TO_STR(PTC_VERSION_PATCH)

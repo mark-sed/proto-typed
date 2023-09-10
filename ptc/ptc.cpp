@@ -37,6 +37,7 @@ static llvm::codegen::RegisterCodeGenFlags cgf;
 static llvm::cl::list<std::string> inputFiles(llvm::cl::Positional, llvm::cl::desc("<input-files>"));
 static llvm::cl::opt<std::string> mTriple("mtriple", llvm::cl::desc("Override target triple for module"));
 static llvm::cl::opt<bool> emitLLVM("emit-llvm", llvm::cl::desc("Emit IR code instead of assembler"), llvm::cl::init(false));
+static llvm::cl::opt<int> verboseLevel("verbose", llvm::cl::desc("Debug verbose level (1-5)"), llvm::cl::init(0));
 
 static const char *head = "Proto-typed compiler";
 
@@ -180,9 +181,7 @@ static ModuleInfo *getNextModuleForParsing() {
 int main(int argc, char *argv[]) {
     llvm::InitLLVM LLVMX(argc, argv);
 
-    log::Logger::get().set_disable(false);
-    log::Logger::get().set_log_everything(true);
-    log::Logger::get().set_logging_level(MAX_LOGGING_LEVEL);
+    LOG1("ptc version " PTC_VERSION);
 
     llvm::InitializeAllTargets();
     llvm::InitializeAllTargetMCs();
@@ -191,6 +190,10 @@ int main(int argc, char *argv[]) {
 
     llvm::cl::SetVersionPrinter(&printVersion);
     llvm::cl::ParseCommandLineOptions(argc, argv, head);
+
+    log::Logger::get().set_disable(false);
+    log::Logger::get().set_log_everything(true);
+    log::Logger::get().set_logging_level(verboseLevel);
 
     if(llvm::codegen::getMCPU() == "help" ||
             std::any_of(llvm::codegen::getMAttrs().begin(), 
