@@ -870,7 +870,7 @@ ir::IR *Scanner::parseForeach(ir::Expr *i, ir::Expr *collection, std::vector<ir:
             diags.report(llvmloc, diag::ERR_MISMATCHED_FOR_TYPES, i->getType()->getName(), collection->getType()->getName());
         }
     }
-    else {
+    else if(collection->getType()->getName() != STRING_CSTR && i->getType()->getName() != STRING_CSTR){
         diags.report(llvmloc, diag::ERR_UNSUPPORTED_FOR_TYPE, collection->getType()->getName());
     }
     auto freach = new ir::ForeachStmt(currentIR, llvmloc, "for", i, collection, body, defineI);

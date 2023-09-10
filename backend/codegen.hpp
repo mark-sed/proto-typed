@@ -64,6 +64,7 @@ protected:
     };
 
     llvm::DenseMap<llvm::BasicBlock *, BasicBlockDef> currDef;
+    llvm::DenseMap<ir::IR *, llvm::Value *> locals;
 
     virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) = 0;
     virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl) = 0;

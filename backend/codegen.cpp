@@ -139,6 +139,21 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
         "Declaration must be variable or formal parameter");
     assert(val && "Value is nullptr");
     currDef[BB].defs[decl] = val;
+    if(locals.find(decl) != locals.end()) {
+        builder.CreateStore(val, locals[decl]);
+    }
+    else {
+        llvm::Type *t;
+        if(auto vrdcl = llvm::dyn_cast<ir::VarDecl>(decl)) {
+            t = mapType(vrdcl->getType());
+        }
+        else if(auto frmlp = llvm::dyn_cast<ir::FormalParamDecl>(decl)){
+            t = mapType(frmlp->getType());
+        }
+        auto vPtr = builder.CreateAlloca(t);
+        builder.CreateStore(val, vPtr);
+        locals[decl] = vPtr;
+    }
 }
 
 void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) {
@@ -147,14 +162,34 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
             builder.CreateStore(val, cgm.getGlobals(decl));
         }
         else {
-            writeLocalVar(BB, decl, val);
+            if(locals.find(decl) != locals.end()) {
+                LOGMAX("Write var access "+decl->debug());
+                builder.CreateStore(val, locals[decl]);
+            }
+            else {
+                //writeLocalVar(BB, decl, val);
+                LOGMAX("Write var create "+decl->debug());
+                auto vPtr = builder.CreateAlloca(mapType(v->getType()));
+                builder.CreateStore(val, vPtr);
+                locals[decl] = vPtr;
+            }
         }
     } else if (auto *v = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
         if(v->isByReference()) {
             builder.CreateStore(val, formalParams[v]);
         }
         else {
-            writeLocalVar(BB, decl, val);
+            if(locals.find(decl) != locals.end()) {
+                LOGMAX("Write var access "+decl->debug());
+                builder.CreateStore(val, locals[decl]);
+            }
+            else {
+                //writeLocalVar(BB, decl, val);
+                LOGMAX("Write var create "+decl->debug());
+                auto vPtr = builder.CreateAlloca(mapType(v->getType()));
+                builder.CreateStore(val, vPtr);
+                locals[decl] = vPtr;
+            }
         }
     } else {
         llvm::report_fatal_error("Unsupported variable access");
@@ -177,11 +212,26 @@ llvm::Value *cg::CGModule::readVar(llvm::BasicBlock *BB, ir::IR *decl) {
 
 llvm::Value *cg::CGFunction::readLocalVar(llvm::BasicBlock *BB, ir::IR *decl) {
     // TODO: Checks for type
-    auto val = currDef[BB].defs.find(decl);
+    /*auto val = currDef[BB].defs.find(decl);
     if(val != currDef[BB].defs.end()) {
         return val->second;
+    }*/
+    LOGMAX("Read var "+decl->debug());
+    auto val = locals.find(decl);
+    if(val != locals.end()) {
+        llvm::Type *t;
+        if(auto vrdcl = llvm::dyn_cast<ir::VarDecl>(decl)) {
+            t = mapType(vrdcl->getType());
+        }
+        else if(auto vrdcl = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
+            t = mapType(vrdcl->getType());
+        }
+        return builder.CreateLoad(t, val->second);
     }
-    return readLocalVarRecursive(BB, decl);
+    else {
+        llvm::report_fatal_error("Somehow codegen did not have variable created");
+        return nullptr;
+    }
 }
 
 llvm::Value *cg::CGFunction::readLocalVarRecursive(llvm::BasicBlock *BB, ir::IR *decl) {
@@ -616,7 +666,7 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             result = builder.CreateICmpSLT(left, right);
         }
         else {
-            llvm::report_fatal_error("LT does not supported given type");
+            llvm::report_fatal_error("LT does not supported given type ");
         }
     }
     break;
@@ -910,9 +960,10 @@ void cg::CGFunction::emitStmt(ir::ForeachStmt *stmt) {
 
     auto indexPtr = builder.CreateAlloca(int64T);
     builder.CreateStore(llvm::ConstantInt::get(int64T, 0, true), indexPtr);
-    llvm::Value *iPtr = nullptr;
     if(stmt->getDefineI()) {
-        iPtr = builder.CreateAlloca(mapType(stmt->getI()->getType()));
+        auto vracc = llvm::dyn_cast<ir::VarAccess>(stmt->getI());
+        auto vrdcl = llvm::dyn_cast<ir::VarDecl>(vracc->getVar());
+        emitStmt(vrdcl);
     }
     builder.CreateBr(forCondBB);
 
@@ -952,18 +1003,35 @@ void cg::CGFunction::emitStmt(ir::ForeachStmt *stmt) {
         auto casted = builder.CreateBitCast(buffer, elT->getPointerTo());
         auto valptr = builder.CreateGEP(elT, casted, index);
         auto result = builder.CreateLoad(elT, valptr);
-        if(!stmt->getDefineI()) {
-            auto iLd = emitExpr(stmt->getI());
-            iPtr = llvm::dyn_cast<llvm::LoadInst>(iLd)->getOperand(0);
-        }
-        if(!iPtr) {
-            llvm::report_fatal_error("Somehow for loop value is not being loaded");
-        }
+        auto iLd = emitExpr(stmt->getI());
+        auto iPtr = llvm::dyn_cast<llvm::LoadInst>(iLd)->getOperand(0);
         builder.CreateStore(result, iPtr);
     }
     else {
         // string
-        
+        std::string emstr = "";
+        auto resStrIR = new ir::StringLiteral(llvm::SMLoc(), emstr, stmt->getCollection()->getType());
+        auto resStr = emitExpr(resStrIR);
+        delete resStrIR;
+        auto resStrPtr = llvm::dyn_cast<llvm::LoadInst>(resStr)->getOperand(0);
+        auto str_add = cgm.getLLVMMod()->getOrInsertFunction("string_Add_Char",
+                                llvm::FunctionType::get(
+                                voidT,
+                                {
+                                    stringT->getPointerTo(),
+                                    builder.getInt8Ty()
+                                },
+                                false
+                                ));
+        llvm::Value* buffer = builder.CreateExtractValue(coll, 0);
+        auto valptr = builder.CreateGEP(builder.getInt8Ty(), buffer, index);
+        auto charextr = builder.CreateLoad(builder.getInt8Ty(), valptr);
+
+        builder.CreateCall(str_add, {resStrPtr, charextr});
+        auto result = builder.CreateLoad(stringT, resStrPtr);
+        auto iLd = emitExpr(stmt->getI());
+        auto iPtr = llvm::dyn_cast<llvm::LoadInst>(iLd)->getOperand(0);
+        builder.CreateStore(result, iPtr);
     }
 
     emit(stmt->getBody());
@@ -1056,11 +1124,15 @@ void cg::CGFunction::emitStmt(ir::VarDecl *stmt) {
             ir::StringLiteral *empt = new ir::StringLiteral(stmt->getLocation(), s, stmt->getType());
             v = emitExpr(empt);
         }
+        else if(stmt->getType()->isMatrix()) {
+            llvm::report_fatal_error("Local matrix intializer not yet implemented");
+        }
         else {
             llvm::report_fatal_error("Local struct intializer not yet implemented");
         }
     }
     writeVar(currBB, stmt, v);
+    
 }
 
 void cg::CGFunction::emit(std::vector<ir::IR *> stmts) {
