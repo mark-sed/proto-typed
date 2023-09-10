@@ -138,58 +138,52 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
         llvm::isa<ir::FormalParamDecl>(decl)) &&
         "Declaration must be variable or formal parameter");
     assert(val && "Value is nullptr");
+    LOGMAX("Read var: "+decl->debug());
     currDef[BB].defs[decl] = val;
-    if(locals.find(decl) != locals.end()) {
-        builder.CreateStore(val, locals[decl]);
+    // Check if it is a parameter
+    if (auto *fpd = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
+        if(formalParams.find(fpd) != formalParams.end()) {
+            builder.CreateStore(val, formalParams[fpd]);
+        }
     }
     else {
-        llvm::Type *t;
-        if(auto vrdcl = llvm::dyn_cast<ir::VarDecl>(decl)) {
-            t = mapType(vrdcl->getType());
+        // Its a local variable
+        if(locals.find(decl) != locals.end()) {
+            builder.CreateStore(val, locals[decl]);
         }
-        else if(auto frmlp = llvm::dyn_cast<ir::FormalParamDecl>(decl)){
-            t = mapType(frmlp->getType());
+        else {
+            llvm::Type *t;
+            if(auto vrdcl = llvm::dyn_cast<ir::VarDecl>(decl)) {
+                t = mapType(vrdcl->getType());
+            }
+            else if(auto frmlp = llvm::dyn_cast<ir::FormalParamDecl>(decl)){
+                t = mapType(frmlp->getType());
+            }
+            else {
+                llvm::report_fatal_error("Unknown local variable type");
+            }
+            auto vPtr = builder.CreateAlloca(t);
+            builder.CreateStore(val, vPtr);
+            locals[decl] = vPtr;
         }
-        auto vPtr = builder.CreateAlloca(t);
-        builder.CreateStore(val, vPtr);
-        locals[decl] = vPtr;
     }
 }
 
 void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) {
+    LOGMAX("Write var: "+decl->debug());
     if(auto *v = llvm::dyn_cast<ir::VarDecl>(decl)) {
         if(v->getEnclosingIR() == cgm.getModuleDecl()) {
             builder.CreateStore(val, cgm.getGlobals(decl));
         }
         else {
-            if(locals.find(decl) != locals.end()) {
-                LOGMAX("Write var access "+decl->debug());
-                builder.CreateStore(val, locals[decl]);
-            }
-            else {
-                //writeLocalVar(BB, decl, val);
-                LOGMAX("Write var create "+decl->debug());
-                auto vPtr = builder.CreateAlloca(mapType(v->getType()));
-                builder.CreateStore(val, vPtr);
-                locals[decl] = vPtr;
-            }
+            writeLocalVar(BB, decl, val);
         }
     } else if (auto *v = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
         if(v->isByReference()) {
             builder.CreateStore(val, formalParams[v]);
         }
         else {
-            if(locals.find(decl) != locals.end()) {
-                LOGMAX("Write var access "+decl->debug());
-                builder.CreateStore(val, locals[decl]);
-            }
-            else {
-                //writeLocalVar(BB, decl, val);
-                LOGMAX("Write var create "+decl->debug());
-                auto vPtr = builder.CreateAlloca(mapType(v->getType()));
-                builder.CreateStore(val, vPtr);
-                locals[decl] = vPtr;
-            }
+            writeLocalVar(BB, decl, val);
         }
     } else {
         llvm::report_fatal_error("Unsupported variable access");
@@ -229,9 +223,21 @@ llvm::Value *cg::CGFunction::readLocalVar(llvm::BasicBlock *BB, ir::IR *decl) {
         return builder.CreateLoad(t, val->second);
     }
     else {
-        llvm::report_fatal_error("Somehow codegen did not have variable created");
-        return nullptr;
+        if(auto fpd = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
+            auto fval = formalParams.find(fpd);
+            if(fval != formalParams.end()) {
+                return builder.CreateLoad(mapType(fpd->getType()), fval->second);
+            }
+            else {
+                llvm::report_fatal_error("Somehow codegen did not have formal parameter created");
+            }
+        }
+        else {
+            llvm::report_fatal_error("Somehow codegen did not have variable created");
+            
+        }
     }
+    return nullptr;
 }
 
 llvm::Value *cg::CGFunction::readLocalVarRecursive(llvm::BasicBlock *BB, ir::IR *decl) {
@@ -468,6 +474,7 @@ void cg::CGFunction::emitMemberAssignment(ir::BinaryInfixExpr *l, llvm::Value *r
                 }
                 else {
                     llvar = builder.CreateAlloca(mapType(strucType));
+                    // TODO: Check correctness, possibly call read
                     builder.CreateStore(currDef[currBB].defs[var->getVar()], llvar);
                 }
             }
@@ -1512,8 +1519,10 @@ void cg::CGFunction::run() {
     for(auto i = llvmFun->arg_begin(); i != llvmFun->arg_end(); ++i, ++idx) {
         llvm::Argument *arg = i;
         ir::FormalParamDecl *fp = fun->getParams()[idx];
-        formalParams[fp] = arg;
-        defs.defs.insert(std::pair<ir::IR *, llvm::Value *>(fp, arg));
+        auto argPtr = builder.CreateAlloca(arg->getType());
+        builder.CreateStore(arg, argPtr);
+        formalParams[fp] = argPtr;
+        defs.defs.insert(std::pair<ir::IR *, llvm::Value *>(fp, argPtr));
     }
 
     for(auto *d : fun->getDecl()) {

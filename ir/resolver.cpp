@@ -54,6 +54,11 @@ void UnresolvedSymbolResolver::resolve(ir::Expr * expr, llvm::SMLoc loc) {
             resolve(v, loc);
         }
     }
+    else if(auto e = llvm::dyn_cast<ir::Range>(expr)) {
+        resolve(e->getStart(), loc);
+        resolve(e->getStep(), loc);
+        resolve(e->getEnd(), loc);
+    }
     else if(auto e = llvm::dyn_cast<ir::UnresolvedSymbolAccess>(expr)) {
         // TODO: Handle function pointer
         if(globalScope->lookupPossibleFun(e->getName())) {

@@ -124,7 +124,7 @@ private:
     ir::FunctionDecl *fun;
     llvm::FunctionType *funType;
     llvm::Function *llvmFun;
-    llvm::DenseMap<ir::FormalParamDecl *, llvm::Argument *> formalParams;
+    llvm::DenseMap<ir::FormalParamDecl *, llvm::Value *> formalParams;
 
     llvm::Value *readLocalVar(llvm::BasicBlock *BB, ir::IR *decl);
     llvm::Value *readLocalVarRecursive(llvm::BasicBlock *BB, ir::IR *decl);
