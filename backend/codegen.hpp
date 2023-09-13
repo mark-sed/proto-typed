@@ -67,7 +67,7 @@ protected:
     llvm::DenseMap<ir::IR *, llvm::Value *> locals;
 
     virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) = 0;
-    virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl) = 0;
+    virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe=false) = 0;
 
     llvm::StructType *getStringIR();
 
@@ -99,11 +99,12 @@ private:
     llvm::GlobalVariable *str_empty;
     std::vector<std::pair<llvm::Value *, llvm::GlobalVariable *>> stringsToInit;
     std::vector<std::pair<llvm::Value *, ir::MatrixLiteral *>> matricesToInit;
+    //std::vector<std::pair<llvm::GlobalVariable *, llvm::GlobalVariable *>> maybesToInit;
 
     PTLib *ptlibLoader;
 protected:
     virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) override;
-    virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl) override;
+    virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe=false) override;
 
 public:
     CGModule(llvm::Module *llvmMod);
@@ -138,7 +139,7 @@ private:
     llvm::Function *createFunction(ir::FunctionDecl *fun, llvm::FunctionType *funType);
 protected:
     virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) override;
-    virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl) override;
+    virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe=false) override;
 
     llvm::Value *emitInfixExpr(ir::BinaryInfixExpr *e);
     llvm::Value *emitFunCall(ir::FunctionCall *e);

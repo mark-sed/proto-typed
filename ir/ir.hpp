@@ -155,29 +155,44 @@ std::string block2List(std::vector<ir::FormalParamDecl *> block);
 class TypeDecl : public IR {
 private:
     IR *decl;
-    bool is_maybe;
     std::vector<Expr *> matrixSize;
+    bool maybe;
 public:
     TypeDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name, IR *decl=nullptr)
             : IR(IRKind::IR_TYPE_DECL, enclosing_ir, loc, name),
               decl(decl),
-              matrixSize{} {}
+              matrixSize{},
+              maybe(false) {}
     TypeDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name, std::vector<Expr *> matsize, IR *decl=nullptr)
             : IR(IRKind::IR_TYPE_DECL, enclosing_ir, loc, name),
               decl(decl),
-              matrixSize(matsize) {}
+              matrixSize(matsize),
+              maybe(false) {}
+
+    TypeDecl *clone() {
+        return new TypeDecl(*this);
+    }
 
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_TYPE_DECL;
     }
     bool isMatrix() { return !matrixSize.empty(); }
+    bool isMaybe() { return maybe; }
+    void setMaybe(bool m) { maybe = m; }
     std::vector<Expr *> getMatrixSize() { return matrixSize; }
     IR *getDecl() { return decl; }
-    std::string debug() const override { 
+    std::string debug() const override {
+        std::string n;
         if(!matrixSize.empty()) {
-            return name + "<" + block2List(matrixSize) + ">";
+            n = name + "<" + block2List(matrixSize) + ">";
         }
-        return name; 
+        else {
+            n = name;
+        }
+        if(maybe) {
+            n+="?";
+        }
+        return n;
     }
 };
 

@@ -609,13 +609,13 @@ void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT) {
     mainModule->addLibFunction(funLength);
 }
 
-ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &matsize) {
+ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &matsize, bool isMaybe) {
     auto ogName = name;
     for(size_t i = 0; i < matsize.size(); ++i) {
         name += "[]";
     }
     LOGMAX("Creating matrix type "+name);
-    auto rootType = sym_lookup(name, true);
+    auto rootType = sym_lookup(name, isMaybe, true);
     if(auto rootDecl = llvm::dyn_cast<ir::TypeDecl>(rootType)) {
         auto elemT = rootDecl;
         auto elemName = ogName;

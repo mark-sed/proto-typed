@@ -39,9 +39,10 @@ public:
     /**
      * @brief Finds a symbol in the scope
      * @param name Symbol to find
+     * @param isMaybe Valid only for type lookups. If the type exists it will return the maybe version
      * @return The IR of the symbol or nullptr if not found
      */
-    ir::IR *lookup(llvm::StringRef name);
+    ir::IR *lookup(llvm::StringRef name, bool isMaybe=false);
 
     ir::IR *lookupPossibleFun(llvm::StringRef name);
 

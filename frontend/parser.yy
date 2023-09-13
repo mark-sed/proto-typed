@@ -336,12 +336,12 @@ function : type fun_id LPAR RPAR block           { $$ = scanner->parseFun($1, $2
 fun_id : ID { scanner->enterFunScope(); $$ = $1; }
        ;
 funargs : type ID               { $$ = scanner->parseFunParam($1, $2); }
-        | funargdef
+        //| funargdef
         | funargs COMMA type ID { $$ = scanner->parseAddFunParam($1, $3, $4); }
         ;
-funargdef : type ID SET expr
-          | funargdef COMMA funargdef
-          ;
+//funargdef : type ID SET expr
+//          | funargdef COMMA funargdef
+//          ;
 
 // Variable declaration
 vardecl : type ID { $$ = scanner->parseVarDecl($1, $2); }
@@ -797,18 +797,18 @@ matsq : LSQ RSQ                 { $$ = scanner->parseMatrixSize(scanner->parseIn
       ;
 
 // Variable types
-type : KWINT KWMAYBE
-     | KWFLOAT KWMAYBE
-     | KWSTRING KWMAYBE
-     | KWBOOL KWMAYBE
-     | ID KWMAYBE
-     | funtype KWMAYBE
-     | mattype KWMAYBE
-     | KWINT            { $$ = scanner->sym_lookup(INT_CSTR, true); }
-     | KWFLOAT          { $$ = scanner->sym_lookup(FLOAT_CSTR, true); }
-     | KWSTRING         { $$ = scanner->sym_lookup(STRING_CSTR, true); }
-     | KWBOOL           { $$ = scanner->sym_lookup(BOOL_CSTR, true); }
-     | ID               { $$ = scanner->sym_lookup($1, true); }
+type : KWINT KWMAYBE    { $$ = scanner->sym_lookup(INT_CSTR, true, true); }
+     | KWFLOAT KWMAYBE  { $$ = scanner->sym_lookup(FLOAT_CSTR, true, true); }
+     | KWSTRING KWMAYBE { $$ = scanner->sym_lookup(STRING_CSTR, true, true); }
+     | KWBOOL KWMAYBE   { $$ = scanner->sym_lookup(BOOL_CSTR, true, true); }
+     | ID KWMAYBE       { $$ = scanner->sym_lookup($1, true, true); }
+     | funtype KWMAYBE  
+     | mattype KWMAYBE  
+     | KWINT            { $$ = scanner->sym_lookup(INT_CSTR, false, true); }
+     | KWFLOAT          { $$ = scanner->sym_lookup(FLOAT_CSTR, false, true); }
+     | KWSTRING         { $$ = scanner->sym_lookup(STRING_CSTR, false, true); }
+     | KWBOOL           { $$ = scanner->sym_lookup(BOOL_CSTR, false, true); }
+     | ID               { $$ = scanner->sym_lookup($1, false, true); }
      | funtype
      | mattype          { $$ = $1; }
      ;

@@ -88,12 +88,12 @@ public:
      * @param name Symbol to lookup
      * @return The symbol if it is found or nullptr
      */
-    ir::IR *sym_lookup(std::string name, bool fail_if_not_found=false) {
+    ir::IR *sym_lookup(std::string name, bool isMaybe=false, bool fail_if_not_found=false) {
         LOGMAX("Symbol lookup: "+name);
         // Remove matrix brackets
         name.erase(std::remove(name.begin(), name.end(), '['), name.end());
         name.erase(std::remove(name.begin(), name.end(), ']'), name.end());
-        auto rval = currScope->lookup(name);
+        auto rval = currScope->lookup(name, isMaybe);
         if(!rval && fail_if_not_found) {
             diags.report(llvmloc, diag::ERR_UNDEFINED_TYPE, name);
         }
@@ -109,7 +109,7 @@ public:
     ir::IR *parseForeach(ir::IR *i, ir::Expr *collection, std::vector<ir::IR *> &body);
     ir::IR *parseDoWhile(ir::Expr *cond, std::vector<ir::IR *> &body);
     ir::IR *parseFun(ir::IR *type, std::string name, std::vector<ir::FormalParamDecl *> params, std::vector<ir::IR *> body);
-    ir::IR *parseMatrixType(std::string name, std::vector<ir::Expr *> &matsize);
+    ir::IR *parseMatrixType(std::string name, std::vector<ir::Expr *> &matsize, bool isMaybe=false);
     ir::IR *parseReturn(ir::Expr *e);
     ir::IR *parseBreak();
     ir::IR *parseContinue();
