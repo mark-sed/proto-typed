@@ -117,6 +117,7 @@ public:
     void defineStruct(ir::StructDecl *decl);
     llvm::GlobalObject *getGlobals(ir::IR *ir) { return globals[ir]; }
     void run(ir::ModuleDecl *module);
+    llvm::GlobalVariable *nonePtr;
 };
 
 class CGFunction : public CodeGen {

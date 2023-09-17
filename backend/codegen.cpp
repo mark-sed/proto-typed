@@ -152,7 +152,7 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
     // Check if it is a parameter
     if (auto *fpd = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
         if(formalParams.find(fpd) != formalParams.end()) {
-            if(fpd->getType()->isMaybe()) {
+            if(fpd->getType()->isMaybe() && !llvm::isa<llvm::ConstantPointerNull>(val)) {
                 auto ptrV = builder.CreateLoad(mapType(fpd->getType()), formalParams[fpd]);
                 builder.CreateStore(val, ptrV);
             }
@@ -167,7 +167,7 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
     else if(auto *vrdec = llvm::dyn_cast<ir::VarDecl>(decl)){
         // Its a local variable
         if(locals.find(decl) != locals.end()) {
-            if(vrdec->getType()->isMaybe()) {
+            if(vrdec->getType()->isMaybe() && !llvm::isa<llvm::ConstantPointerNull>(val)) {
                 auto ptrV = builder.CreateLoad(mapType(vrdec->getType()), locals[decl]);
                 builder.CreateStore(val, ptrV);
             }
@@ -190,7 +190,7 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
                 llvm::report_fatal_error("Unknown local variable type");
             }
             
-            if(td->isMaybe()) {
+            if(td->isMaybe() && !llvm::isa<llvm::ConstantPointerNull>(val)) {
                 auto vPtrPtr = builder.CreateAlloca(t);
                 auto vPtr = builder.CreateAlloca(t->getPointerElementType());
                 builder.CreateStore(val, vPtr);
@@ -210,7 +210,7 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
     LOGMAX("Write var: "+decl->debug());
     if(auto *v = llvm::dyn_cast<ir::VarDecl>(decl)) {
         if(v->getEnclosingIR() == cgm.getModuleDecl()) {
-            if(v->getType()->isMaybe()) {
+            if(v->getType()->isMaybe() && !llvm::isa<llvm::ConstantPointerNull>(val)) {
                 auto vPtr = builder.CreateAlloca(mapType(v->getType())->getPointerElementType());
                 builder.CreateStore(val, vPtr);
                 builder.CreateStore(vPtr, cgm.getGlobals(decl));
@@ -223,7 +223,7 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
             writeLocalVar(BB, decl, val);
         }
     } else if (auto *v = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
-        if(v->isByReference()) {
+        if(v->isByReference() && !llvm::isa<llvm::ConstantPointerNull>(val)) {
             auto vPtr = builder.CreateLoad(mapType(v->getType()), formalParams[v]);
             builder.CreateStore(val, vPtr);
         }
@@ -446,6 +446,8 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
     case ir::ExprKind::EX_INT:
         LOGMAX("Accessing int value");
         return llvm::ConstantInt::get(int64T, llvm::dyn_cast<ir::IntLiteral>(e)->getValue());
+    case ir::ExprKind::EX_NONE:
+        return llvm::ConstantPointerNull::get(builder.getInt8Ty()->getPointerTo());
     case ir::ExprKind::EX_STRING: 
     {
         llvm::GlobalVariable *v = new llvm::GlobalVariable(*cgm.getLLVMMod(),

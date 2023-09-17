@@ -27,6 +27,7 @@
 #define MATRIX_CSTR "matrix"
 #define VOID_CSTR "void"
 #define RANGE_CSTR "range"
+#define NONETYPE_CSTR "noneType"
 #define UNKNOWN_CSTR "*unknowntype*"
 
 namespace ptc {
@@ -568,6 +569,24 @@ public:
         return e->getKind() == ExprKind::EX_MATRIX;
     }
     std::string debug() const override { return "("+type->getName()+")["+block2List(value)+"]"; }
+};
+
+/**
+ * None value
+ */
+class NoneLiteral : public Expr {
+private:
+    llvm::SMLoc loc;
+public:
+    NoneLiteral(llvm::SMLoc loc, TypeDecl *type)
+              : Expr(ExprKind::EX_NONE, type, true),
+                loc(loc) {
+    }
+
+    static bool classof(const Expr *e) {
+        return e->getKind() == ExprKind::EX_NONE;
+    }
+    std::string debug() const override { return "none"; }
 };
 
 /**

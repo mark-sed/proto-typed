@@ -204,6 +204,7 @@
 %type <ptc::ir::Expr *> int_val
 %type <ptc::ir::Expr *> expr_var
 %type <ptc::ir::Expr *> expr_mat
+%type <ptc::ir::Expr *> expr_none
 %type <ptc::ir::Expr *> set
 %type <ptc::ir::Expr *> matrix
 %type <ptc::ir::Expr *> range
@@ -379,7 +380,7 @@ callarglist : expr                    { $$ = scanner->parseFunCallArg($1); }
 // Expressions
 expr : expr_mat     { $$ = $1; }
      | expr_var     { $$ = $1; }
-     | expr_none
+     | expr_none    { $$ = $1; }
      | expr_struct
      | expr_int     { $$ = scanner->parseInt($1); }
      | expr_float   { $$ = scanner->parseFloat($1); }
@@ -632,8 +633,8 @@ slice : LSQ COLON RSQ
       ;
 
 // None expression
-expr_none : NONE
-          | LPAR NONE RPAR
+expr_none : NONE            { $$ = scanner->parseNone(); }
+          | LPAR NONE RPAR  { $$ = scanner->parseNone(); }
           ;
 
 // Struct expression

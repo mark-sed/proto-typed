@@ -67,6 +67,7 @@ void Scanner::init() {
     boolType = new ir::TypeDecl(currentIR, llvm::SMLoc(), BOOL_CSTR);
     voidType = new ir::TypeDecl(currentIR, llvm::SMLoc(), VOID_CSTR);
     rangeType = new ir::TypeDecl(currentIR, llvm::SMLoc(), RANGE_CSTR);
+    noneType = new ir::TypeDecl(currentIR, llvm::SMLoc(), NONETYPE_CSTR);
 
     unknownType = new ir::TypeDecl(currentIR, llvm::SMLoc(), UNKNOWN_CSTR);
 
@@ -76,6 +77,7 @@ void Scanner::init() {
     currScope->insert(stringType);
     currScope->insert(voidType);
     currScope->insert(rangeType);
+    currScope->insert(noneType);
 
     {
         auto printParams = std::vector<ir::FormalParamDecl *>{
@@ -344,6 +346,11 @@ ir::Expr *Scanner::parseString(std::string v) {
     return new ir::StringLiteral(llvmloc, v, stringType);
 }
 
+ir::Expr *Scanner::parseNone() {
+    LOGMAX("Parsing none");
+    return new ir::NoneLiteral(llvmloc, noneType);
+}
+
 ir::Expr *Scanner::parseVar(std::string v, bool external) {
     LOGMAX("Parsing a variable "+v);
     if(!external) {
@@ -393,6 +400,12 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
             if(tl->getName() != tr->getName()) {
                 if((tl->getName() == FLOAT_CSTR && tr->getName() == INT_CSTR)
                 || (tl->getName() == INT_CSTR && tr->getName() == FLOAT_CSTR)) {
+                    type = tl;
+                }
+                else if(tr->getName() == NONETYPE_CSTR) {
+                    if(!tl->isMaybe()) {
+                        diags.report(llvmloc, diag::ERR_CANNOT_ASSIGN_NONE);
+                    }
                     type = tl;
                 }
                 else {

@@ -658,6 +658,7 @@ namespace  ptc  {
       // expr_mat
       // range
       // int_val
+      // expr_none
       char dummy4[sizeof (ptc::ir::Expr *)];
 
       // stmts
@@ -1032,6 +1033,7 @@ namespace  ptc  {
       case symbol_kind::S_expr_mat: // expr_mat
       case symbol_kind::S_range: // range
       case symbol_kind::S_int_val: // int_val
+      case symbol_kind::S_expr_none: // expr_none
         value.move< ptc::ir::Expr * > (std::move (that.value));
         break;
 
@@ -1294,6 +1296,7 @@ switch (yykind)
       case symbol_kind::S_expr_mat: // expr_mat
       case symbol_kind::S_range: // range
       case symbol_kind::S_int_val: // int_val
+      case symbol_kind::S_expr_none: // expr_none
         value.template destroy< ptc::ir::Expr * > ();
         break;
 
@@ -3022,7 +3025,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 3026 "frontend/parser.hpp"
+#line 3029 "frontend/parser.hpp"
 
 
 
