@@ -118,9 +118,10 @@ std::string cg::CodeGen::mangleName(ir::IR *ir) {
 llvm::Type *cg::CodeGen::mapType(ir::IR *decl) {
     if(auto *fp = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
         llvm::Type *t = convertType(fp->getType());
-        if(fp->isByReference()) {
-            t = t->getPointerTo();
-        }
+        // Maybe type handles this
+        //if(fp->isByReference()) {
+        //    t = t->getPointerTo();
+        //}
         return t;
     }
     if(auto *v = llvm::dyn_cast<ir::VarDecl>(decl)) {
@@ -151,28 +152,56 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
     // Check if it is a parameter
     if (auto *fpd = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
         if(formalParams.find(fpd) != formalParams.end()) {
-            builder.CreateStore(val, formalParams[fpd]);
+            if(fpd->getType()->isMaybe()) {
+                auto ptrV = builder.CreateLoad(mapType(fpd->getType()), formalParams[fpd]);
+                builder.CreateStore(val, ptrV);
+            }
+            else {
+                builder.CreateStore(val, formalParams[fpd]);
+            }
+        }
+        else {
+            llvm::report_fatal_error("Write local var formal param not found");
         }
     }
-    else {
+    else if(auto *vrdec = llvm::dyn_cast<ir::VarDecl>(decl)){
         // Its a local variable
         if(locals.find(decl) != locals.end()) {
-            builder.CreateStore(val, locals[decl]);
+            if(vrdec->getType()->isMaybe()) {
+                auto ptrV = builder.CreateLoad(mapType(vrdec->getType()), locals[decl]);
+                builder.CreateStore(val, ptrV);
+            }
+            else {
+                builder.CreateStore(val, locals[decl]);
+            }
         }
         else {
             llvm::Type *t;
+            ir::TypeDecl *td;
             if(auto vrdcl = llvm::dyn_cast<ir::VarDecl>(decl)) {
+                td = vrdcl->getType();
                 t = mapType(vrdcl->getType());
             }
             else if(auto frmlp = llvm::dyn_cast<ir::FormalParamDecl>(decl)){
+                td = frmlp->getType();
                 t = mapType(frmlp->getType());
             }
             else {
                 llvm::report_fatal_error("Unknown local variable type");
             }
-            auto vPtr = builder.CreateAlloca(t);
-            builder.CreateStore(val, vPtr);
-            locals[decl] = vPtr;
+            
+            if(td->isMaybe()) {
+                auto vPtrPtr = builder.CreateAlloca(t);
+                auto vPtr = builder.CreateAlloca(t->getPointerElementType());
+                builder.CreateStore(val, vPtr);
+                builder.CreateStore(vPtr, vPtrPtr);
+                locals[decl] = vPtrPtr;
+            }
+            else {
+                auto vPtr = builder.CreateAlloca(t);
+                builder.CreateStore(val, vPtr);
+                locals[decl] = vPtr;
+            }
         }
     }
 }
@@ -195,7 +224,8 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
         }
     } else if (auto *v = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
         if(v->isByReference()) {
-            builder.CreateStore(val, formalParams[v]);
+            auto vPtr = builder.CreateLoad(mapType(v->getType()), formalParams[v]);
+            builder.CreateStore(val, vPtr);
         }
         else {
             writeLocalVar(BB, decl, val);
@@ -248,6 +278,10 @@ llvm::Value *cg::CGFunction::readLocalVar(llvm::BasicBlock *BB, ir::IR *decl) {
         if(auto fpd = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
             auto fval = formalParams.find(fpd);
             if(fval != formalParams.end()) {
+                if(fpd->getType()->isMaybe()) {
+                    auto ptrV = builder.CreateLoad(mapType(fpd->getType()), fval->second);
+                    return builder.CreateLoad(mapType(fpd->getType())->getPointerElementType(), ptrV);
+                }
                 return builder.CreateLoad(mapType(fpd->getType()), fval->second);
             }
             else {
@@ -262,7 +296,7 @@ llvm::Value *cg::CGFunction::readLocalVar(llvm::BasicBlock *BB, ir::IR *decl) {
     return nullptr;
 }
 
-llvm::Value *cg::CGFunction::readLocalVarRecursive(llvm::BasicBlock *BB, ir::IR *decl) {
+/*llvm::Value *cg::CGFunction::readLocalVarRecursive(llvm::BasicBlock *BB, ir::IR *decl) {
     // TODO: Checks for type
     llvm::Value *val = nullptr;
     if(!currDef[BB].sealed) {
@@ -324,13 +358,13 @@ void cg::CGFunction::optimizePhi(llvm::PHINode *phi) {
     for(auto *p: candidatePhis) {
         optimizePhi(p);
     }
-}
+}*/
 
 void cg::CGFunction::sealBlock(llvm::BasicBlock *BB) {
-    for(auto phi: currDef[BB].incompletePhis) {
+    /*for(auto phi: currDef[BB].incompletePhis) {
         addPhiOperands(BB, phi.second, phi.first);
     }
-    currDef[BB].incompletePhis.clear();
+    currDef[BB].incompletePhis.clear();*/
     currDef[BB].sealed = true;
 }
 
@@ -352,7 +386,8 @@ llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl, bool as
     } else if(auto *v = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
         if(v->isByReference()) {
             if(v->getType()->isMaybe() && !asMaybe) {
-                return builder.CreateLoad(mapType(v), formalParams[v]);
+                auto fvPtr = builder.CreateLoad(mapType(v), formalParams[v]);
+                return builder.CreateLoad(mapType(v)->getPointerElementType(), fvPtr);
             }
             return builder.CreateLoad(mapType(v)->getNonOpaquePointerElementType(), formalParams[v]);
         }
@@ -842,6 +877,27 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         else if(left->getType() == int1T) {
             lval = builder.CreateCall(to_str_bool, { left });
         }
+        else if(left->getType() == stringT) {
+            // Ignore
+        }
+        else if(left->getType() == int64T->getPointerTo()) {
+            auto ld = builder.CreateLoad(int64T, left);
+            lval = builder.CreateCall(to_str_int, { ld });
+        }
+        else if(left->getType() == floatT->getPointerTo()) {
+            auto ld = builder.CreateLoad(floatT, left);
+            lval = builder.CreateCall(to_str_float, { ld });
+        }
+        else if(left->getType() == int1T->getPointerTo()) {
+            auto ld = builder.CreateLoad(int1T, left);
+            lval = builder.CreateCall(to_str_bool, { ld });
+        }
+        else if(left->getType() == stringT->getPointerTo()) {
+            lval = builder.CreateLoad(stringT, left);
+        }
+        else {
+            llvm::report_fatal_error("Unknown type in left concat");
+        }
 
         if(right->getType() == int64T) {
             rval = builder.CreateCall(to_str_int, { right });
@@ -851,6 +907,27 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         }
         else if(right->getType() == int1T) {
             rval = builder.CreateCall(to_str_bool, { right });
+        }
+        else if(right->getType() == stringT) {
+            // Ignore
+        }
+        else if(right->getType() == int64T->getPointerTo()) {
+            auto ld = builder.CreateLoad(int64T, right);
+            rval = builder.CreateCall(to_str_int, { ld });
+        }
+        else if(right->getType() == floatT->getPointerTo()) {
+            auto ld = builder.CreateLoad(floatT, right);
+            rval = builder.CreateCall(to_str_float, { ld });
+        }
+        else if(right->getType() == int1T->getPointerTo()) {
+            auto ld = builder.CreateLoad(int1T, right);
+            rval = builder.CreateCall(to_str_bool, { ld });
+        }
+        else if(right->getType() == stringT->getPointerTo()) {
+            rval = builder.CreateLoad(stringT, right);
+        }
+        else {
+            llvm::report_fatal_error("Unknown type in concat");
         }
 
         auto res = builder.CreateAlloca(stringT);
@@ -1547,7 +1624,7 @@ llvm::Function *cg::CGFunction::createFunction(ir::FunctionDecl *fun, llvm::Func
         llvm::Argument *arg = i;
         ir::FormalParamDecl *param = fun->getParams()[idx];
         if(param->isByReference()) {
-            // FIXME: Handle referenced params
+            // FIXME: Handle referenced params??
         }
         arg->setName(param->getName());
     }

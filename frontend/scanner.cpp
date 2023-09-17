@@ -722,7 +722,7 @@ std::vector<ir::FormalParamDecl *> Scanner::parseFunParam(ir::IR *type, std::str
     if(t == rangeType) {
         diags.report(type->getLocation(), diag::ERR_CANNOT_INSTANTIATE_TYPE, RANGE_CSTR);
     }
-    auto fp = new ir::FormalParamDecl(currentIR, llvmloc, name, t);
+    auto fp = new ir::FormalParamDecl(currentIR, llvmloc, name, t, t->isMaybe());
     std::vector<ir::FormalParamDecl *> list{fp};
     currScope->insert(fp);
     //this->decls.push_back(fp);
@@ -736,7 +736,7 @@ std::vector<ir::FormalParamDecl *> Scanner::parseAddFunParam(std::vector<ir::For
     if(t == rangeType) {
         diags.report(type->getLocation(), diag::ERR_CANNOT_INSTANTIATE_TYPE, RANGE_CSTR);
     }
-    auto fp = new ir::FormalParamDecl(currentIR, llvmloc, name, t);
+    auto fp = new ir::FormalParamDecl(currentIR, llvmloc, name, t, t->isMaybe());
     list.push_back(fp);
     currScope->insert(fp);
     //this->decls.push_back(fp);
