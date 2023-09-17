@@ -25,11 +25,17 @@ bool Scope::insert(ir::IR *decl) {
     )).second;
 }
 
-ir::IR *Scope::lookup(llvm::StringRef name) {
+ir::IR *Scope::lookup(llvm::StringRef name, bool isMaybe) {
     Scope *s = this;
     while(s) {
         auto i = s->symbols.find(name);
         if(i != s->symbols.end()) {
+            if(isMaybe && llvm::isa<ir::TypeDecl>(i->second)) {
+                auto t = llvm::dyn_cast<ir::TypeDecl>(i->second);
+                auto mbT = t->clone();
+                mbT->setMaybe(true);
+                return mbT;
+            }
             return i->second;
         }
         s = s->getParent();

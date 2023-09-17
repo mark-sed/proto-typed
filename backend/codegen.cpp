@@ -69,32 +69,40 @@ void cg::CodeGen::init() {
 }
 
 llvm::Type *cg::CodeGen::convertType(ir::TypeDecl *t) {
+    llvm::Type *llvmT = nullptr;
     if(t->isMatrix()) {
-        return matrixT;
+        llvmT = matrixT;
     }
-    if(t->getName() == INT_CSTR) {
-        return int64T;
+    else if(t->getName() == INT_CSTR) {
+        llvmT = int64T;
     }
-    if(t->getName() == BOOL_CSTR) {
-        return int1T;
+    else if(t->getName() == BOOL_CSTR) {
+        llvmT = int1T;
     }
-    if(t->getName() == VOID_CSTR) {
-        return voidT;
+    else if(t->getName() == VOID_CSTR) {
+        llvmT = voidT;
     }
-    if(t->getName() == FLOAT_CSTR) {
-        return floatT;
+    else if(t->getName() == FLOAT_CSTR) {
+        llvmT = floatT;
     }
-    if(t->getName() == STRING_CSTR) {
-        return stringT;
+    else if(t->getName() == STRING_CSTR) {
+        llvmT = stringT;
     }
-    if(t->getDecl()) {
+    else if(t->getDecl()) {
         if(auto *v = llvm::dyn_cast<ir::StructDecl>(t->getDecl())) {
             std::string manName = mangleName(v);
-            return userTypes[manName].first;
+            llvmT = userTypes[manName].first;
         }
     }
-    llvm::report_fatal_error("Unsupported type");
-    return nullptr;
+
+    if(!llvmT) {
+        llvm::report_fatal_error("Unsupported type");
+        return nullptr;
+    }
+
+    if(t->isMaybe())
+        return llvmT->getPointerTo();
+    return llvmT;
 }
 
 std::string cg::CodeGen::mangleName(ir::IR *ir) {
@@ -110,9 +118,10 @@ std::string cg::CodeGen::mangleName(ir::IR *ir) {
 llvm::Type *cg::CodeGen::mapType(ir::IR *decl) {
     if(auto *fp = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
         llvm::Type *t = convertType(fp->getType());
-        if(fp->isByReference()) {
-            t = t->getPointerTo();
-        }
+        // Maybe type handles this
+        //if(fp->isByReference()) {
+        //    t = t->getPointerTo();
+        //}
         return t;
     }
     if(auto *v = llvm::dyn_cast<ir::VarDecl>(decl)) {
@@ -143,28 +152,56 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
     // Check if it is a parameter
     if (auto *fpd = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
         if(formalParams.find(fpd) != formalParams.end()) {
-            builder.CreateStore(val, formalParams[fpd]);
+            if(fpd->getType()->isMaybe() && !llvm::isa<llvm::ConstantPointerNull>(val)) {
+                auto ptrV = builder.CreateLoad(mapType(fpd->getType()), formalParams[fpd]);
+                builder.CreateStore(val, ptrV);
+            }
+            else {
+                builder.CreateStore(val, formalParams[fpd]);
+            }
+        }
+        else {
+            llvm::report_fatal_error("Write local var formal param not found");
         }
     }
-    else {
+    else if(auto *vrdec = llvm::dyn_cast<ir::VarDecl>(decl)){
         // Its a local variable
         if(locals.find(decl) != locals.end()) {
-            builder.CreateStore(val, locals[decl]);
+            if(vrdec->getType()->isMaybe() && !llvm::isa<llvm::ConstantPointerNull>(val)) {
+                auto ptrV = builder.CreateLoad(mapType(vrdec->getType()), locals[decl]);
+                builder.CreateStore(val, ptrV);
+            }
+            else {
+                builder.CreateStore(val, locals[decl]);
+            }
         }
         else {
             llvm::Type *t;
+            ir::TypeDecl *td;
             if(auto vrdcl = llvm::dyn_cast<ir::VarDecl>(decl)) {
+                td = vrdcl->getType();
                 t = mapType(vrdcl->getType());
             }
             else if(auto frmlp = llvm::dyn_cast<ir::FormalParamDecl>(decl)){
+                td = frmlp->getType();
                 t = mapType(frmlp->getType());
             }
             else {
                 llvm::report_fatal_error("Unknown local variable type");
             }
-            auto vPtr = builder.CreateAlloca(t);
-            builder.CreateStore(val, vPtr);
-            locals[decl] = vPtr;
+            
+            if(td->isMaybe() && !llvm::isa<llvm::ConstantPointerNull>(val)) {
+                auto vPtrPtr = builder.CreateAlloca(t);
+                auto vPtr = builder.CreateAlloca(t->getPointerElementType());
+                builder.CreateStore(val, vPtr);
+                builder.CreateStore(vPtr, vPtrPtr);
+                locals[decl] = vPtrPtr;
+            }
+            else {
+                auto vPtr = builder.CreateAlloca(t);
+                builder.CreateStore(val, vPtr);
+                locals[decl] = vPtr;
+            }
         }
     }
 }
@@ -173,14 +210,22 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
     LOGMAX("Write var: "+decl->debug());
     if(auto *v = llvm::dyn_cast<ir::VarDecl>(decl)) {
         if(v->getEnclosingIR() == cgm.getModuleDecl()) {
-            builder.CreateStore(val, cgm.getGlobals(decl));
+            if(v->getType()->isMaybe() && !llvm::isa<llvm::ConstantPointerNull>(val)) {
+                auto vPtr = builder.CreateAlloca(mapType(v->getType())->getPointerElementType());
+                builder.CreateStore(val, vPtr);
+                builder.CreateStore(vPtr, cgm.getGlobals(decl));
+            }
+            else {
+                builder.CreateStore(val, cgm.getGlobals(decl));
+            }
         }
         else {
             writeLocalVar(BB, decl, val);
         }
     } else if (auto *v = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
-        if(v->isByReference()) {
-            builder.CreateStore(val, formalParams[v]);
+        if(v->isByReference() && !llvm::isa<llvm::ConstantPointerNull>(val)) {
+            auto vPtr = builder.CreateLoad(mapType(v->getType()), formalParams[v]);
+            builder.CreateStore(val, vPtr);
         }
         else {
             writeLocalVar(BB, decl, val);
@@ -190,7 +235,7 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
     }
 }
 
-llvm::Value *cg::CGModule::readVar(llvm::BasicBlock *BB, ir::IR *decl) {
+llvm::Value *cg::CGModule::readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe) {
     /*if(auto *v = llvm::dyn_cast<ir::VarDecl>(decl)) {
         if(v->getEnclosingIR()->getKind() == ir::IRKind::IR_MODULE_DECL) {
             return builder.CreateLoad(mapType(v), getGlobals(decl));
@@ -213,12 +258,19 @@ llvm::Value *cg::CGFunction::readLocalVar(llvm::BasicBlock *BB, ir::IR *decl) {
     LOGMAX("Read var "+decl->debug());
     auto val = locals.find(decl);
     if(val != locals.end()) {
-        llvm::Type *t;
+        llvm::Type *t = nullptr;
+        ir::TypeDecl *ptT = nullptr;
         if(auto vrdcl = llvm::dyn_cast<ir::VarDecl>(decl)) {
-            t = mapType(vrdcl->getType());
+            ptT = vrdcl->getType();
+            t = mapType(ptT);
         }
         else if(auto vrdcl = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
-            t = mapType(vrdcl->getType());
+            ptT = vrdcl->getType();
+            t = mapType(ptT);
+        }
+        if(ptT->isMaybe()) {
+            auto ptrV = builder.CreateLoad(t, val->second);
+            return builder.CreateLoad(t->getPointerElementType(), ptrV);
         }
         return builder.CreateLoad(t, val->second);
     }
@@ -226,6 +278,10 @@ llvm::Value *cg::CGFunction::readLocalVar(llvm::BasicBlock *BB, ir::IR *decl) {
         if(auto fpd = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
             auto fval = formalParams.find(fpd);
             if(fval != formalParams.end()) {
+                if(fpd->getType()->isMaybe()) {
+                    auto ptrV = builder.CreateLoad(mapType(fpd->getType()), fval->second);
+                    return builder.CreateLoad(mapType(fpd->getType())->getPointerElementType(), ptrV);
+                }
                 return builder.CreateLoad(mapType(fpd->getType()), fval->second);
             }
             else {
@@ -240,7 +296,7 @@ llvm::Value *cg::CGFunction::readLocalVar(llvm::BasicBlock *BB, ir::IR *decl) {
     return nullptr;
 }
 
-llvm::Value *cg::CGFunction::readLocalVarRecursive(llvm::BasicBlock *BB, ir::IR *decl) {
+/*llvm::Value *cg::CGFunction::readLocalVarRecursive(llvm::BasicBlock *BB, ir::IR *decl) {
     // TODO: Checks for type
     llvm::Value *val = nullptr;
     if(!currDef[BB].sealed) {
@@ -302,19 +358,23 @@ void cg::CGFunction::optimizePhi(llvm::PHINode *phi) {
     for(auto *p: candidatePhis) {
         optimizePhi(p);
     }
-}
+}*/
 
 void cg::CGFunction::sealBlock(llvm::BasicBlock *BB) {
-    for(auto phi: currDef[BB].incompletePhis) {
+    /*for(auto phi: currDef[BB].incompletePhis) {
         addPhiOperands(BB, phi.second, phi.first);
     }
-    currDef[BB].incompletePhis.clear();
+    currDef[BB].incompletePhis.clear();*/
     currDef[BB].sealed = true;
 }
 
-llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl) {
+llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe) {
     if(auto *v = llvm::dyn_cast<ir::VarDecl>(decl)) {
         if(v->getEnclosingIR()->getKind() == ir::IRKind::IR_MODULE_DECL) {
+            if(v->getType()->isMaybe() && !asMaybe) {
+                auto ptrV = builder.CreateLoad(mapType(v), currModule.getGlobals(decl));
+                return builder.CreateLoad(mapType(v)->getPointerElementType(), ptrV);
+            }
             return builder.CreateLoad(mapType(v), currModule.getGlobals(decl));
         }
         else {
@@ -325,6 +385,10 @@ llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl) {
         }*/
     } else if(auto *v = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
         if(v->isByReference()) {
+            if(v->getType()->isMaybe() && !asMaybe) {
+                auto fvPtr = builder.CreateLoad(mapType(v), formalParams[v]);
+                return builder.CreateLoad(mapType(v)->getPointerElementType(), fvPtr);
+            }
             return builder.CreateLoad(mapType(v)->getNonOpaquePointerElementType(), formalParams[v]);
         }
         else {
@@ -382,6 +446,8 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
     case ir::ExprKind::EX_INT:
         LOGMAX("Accessing int value");
         return llvm::ConstantInt::get(int64T, llvm::dyn_cast<ir::IntLiteral>(e)->getValue());
+    case ir::ExprKind::EX_NONE:
+        return llvm::ConstantPointerNull::get(builder.getInt8Ty()->getPointerTo());
     case ir::ExprKind::EX_STRING: 
     {
         llvm::GlobalVariable *v = new llvm::GlobalVariable(*cgm.getLLVMMod(),
@@ -813,6 +879,27 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         else if(left->getType() == int1T) {
             lval = builder.CreateCall(to_str_bool, { left });
         }
+        else if(left->getType() == stringT) {
+            // Ignore
+        }
+        else if(left->getType() == int64T->getPointerTo()) {
+            auto ld = builder.CreateLoad(int64T, left);
+            lval = builder.CreateCall(to_str_int, { ld });
+        }
+        else if(left->getType() == floatT->getPointerTo()) {
+            auto ld = builder.CreateLoad(floatT, left);
+            lval = builder.CreateCall(to_str_float, { ld });
+        }
+        else if(left->getType() == int1T->getPointerTo()) {
+            auto ld = builder.CreateLoad(int1T, left);
+            lval = builder.CreateCall(to_str_bool, { ld });
+        }
+        else if(left->getType() == stringT->getPointerTo()) {
+            lval = builder.CreateLoad(stringT, left);
+        }
+        else {
+            llvm::report_fatal_error("Unknown type in left concat");
+        }
 
         if(right->getType() == int64T) {
             rval = builder.CreateCall(to_str_int, { right });
@@ -822,6 +909,27 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         }
         else if(right->getType() == int1T) {
             rval = builder.CreateCall(to_str_bool, { right });
+        }
+        else if(right->getType() == stringT) {
+            // Ignore
+        }
+        else if(right->getType() == int64T->getPointerTo()) {
+            auto ld = builder.CreateLoad(int64T, right);
+            rval = builder.CreateCall(to_str_int, { ld });
+        }
+        else if(right->getType() == floatT->getPointerTo()) {
+            auto ld = builder.CreateLoad(floatT, right);
+            rval = builder.CreateCall(to_str_float, { ld });
+        }
+        else if(right->getType() == int1T->getPointerTo()) {
+            auto ld = builder.CreateLoad(int1T, right);
+            rval = builder.CreateCall(to_str_bool, { ld });
+        }
+        else if(right->getType() == stringT->getPointerTo()) {
+            rval = builder.CreateLoad(stringT, right);
+        }
+        else {
+            llvm::report_fatal_error("Unknown type in concat");
         }
 
         auto res = builder.CreateAlloca(stringT);
@@ -1172,7 +1280,6 @@ void cg::CGFunction::emitStmt(ir::VarDecl *stmt) {
         }
     }
     writeVar(currBB, stmt, v);
-    
 }
 
 void cg::CGFunction::emit(std::vector<ir::IR *> stmts) {
@@ -1227,6 +1334,9 @@ void cg::CGModule::defineStruct(ir::StructDecl *decl) {
         llvm::SmallVector<llvm::Constant *> vals; //{ llvm::ConstantInt::get(builder.getInt32Ty(), 0, true) };
         for(auto e : decl->getElements()) {
             auto evar = llvm::dyn_cast<ir::VarDecl>(e);
+            if(evar->getType()->isMaybe()) {
+                llvm::report_fatal_error("Struct maybe types are not yet implemented");
+            }
             if(auto ival = evar->getInitValue()) {
                 if(auto vcast = llvm::dyn_cast<ir::IntLiteral>(ival)) {
                     vals.push_back(llvm::ConstantInt::get(ctx, vcast->getValue()));
@@ -1295,14 +1405,21 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
         case ir::IRKind::IR_VAR_DECL:
         {   // new variable needs its own scope
             auto var = llvm::dyn_cast<ir::VarDecl>(decl);
+            auto value = var->getInitValue();
+            llvm::Type *vType = mapType(var);
+            if(var->getType()->isMaybe() && value) {
+                llvm::report_fatal_error("MAYBE INITALIZER NOT YET IMPLEMENTED");
+                // Get base type because global variable is already a pointer (address)
+                vType = vType->getPointerElementType();
+            }
             llvm::GlobalVariable *v = new llvm::GlobalVariable(*llvmMod,
-                                                            mapType(var),
+                                                            vType,
                                                             false,
                                                             llvm::GlobalValue::PrivateLinkage,
                                                             nullptr,
                                                             mangleName(var));
-            auto value = var->getInitValue();
             if(value) {
+                // If variable is maybe this will initialize the variable it will point to
                 if(auto vcast = llvm::dyn_cast<ir::IntLiteral>(value)) {
                     v->setInitializer(llvm::ConstantInt::get(ctx, vcast->getValue()));
                 }
@@ -1331,66 +1448,72 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                 }
             }
             else { //if(utils::isOneOf(var->getType()->getName(), {FLOAT_CSTR, INT_CSTR, BOOL_CSTR, STRING_CSTR})) {
-                auto ty = var->getType()->getName();
-                if(ty == INT_CSTR) {
-                    v->setInitializer(llvm::ConstantInt::get(int64T, 0, true));
-                }
-                else if(ty == BOOL_CSTR) {
-                    v->setInitializer(llvm::ConstantInt::getFalse(int1T));
-                }
-                else if(ty == FLOAT_CSTR) {
-                    v->setInitializer(llvm::ConstantFP::get(floatT, 0.0));
-                }
-                else if(ty == STRING_CSTR) {
-                    auto init = llvm::ConstantAggregateZero::get(stringT);
-                    v->setInitializer(init);
-                    stringsToInit.push_back(std::make_pair(v, str_empty));
-                }
-                else if(var->getType()->isMatrix()) {
-                    auto init = llvm::ConstantAggregateZero::get(matrixT);
-                    v->setInitializer(init);
-                    matricesToInit.push_back(std::make_pair(v, nullptr));
+                if(var->getType()->isMaybe()) {
+                    auto ptt = llvm::dyn_cast<llvm::PointerType>(mapType(var->getType()));
+                    v->setInitializer(llvm::ConstantPointerNull::get(ptt));
                 }
                 else {
-                    // struct
-                    v->setInitializer(userTypes[mangleName(var->getType()->getDecl())].second);
-                    // TODO: Handle nested structs
-                    // Initialize all strings
-                    if(auto struDecl = llvm::dyn_cast<ir::StructDecl>(var->getType()->getDecl())) {
-                        int index = 0;
-                        for(auto e: struDecl->getElements()) {
-                            if(auto eVar = llvm::dyn_cast<ir::VarDecl>(e)) {
-                                if(eVar->getType()->getName() == STRING_CSTR) {
-                                    if(auto val = eVar->getInitValue()) {
-                                        llvm::Value* zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), 0);
-                                        llvm::Value* stIndex = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), index);
-                                        llvm::Value *elemPtr = builder.CreateGEP(mapType(var->getType()), v, {zero, stIndex});
-
-                                        auto vcast = llvm::dyn_cast<ir::StringLiteral>(val);
-                                        llvm::GlobalVariable *str_txt = new llvm::GlobalVariable(*llvmMod,
-                                                                                                builder.getInt8Ty()->getPointerTo(),
-                                                                                                false,
-                                                                                                llvm::GlobalValue::PrivateLinkage,
-                                                                                                nullptr);
-                                        str_txt->setInitializer(builder.CreateGlobalStringPtr(vcast->getValue().c_str(), "", 0, llvmMod));
-
-                                        stringsToInit.push_back(std::make_pair(elemPtr, str_txt));
-                                    }
-                                    else {
-                                        // Default
-                                        llvm::Value* zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), 0);
-                                        llvm::Value* stIndex = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), index);
-                                        llvm::Value *elemPtr = builder.CreateGEP(mapType(var->getType()), v, {zero, stIndex});
-                                        stringsToInit.push_back(std::make_pair(elemPtr, str_empty));
-                                    }
-                                }
-                            }
-                            // TODO: make this function and recursively go deeper if e is StructDecl
-                            ++index;
-                        }
+                    auto ty = var->getType()->getName();
+                    if(ty == INT_CSTR) {
+                        v->setInitializer(llvm::ConstantInt::get(int64T, 0, true));
+                    }
+                    else if(ty == BOOL_CSTR) {
+                        v->setInitializer(llvm::ConstantInt::getFalse(int1T));
+                    }
+                    else if(ty == FLOAT_CSTR) {
+                        v->setInitializer(llvm::ConstantFP::get(floatT, 0.0));
+                    }
+                    else if(ty == STRING_CSTR) {
+                        auto init = llvm::ConstantAggregateZero::get(stringT);
+                        v->setInitializer(init);
+                        stringsToInit.push_back(std::make_pair(v, str_empty));
+                    }
+                    else if(var->getType()->isMatrix()) {
+                        auto init = llvm::ConstantAggregateZero::get(matrixT);
+                        v->setInitializer(init);
+                        matricesToInit.push_back(std::make_pair(v, nullptr));
                     }
                     else {
-                        llvm::report_fatal_error("Global variable is of unknown type");
+                        // struct
+                        v->setInitializer(userTypes[mangleName(var->getType()->getDecl())].second);
+                        // TODO: Handle nested structs
+                        // Initialize all strings
+                        if(auto struDecl = llvm::dyn_cast<ir::StructDecl>(var->getType()->getDecl())) {
+                            int index = 0;
+                            for(auto e: struDecl->getElements()) {
+                                if(auto eVar = llvm::dyn_cast<ir::VarDecl>(e)) {
+                                    if(eVar->getType()->getName() == STRING_CSTR) {
+                                        if(auto val = eVar->getInitValue()) {
+                                            llvm::Value* zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), 0);
+                                            llvm::Value* stIndex = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), index);
+                                            llvm::Value *elemPtr = builder.CreateGEP(mapType(var->getType()), v, {zero, stIndex});
+
+                                            auto vcast = llvm::dyn_cast<ir::StringLiteral>(val);
+                                            llvm::GlobalVariable *str_txt = new llvm::GlobalVariable(*llvmMod,
+                                                                                                    builder.getInt8Ty()->getPointerTo(),
+                                                                                                    false,
+                                                                                                    llvm::GlobalValue::PrivateLinkage,
+                                                                                                    nullptr);
+                                            str_txt->setInitializer(builder.CreateGlobalStringPtr(vcast->getValue().c_str(), "", 0, llvmMod));
+
+                                            stringsToInit.push_back(std::make_pair(elemPtr, str_txt));
+                                        }
+                                        else {
+                                            // Default
+                                            llvm::Value* zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), 0);
+                                            llvm::Value* stIndex = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), index);
+                                            llvm::Value *elemPtr = builder.CreateGEP(mapType(var->getType()), v, {zero, stIndex});
+                                            stringsToInit.push_back(std::make_pair(elemPtr, str_empty));
+                                        }
+                                    }
+                                }
+                                // TODO: make this function and recursively go deeper if e is StructDecl
+                                ++index;
+                            }
+                        }
+                        else {
+                            llvm::report_fatal_error("Global variable is of unknown type");
+                        }
                     }
                 }
             }
@@ -1503,7 +1626,7 @@ llvm::Function *cg::CGFunction::createFunction(ir::FunctionDecl *fun, llvm::Func
         llvm::Argument *arg = i;
         ir::FormalParamDecl *param = fun->getParams()[idx];
         if(param->isByReference()) {
-            // FIXME: Handle referenced params
+            // FIXME: Handle referenced params??
         }
         arg->setName(param->getName());
     }

@@ -1,0 +1,25 @@
+// Expects: 42\n4\nfalse\nA
+
+int? globA
+globA = 42
+print(globA++"\n")
+
+void foo(int? x) {
+    x = 4
+}
+
+foo(globA)
+print(globA++"\n")
+
+void foo2(string? c) {
+    bool? g
+    g = false
+
+    print(g++"\n")
+
+    c = "A"
+}
+
+string hglob
+foo2(hglob)
+print(hglob)

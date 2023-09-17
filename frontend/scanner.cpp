@@ -67,6 +67,7 @@ void Scanner::init() {
     boolType = new ir::TypeDecl(currentIR, llvm::SMLoc(), BOOL_CSTR);
     voidType = new ir::TypeDecl(currentIR, llvm::SMLoc(), VOID_CSTR);
     rangeType = new ir::TypeDecl(currentIR, llvm::SMLoc(), RANGE_CSTR);
+    noneType = new ir::TypeDecl(currentIR, llvm::SMLoc(), NONETYPE_CSTR);
 
     unknownType = new ir::TypeDecl(currentIR, llvm::SMLoc(), UNKNOWN_CSTR);
 
@@ -76,6 +77,7 @@ void Scanner::init() {
     currScope->insert(stringType);
     currScope->insert(voidType);
     currScope->insert(rangeType);
+    currScope->insert(noneType);
 
     {
         auto printParams = std::vector<ir::FormalParamDecl *>{
@@ -344,6 +346,11 @@ ir::Expr *Scanner::parseString(std::string v) {
     return new ir::StringLiteral(llvmloc, v, stringType);
 }
 
+ir::Expr *Scanner::parseNone() {
+    LOGMAX("Parsing none");
+    return new ir::NoneLiteral(llvmloc, noneType);
+}
+
 ir::Expr *Scanner::parseVar(std::string v, bool external) {
     LOGMAX("Parsing a variable "+v);
     if(!external) {
@@ -393,6 +400,12 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
             if(tl->getName() != tr->getName()) {
                 if((tl->getName() == FLOAT_CSTR && tr->getName() == INT_CSTR)
                 || (tl->getName() == INT_CSTR && tr->getName() == FLOAT_CSTR)) {
+                    type = tl;
+                }
+                else if(tr->getName() == NONETYPE_CSTR) {
+                    if(!tl->isMaybe()) {
+                        diags.report(llvmloc, diag::ERR_CANNOT_ASSIGN_NONE);
+                    }
                     type = tl;
                 }
                 else {
@@ -609,13 +622,13 @@ void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT) {
     mainModule->addLibFunction(funLength);
 }
 
-ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &matsize) {
+ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &matsize, bool isMaybe) {
     auto ogName = name;
     for(size_t i = 0; i < matsize.size(); ++i) {
         name += "[]";
     }
     LOGMAX("Creating matrix type "+name);
-    auto rootType = sym_lookup(name, true);
+    auto rootType = sym_lookup(name, isMaybe, true);
     if(auto rootDecl = llvm::dyn_cast<ir::TypeDecl>(rootType)) {
         auto elemT = rootDecl;
         auto elemName = ogName;
@@ -722,7 +735,7 @@ std::vector<ir::FormalParamDecl *> Scanner::parseFunParam(ir::IR *type, std::str
     if(t == rangeType) {
         diags.report(type->getLocation(), diag::ERR_CANNOT_INSTANTIATE_TYPE, RANGE_CSTR);
     }
-    auto fp = new ir::FormalParamDecl(currentIR, llvmloc, name, t);
+    auto fp = new ir::FormalParamDecl(currentIR, llvmloc, name, t, t->isMaybe());
     std::vector<ir::FormalParamDecl *> list{fp};
     currScope->insert(fp);
     //this->decls.push_back(fp);
@@ -736,7 +749,7 @@ std::vector<ir::FormalParamDecl *> Scanner::parseAddFunParam(std::vector<ir::For
     if(t == rangeType) {
         diags.report(type->getLocation(), diag::ERR_CANNOT_INSTANTIATE_TYPE, RANGE_CSTR);
     }
-    auto fp = new ir::FormalParamDecl(currentIR, llvmloc, name, t);
+    auto fp = new ir::FormalParamDecl(currentIR, llvmloc, name, t, t->isMaybe());
     list.push_back(fp);
     currScope->insert(fp);
     //this->decls.push_back(fp);

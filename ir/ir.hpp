@@ -27,6 +27,7 @@
 #define MATRIX_CSTR "matrix"
 #define VOID_CSTR "void"
 #define RANGE_CSTR "range"
+#define NONETYPE_CSTR "noneType"
 #define UNKNOWN_CSTR "*unknowntype*"
 
 namespace ptc {
@@ -155,29 +156,44 @@ std::string block2List(std::vector<ir::FormalParamDecl *> block);
 class TypeDecl : public IR {
 private:
     IR *decl;
-    bool is_maybe;
     std::vector<Expr *> matrixSize;
+    bool maybe;
 public:
     TypeDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name, IR *decl=nullptr)
             : IR(IRKind::IR_TYPE_DECL, enclosing_ir, loc, name),
               decl(decl),
-              matrixSize{} {}
+              matrixSize{},
+              maybe(false) {}
     TypeDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name, std::vector<Expr *> matsize, IR *decl=nullptr)
             : IR(IRKind::IR_TYPE_DECL, enclosing_ir, loc, name),
               decl(decl),
-              matrixSize(matsize) {}
+              matrixSize(matsize),
+              maybe(false) {}
+
+    TypeDecl *clone() {
+        return new TypeDecl(*this);
+    }
 
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_TYPE_DECL;
     }
     bool isMatrix() { return !matrixSize.empty(); }
+    bool isMaybe() { return maybe; }
+    void setMaybe(bool m) { maybe = m; }
     std::vector<Expr *> getMatrixSize() { return matrixSize; }
     IR *getDecl() { return decl; }
-    std::string debug() const override { 
+    std::string debug() const override {
+        std::string n;
         if(!matrixSize.empty()) {
-            return name + "<" + block2List(matrixSize) + ">";
+            n = name + "<" + block2List(matrixSize) + ">";
         }
-        return name; 
+        else {
+            n = name;
+        }
+        if(maybe) {
+            n+="?";
+        }
+        return n;
     }
 };
 
@@ -553,6 +569,24 @@ public:
         return e->getKind() == ExprKind::EX_MATRIX;
     }
     std::string debug() const override { return "("+type->getName()+")["+block2List(value)+"]"; }
+};
+
+/**
+ * None value
+ */
+class NoneLiteral : public Expr {
+private:
+    llvm::SMLoc loc;
+public:
+    NoneLiteral(llvm::SMLoc loc, TypeDecl *type)
+              : Expr(ExprKind::EX_NONE, type, true),
+                loc(loc) {
+    }
+
+    static bool classof(const Expr *e) {
+        return e->getKind() == ExprKind::EX_NONE;
+    }
+    std::string debug() const override { return "none"; }
 };
 
 /**
