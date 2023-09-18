@@ -880,6 +880,31 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
                                     int1T,
                                     false
                                  ));
+        /*auto to_str_mint = cgm.getLLVMMod()->getOrInsertFunction("to_string_mint",
+                                 llvm::FunctionType::get(
+                                    stringT,
+                                    int64T->getPointerTo(),
+                                    false
+                                 ));
+        auto to_str_mfloat = cgm.getLLVMMod()->getOrInsertFunction("to_string_mfloat",
+                                 llvm::FunctionType::get(
+                                    stringT,
+                                    floatT->getPointerTo(),
+                                    false
+                                 ));
+        auto to_str_mbool = cgm.getLLVMMod()->getOrInsertFunction("to_string_mbool",
+                                 llvm::FunctionType::get(
+                                    stringT,
+                                    int1T->getPointerTo(),
+                                    false
+                                 ));
+        // Cannot be just loaded in case of none
+        auto to_str_mstring = cgm.getLLVMMod()->getOrInsertFunction("to_string_mstring",
+                                 llvm::FunctionType::get(
+                                    stringT,
+                                    int1T->getPointerTo(),
+                                    false
+                                 ));*/
         auto str_concat = cgm.getLLVMMod()->getOrInsertFunction("string_Add_Str",
                                  llvm::FunctionType::get(
                                     voidT,
@@ -890,66 +915,79 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
                                     },
                                     false
                                  ));
-        if(left->getType() == int64T) {
-            lval = builder.CreateCall(to_str_int, { left });
+        if(!e->getLeft()->getType()->isMaybe()) {
+            if(left->getType() == int64T) {
+                lval = builder.CreateCall(to_str_int, { left });
+            }
+            else if(left->getType() == floatT) {
+                lval = builder.CreateCall(to_str_float, { left });
+            }
+            else if(left->getType() == int1T) {
+                lval = builder.CreateCall(to_str_bool, { left });
+            }
+            else if(left->getType() == stringT) {
+                // Ignore
+            }
+            else {
+                llvm::report_fatal_error("Unknown type in concat");
+            }
         }
-        else if(left->getType() == floatT) {
-            lval = builder.CreateCall(to_str_float, { left });
-        }
-        else if(left->getType() == int1T) {
-            lval = builder.CreateCall(to_str_bool, { left });
-        }
-        else if(left->getType() == stringT) {
-            // Ignore
-        }
-        /*else if(left->getType() == int64T->getPointerTo()) {
-            auto ld = builder.CreateLoad(int64T, left);
-            lval = builder.CreateCall(to_str_int, { ld });
-        }
-        else if(left->getType() == floatT->getPointerTo()) {
-            auto ld = builder.CreateLoad(floatT, left);
-            lval = builder.CreateCall(to_str_float, { ld });
-        }
-        else if(left->getType() == int1T->getPointerTo()) {
-            auto ld = builder.CreateLoad(int1T, left);
-            lval = builder.CreateCall(to_str_bool, { ld });
-        }
-        else if(left->getType() == stringT->getPointerTo()) {
-            lval = builder.CreateLoad(stringT, left);
-        }*/
+        // TODO: Uncomment once ptlib.pt(.o) is being linked 
         else {
-            llvm::report_fatal_error("Unknown type in left concat");
+            llvm::report_fatal_error("Concat for maybe is not yet implemented");
+            /*left = llvm::dyn_cast<llvm::LoadInst>(left)->getOperand(0);
+            if(left->getType() == int64T->getPointerTo()) {
+                lval = builder.CreateCall(to_str_mint, { left });
+            }
+            else if(left->getType() == floatT->getPointerTo()) {
+                lval = builder.CreateCall(to_str_mfloat, { left });
+            }
+            else if(left->getType() == int1T->getPointerTo()) {
+                lval = builder.CreateCall(to_str_mbool, { left });
+            }
+            else if(left->getType() == stringT->getPointerTo()) {
+                lval = builder.CreateCall(to_str_mstring, { left });
+            }
+            else {
+                llvm::report_fatal_error("Unknown type in concat");
+            }*/
         }
 
-        if(right->getType() == int64T) {
-            rval = builder.CreateCall(to_str_int, { right });
+        if(!e->getRight()->getType()->isMaybe()) {
+            if(right->getType() == int64T) {
+                rval = builder.CreateCall(to_str_int, { right });
+            }
+            else if(right->getType() == floatT) {
+                rval = builder.CreateCall(to_str_float, { right });
+            }
+            else if(right->getType() == int1T) {
+                rval = builder.CreateCall(to_str_bool, { right });
+            }
+            else if(right->getType() == stringT) {
+                // Ignore
+            }
+            else {
+                llvm::report_fatal_error("Unknown type in concat");
+            }
         }
-        else if(right->getType() == floatT) {
-            rval = builder.CreateCall(to_str_float, { right });
-        }
-        else if(right->getType() == int1T) {
-            rval = builder.CreateCall(to_str_bool, { right });
-        }
-        else if(right->getType() == stringT) {
-            // Ignore
-        }
-        /*else if(right->getType() == int64T->getPointerTo()) {
-            auto ld = builder.CreateLoad(int64T, right);
-            rval = builder.CreateCall(to_str_int, { ld });
-        }
-        else if(right->getType() == floatT->getPointerTo()) {
-            auto ld = builder.CreateLoad(floatT, right);
-            rval = builder.CreateCall(to_str_float, { ld });
-        }
-        else if(right->getType() == int1T->getPointerTo()) {
-            auto ld = builder.CreateLoad(int1T, right);
-            rval = builder.CreateCall(to_str_bool, { ld });
-        }
-        else if(right->getType() == stringT->getPointerTo()) {
-            rval = builder.CreateLoad(stringT, right);
-        }*/
         else {
-            llvm::report_fatal_error("Unknown type in concat");
+            llvm::report_fatal_error("Concat for maybe is not yet implemented");
+            /*right = llvm::dyn_cast<llvm::LoadInst>(right)->getOperand(0);
+            if(right->getType() == int64T->getPointerTo()) {
+                rval = builder.CreateCall(to_str_mint, { right });
+            }
+            else if(right->getType() == floatT->getPointerTo()) {
+                rval = builder.CreateCall(to_str_mfloat, { right });
+            }
+            else if(right->getType() == int1T->getPointerTo()) {
+                rval = builder.CreateCall(to_str_mbool, { right });
+            }
+            else if(right->getType() == stringT->getPointerTo()) {
+                rval = builder.CreateCall(to_str_mstring, { right });
+            }
+            else {
+                llvm::report_fatal_error("Unknown type in concat");
+            }*/
         }
 
         auto res = builder.CreateAlloca(stringT);
@@ -1427,18 +1465,32 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
             auto var = llvm::dyn_cast<ir::VarDecl>(decl);
             auto value = var->getInitValue();
             llvm::Type *vType = mapType(var);
-            if(var->getType()->isMaybe() && value) {
-                llvm::report_fatal_error("MAYBE INITALIZER NOT YET IMPLEMENTED");
+            llvm::GlobalVariable *vPtr = nullptr;
+            llvm::GlobalVariable *v = nullptr;
+            std::string vName = mangleName(var);
+            if(var->getType()->isMaybe() && value && !llvm::isa<ir::NoneLiteral>(value)) {
+                vPtr = new llvm::GlobalVariable(*llvmMod,
+                                                vType,
+                                                false,
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                nullptr,
+                                                vName);
+                vName = "";
                 // Get base type because global variable is already a pointer (address)
+                vPtr->setInitializer(llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(vType)));
                 vType = vType->getPointerElementType();
             }
-            llvm::GlobalVariable *v = new llvm::GlobalVariable(*llvmMod,
-                                                            vType,
-                                                            false,
-                                                            llvm::GlobalValue::PrivateLinkage,
-                                                            nullptr,
-                                                            mangleName(var));
-            if(value) {
+            v = new llvm::GlobalVariable(*llvmMod,
+                                        vType,
+                                        false,
+                                        llvm::GlobalValue::PrivateLinkage,
+                                        nullptr,
+                                        vName);
+            if(var->getType()->isMaybe() && value && !llvm::isa<ir::NoneLiteral>(value)) {
+                maybesToInit.push_back(std::make_pair(vPtr, v));
+            }
+
+            if(value && !llvm::isa<ir::NoneLiteral>(value)) {
                 // If variable is maybe this will initialize the variable it will point to
                 if(auto vcast = llvm::dyn_cast<ir::IntLiteral>(value)) {
                     v->setInitializer(llvm::ConstantInt::get(ctx, vcast->getValue()));
@@ -1467,7 +1519,7 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                     llvm::report_fatal_error("Global variable initializer is not a constant");
                 }
             }
-            else { //if(utils::isOneOf(var->getType()->getName(), {FLOAT_CSTR, INT_CSTR, BOOL_CSTR, STRING_CSTR})) {
+            else if(!value || !llvm::isa<ir::NoneLiteral>(value)){ //if(utils::isOneOf(var->getType()->getName(), {FLOAT_CSTR, INT_CSTR, BOOL_CSTR, STRING_CSTR})) {
                 if(var->getType()->isMaybe()) {
                     auto ptt = llvm::dyn_cast<llvm::PointerType>(mapType(var->getType()));
                     v->setInitializer(llvm::ConstantPointerNull::get(ptt));
@@ -1537,7 +1589,12 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                     }
                 }
             }
-            globals[var] = v;
+            if(var->getType()->isMaybe() && value && !llvm::isa<ir::NoneLiteral>(value)) {
+                globals[var] = vPtr;
+            }
+            else {
+                globals[var] = v;
+            }
         }
         break;
         case ir::IRKind::IR_FUNCTION_DECL:
@@ -1616,6 +1673,11 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
     // Init matrices
     for(auto m: matricesToInit) {
         builder.CreateCall(matrixCreateF, { m.first });
+    }
+
+    // Init maybes
+    for(auto m: maybesToInit) {
+        builder.CreateStore(m.second, m.first);
     }
 
     auto entryFunLLVM = llvmMod->getFunction(mangleName(entryFun));
