@@ -761,6 +761,16 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         if(left->getType() == right->getType()) {
             result = builder.CreateICmpEQ(left, right);
         }
+        else if(e->getLeft()->getType()->getName() == NONETYPE_CSTR && e->getRight()->getType()->isMaybe()) {
+            auto ldv = llvm::dyn_cast<llvm::LoadInst>(right)->getOperand(0);
+            auto tnone = llvm::ConstantPointerNull::get(right->getType()->getPointerTo());
+            result = builder.CreateICmpEQ(ldv, tnone);
+        }
+        else if(e->getRight()->getType()->getName() == NONETYPE_CSTR && e->getLeft()->getType()->isMaybe()) {
+            auto ldv = llvm::dyn_cast<llvm::LoadInst>(left)->getOperand(0);
+            auto tnone = llvm::ConstantPointerNull::get(left->getType()->getPointerTo());
+            result = builder.CreateICmpEQ(ldv, tnone);
+        }
         else {
             llvm::report_fatal_error("EQ does not supported given type");
         }
@@ -771,6 +781,16 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         LOGMAX("Creating NEQ instruction");
         if(left->getType() == right->getType()) {
             result = builder.CreateICmpNE(left, right);
+        }
+        else if(e->getLeft()->getType()->getName() == NONETYPE_CSTR && e->getRight()->getType()->isMaybe()) {
+            auto ldv = llvm::dyn_cast<llvm::LoadInst>(right)->getOperand(0);
+            auto tnone = llvm::ConstantPointerNull::get(right->getType()->getPointerTo());
+            result = builder.CreateICmpNE(ldv, tnone);
+        }
+        else if(e->getRight()->getType()->getName() == NONETYPE_CSTR && e->getLeft()->getType()->isMaybe()) {
+            auto ldv = llvm::dyn_cast<llvm::LoadInst>(left)->getOperand(0);
+            auto tnone = llvm::ConstantPointerNull::get(left->getType()->getPointerTo());
+            result = builder.CreateICmpNE(ldv, tnone);
         }
         else {
             llvm::report_fatal_error("NEQ does not supported given type");
@@ -882,7 +902,7 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         else if(left->getType() == stringT) {
             // Ignore
         }
-        else if(left->getType() == int64T->getPointerTo()) {
+        /*else if(left->getType() == int64T->getPointerTo()) {
             auto ld = builder.CreateLoad(int64T, left);
             lval = builder.CreateCall(to_str_int, { ld });
         }
@@ -896,7 +916,7 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         }
         else if(left->getType() == stringT->getPointerTo()) {
             lval = builder.CreateLoad(stringT, left);
-        }
+        }*/
         else {
             llvm::report_fatal_error("Unknown type in left concat");
         }
@@ -913,7 +933,7 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         else if(right->getType() == stringT) {
             // Ignore
         }
-        else if(right->getType() == int64T->getPointerTo()) {
+        /*else if(right->getType() == int64T->getPointerTo()) {
             auto ld = builder.CreateLoad(int64T, right);
             rval = builder.CreateCall(to_str_int, { ld });
         }
@@ -927,7 +947,7 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         }
         else if(right->getType() == stringT->getPointerTo()) {
             rval = builder.CreateLoad(stringT, right);
-        }
+        }*/
         else {
             llvm::report_fatal_error("Unknown type in concat");
         }
