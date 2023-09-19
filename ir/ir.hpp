@@ -5,7 +5,7 @@
  * @date 2023-04-20
  * 
  * @copyright Copyright (c) 2023
- * 
+ * Internal Representation of the code
  */
 
 #ifndef _IR_HPP_
@@ -782,6 +782,9 @@ public:
     }
 };
 
+/**
+ * While or doWhile statement
+ */
 class WhileStmt : public IR {
 private:
     Expr *cond;
@@ -816,6 +819,9 @@ public:
     }
 };
 
+/**
+ * Foreach statement (for with collection or range)
+ */
 class ForeachStmt : public IR {
 private:
     Expr *i;

@@ -5,7 +5,7 @@
  * @date 2023-04-20
  * 
  * @copyright Copyright (c) 2023
- * 
+ * Internal Representation of the code
  */
 
 #include "ir.hpp"

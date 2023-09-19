@@ -1,3 +1,12 @@
+/**
+ * @file utils.hpp
+ * @author Marek Sedlacek
+ * @brief Helper functions
+ * 
+ * @copyright Copyright (c) 2023
+ * General helper functions
+ */
+
 #ifndef _UTILS_HPP_
 #define _UTILS_HPP_
 

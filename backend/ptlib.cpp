@@ -1,3 +1,13 @@
+/**
+ * @file ptlib.cpp
+ * @author Marek Sedlacek
+ * @brief Prototyped standard library intrinsics
+ * 
+ * @copyright Copyright (c) 2023
+ * Generates prototyped functions that need to be intrinsified
+ * or that are templated.
+ */
+
 #include "ptlib.hpp"
 #include "codegen.hpp"
 

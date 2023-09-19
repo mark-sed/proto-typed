@@ -43,6 +43,7 @@ private:
 
     llvm::SMLoc llvmloc;
 
+    // Type declarations for language types
     ir::TypeDecl *intType;
     ir::TypeDecl *floatType;
     ir::TypeDecl *stringType;
@@ -52,6 +53,13 @@ private:
     ir::TypeDecl *rangeType;
     ir::TypeDecl *unknownType;
 
+    /**
+     * Adds a custom generated matrix function (templated) to the symbol table
+     * Based on the defined types there needs to be generic Matrix functions
+     * generated (e.g. append, length...)
+     * @param t Matrix type declaration
+     * @param elemT Matrix element type
+     */
     void addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT);
 public:
     ptc::Parser::location_type *loc = nullptr;     ///< Current parsing location
@@ -76,12 +84,37 @@ public:
      */
     void parse(std::istream *code);
 
+    /**
+     * Parses escape sequences in read PT string to work with LLVM strings
+     * @param str String to escape
+     * @return escaped string str
+     */
     std::string escapeString(std::string str);
 
+    /**
+     * Denotes that a new scope was entered during parsing for a given IR
+     * @param decl IR which was entered
+     */
     void enterScope(ir::IR *decl);
+    /**
+     * Denotes that a new function scope was entered of not yet known function
+     * The function has to be later on set (once all the information is parsed)
+     */
     void enterFunScope();
+    /**
+     * Works pretty much the same as enterFunScope, but has different logging
+     * The IR has to be later on set (function is used as a placeholder)
+     */
     void enterBlockScope();
+    /**
+     * Denotes that the current scope was left and a new one should be taken from the
+     * stack of scopes
+     */
     void leaveScope();
+    /**
+     * Reports fatal error using diag::diagmsg
+     * If possible use the diags argument
+     */
     void fatal_error(diag::diagmsg d, std::string msg);
 
     /**

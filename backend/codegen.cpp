@@ -1,3 +1,12 @@
+/**
+ * @file codegen.cpp
+ * @author Marek Sedlacek
+ * @brief Code generation
+ * 
+ * @copyright Copyright (c) 2023
+ * Code generation from IR to LLVM assembly
+ */
+
 #include "codegen.hpp"
 #include "logging.hpp"
 #include "utils.hpp"
@@ -1740,20 +1749,6 @@ void cg::CGFunction::run() {
         }
     }
 
-    /* llvm::Type *retTy = llvm::Type::getInt32Ty(ctx);
-    llvm::FunctionType* FuncTy = llvm::FunctionType::get(retTy, false);
-    llvm::Type *charTy = llvm::Type::getInt8Ty(ctx);
-    llvm::Type *charPtrTy = charTy->getPointerTo();
-    //llvm::Argument arg(charTy, "s");
-    llvm::Attribute arg = llvm::Attribute::get(ctx, llvm::Attribute::AttrKind::ByVal, charTy);
-    llvm::AttributeList atl;
-    atl.addAttributeAtIndex(ctx, 0, arg);
-    llvm::FunctionCallee putcFun = cgm.getLLVMMod()->getOrInsertFunction("puts", llvm::Type::getInt32Ty(ctx));
-    llvm::Value *v = llvm::ConstantDataArray::getString(ctx, llvm::StringRef("Hello!"));
-    llvm::ArrayRef<llvm::Value *> args{v};
-    llvm::Instruction* putcCall = llvm::CallInst::Create(putcFun, args);
-    builder.Insert(putcCall);*/
-
     auto block = fun->getDecl();
     emit(fun->getDecl());
     if(!currBB->getTerminator()) {
@@ -1761,5 +1756,3 @@ void cg::CGFunction::run() {
     }
     sealBlock(currBB);
 }
-
-//void cg::CGFunction::run() { }

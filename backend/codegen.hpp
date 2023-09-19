@@ -1,3 +1,12 @@
+/**
+ * @file codegen.hpp
+ * @author Marek Sedlacek
+ * @brief Code generation
+ * 
+ * @copyright Copyright (c) 2023
+ * Code generation from IR to LLVM assembly
+ */
+
 #ifndef _CODE_GEN_HPP_
 #define _CODE_GEN_HPP_
 
@@ -18,6 +27,10 @@ namespace cg {
 
 class PTLib;
 
+/**
+ * General codegeneration handler
+ * Runs code generation pipeline
+ */
 class CodeGenHandler {
 private:
     llvm::LLVMContext &ctx;
@@ -28,13 +41,28 @@ protected:
                  : ctx(ctx), target(target), module(nullptr) {}
 
 public:
+    /**
+     * Creates new CodeGenHandler instance
+     * @param ctx LLVM context
+     * @param target Target architecture
+     * @return new CodeGenHandler instance
+     */
     static CodeGenHandler *create(llvm::LLVMContext &ctx, llvm::TargetMachine *target);
 
+    /**
+     * Runs codegeneration for a given module
+     * @param module IR module
+     * @param fileName Module file name (for error reporting)
+     * @return LLVM module with code generated for passed in module
+     */
     std::unique_ptr<llvm::Module> run(ir::ModuleDecl *module, std::string fileName);
 };
 
 class CGModule;
 
+/**
+ * General code generation class used by specific code generators
+ */
 class CodeGen {
 protected:
     llvm::LLVMContext &ctx;
@@ -72,6 +100,7 @@ protected:
     llvm::StructType *getStringIR();
 
 public:
+    // LLVM versions of PT types
     llvm::Type *voidT;
     llvm::Type *int1T;
     llvm::Type *int64T;
@@ -81,16 +110,42 @@ public:
     llvm::StructType *matrixT;
     llvm::PointerType *matrixTPtr;
 
+    /**
+     * Maps PT type to llvm type
+     * Unlike convertType, this can also accept variable declarations
+     * @param decl PT type declaration
+     * @return llvm type for passed in type
+     * @note calls convertType
+     */
     llvm::Type *mapType(ir::IR *decl);
+    /**
+     * Converts PT type to llvm type
+     * @param type PT type declaration
+     * @return llvm type for passed in type
+     */
     llvm::Type *convertType(ir::TypeDecl *type);
+    /**
+     * Generates mangled name for given IR
+     * @param ir IR for which to generate name
+     * @return mangled name for given IR
+     */
     std::string mangleName(ir::IR *ir);
 
+    /**
+     * Holds all the user defined types (structs)
+     */
     static llvm::StringMap<std::pair<llvm::Type *, llvm::Constant *>> userTypes;
 
+    /**
+     * Initializer, has to be called before any other method
+     * Initializes types and internal structures
+     */
     void init();
 };
 
-
+/**
+ * Code generator for PT module
+ */
 class CGModule : public CodeGen {
 private:
     llvm::Module *llvmMod;
@@ -107,6 +162,9 @@ protected:
     virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe=false) override;
 
 public:
+    /**
+     * @param llvmMod module which to which the code will be generated
+     */
     CGModule(llvm::Module *llvmMod);
     ~CGModule();
 
@@ -114,10 +172,23 @@ public:
     llvm::Module *getLLVMMod() { return llvmMod; }
     ir::ModuleDecl *getModuleDecl() { return mod; }
 
+    /**
+     * Generates llvm type for passed in structure and
+     * adds it to the userTypes
+     * @param decl Structure declaration
+     */
     void defineStruct(ir::StructDecl *decl);
+    /**
+     * Getter for global objects
+     * @param ir IR to get the GO for
+     * @return llvm IR GlobalObject for passed in IR
+     */
     llvm::GlobalObject *getGlobals(ir::IR *ir) { return globals[ir]; }
+
+    /**
+     * Runs the code generation for passed in module
+     */
     void run(ir::ModuleDecl *module);
-    llvm::GlobalVariable *nonePtr;
 };
 
 class CGFunction : public CodeGen {
@@ -129,12 +200,12 @@ private:
     llvm::DenseMap<ir::FormalParamDecl *, llvm::Value *> formalParams;
 
     llvm::Value *readLocalVar(llvm::BasicBlock *BB, ir::IR *decl);
-    llvm::Value *readLocalVarRecursive(llvm::BasicBlock *BB, ir::IR *decl);
+    //llvm::Value *readLocalVarRecursive(llvm::BasicBlock *BB, ir::IR *decl);
     void writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val);
     void sealBlock(llvm::BasicBlock *BB);
-    llvm::PHINode *addEmptyPhi(llvm::BasicBlock *BB, ir::IR *decl);
-    void addPhiOperands(llvm::BasicBlock *BB, ir::IR *decl, llvm::PHINode *phi);
-    void optimizePhi(llvm::PHINode *phi);
+    //llvm::PHINode *addEmptyPhi(llvm::BasicBlock *BB, ir::IR *decl);
+    //void addPhiOperands(llvm::BasicBlock *BB, ir::IR *decl, llvm::PHINode *phi);
+    //void optimizePhi(llvm::PHINode *phi);
 
     llvm::FunctionType *createFunctionType(ir::FunctionDecl *fun);
     llvm::Function *createFunction(ir::FunctionDecl *fun, llvm::FunctionType *funType);

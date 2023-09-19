@@ -1,3 +1,12 @@
+/**
+ * @file utils.cpp
+ * @author Marek Sedlacek
+ * @brief Helper functions
+ * 
+ * @copyright Copyright (c) 2023
+ * General helper functions
+ */
+
 #include "utils.hpp"
 #include "llvm/IR/Value.h"
 
