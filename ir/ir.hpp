@@ -27,6 +27,7 @@
 #define MATRIX_CSTR "matrix"
 #define VOID_CSTR "void"
 #define RANGE_CSTR "range"
+#define VARARGS_CSTR "varargs"
 #define NONETYPE_CSTR "noneType"
 #define UNKNOWN_CSTR "*unknowntype*"
 

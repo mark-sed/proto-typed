@@ -51,6 +51,7 @@ private:
     ir::TypeDecl *voidType;
     ir::TypeDecl *noneType;
     ir::TypeDecl *rangeType;
+    ir::TypeDecl *varargsType;
     ir::TypeDecl *unknownType;
 
     /**

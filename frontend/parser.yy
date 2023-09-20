@@ -340,8 +340,8 @@ fun_id : ID { scanner->enterFunScope(); $$ = $1; }
 funargsnvar : type ID                   { $$ = scanner->parseFunParam($1, $2); }
             | funargsnvar COMMA type ID { $$ = scanner->parseAddFunParam($1, $3, $4); }
             ;
-funargs : RANGE ID
-        | funargsnvar COMMA RANGE ID
+funargs : RANGE ID                      { $$ = scanner->parseFunParam(scanner->sym_lookup(VARARGS_CSTR, false, true), $2); }
+        | funargsnvar COMMA RANGE ID    { $$ = $$ = scanner->parseAddFunParam($1, scanner->sym_lookup(VARARGS_CSTR, false, true), $4);}
         | funargsnvar                   { $$ = $1; }
         ;
          

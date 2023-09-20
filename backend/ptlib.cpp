@@ -10,6 +10,7 @@
 
 #include "ptlib.hpp"
 #include "codegen.hpp"
+#include "logging.hpp"
 
 using namespace ptc;
 using namespace ptc::cg;

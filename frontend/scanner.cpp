@@ -68,6 +68,7 @@ void Scanner::init() {
     voidType = new ir::TypeDecl(currentIR, llvm::SMLoc(), VOID_CSTR);
     rangeType = new ir::TypeDecl(currentIR, llvm::SMLoc(), RANGE_CSTR);
     noneType = new ir::TypeDecl(currentIR, llvm::SMLoc(), NONETYPE_CSTR);
+    varargsType = new ir::TypeDecl(currentIR, llvm::SMLoc(), VARARGS_CSTR);
 
     unknownType = new ir::TypeDecl(currentIR, llvm::SMLoc(), UNKNOWN_CSTR);
 
@@ -78,6 +79,7 @@ void Scanner::init() {
     currScope->insert(voidType);
     currScope->insert(rangeType);
     currScope->insert(noneType);
+    currScope->insert(varargsType);
 
     {
         auto printParams = std::vector<ir::FormalParamDecl *>{
@@ -593,13 +595,16 @@ std::vector<ir::Expr *> Scanner::parseAddMatrixSize(std::vector<ir::Expr *> &lis
 }
 
 void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT) {
+    ir::TypeDecl *tPtr = t->clone();
+    tPtr->setMaybe(true);
     auto params = std::vector<ir::FormalParamDecl *>{
-        new ir::FormalParamDecl(currentIR, llvmloc, "m", t, true),
+        new ir::FormalParamDecl(currentIR, llvmloc, "m", tPtr, true),
         new ir::FormalParamDecl(currentIR, llvmloc, "v", elemT, false)
     };
     auto body = std::vector<ir::IR *> {};
     auto funAppend = new ir::FunctionDecl(currentIR,
                                             llvm::SMLoc(),
+                                            // We act as if the type is not maybe
                                             "append_"+t->getName()+"_"+elemT->getName(),
                                             "append",
                                             this->voidType,
