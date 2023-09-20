@@ -219,6 +219,7 @@
 %type <std::vector<ptc::ir::IR *> > decllist
 %type <std::vector<std::string> > id_list
 %type <std::vector<ptc::ir::FormalParamDecl *> > funargs
+%type <std::vector<ptc::ir::FormalParamDecl *> > funargsnvar
 
 %locations
 
@@ -336,13 +337,14 @@ function : type fun_id LPAR RPAR block           { $$ = scanner->parseFun($1, $2
          ;
 fun_id : ID { scanner->enterFunScope(); $$ = $1; }
        ;
-funargs : type ID               { $$ = scanner->parseFunParam($1, $2); }
-        //| funargdef
-        | funargs COMMA type ID { $$ = scanner->parseAddFunParam($1, $3, $4); }
+funargsnvar : type ID                   { $$ = scanner->parseFunParam($1, $2); }
+            | funargsnvar COMMA type ID { $$ = scanner->parseAddFunParam($1, $3, $4); }
+            ;
+funargs : RANGE ID
+        | funargsnvar COMMA RANGE ID
+        | funargsnvar                   { $$ = $1; }
         ;
-//funargdef : type ID SET expr
-//          | funargdef COMMA funargdef
-//          ;
+         
 
 // Variable declaration
 vardecl : type ID { $$ = scanner->parseVarDecl($1, $2); }

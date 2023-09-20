@@ -191,6 +191,9 @@ public:
     void run(ir::ModuleDecl *module);
 };
 
+/**
+ * Code generator for PT functions
+ */
 class CGFunction : public CodeGen {
 private:
     CGModule &cgm;
@@ -213,10 +216,12 @@ protected:
     virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) override;
     virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe=false) override;
 
+    // Expression code generation
     llvm::Value *emitInfixExpr(ir::BinaryInfixExpr *e);
     llvm::Value *emitFunCall(ir::FunctionCall *e);
     llvm::Value *emitExpr(ir::Expr *e);
 
+    // IR code generation
     void emitMemberAssignment(ir::BinaryInfixExpr *l, llvm::Value *r);
     void emitStmt(ir::ExprStmt *stmt);
     void emitStmt(ir::ReturnStmt *stmt);
@@ -229,11 +234,18 @@ protected:
     void emitStmt(ir::VarDecl *stmt);
     virtual void emit(std::vector<ir::IR *> stmts);
 public:
+    /**
+     * @param cgm Code generator for module in which this function resides
+     * @param fun IR declaration of this function
+     */
     CGFunction(CGModule &cgm, ir::FunctionDecl *fun) : CodeGen(cgm.getLLVMCtx(), cgm), cgm(cgm), fun(fun) {
         funType = createFunctionType(fun);
         this->llvmFun = createFunction(fun, funType);
     } 
 
+    /**
+     * Runs code generation for this function
+     */
     void run();
 };
 

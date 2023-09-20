@@ -691,6 +691,7 @@ namespace  ptc  {
       // matsq
       char dummy7[sizeof (std::vector<ptc::ir::Expr *> )];
 
+      // funargsnvar
       // funargs
       char dummy8[sizeof (std::vector<ptc::ir::FormalParamDecl *> )];
 
@@ -949,32 +950,33 @@ namespace  ptc  {
         S_declistval = 101,                      // declistval
         S_function = 102,                        // function
         S_fun_id = 103,                          // fun_id
-        S_funargs = 104,                         // funargs
-        S_vardecl = 105,                         // vardecl
-        S_vardef = 106,                          // vardef
-        S_set = 107,                             // set
-        S_callarglist = 108,                     // callarglist
-        S_expr = 109,                            // expr
-        S_expr_var = 110,                        // expr_var
-        S_matrix = 111,                          // matrix
-        S_matvals = 112,                         // matvals
-        S_expr_mat = 113,                        // expr_mat
-        S_range = 114,                           // range
-        S_int_val = 115,                         // int_val
-        S_slice = 116,                           // slice
-        S_expr_none = 117,                       // expr_none
-        S_expr_struct = 118,                     // expr_struct
-        S_struct_val = 119,                      // struct_val
-        S_struct_list = 120,                     // struct_list
-        S_expr_int = 121,                        // expr_int
-        S_expr_float = 122,                      // expr_float
-        S_expr_str = 123,                        // expr_str
-        S_expr_bool = 124,                       // expr_bool
-        S_funtype = 125,                         // funtype
-        S_typelist = 126,                        // typelist
-        S_mattype = 127,                         // mattype
-        S_matsq = 128,                           // matsq
-        S_type = 129                             // type
+        S_funargsnvar = 104,                     // funargsnvar
+        S_funargs = 105,                         // funargs
+        S_vardecl = 106,                         // vardecl
+        S_vardef = 107,                          // vardef
+        S_set = 108,                             // set
+        S_callarglist = 109,                     // callarglist
+        S_expr = 110,                            // expr
+        S_expr_var = 111,                        // expr_var
+        S_matrix = 112,                          // matrix
+        S_matvals = 113,                         // matvals
+        S_expr_mat = 114,                        // expr_mat
+        S_range = 115,                           // range
+        S_int_val = 116,                         // int_val
+        S_slice = 117,                           // slice
+        S_expr_none = 118,                       // expr_none
+        S_expr_struct = 119,                     // expr_struct
+        S_struct_val = 120,                      // struct_val
+        S_struct_list = 121,                     // struct_list
+        S_expr_int = 122,                        // expr_int
+        S_expr_float = 123,                      // expr_float
+        S_expr_str = 124,                        // expr_str
+        S_expr_bool = 125,                       // expr_bool
+        S_funtype = 126,                         // funtype
+        S_typelist = 127,                        // typelist
+        S_mattype = 128,                         // mattype
+        S_matsq = 129,                           // matsq
+        S_type = 130                             // type
       };
     };
 
@@ -1070,6 +1072,7 @@ namespace  ptc  {
         value.move< std::vector<ptc::ir::Expr *>  > (std::move (that.value));
         break;
 
+      case symbol_kind::S_funargsnvar: // funargsnvar
       case symbol_kind::S_funargs: // funargs
         value.move< std::vector<ptc::ir::FormalParamDecl *>  > (std::move (that.value));
         break;
@@ -1333,6 +1336,7 @@ switch (yykind)
         value.template destroy< std::vector<ptc::ir::Expr *>  > ();
         break;
 
+      case symbol_kind::S_funargsnvar: // funargsnvar
       case symbol_kind::S_funargs: // funargs
         value.template destroy< std::vector<ptc::ir::FormalParamDecl *>  > ();
         break;
@@ -3011,8 +3015,8 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 3334,     ///< Last index in yytable_.
-      yynnts_ = 53,  ///< Number of nonterminal symbols.
+      yylast_ = 3320,     ///< Last index in yytable_.
+      yynnts_ = 54,  ///< Number of nonterminal symbols.
       yyfinal_ = 122 ///< Termination state number.
     };
 
@@ -3025,7 +3029,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 3029 "frontend/parser.hpp"
+#line 3033 "frontend/parser.hpp"
 
 
 
