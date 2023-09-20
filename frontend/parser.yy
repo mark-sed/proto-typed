@@ -131,6 +131,7 @@
 
 /* Keywords */
 %token KWVAR "var"
+%token KWANY "any"
 %token KWIMPORT "import"
 %token KWIF "if"
 %token KWELSE "else"
@@ -148,6 +149,7 @@
 %token KWBOOL "'bool'"
 %token KWSTRUCT "'struct'"
 %token KWVOID "'void'"
+%token KWRANGE "'range'"
 
 /* Identifiers */
 %token <std::string> ID "identifier"
@@ -811,6 +813,7 @@ type : KWINT KWMAYBE    { $$ = scanner->sym_lookup(INT_CSTR, true, true); }
      | KWFLOAT          { $$ = scanner->sym_lookup(FLOAT_CSTR, false, true); }
      | KWSTRING         { $$ = scanner->sym_lookup(STRING_CSTR, false, true); }
      | KWBOOL           { $$ = scanner->sym_lookup(BOOL_CSTR, false, true); }
+     | KWANY
      | ID               { $$ = scanner->sym_lookup($1, false, true); }
      | funtype
      | mattype          { $$ = $1; }

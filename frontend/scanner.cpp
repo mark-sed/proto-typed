@@ -285,9 +285,6 @@ ir::IR *Scanner::parseVarDecl(ir::IR *type, const std::string name, ir::Expr *va
     LOGMAX(type->getName()+" "+name);
     ir::TypeDecl *t = llvm::dyn_cast<ir::TypeDecl>(type);
     if(t) {
-        if(t == rangeType) {
-            diags.report(type->getLocation(), diag::ERR_CANNOT_INSTANTIATE_TYPE, RANGE_CSTR);
-        }
         auto v = new ir::VarDecl(currentIR, type->getLocation(), name, t, value);
         if(currScope->insert(v)) {
             //this->decls.push_back(v);
@@ -734,12 +731,9 @@ std::vector<std::string> Scanner::parseAddImportName(std::vector<std::string> &l
 }
 
 std::vector<ir::FormalParamDecl *> Scanner::parseFunParam(ir::IR *type, std::string name) {
-    LOGMAX("Creating new function param list with "+name);
+    LOGMAX("Creating new function param list with "+type->getName()+" "+name);
     // TODO: Handle by reference
     auto t = llvm::dyn_cast<ir::TypeDecl>(type);
-    if(t == rangeType) {
-        diags.report(type->getLocation(), diag::ERR_CANNOT_INSTANTIATE_TYPE, RANGE_CSTR);
-    }
     auto fp = new ir::FormalParamDecl(currentIR, llvmloc, name, t, t->isMaybe());
     std::vector<ir::FormalParamDecl *> list{fp};
     currScope->insert(fp);
@@ -751,9 +745,6 @@ std::vector<ir::FormalParamDecl *> Scanner::parseAddFunParam(std::vector<ir::For
     LOGMAX("Pushing new argument into function param list: "+name);
     // TODO: Handle by reference
     auto t = llvm::dyn_cast<ir::TypeDecl>(type);
-    if(t == rangeType) {
-        diags.report(type->getLocation(), diag::ERR_CANNOT_INSTANTIATE_TYPE, RANGE_CSTR);
-    }
     auto fp = new ir::FormalParamDecl(currentIR, llvmloc, name, t, t->isMaybe());
     list.push_back(fp);
     currScope->insert(fp);
@@ -817,9 +808,6 @@ ir::IR *Scanner::parseStructElement(ir::IR *type, const std::string name, ir::Ex
     LOGMAX("struct element "+type->getName()+" "+name);
     ir::TypeDecl *t = llvm::dyn_cast<ir::TypeDecl>(type);
     if(t) {
-        if(t == rangeType) {
-            diags.report(type->getLocation(), diag::ERR_CANNOT_INSTANTIATE_TYPE, RANGE_CSTR);
-        }
         auto v = new ir::VarDecl(currentIR, type->getLocation(), name, t, value);
         return v;
     }
@@ -972,9 +960,6 @@ ir::IR *Scanner::parseForeach(ir::IR *i, ir::Expr *collection, std::vector<ir::I
 ir::IR *Scanner::parseFun(ir::IR *type, std::string name, std::vector<ir::FormalParamDecl *> params, std::vector<ir::IR *> body) {
     LOGMAX("Parsing a function "+name);
     auto ctype = llvm::dyn_cast<ir::TypeDecl>(type);
-    if(ctype == rangeType) {
-        diags.report(type->getLocation(), diag::ERR_CANNOT_INSTANTIATE_TYPE, RANGE_CSTR);
-    }
     auto f = llvm::dyn_cast<ir::FunctionDecl>(currentIR);
     f->resolveFunction(llvmloc, encodeFunction(name, params), name, ctype, params, body);
     leaveScope();

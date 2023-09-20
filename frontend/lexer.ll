@@ -123,6 +123,7 @@ oct     0[Qq][0-7]+
 "?"             { return token::KWMAYBE; }
 
 "var"           { return token::KWVAR; }
+"any"           { return token::KWANY; }
 "import"        { return token::KWIMPORT; }
 "if"            { return token::KWIF; }
 "else"          { return token::KWELSE; }
@@ -139,6 +140,7 @@ oct     0[Qq][0-7]+
 "bool"          { return token::KWBOOL; }
 "struct"        { return token::KWSTRUCT; }
 "void"          { return token::KWVOID; }
+"range"         { return token::KWRANGE; }
 
 "true"          {
                   yylval->emplace<bool>(true);

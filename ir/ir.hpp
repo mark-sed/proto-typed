@@ -178,6 +178,12 @@ public:
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_TYPE_DECL;
     }
+    std::string getBaseName() { 
+        auto bn = getName(); 
+        bn.erase(std::remove(bn.begin(), bn.end(), '['), bn.end());
+        bn.erase(std::remove(bn.begin(), bn.end(), ']'), bn.end());
+        return bn;
+    }
     bool isMatrix() { return !matrixSize.empty(); }
     bool isMaybe() { return maybe; }
     void setMaybe(bool m) { maybe = m; }
