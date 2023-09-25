@@ -11,4 +11,10 @@ else
     VERBOSE=0
 fi
 
-./build/ptc/ptc ${PROG}.pt -verbose ${VERBOSE} -filetype=obj -relocation-model=pic && gcc ${PROG}.o ptlib.o -o ${PROG}.out && rm ${PROG}.o && ./${PROG}.out
+if [ -n "$3" ]; then
+    DIR=$3
+else
+    DIR=./
+fi
+
+$DIR"build/ptc/ptc" ${PROG}.pt -verbose ${VERBOSE} -filetype=obj -relocation-model=pic && gcc ${PROG}.o $DIR"ptlib.o" -o ${DIR}${PROG}.out && rm ${PROG}.o && ${DIR}${PROG}.out

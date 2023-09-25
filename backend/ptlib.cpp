@@ -103,7 +103,7 @@ void PTLib::to_string_intInit() {
                                 llvm::FunctionType::get(
                                 builder.getInt32Ty(),
                                 builder.getInt8Ty()->getPointerTo(),
-                                true
+                                false
                                 ));
     llvm::GlobalVariable *format = new llvm::GlobalVariable(*llvmMod,
                                                         builder.getInt8Ty()->getPointerTo(),
