@@ -1,0 +1,33 @@
+void foo() {
+
+}
+
+void bar() {
+    return
+}
+
+int baz() {
+    return 4
+}
+
+int boo(bool b) {
+    if(b) return 1
+    else return boo(true)
+}
+
+float miss(bool a) {
+    if(a) {
+        return 4.0
+    }
+    else if(boo(true) == 1) {
+        return 5.6
+    }
+    else {
+        if(boo(true) == 42) {
+            print("hello")
+        }
+        else {
+            return 4.8
+        }
+    }
+}

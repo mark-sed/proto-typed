@@ -52,7 +52,7 @@ C_GREEN='\033[0;32m'
 
 function failed {
     FAILED_TESTS+=("$1")
-    printf "${C_RED}FAILED${C_OFF}: $1\n"
+    printf "${C_RED}FAIL${C_OFF}: $1: $2\n"
     
 }
 
@@ -65,10 +65,10 @@ function run {
     rm -f ${WRKDIR}${PROGNAME}
 }
 
-function except_pass {
+function expect_pass {
     run $1
     if [[ $RETCODE -ne 0 ]]; then
-        failed $2
+        failed $2 "Compilation failed."
         printf "Command:\n--------\n$CMD\n"
         printf "Output:\n-------\n"
         cat $OUTP_STD
@@ -77,10 +77,25 @@ function except_pass {
     fi
 }
 
+function expect_fail {
+    run $1
+    if [[ $RETCODE -eq 0 ]]; then
+        failed $3 "Test was supposed to fail, but passed."
+    elif ! cmp -s "$OUTP_ERR" <(printf "$2") ; then
+        failed $3 "Error message differs."
+        printf "Command:\n--------\n$CMD\n"
+        printf "Output:\n-------\n"
+        cat $OUTP_STD
+        printf "Error output:\n-------------\n"
+        cat $OUTP_ERR
+        printf "Expected error:\n--------------\n${2}\n"
+    fi
+}
+
 function expect_out_eq {
     outstr=$(cat $OUTP_STD)
     if ! cmp -s "$OUTP_STD" <(printf "$1") ; then
-        failed $2
+        failed $2 "Output differs"
         printf "Expected:\n-------\n${1}\n"
         printf "Got:\n----\n${outstr}\n"
     fi
@@ -104,22 +119,28 @@ function run_test {
 }
 
 function test_fib {
-    except_pass "fib.pt" "fib"
+    expect_pass "fib.pt" "fib"
     expect_out_eq "55" "fib"
 }
 
 function test_strings {
-    except_pass "strings.pt" "strings"
+    expect_pass "strings.pt" "strings"
     expect_out_eq "global string\nexpr string\nlocal s" "strings"
+}
+
+function test_missing_return {
+    expect_fail "missing_return.pt" "<unknown>:0: error: Missing return in a flow path in a function ‘miss’.\n" "missing_return"
 }
 
 function run_all_tests {
     run_test fib
     run_test strings
+    run_test missing_return
 }
 
 # Count all functions starting with test_ 
 TEST_AMOUNT=$(declare -F | grep "test_" | wc -l)
+start_time=`date +%s`
 run_all_tests
 if [[ ${#FAILED_TESTS[@]} -ne 0 ]]; then
     UNQ_TST=($(printf "%s\n" "${FAILED_TESTS[@]}" | sort -u | tr '\n' ' '))
@@ -129,5 +150,7 @@ if [[ ${#FAILED_TESTS[@]} -ne 0 ]]; then
         printf "\t${t}\n"
     done
 else
-    printf "${C_GREEN}SUCCESS${C_OFF}: $INDEX tests passed\n"
+    end_time=`date +%s`
+    runtime=$((end_time-start_time))
+    printf "${C_GREEN}SUCCESS${C_OFF}: $INDEX tests passed (after $runtime s)\n"
 fi
