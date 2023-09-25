@@ -1,0 +1,19 @@
+string globs = "global"
+string str = " string\n"
+
+string ccat(string a, string b) {
+    return a ++ b
+}
+
+print(ccat(globs, str))
+print(ccat("expr", " string\n"))
+
+void foo() {
+    string locals = "local"
+    string str
+    str = " s"
+
+    print(ccat(locals, str))
+}
+
+foo()

@@ -79,7 +79,7 @@ function except_pass {
 
 function expect_out_eq {
     outstr=$(cat $OUTP_STD)
-    if [[ "$outstr" != "$1" ]]; then
+    if ! cmp -s "$OUTP_STD" <(printf "$1") ; then
         failed $2
         printf "Expected:\n-------\n${1}\n"
         printf "Got:\n----\n${outstr}\n"
@@ -108,10 +108,26 @@ function test_fib {
     expect_out_eq "55" "fib"
 }
 
+function test_strings {
+    except_pass "strings.pt" "strings"
+    expect_out_eq "global string\nexpr string\nlocal s" "strings"
+}
+
 function run_all_tests {
     run_test fib
+    run_test strings
 }
 
 # Count all functions starting with test_ 
 TEST_AMOUNT=$(declare -F | grep "test_" | wc -l)
 run_all_tests
+if [[ ${#FAILED_TESTS[@]} -ne 0 ]]; then
+    UNQ_TST=($(printf "%s\n" "${FAILED_TESTS[@]}" | sort -u | tr '\n' ' '))
+    printf "${C_RED}FAILED${C_OFF}: ${#UNQ_TST[@]} test(s) did not pass\n"
+    printf "Failed tests:\n"
+    for t in $UNQ_TST; do
+        printf "\t${t}\n"
+    done
+else
+    printf "${C_GREEN}SUCCESS${C_OFF}: $INDEX tests passed\n"
+fi
