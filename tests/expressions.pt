@@ -1,0 +1,86 @@
+int int_test(int x) {
+    int y
+    y = x + 2
+    y -= 8
+    y = y * 2
+    y += x % 2
+    y = y / -2
+    return y
+}
+
+int int_test2(int x) {
+    return ((x + 2 - 8) * 2 + (x % 2)) / -2
+}
+
+float float_test(float x) {
+    float y = x
+    y += 2.5
+    y = y - 0.9
+    y *= 5
+    y += x % 2.0
+    y /= -2
+    return y
+}
+
+float float_test2(float x) {
+    return ((x + 2.5 - 0.9) * 5.0 + (x % 2.0)) / -2
+}
+
+bool bool_test(bool x, bool x2) {
+    bool y
+    y = x or x2
+    y = y and x2
+    y = y or (x2 == false)
+    y = y or (x2 != true)
+    return y
+}
+
+bool bool_test2(bool x, bool x2) {
+    return (((x or x2) and x2) or (x2 == false)) or (x2 != true)
+}
+
+string string_test(string x, int z) {
+    string y = "\n"
+    y = x ++ y
+    string by = to_string(z == 42)
+    y = by ++ y
+    string y2
+    for(int i: 0..length(y)) {
+        if(i == 3) continue
+        y2 ++= y[i]
+    }
+    return y2
+}
+
+bool none_test(int? x) {
+    return x == none
+}
+
+string matrix_test(int[] x) {
+    string y
+    y ++= "(" ++ x[0] ++ " - " ++ x[length(x) - 1] ++ ")"
+    for(int i : x) {
+        y ++= ", "++i
+    }
+    return y ++ "\n"
+}
+
+int? a_none
+int? a_some = 42
+
+print(int_test(2)++"\n") // 4
+print(int_test2(2)++"\n") // 4
+print(float_test(42.5)++"\n") //-110.5
+print(float_test2(42.5)++"\n") //-110.5
+print(bool_test(false, true)++"\n") //true
+print(bool_test2(false, true)++"\n") //true
+print(string_test("man", 42)) //truman\n
+print(none_test(a_none)++"\n") //true
+print(none_test(a_some)++"\n") //false
+
+int[] matrix_int
+append(matrix_int, 0)
+append(matrix_int, 1)
+append(matrix_int, 2)
+append(matrix_int, 3)
+print(matrix_test(matrix_int)) // (0 - 3), 0, 1, 2, 3

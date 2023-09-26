@@ -1136,10 +1136,12 @@ void cg::CGFunction::emitStmt(ir::WhileStmt *stmt) {
 void cg::CGFunction::emitStmt(ir::ForeachStmt *stmt) {
     llvm::BasicBlock *forCondBB = llvm::BasicBlock::Create(ctx, "for.cond", llvmFun);
     llvm::BasicBlock *forBodyBB = llvm::BasicBlock::Create(ctx, "for.body", llvmFun);
+    llvm::BasicBlock *forNextIterBB = llvm::BasicBlock::Create(ctx, "for.next", llvmFun);
     llvm::BasicBlock *forAfterBB = llvm::BasicBlock::Create(ctx, "for.after", llvmFun);
 
     stmt->setAfterBB(forAfterBB);
     stmt->setCondBB(forCondBB);
+    stmt->setNextIterBB(forNextIterBB);
 
     auto range = llvm::dyn_cast<ir::Range>(stmt->getCollection());
 
@@ -1244,6 +1246,10 @@ void cg::CGFunction::emitStmt(ir::ForeachStmt *stmt) {
     }
 
     emit(stmt->getBody());
+    builder.CreateBr(forNextIterBB);
+
+    sealBlock(currBB);
+    setCurrBB(forNextIterBB);
     
     llvm::Value *newIndex = nullptr;
     if(range) {
@@ -1255,7 +1261,7 @@ void cg::CGFunction::emitStmt(ir::ForeachStmt *stmt) {
     builder.CreateStore(newIndex, indexPtr);
     builder.CreateCall(stackrestore, { stp });
     builder.CreateBr(forCondBB);
-    sealBlock(currBB);
+    sealBlock(forNextIterBB);
     sealBlock(forCondBB);
     setCurrBB(forAfterBB);
 
@@ -1279,8 +1285,7 @@ void cg::CGFunction::emitStmt(ir::ReturnStmt *stmt) {
 void cg::CGFunction::emitStmt(ir::BreakStmt *stmt) {
     LOGMAX("Creating break");
     ir::IR *cycle = stmt->getEnclosingIR();
-    // TODO: Add for when implemented
-    while(cycle && !llvm::isa<ir::WhileStmt>(cycle)) {
+    while(cycle && !llvm::isa<ir::WhileStmt>(cycle) && !llvm::isa<ir::ForeachStmt>(cycle)) {
         cycle = cycle->getEnclosingIR();
     }
     if(!cycle) {
@@ -1289,16 +1294,15 @@ void cg::CGFunction::emitStmt(ir::BreakStmt *stmt) {
     if(auto loop = llvm::dyn_cast<ir::WhileStmt>(cycle)) {
         builder.CreateBr(loop->getAfterBB());
     }
-    /*else if(auto loop = llvm::dyn_cast<ir::ForStmt>(cycle)) {
+    else if(auto loop = llvm::dyn_cast<ir::ForeachStmt>(cycle)) {
         builder.CreateBr(loop->getAfterBB());
-    }*/
+    }
 }
 
 void cg::CGFunction::emitStmt(ir::ContinueStmt *stmt) {
     LOGMAX("Creating continue");
     ir::IR *cycle = stmt->getEnclosingIR();
-    // TODO: Add for when implemented
-    while(cycle && !llvm::isa<ir::WhileStmt>(cycle)) {
+    while(cycle && !llvm::isa<ir::WhileStmt>(cycle) && !llvm::isa<ir::ForeachStmt>(cycle)) {
         cycle = cycle->getEnclosingIR();
     }
     if(!cycle) {
@@ -1307,9 +1311,9 @@ void cg::CGFunction::emitStmt(ir::ContinueStmt *stmt) {
     if(auto loop = llvm::dyn_cast<ir::WhileStmt>(cycle)) {
         builder.CreateBr(loop->getCondBB());
     }
-    /*else if(auto loop = llvm::dyn_cast<ir::ForStmt>(cycle)) {
-        builder.CreateBr(loop->getAfterBB());
-    }*/
+    else if(auto loop = llvm::dyn_cast<ir::ForeachStmt>(cycle)) {
+        builder.CreateBr(loop->getNextIterBB());
+    }
 }
 
 void cg::CGFunction::emitStmt(ir::Import *stmt) {

@@ -572,6 +572,8 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          | expr_var LOR expr_bool { $$ = scanner->parseInfixExpr($1, scanner->parseBool($3), ir::Operator(ir::OperatorKind::OP_LOR)); }
          | expr_var LOR expr_var  { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_LOR)); }                   
 
+         | LNOT expr_var
+
          | expr_int CONCAT expr_struct
          | expr_float CONCAT expr_struct
          | expr_str CONCAT expr_struct

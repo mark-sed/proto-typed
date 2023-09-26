@@ -94,7 +94,7 @@ function expect_fail {
 
 function expect_out_eq {
     outstr=$(cat $OUTP_STD)
-    if ! cmp -s "$OUTP_STD" <(printf "$1") ; then
+    if ! cmp  "$OUTP_STD" <(printf "$1") ; then
         failed $2 "Output differs"
         printf "Expected:\n-------\n${1}\n"
         printf "Got:\n----\n${outstr}\n"
@@ -128,6 +128,11 @@ function test_strings {
     expect_out_eq "global string\nexpr string\nlocal s" "strings"
 }
 
+function test_expressions {
+    expect_pass "expressions.pt" "expressions"
+    expect_out_eq "4\n4\n-110.5\n-110.5\ntrue\ntrue\ntruman\ntrue\nfalse\n(0 - 3), 0, 1, 2, 3\n"
+}
+
 function test_missing_return {
     expect_fail "missing_return.pt" "<unknown>:0: error: Missing return in a flow path in a function ‘miss’.\n" "missing_return"
 }
@@ -136,6 +141,7 @@ function run_all_tests {
     run_test fib
     run_test strings
     run_test missing_return
+    run_test expressions
 }
 
 # Count all functions starting with test_ 

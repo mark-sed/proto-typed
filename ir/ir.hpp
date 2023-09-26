@@ -837,6 +837,7 @@ private:
     bool defineI;
     llvm::BasicBlock *afterBB;
     llvm::BasicBlock *condBB;
+    llvm::BasicBlock *nextIterBB;
 public:
     ForeachStmt(IR *enclosing_ir,
                 llvm::SMLoc loc,
@@ -856,6 +857,10 @@ public:
     std::vector<ir::IR *> getBody() { return body; }
     void setAfterBB(llvm::BasicBlock *bb) { afterBB = bb; }
     void setCondBB(llvm::BasicBlock *bb) { condBB = bb; }
+    void setNextIterBB(llvm::BasicBlock *bb) { nextIterBB = bb; }
+    llvm::BasicBlock *getAfterBB() { return afterBB; }
+    llvm::BasicBlock *getCondBB() { return condBB; }
+    llvm::BasicBlock *getNextIterBB() { return nextIterBB; }
     bool getDefineI() { return defineI; }
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_FOREACH;
