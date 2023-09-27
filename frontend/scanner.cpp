@@ -601,7 +601,6 @@ void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT) {
     auto body = std::vector<ir::IR *> {};
     auto funAppend = new ir::FunctionDecl(currentIR,
                                             llvm::SMLoc(),
-                                            // We act as if the type is not maybe
                                             "append_"+t->getName()+"_"+elemT->getName(),
                                             "append",
                                             this->voidType,
