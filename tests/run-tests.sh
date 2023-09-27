@@ -10,6 +10,8 @@ PTC="ptc"
 PT="../run_pt.sh"
 OUTP_ERR=/tmp/.ptc_test_err.txt
 OUTP_STD=/tmp/.ptc_test_std.txt
+TEST_DIR=""
+WRKDIR="./"
 POSITIONAL_ARGS=()
 
 while [[ $# -gt 0 ]]; do
@@ -30,6 +32,11 @@ while [[ $# -gt 0 ]]; do
             ;;
         -dir)
             WRKDIR="$2"
+            shift
+            shift
+            ;;
+        -test-dir)
+            TEST_DIR="$2"
             shift
             shift
             ;;
@@ -57,12 +64,12 @@ function failed {
 }
 
 function run {
-    CMD="$PT $1 0 $WRKDIR"
+    CMD="$PT ${TEST_DIR}$1 0 $WRKDIR"
     $CMD 2>$OUTP_ERR 1>$OUTP_STD
     RETCODE=$(echo $?)
     # Get output binary name
     PROGNAME=$(echo "$1" | cut -f 1 -d '.')".out"
-    rm -f ${WRKDIR}${PROGNAME}
+    rm -f ${TEST_DIR}${PROGNAME}
 }
 
 function expect_pass {
