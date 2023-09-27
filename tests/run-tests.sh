@@ -133,6 +133,11 @@ function test_expressions {
     expect_out_eq "4\n4\n-110.5\n-110.5\ntrue\ntrue\ntruman\ntrue\nfalse\n(0 - 3), 0, 1, 2, 3\n"
 }
 
+function test_maybes {
+    expect_pass "maybes.pt" "maybes"
+    expect_out_eq "8\n9\n5\n42\nthere\ngeneral\n50\n"
+}
+
 function test_missing_return {
     expect_fail "missing_return.pt" "<unknown>:0: error: Missing return in a flow path in a function ‘miss’.\n" "missing_return"
 }
@@ -142,6 +147,7 @@ function run_all_tests {
     run_test strings
     run_test missing_return
     run_test expressions
+    run_test maybes
 }
 
 # Count all functions starting with test_ 

@@ -1,0 +1,57 @@
+int? mint_test() {
+    int? a
+    a = 8
+    return a
+}
+
+void call_mint_test() {
+    int? x = mint_test()
+    int c = x + 1
+    print(c++"\n")
+}
+
+void mint_test2() {
+    string? x3
+    x3 = "hello"
+    string? y3
+    y3 = x3
+    x3 = "there"
+    string c3
+    c3 = y3
+    print(c3++"\n") // 5
+    y3 = "general"
+    c3 = x3
+    print(c3++"\n") // 42
+}
+
+void mint_test3(int? x) {
+    x = 50
+}
+
+int? x
+x = mint_test()
+int c
+c = x
+print(c++"\n") //8
+
+call_mint_test() //9
+
+int? x2
+x2 = 4
+int? y2
+y2 = x2
+x2 = 5
+int c2
+c2 = y2
+print(c2++"\n") // 5
+y2 = 42
+c2 = x2
+print(c2++"\n") // 42
+
+mint_test2() // 5\n42\n
+
+int? x3
+mint_test3(x3)
+int c3
+c3 = x3
+print(c3++"\n") //50

@@ -202,7 +202,7 @@ private:
     llvm::Function *llvmFun;
     llvm::DenseMap<ir::FormalParamDecl *, llvm::Value *> formalParams;
 
-    llvm::Value *readLocalVar(llvm::BasicBlock *BB, ir::IR *decl);
+    llvm::Value *readLocalVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe=false);
     //llvm::Value *readLocalVarRecursive(llvm::BasicBlock *BB, ir::IR *decl);
     void writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val);
     void sealBlock(llvm::BasicBlock *BB);

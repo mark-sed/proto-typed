@@ -161,7 +161,7 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
     // Check if it is a parameter
     if (auto *fpd = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
         if(formalParams.find(fpd) != formalParams.end()) {
-            if(fpd->getType()->isMaybe() && !llvm::isa<llvm::ConstantPointerNull>(val)) {
+            if(fpd->getType()->isMaybe() && !llvm::isa<llvm::ConstantPointerNull>(val) && !llvm::isa<llvm::PointerType>(val->getType())) {
                 auto ptrV = builder.CreateLoad(mapType(fpd->getType()), formalParams[fpd]);
                 builder.CreateStore(val, ptrV);
             }
@@ -176,9 +176,33 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
     else if(auto *vrdec = llvm::dyn_cast<ir::VarDecl>(decl)){
         // Its a local variable
         if(locals.find(decl) != locals.end()) {
-            if(vrdec->getType()->isMaybe() && !llvm::isa<llvm::ConstantPointerNull>(val)) {
-                auto ptrV = builder.CreateLoad(mapType(vrdec->getType()), locals[decl]);
-                builder.CreateStore(val, ptrV);
+            if(vrdec->getType()->isMaybe() && !llvm::isa<llvm::ConstantPointerNull>(val) && !llvm::isa<llvm::PointerType>(val->getType())) {
+                llvm::BasicBlock *allocBB = llvm::BasicBlock::Create(ctx, "maybe.alloc", llvmFun);
+                llvm::BasicBlock *assignBB = llvm::BasicBlock::Create(ctx, "maybe.assign", llvmFun);
+                
+                auto ptrVal = builder.CreateLoad(mapType(vrdec->getType()), locals[decl]);
+                auto isNone = builder.CreateICmpEQ(ptrVal, llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(mapType(vrdec->getType()))));
+                builder.CreateCondBr(isNone, allocBB, assignBB);
+
+                setCurrBB(allocBB);
+                auto mallocF = cgm.getLLVMMod()->getOrInsertFunction("malloc",
+                                 llvm::FunctionType::get(
+                                    builder.getInt8Ty()->getPointerTo(),
+                                    builder.getInt64Ty(),
+                                    false
+                                 ));
+                auto sizeofV = builder.CreateGEP(mapType(vrdec->getType()), 
+                                llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(mapType(vrdec->getType()))),
+                                llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
+                auto size = builder.CreatePtrToInt(sizeofV, builder.getInt64Ty());
+                auto mem = builder.CreateCall(mallocF, size);
+                builder.CreateStore(mem, locals[decl]);
+
+                builder.CreateBr(assignBB);
+                setCurrBB(assignBB);
+
+                auto ptrValNew = builder.CreateLoad(mapType(vrdec->getType()), locals[decl]);
+                builder.CreateStore(val, ptrValNew);
             }
             else {
                 builder.CreateStore(val, locals[decl]);
@@ -199,11 +223,21 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
                 llvm::report_fatal_error("Unknown local variable type");
             }
             
-            if(td->isMaybe() && !llvm::isa<llvm::ConstantPointerNull>(val)) {
+            if(td->isMaybe() && !llvm::isa<llvm::ConstantPointerNull>(val) && !llvm::isa<llvm::PointerType>(val->getType())) {
+                auto mallocF = cgm.getLLVMMod()->getOrInsertFunction("malloc",
+                                 llvm::FunctionType::get(
+                                    builder.getInt8Ty()->getPointerTo(),
+                                    builder.getInt64Ty(),
+                                    false
+                                 ));
+                auto sizeofV = builder.CreateGEP((t), 
+                                llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(t)),
+                                llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
+                auto size = builder.CreatePtrToInt(sizeofV, builder.getInt64Ty());
+                auto mem = builder.CreateCall(mallocF, size);
                 auto vPtrPtr = builder.CreateAlloca(t);
-                auto vPtr = builder.CreateAlloca(t->getPointerElementType());
-                builder.CreateStore(val, vPtr);
-                builder.CreateStore(vPtr, vPtrPtr);
+                builder.CreateStore(val, mem);
+                builder.CreateStore(mem, vPtrPtr);
                 locals[decl] = vPtrPtr;
             }
             else {
@@ -219,10 +253,33 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
     LOGMAX("Write var: "+decl->debug());
     if(auto *v = llvm::dyn_cast<ir::VarDecl>(decl)) {
         if(v->getEnclosingIR() == cgm.getModuleDecl()) {
-            if(v->getType()->isMaybe() && !llvm::isa<llvm::ConstantPointerNull>(val)) {
-                auto vPtr = builder.CreateAlloca(mapType(v->getType())->getPointerElementType());
-                builder.CreateStore(val, vPtr);
-                builder.CreateStore(vPtr, cgm.getGlobals(decl));
+            if(v->getType()->isMaybe() && !llvm::isa<llvm::ConstantPointerNull>(val) && !llvm::isa<llvm::PointerType>(val->getType())) {
+                llvm::BasicBlock *allocBB = llvm::BasicBlock::Create(ctx, "maybe.alloc", llvmFun);
+                llvm::BasicBlock *assignBB = llvm::BasicBlock::Create(ctx, "maybe.assign", llvmFun);
+                
+                auto ptrVal = builder.CreateLoad(mapType(v->getType()), cgm.getGlobals(decl));
+                auto isNone = builder.CreateICmpEQ(ptrVal, llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(mapType(v->getType()))));
+                builder.CreateCondBr(isNone, allocBB, assignBB);
+
+                setCurrBB(allocBB);
+                auto mallocF = cgm.getLLVMMod()->getOrInsertFunction("malloc",
+                                 llvm::FunctionType::get(
+                                    builder.getInt8Ty()->getPointerTo(),
+                                    builder.getInt64Ty(),
+                                    false
+                                 ));
+                auto sizeofV = builder.CreateGEP(mapType(v->getType()), 
+                                llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(mapType(v->getType()))),
+                                llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
+                auto size = builder.CreatePtrToInt(sizeofV, builder.getInt64Ty());
+                auto mem = builder.CreateCall(mallocF, size);
+                builder.CreateStore(mem, cgm.getGlobals(decl));
+
+                builder.CreateBr(assignBB);
+                setCurrBB(assignBB);
+
+                auto ptrValNew = builder.CreateLoad(mapType(v->getType()), cgm.getGlobals(decl));
+                builder.CreateStore(val, ptrValNew);
             }
             else {
                 builder.CreateStore(val, cgm.getGlobals(decl));
@@ -232,9 +289,33 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
             writeLocalVar(BB, decl, val);
         }
     } else if (auto *v = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
-        if(v->isByReference() && !llvm::isa<llvm::ConstantPointerNull>(val)) {
-            auto vPtr = builder.CreateLoad(mapType(v->getType()), formalParams[v]);
-            builder.CreateStore(val, vPtr);
+        if(v->isByReference() && !llvm::isa<llvm::ConstantPointerNull>(val) && !llvm::isa<llvm::PointerType>(val->getType())) {
+            llvm::BasicBlock *allocBB = llvm::BasicBlock::Create(ctx, "maybe.alloc", llvmFun);
+            llvm::BasicBlock *assignBB = llvm::BasicBlock::Create(ctx, "maybe.assign", llvmFun);
+            
+            auto ptrVal = builder.CreateLoad(mapType(v->getType()), formalParams[v]);
+            auto isNone = builder.CreateICmpEQ(ptrVal, llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(mapType(v->getType()))));
+            builder.CreateCondBr(isNone, allocBB, assignBB);
+
+            setCurrBB(allocBB);
+            auto mallocF = cgm.getLLVMMod()->getOrInsertFunction("malloc",
+                                llvm::FunctionType::get(
+                                builder.getInt8Ty()->getPointerTo(),
+                                builder.getInt64Ty(),
+                                false
+                                ));
+            auto sizeofV = builder.CreateGEP(mapType(v->getType()), 
+                            llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(mapType(v->getType()))),
+                            llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
+            auto size = builder.CreatePtrToInt(sizeofV, builder.getInt64Ty());
+            auto mem = builder.CreateCall(mallocF, size);
+            builder.CreateStore(mem, formalParams[v]);
+
+            builder.CreateBr(assignBB);
+            setCurrBB(assignBB);
+
+            auto ptrValNew = builder.CreateLoad(mapType(v->getType()), formalParams[v]);
+            builder.CreateStore(val, ptrValNew);
         }
         else {
             writeLocalVar(BB, decl, val);
@@ -258,7 +339,7 @@ llvm::Value *cg::CGModule::readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMa
     llvm::report_fatal_error("UNIMPLEMENTED module var read");
 }
 
-llvm::Value *cg::CGFunction::readLocalVar(llvm::BasicBlock *BB, ir::IR *decl) {
+llvm::Value *cg::CGFunction::readLocalVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe) {
     // TODO: Checks for type
     /*auto val = currDef[BB].defs.find(decl);
     if(val != currDef[BB].defs.end()) {
@@ -277,7 +358,7 @@ llvm::Value *cg::CGFunction::readLocalVar(llvm::BasicBlock *BB, ir::IR *decl) {
             ptT = vrdcl->getType();
             t = mapType(ptT);
         }
-        if(ptT->isMaybe()) {
+        if(ptT->isMaybe() && !asMaybe) {
             auto ptrV = builder.CreateLoad(t, val->second);
             return builder.CreateLoad(t->getPointerElementType(), ptrV);
         }
@@ -287,7 +368,7 @@ llvm::Value *cg::CGFunction::readLocalVar(llvm::BasicBlock *BB, ir::IR *decl) {
         if(auto fpd = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
             auto fval = formalParams.find(fpd);
             if(fval != formalParams.end()) {
-                if(fpd->getType()->isMaybe()) {
+                if(fpd->getType()->isMaybe() && !asMaybe) {
                     auto ptrV = builder.CreateLoad(mapType(fpd->getType()), fval->second);
                     return builder.CreateLoad(mapType(fpd->getType())->getPointerElementType(), ptrV);
                 }
@@ -387,7 +468,7 @@ llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl, bool as
             return builder.CreateLoad(mapType(v), currModule.getGlobals(decl));
         }
         else {
-            return readLocalVar(BB, decl);
+            return readLocalVar(BB, decl, asMaybe);
         }
         /*else {
             llvm::report_fatal_error("Nested functions are not supported");
@@ -401,7 +482,7 @@ llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl, bool as
             return builder.CreateLoad(mapType(v)->getNonOpaquePointerElementType(), formalParams[v]);
         }
         else {
-            return readLocalVar(BB, decl);
+            return readLocalVar(BB, decl, asMaybe);
         }
     }
     llvm::report_fatal_error("Unsupported variable declaration");
@@ -416,14 +497,18 @@ llvm::Value *cg::CGFunction::emitFunCall(ir::FunctionCall *e) {
     std::vector<llvm::Value *> args{};
     int index = 0;
     for(auto a: e->getParams()) {
-        auto emEx = emitExpr(a);
+        llvm::Value *emEx = nullptr;
         if(f->getParams()[index]->isByReference()) {
+            emEx = readVar(currBB, llvm::dyn_cast<ir::VarAccess>(a)->getVar(), true);
             if(auto li = llvm::dyn_cast<llvm::LoadInst>(emEx)) {
                 emEx = li->getOperand(0);
             }
             else {
                 llvm::report_fatal_error("Argument in a function call cannot be passed in by a reference");
             }
+        }
+        else {
+            emEx = emitExpr(a);
         }
         args.push_back(emEx);
         ++index;
@@ -578,9 +663,17 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         LOGMAX("Creating assignment instruction");
         if(auto *var = llvm::dyn_cast<ir::VarAccess>(e->getLeft())) {
             if(auto *varDecl = llvm::dyn_cast<ir::VarDecl>(var->getVar())) {
+                if(e->getLeft()->getType()->isMaybe() && e->getRight()->getType()->isMaybe()) {
+                    if(auto r = llvm::dyn_cast<llvm::LoadInst>(right))
+                        right = r->getOperand(0);
+                }
                 writeVar(currBB, varDecl, right);
             }
             else if(auto *fp = llvm::dyn_cast<ir::FormalParamDecl>(var->getVar())) {
+                if(e->getLeft()->getType()->isMaybe() && e->getRight()->getType()->isMaybe()) {
+                    if(auto r = llvm::dyn_cast<llvm::LoadInst>(right))
+                        right = r->getOperand(0);
+                }
                 writeVar(currBB, fp, right);
             }
             else {
@@ -1261,8 +1354,14 @@ void cg::CGFunction::emitStmt(ir::ReturnStmt *stmt) {
     }
     if(stmt->getValue()) {
         LOGMAX("Creating return with value");
-        llvm::Value *retVal = emitExpr(stmt->getValue());
-        builder.CreateRet(retVal);
+        if(stmt->getValue()->getType()->isMaybe()) {
+            llvm::Value *retVal = readVar(currBB, llvm::dyn_cast<ir::VarAccess>(stmt->getValue())->getVar(), true);
+            builder.CreateRet(retVal);
+        }
+        else {
+            llvm::Value *retVal = emitExpr(stmt->getValue());
+            builder.CreateRet(retVal);
+        }
     }
     else {
         LOGMAX("Creating return void");
@@ -1314,6 +1413,9 @@ void cg::CGFunction::emitStmt(ir::VarDecl *stmt) {
     llvm::Value *v = nullptr;
     if(value) {
         v = emitExpr(value);
+    }
+    else if(stmt->getType()->isMaybe()){
+        v = llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(mapType(stmt->getType())));
     }
     else {
         auto ty = stmt->getType()->getName();
@@ -1694,6 +1796,9 @@ llvm::FunctionType *cg::CGFunction::createFunctionType(ir::FunctionDecl *fun) {
     llvm::SmallVector<llvm::Type *> paramTypes;
     for(auto p : fun->getParams()) {
         llvm::Type *t = mapType(p);
+        if(p->getType()->isMaybe()) {
+            t = t->getPointerTo();
+        }
         paramTypes.push_back(t);
     }
     return llvm::FunctionType::get(retType, paramTypes, false);
@@ -1725,10 +1830,16 @@ void cg::CGFunction::run() {
     for(auto i = llvmFun->arg_begin(); i != llvmFun->arg_end(); ++i, ++idx) {
         llvm::Argument *arg = i;
         ir::FormalParamDecl *fp = fun->getParams()[idx];
-        auto argPtr = builder.CreateAlloca(arg->getType());
-        builder.CreateStore(arg, argPtr);
-        formalParams[fp] = argPtr;
-        defs.defs.insert(std::pair<ir::IR *, llvm::Value *>(fp, argPtr));
+        if(!fp->getType()->isMaybe()) {
+            auto argPtr = builder.CreateAlloca(arg->getType());
+            builder.CreateStore(arg, argPtr);
+            formalParams[fp] = argPtr;
+            defs.defs.insert(std::pair<ir::IR *, llvm::Value *>(fp, argPtr));
+        }
+        else {
+            formalParams[fp] = arg;
+            defs.defs.insert(std::pair<ir::IR *, llvm::Value *>(fp, arg));
+        }
     }
 
     for(auto *d : fun->getDecl()) {
