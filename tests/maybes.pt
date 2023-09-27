@@ -10,7 +10,7 @@ void call_mint_test() {
     print(c++"\n")
 }
 
-void mint_test2() {
+void mstring_test() {
     string? x3
     x3 = "hello"
     string? y3
@@ -26,6 +26,10 @@ void mint_test2() {
 
 void mint_test3(int? x) {
     x = 50
+}
+
+void mint_test2(int? x) {
+    x = 1
 }
 
 int? x
@@ -48,10 +52,16 @@ y2 = 42
 c2 = x2
 print(c2++"\n") // 42
 
-mint_test2() // 5\n42\n
+mstring_test() // there\ngeneral\n
 
 int? x3
 mint_test3(x3)
 int c3
 c3 = x3
 print(c3++"\n") //50
+
+int a = 4
+mint_test2(a)
+print(a++"\n") // 1
+
+mint_test2(0) // no output, should just pass

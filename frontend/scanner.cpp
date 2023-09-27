@@ -29,7 +29,7 @@ std::string ptc::encodeFunction(std::string name, std::vector<ir::FormalParamDec
     assert(name.size() > 0 && "Function name cannot be empty");
     std::string paramStr;
     for(auto p : params) {
-        paramStr += (p->getType()->isMaybe() ? "m" : "")+p->getType()->getName()+"_";
+        paramStr += p->getType()->getName()+"_";
     }
     return name+"_"+std::to_string(params.size())+paramStr;
 }
@@ -38,7 +38,7 @@ std::string ptc::encodeFunction(std::string name, std::vector<ir::Expr *> params
     assert(name.size() > 0 && "Function name cannot be empty");
     std::string paramStr;
     for(auto p : params) {
-        paramStr += (p->getType()->isMaybe() ? "m" : "")+p->getType()->getName()+"_";
+        paramStr += p->getType()->getName()+"_";
     }
     return name+"_"+std::to_string(params.size())+paramStr;
 }

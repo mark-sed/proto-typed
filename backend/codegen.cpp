@@ -499,12 +499,35 @@ llvm::Value *cg::CGFunction::emitFunCall(ir::FunctionCall *e) {
     for(auto a: e->getParams()) {
         llvm::Value *emEx = nullptr;
         if(f->getParams()[index]->isByReference()) {
-            emEx = readVar(currBB, llvm::dyn_cast<ir::VarAccess>(a)->getVar(), true);
-            if(auto li = llvm::dyn_cast<llvm::LoadInst>(emEx)) {
-                emEx = li->getOperand(0);
+            if(auto aa = llvm::dyn_cast<ir::VarAccess>(a)) {
+                if(aa->getType()->isMaybe()) {
+                    emEx = readVar(currBB, aa->getVar(), true);
+                    if(auto li = llvm::dyn_cast<llvm::LoadInst>(emEx)) {
+                        emEx = li->getOperand(0);
+                    }
+                    else {
+                        llvm::report_fatal_error("Argument in a function call cannot be passed in by a reference");
+                    }
+                }
+                else {
+                    emEx = builder.CreateAlloca(mapType(f->getParams()[index]->getType()));
+                    auto vLd = readVar(currBB, aa->getVar(), true);
+                    if(auto li = llvm::dyn_cast<llvm::LoadInst>(vLd)) {
+                        builder.CreateStore(li->getOperand(0), emEx);
+                    }
+                    else {
+                        llvm::report_fatal_error("Argument in a function call cannot be passed in by a reference");
+                    }
+                    
+                }
             }
             else {
-                llvm::report_fatal_error("Argument in a function call cannot be passed in by a reference");
+                // Constant was passed to a maybe argument
+                // Alloca memory and forget about it as it cannot be used
+                emEx = builder.CreateAlloca(mapType(f->getParams()[index]->getType()));
+                auto emExValPtr = builder.CreateAlloca(mapType(f->getParams()[index]->getType())->getPointerElementType());
+                builder.CreateStore(emitExpr(a), emExValPtr);
+                builder.CreateStore(emExValPtr, emEx);
             }
         }
         else {
@@ -982,26 +1005,26 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
                                     int1T,
                                     false
                                  ));
-        /*auto to_str_mint = cgm.getLLVMMod()->getOrInsertFunction("to_string_mint",
+        /*auto to_str_mint = cgm.getLLVMMod()->getOrInsertFunction("to_string_m_int",
                                  llvm::FunctionType::get(
                                     stringT,
                                     int64T->getPointerTo(),
                                     false
                                  ));
-        auto to_str_mfloat = cgm.getLLVMMod()->getOrInsertFunction("to_string_mfloat",
+        auto to_str_mfloat = cgm.getLLVMMod()->getOrInsertFunction("to_string_m_float",
                                  llvm::FunctionType::get(
                                     stringT,
                                     floatT->getPointerTo(),
                                     false
                                  ));
-        auto to_str_mbool = cgm.getLLVMMod()->getOrInsertFunction("to_string_mbool",
+        auto to_str_mbool = cgm.getLLVMMod()->getOrInsertFunction("to_string_m_bool",
                                  llvm::FunctionType::get(
                                     stringT,
                                     int1T->getPointerTo(),
                                     false
                                  ));
         // Cannot be just loaded in case of none
-        auto to_str_mstring = cgm.getLLVMMod()->getOrInsertFunction("to_string_mstring",
+        auto to_str_mstring = cgm.getLLVMMod()->getOrInsertFunction("to_string_m_string",
                                  llvm::FunctionType::get(
                                     stringT,
                                     int1T->getPointerTo(),

@@ -135,7 +135,7 @@ function test_expressions {
 
 function test_maybes {
     expect_pass "maybes.pt" "maybes"
-    expect_out_eq "8\n9\n5\n42\nthere\ngeneral\n50\n"
+    expect_out_eq "8\n9\n5\n42\nthere\ngeneral\n50\n1\n"
 }
 
 function test_missing_return {
