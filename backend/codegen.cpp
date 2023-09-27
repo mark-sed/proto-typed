@@ -518,7 +518,6 @@ llvm::Value *cg::CGFunction::emitFunCall(ir::FunctionCall *e) {
                     else {
                         llvm::report_fatal_error("Argument in a function call cannot be passed in by a reference");
                     }
-                    
                 }
             }
             else {
@@ -1613,6 +1612,8 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                                         nullptr,
                                         vName);
             if(var->getType()->isMaybe() && value && !llvm::isa<ir::NoneLiteral>(value)) {
+                // TODO(optim): Creating v could be avoided and just the constant could be
+                // assigned bellow when initalizing maybes
                 maybesToInit.push_back(std::make_pair(vPtr, v));
             }
 
@@ -1802,8 +1803,21 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
     }
 
     // Init maybes
-    for(auto m: maybesToInit) {
-        builder.CreateStore(m.second, m.first);
+    for(auto [d, v]: maybesToInit) {
+        auto mallocF = getLLVMMod()->getOrInsertFunction("malloc",
+                            llvm::FunctionType::get(
+                            builder.getInt8Ty()->getPointerTo(),
+                            builder.getInt64Ty(),
+                            false
+                            ));
+        auto sizeofV = builder.CreateGEP(d->getType(), 
+                        llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(d->getType())),
+                        llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
+        auto size = builder.CreatePtrToInt(sizeofV, builder.getInt64Ty());
+        auto mem = builder.CreateCall(mallocF, size);
+        auto valLd = builder.CreateLoad(v->getType()->getPointerElementType(), v);
+        builder.CreateStore(valLd, mem);
+        builder.CreateStore(mem, d);
     }
 
     auto entryFunLLVM = llvmMod->getFunction(mangleName(entryFun));
