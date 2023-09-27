@@ -934,12 +934,6 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             else if(left->getType() == int1T) {
                 lval = builder.CreateCall(to_str_bool, { left });
             }
-            else if(left->getType() == stringT) {
-                // Ignore
-            }
-            else {
-                llvm::report_fatal_error("Unknown type in concat");
-            }
         }
         // TODO: Uncomment once ptlib.pt(.o) is being linked 
         else {
@@ -971,12 +965,6 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             }
             else if(right->getType() == int1T) {
                 rval = builder.CreateCall(to_str_bool, { right });
-            }
-            else if(right->getType() == stringT) {
-                // Ignore
-            }
-            else {
-                llvm::report_fatal_error("Unknown type in concat");
             }
         }
         else {
