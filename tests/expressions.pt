@@ -92,3 +92,14 @@ aInt = 42
 print((~aInt)++"\n") // -43
 print((not bBool)++"\n") // true
 print((not (bBool or true))++"\n") // false
+
+aInt = 1
+print((aInt << 1)++"\n") // 2
+print((aInt >> 1)++"\n") // 0
+aInt = -1
+print((aInt >> 1)++"\n") // -1
+aInt = -9854
+int shB = 4
+print((aInt >> shB)++"\n") // -616
+aInt = 42
+print((aInt << shB)++"\n") // 672

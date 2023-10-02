@@ -856,12 +856,24 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     break;
     case ir::OperatorKind::OP_BLSHFT:
     {
-
+        LOGMAX("Creating BLSHFT instruction");
+        if(left->getType() == right->getType() && left->getType() == int64T) {
+            result = builder.CreateShl(left, right);
+        }
+        else {
+            llvm::report_fatal_error("BLSHFT does not supported given type");
+        }
     }
     break;
     case ir::OperatorKind::OP_BRSHFT:
     {
-
+        LOGMAX("Creating BRSHFT instruction");
+        if(left->getType() == right->getType() && left->getType() == int64T) {
+            result = builder.CreateAShr(left, right);
+        }
+        else {
+            llvm::report_fatal_error("BRSHFT does not supported given type");
+        }
     }
     break;
     case ir::OperatorKind::OP_BT:

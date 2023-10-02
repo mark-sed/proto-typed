@@ -164,7 +164,9 @@ a='our', b='out': a <= b
 
 function test_expressions {
     expect_pass "expressions.pt" "expressions"
-    expect_out_eq "4\n4\n-110.5\n-110.5\ntrue\ntrue\ntruman\ntrue\nfalse\n(0 - 3), 0, 1, 2, 3\n-1\n-43\ntrue\nfalse\n"
+    expect_out_eq "4\n4\n-110.5\n-110.5\ntrue\ntrue\ntruman\ntrue\nfalse\n(0 - 3), 0, 1, 2, 3
+-1\n-43\ntrue\nfalse
+2\n0\n-1\n-616\n672\n"
 }
 
 function test_maybes {
