@@ -132,7 +132,7 @@ function test_fib {
 
 function test_strings {
     expect_pass "strings.pt" "strings"
-    expect_out_eq "global string\nexpr string\nlocal s" "strings"
+    expect_out_eq "global string\nexpr string\nlocal s\na='hello', b='': a != b\na='hello', b='': a != b\na='hello', b='hello': a == b\na='hello', b='hello': a == b\na='hello', b='hell': a != b\na='hello', b='hell': a != b\na='hello', b='helló': a != b\na='hello', b='helló': a != b\na='helló', b='helló': a == b\na='helló', b='helló': a == b\n" "strings"
 }
 
 function test_expressions {

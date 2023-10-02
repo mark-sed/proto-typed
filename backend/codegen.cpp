@@ -882,7 +882,19 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     case ir::OperatorKind::OP_EQ:
     {
         LOGMAX("Creating EQ instruction");
-        if(left->getType() == right->getType()) {
+        if(left->getType() == right->getType() && e->getLeft()->getType()->getName() == STRING_CSTR) {
+            auto str_eq = cgm.getLLVMMod()->getOrInsertFunction("string_Eq",
+                                 llvm::FunctionType::get(
+                                    int1T,
+                                    {
+                                        builder.getInt8Ty()->getPointerTo(),
+                                        builder.getInt8Ty()->getPointerTo()
+                                    },
+                                    false
+                                 ));
+            result = builder.CreateCall(str_eq, {left, right});
+        }
+        else if(left->getType() == right->getType()) {
             result = builder.CreateICmpEQ(left, right);
         }
         else if(e->getLeft()->getType()->getName() == NONETYPE_CSTR && e->getRight()->getType()->isMaybe()) {
@@ -903,7 +915,20 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     case ir::OperatorKind::OP_NEQ:
     {
         LOGMAX("Creating NEQ instruction");
-        if(left->getType() == right->getType()) {
+        if(left->getType() == right->getType() && e->getLeft()->getType()->getName() == STRING_CSTR) {
+            auto str_eq = cgm.getLLVMMod()->getOrInsertFunction("string_Eq",
+                                 llvm::FunctionType::get(
+                                    int1T,
+                                    {
+                                        builder.getInt8Ty()->getPointerTo(),
+                                        builder.getInt8Ty()->getPointerTo()
+                                    },
+                                    false
+                                 ));
+            auto eqval = builder.CreateCall(str_eq, {left, right});
+            result = builder.CreateNot(eqval);
+        }
+        else if(left->getType() == right->getType()) {
             result = builder.CreateICmpNE(left, right);
         }
         else if(e->getLeft()->getType()->getName() == NONETYPE_CSTR && e->getRight()->getType()->isMaybe()) {

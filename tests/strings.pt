@@ -17,3 +17,37 @@ void foo() {
 }
 
 foo()
+print("\n")
+
+string a = "hello"
+string b
+
+void string_cmp(string a, string b) {
+    if(a == b) {
+        print("a='"++a++"', b='"++b++"': a == b\n")
+    }
+    else {
+        print("a='"++a++"', b='"++b++"': a != b\n")
+    }
+}
+
+void string_ncmp(string a, string b) {
+    if(a != b) {
+        print("a='"++a++"', b='"++b++"': a != b\n")
+    }
+    else {
+        print("a='"++a++"', b='"++b++"': a == b\n")
+    }
+}
+
+string_cmp(a, b)
+string_ncmp(a, b)
+b = "hello"
+string_cmp(a, b)
+string_ncmp(a, b)
+string_cmp(a, "hell")
+string_ncmp(a, "hell")
+string_cmp(a, "helló")
+string_ncmp(a, "helló")
+string_cmp("helló", "helló")
+string_ncmp("helló", "helló")

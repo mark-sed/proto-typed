@@ -196,6 +196,31 @@ define fastcc void @string_Create_Init(%string* %this, i8* %value) nounwind {
 	ret void
 }
 
+define fastcc i1 @string_Eq(%string %x, %string %y) {
+	; Compare lengths
+	%xlen = extractvalue %string %x, 1
+	%ylen = extractvalue %string %y, 1
+	%issamelen = icmp eq i32 %xlen, %ylen
+	br i1 %issamelen, label %samelen, label %cmpchars
+samelen:
+	ret i1 1
+cmpchars:
+	; Compare letters
+	%buffx = extractvalue %string %x, 0
+	%buffy = extractvalue %string %y, 0
+
+	; TODO: compare in here, dont call cmp
+	%stcmp = call i32 @strcmp(i8* %buffx, i8* %buffy)
+	%stcmpeq = icmp eq i32 %stcmp, 0
+	br i1 %stcmpeq, label %equal, label %different
+different:
+	ret i1 0
+equal:
+	ret i1 1
+}
+
+declare i32 @strcmp(i8*, i8*)
+
 %matrix = type {
 	i8*,  ; data
 	i32,  ; length
