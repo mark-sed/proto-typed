@@ -157,6 +157,7 @@ public:
     ir::Expr *parseMatrix(std::vector<ir::Expr *> values);
     ir::Expr *parseNone();
     ir::Expr *parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, bool is_const=false);
+    ir::Expr *parseUnaryPrefixExpr(ir::Expr *l, ir::Operator op, bool is_const=false);
     ir::Expr *parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params);
     ir::Expr *parseRange(ir::Expr *start, ir::Expr *second, ir::Expr *end);
     ir::Expr *parseRange(ir::Expr *start, ir::Expr *end);

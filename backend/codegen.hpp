@@ -218,6 +218,7 @@ protected:
 
     // Expression code generation
     llvm::Value *emitInfixExpr(ir::BinaryInfixExpr *e);
+    llvm::Value *emitUnaryPrefixExpr(ir::UnaryPrefixExpr *e);
     llvm::Value *emitFunCall(ir::FunctionCall *e);
     llvm::Value *emitExpr(ir::Expr *e);
 

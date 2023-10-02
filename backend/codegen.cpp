@@ -553,6 +553,7 @@ llvm::Value *cg::CGFunction::emitFunCall(ir::FunctionCall *e) {
 llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
     switch(e->getKind()) {
     case ir::ExprKind::EX_BIN_INF: return emitInfixExpr(llvm::dyn_cast<ir::BinaryInfixExpr>(e));
+    case ir::ExprKind::EX_UN_PRE: return emitUnaryPrefixExpr(llvm::dyn_cast<ir::UnaryPrefixExpr>(e));
     case ir::ExprKind::EX_VAR:
     {
         auto *decl = llvm::dyn_cast<ir::VarAccess>(e)->getVar();
@@ -673,6 +674,34 @@ void cg::CGFunction::emitMemberAssignment(ir::BinaryInfixExpr *l, llvm::Value *r
     else {
         llvm::report_fatal_error("NOT YET IMPLEMENTED nested struct assignment");
     }
+}
+
+llvm::Value *cg::CGFunction::emitUnaryPrefixExpr(ir::UnaryPrefixExpr *e) {
+    llvm::Value *left = emitExpr(e->getExpr());
+    llvm::Value *result = nullptr;
+    switch(e->getOperator().getKind()) {
+    case ir::OperatorKind::OP_LNOT:
+        LOGMAX("Creating LNOT instruction");
+        if(left->getType() == int1T) {
+            result = builder.CreateNot(left);
+        }
+        else {
+            llvm::report_fatal_error("LNOT does not supported given type");
+        }
+    break;
+    case ir::OperatorKind::OP_BNOT:
+        LOGMAX("Creating BNOT instruction");
+        if(left->getType() == int64T) {
+            result = builder.CreateNot(left);
+        }
+        else {
+            llvm::report_fatal_error("BNOT does not supported given type");
+        }
+    break;
+    default: llvm::report_fatal_error("Uknown unary operator in code generation");
+    }
+
+    return result;
 }
 
 llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
@@ -1238,7 +1267,6 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         }
     }
     break;
-    // TODO: implement rest
     default: llvm::report_fatal_error("Uknown operator in code generation");
     }
     return result;

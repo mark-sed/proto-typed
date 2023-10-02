@@ -385,6 +385,34 @@ ir::Expr *Scanner::parseVar(std::string v, bool external) {
     }
 }
 
+ir::Expr *Scanner::parseUnaryPrefixExpr(ir::Expr *l, ir::Operator op, bool is_const) {
+    LOGMAX("Creating expression: "+op.debug()+l->debug())
+    auto tl = l->getType();
+    auto type = tl;
+
+    if(tl == unknownType) {
+        type = unknownType;
+    }
+    else {
+        switch(op.getKind()) {
+            case ir::OperatorKind::OP_LNOT:
+                if(tl->getName() != BOOL_CSTR) {
+                    diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE_UNARY, op.debug(), tl->getName());
+                }
+            break;
+            case ir::OperatorKind::OP_BNOT:
+                if(tl->getName() != INT_CSTR) {
+                    diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE_UNARY, op.debug(), tl->getName());
+                }
+            break;
+            default: diags.report(llvmloc, diag::ERR_INTERNAL, "Unknown operator in an expression");
+            break;
+        }
+    }
+
+    return new ir::UnaryPrefixExpr(l, op, type, is_const);
+}
+
 ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, bool is_const) {
     LOGMAX("Creating expression: "+l->debug()+" "+op.debug()+" "+r->debug())
     auto tl = l->getType();

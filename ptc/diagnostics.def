@@ -21,6 +21,7 @@ DIAG(ERR_INCORRECT_ARGS_DET, Error, "incorrect arguments in a function call to �
 DIAG(ERR_INTERNAL, Error, "internal error. {0}.")
 DIAG(ERR_INVALID_CONVERSION, Error, "invalid conversion from ‘{0}’ to ‘{1}’.")
 DIAG(ERR_UNSUPPORTED_OP_TYPE, Error, "unsupported operand type(s) for ‘{0}’: ‘{1}’ and ‘{2}’.")
+DIAG(ERR_UNSUPPORTED_OP_TYPE_UNARY, Error, "unsupported operand type for ‘{0}’: ‘{1}’.")
 DIAG(ERR_NOT_CALLABLE, Error, "‘{0}’ is not callable.")
 DIAG(ERR_LOOSE_RETURN, Error, "return can appear only inside of a function.")
 DIAG(ERR_SYNTAX, Error, "{0}.")

@@ -57,6 +57,12 @@ void UnresolvedSymbolResolver::resolve(ir::Expr * expr, llvm::SMLoc loc) {
     }
     else if(auto e = llvm::dyn_cast<ir::UnaryPrefixExpr>(expr)) {
         resolve(e->getExpr(), loc);
+        
+        auto newe = scanner->parseUnaryPrefixExpr(e->getExpr(), e->getOperator(), e->isConst());
+        expr->setType(newe->getType());
+    }
+    else if(auto e = llvm::dyn_cast<ir::UnaryPrefixExpr>(expr)) {
+        resolve(e->getExpr(), loc);
         e->setType(e->getExpr()->getType());
     }
     else if(auto e = llvm::dyn_cast<ir::MatrixLiteral>(expr)) {

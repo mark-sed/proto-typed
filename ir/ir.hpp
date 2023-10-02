@@ -63,7 +63,7 @@ enum IRKind {
  */
 enum ExprKind {
     EX_BIN_INF,
-    EX_BIN_PRE,
+    EX_UN_PRE,
     EX_INT,
     EX_BOOL,
     EX_FLOAT,
@@ -107,6 +107,8 @@ enum OperatorKind {
     OP_ASSIGN,
     OP_ACCESS,
     OP_SUBSCR,
+    OP_LNOT,
+    OP_BNOT,
     OP_UNKNOWN
 };
 
@@ -398,6 +400,8 @@ public:
         case OP_ASSIGN: return "=";
         case OP_ACCESS: return ".";
         case OP_SUBSCR: return "[]";
+        case OP_LNOT: return "!";
+        case OP_BNOT: return "~";
         case OP_UNKNOWN: return "unknown";
         default: return "not-listed-op";
         }
@@ -460,7 +464,7 @@ private:
     const Operator op;
 public:
     UnaryPrefixExpr(Expr *e, Operator op, TypeDecl *type, bool is_const)
-                    : Expr(ExprKind::EX_BIN_PRE, type, is_const),
+                    : Expr(ExprKind::EX_UN_PRE, type, is_const),
                       e(e),
                       op(op) {
     }
@@ -469,7 +473,7 @@ public:
     const Operator &getOperator() { return op; }
     std::string debug() const override { return op.debug() + e->debug(); }
     static bool classof(const Expr *e) {
-        return e->getKind() == ExprKind::EX_BIN_PRE;
+        return e->getKind() == ExprKind::EX_UN_PRE;
     }
 };
 

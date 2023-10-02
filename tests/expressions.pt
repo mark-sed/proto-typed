@@ -84,3 +84,11 @@ append(matrix_int, 1)
 append(matrix_int, 2)
 append(matrix_int, 3)
 print(matrix_test(matrix_int)) // (0 - 3), 0, 1, 2, 3
+
+int aInt = 0
+bool bBool = false
+print((~aInt)++"\n") // -1
+aInt = 42
+print((~aInt)++"\n") // -43
+print((not bBool)++"\n") // true
+print((not (bBool or true))++"\n") // false

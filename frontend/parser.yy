@@ -572,7 +572,9 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          | expr_var LOR expr_bool { $$ = scanner->parseInfixExpr($1, scanner->parseBool($3), ir::Operator(ir::OperatorKind::OP_LOR)); }
          | expr_var LOR expr_var  { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_LOR)); }                   
 
-         | LNOT expr_var
+         | LNOT expr_var { $$ = scanner->parseUnaryPrefixExpr($2, ir::Operator(ir::OperatorKind::OP_LNOT)); }
+
+         | BNOT expr_var { $$ = scanner->parseUnaryPrefixExpr($2, ir::Operator(ir::OperatorKind::OP_BNOT)); }
 
          | expr_int CONCAT expr_struct
          | expr_float CONCAT expr_struct
