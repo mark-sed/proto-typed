@@ -253,29 +253,34 @@ int main(int argc, char *argv[]) {
         LOG1("Parsing done for "+fileName);
     }
 
-    // Resolver
-    for(auto mi: modulesToCompile) {
-        const auto &fileName = mi->getPath();
-        LOG1("Running resolver on "+fileName);
-        auto unresolvedResolver = new UnresolvedSymbolResolver(mi->getScanner()->mainModule, mi->getScanner()->globalScope, diags, mi->getScanner());
-        unresolvedResolver->run();
-        delete unresolvedResolver;
-    }
-    // Analysis
-    for(auto mi: modulesToCompile) {
-        auto decls = mi->getScanner()->mainModule->getDecls();
-        for(auto decl : decls) {
-            if(auto f = llvm::dyn_cast<ir::FunctionDecl>(decl)) {
-                LOG1("Running function analysis on "+f->getName());
-                FunctionAnalyzer fcheck(f, diags);
-                fcheck.run();
+    if(diags.getNumErrors() == 0) {
+        // Resolver
+        for(auto mi: modulesToCompile) {
+            const auto &fileName = mi->getPath();
+            LOG1("Running resolver on "+fileName);
+            auto unresolvedResolver = new UnresolvedSymbolResolver(mi->getScanner()->mainModule, mi->getScanner()->globalScope, diags, mi->getScanner());
+            unresolvedResolver->run();
+            delete unresolvedResolver;
+        }
+        // Analysis
+        for(auto mi: modulesToCompile) {
+            auto decls = mi->getScanner()->mainModule->getDecls();
+            for(auto decl : decls) {
+                if(auto f = llvm::dyn_cast<ir::FunctionDecl>(decl)) {
+                    LOG1("Running function analysis on "+f->getName());
+                    FunctionAnalyzer fcheck(f, diags);
+                    fcheck.run();
+                }
             }
         }
-    }
 
-    LOGMAX("Generated IRs after resolver:\n----------");
-    for(auto mi: modulesToCompile) {
-        LOGMAX(mi->getScanner()->mainModule->debug());
+        LOGMAX("Generated IRs after resolver:\n----------");
+        for(auto mi: modulesToCompile) {
+            LOGMAX(mi->getScanner()->mainModule->debug());
+        }
+    }
+    else {
+        LOG1("Skipping resolver because of found errors");
     }
 
     // Codegen

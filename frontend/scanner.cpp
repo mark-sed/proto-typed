@@ -425,11 +425,14 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
         switch(op.getKind()) {
         case ir::OperatorKind::OP_ASSIGN:
             if(tl->getName() != tr->getName()) {
+                /*
+                // I've removed implicit conversion of
                 if((tl->getName() == FLOAT_CSTR && tr->getName() == INT_CSTR)
                 || (tl->getName() == INT_CSTR && tr->getName() == FLOAT_CSTR)) {
                     type = tl;
                 }
-                else if(tr->getName() == NONETYPE_CSTR) {
+                else */
+                if(tr->getName() == NONETYPE_CSTR) {
                     if(!tl->isMaybe()) {
                         diags.report(llvmloc, diag::ERR_CANNOT_ASSIGN_NONE);
                     }
