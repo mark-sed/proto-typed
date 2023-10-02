@@ -49,5 +49,62 @@ string_cmp(a, "hell")
 string_ncmp(a, "hell")
 string_cmp(a, "helló")
 string_ncmp(a, "helló")
-string_cmp("helló", "helló")
-string_ncmp("helló", "helló")
+string_cmp("helló", b[0]++"elló")
+string_ncmp("helló", b[0]++"elló")
+
+void string_gt(string a, string b) {
+    if(a > b) {
+        print("a='"++a++"', b='"++b++"': a > b\n")
+    }
+    else {
+        print("a='"++a++"', b='"++b++"': a <= b\n")
+    }
+}
+
+void string_gte(string a, string b) {
+    if(a >= b) {
+        print("a='"++a++"', b='"++b++"': a >= b\n")
+    }
+    else {
+        print("a='"++a++"', b='"++b++"': a < b\n")
+    }
+}
+
+void string_lt(string a, string b) {
+    if(a < b) {
+        print("a='"++a++"', b='"++b++"': a < b\n")
+    }
+    else {
+        print("a='"++a++"', b='"++b++"': a >= b\n")
+    }
+}
+
+void string_lte(string a, string b) {
+    if(a <= b) {
+        print("a='"++a++"', b='"++b++"': a <= b\n")
+    }
+    else {
+        print("a='"++a++"', b='"++b++"': a > b\n")
+    }
+}
+
+a = "there"
+b = ""
+
+string_gt(a, b)
+string_gt(b, a)
+string_gt("aaabb", "aaaab")
+string_gt("aaabb", "aaabb")
+
+string_gte(a, b)
+string_gte(b, a)
+string_gte("aaabb", "aaabb")
+string_gte("", "")
+
+string_lt(a, b)
+string_lt("a", "z")
+string_lt("our", "out")
+
+string_lte(a, b)
+string_lte("ahoj", "ahoj")
+string_lte("our", "out")

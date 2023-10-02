@@ -838,7 +838,22 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     case ir::OperatorKind::OP_BT:
     {
         LOGMAX("Creating BT instruction");
-        if(left->getType() == right->getType()) {
+        if(left->getType() == right->getType() && e->getLeft()->getType()->getName() == STRING_CSTR) {
+            auto str_cmp = cgm.getLLVMMod()->getOrInsertFunction("strcmp",
+                                 llvm::FunctionType::get(
+                                    builder.getInt32Ty(),
+                                    {
+                                        builder.getInt8Ty()->getPointerTo(),
+                                        builder.getInt8Ty()->getPointerTo()
+                                    },
+                                    false
+                                 ));
+            auto leftbf = builder.CreateExtractValue(left, 0);
+            auto rightbf = builder.CreateExtractValue(right, 0);
+            auto cmpval = builder.CreateCall(str_cmp, {leftbf, rightbf});
+            result = builder.CreateICmpSGT(cmpval, llvm::ConstantInt::get(builder.getInt32Ty(), 0, true));
+        }
+        else if(left->getType() == right->getType()) {
             result = builder.CreateICmpSGT(left, right);
         }
         else {
@@ -849,7 +864,22 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     case ir::OperatorKind::OP_BEQ:
     {
         LOGMAX("Creating BEQ instruction");
-        if(left->getType() == right->getType()) {
+        if(left->getType() == right->getType() && e->getLeft()->getType()->getName() == STRING_CSTR) {
+            auto str_cmp = cgm.getLLVMMod()->getOrInsertFunction("strcmp",
+                                 llvm::FunctionType::get(
+                                    builder.getInt32Ty(),
+                                    {
+                                        builder.getInt8Ty()->getPointerTo(),
+                                        builder.getInt8Ty()->getPointerTo()
+                                    },
+                                    false
+                                 ));
+            auto leftbf = builder.CreateExtractValue(left, 0);
+            auto rightbf = builder.CreateExtractValue(right, 0);
+            auto cmpval = builder.CreateCall(str_cmp, {leftbf, rightbf});
+            result = builder.CreateICmpSGE(cmpval, llvm::ConstantInt::get(builder.getInt32Ty(), 0, true));
+        }
+        else if(left->getType() == right->getType()) {
             result = builder.CreateICmpSGE(left, right);
         }
         else {
@@ -860,7 +890,22 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     case ir::OperatorKind::OP_LT:
     {
         LOGMAX("Creating LT instruction");
-        if(left->getType() == right->getType()) {
+        if(left->getType() == right->getType() && e->getLeft()->getType()->getName() == STRING_CSTR) {
+            auto str_cmp = cgm.getLLVMMod()->getOrInsertFunction("strcmp",
+                                 llvm::FunctionType::get(
+                                    builder.getInt32Ty(),
+                                    {
+                                        builder.getInt8Ty()->getPointerTo(),
+                                        builder.getInt8Ty()->getPointerTo()
+                                    },
+                                    false
+                                 ));
+            auto leftbf = builder.CreateExtractValue(left, 0);
+            auto rightbf = builder.CreateExtractValue(right, 0);
+            auto cmpval = builder.CreateCall(str_cmp, {leftbf, rightbf});
+            result = builder.CreateICmpSLT(cmpval, llvm::ConstantInt::get(builder.getInt32Ty(), 0, true));
+        }
+        else if(left->getType() == right->getType()) {
             result = builder.CreateICmpSLT(left, right);
         }
         else {
@@ -871,7 +916,22 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     case ir::OperatorKind::OP_LEQ:
     {
         LOGMAX("Creating LEQ instruction");
-        if(left->getType() == right->getType()) {
+        if(left->getType() == right->getType() && e->getLeft()->getType()->getName() == STRING_CSTR) {
+            auto str_cmp = cgm.getLLVMMod()->getOrInsertFunction("strcmp",
+                                 llvm::FunctionType::get(
+                                    builder.getInt32Ty(),
+                                    {
+                                        builder.getInt8Ty()->getPointerTo(),
+                                        builder.getInt8Ty()->getPointerTo()
+                                    },
+                                    false
+                                 ));
+            auto leftbf = builder.CreateExtractValue(left, 0);
+            auto rightbf = builder.CreateExtractValue(right, 0);
+            auto cmpval = builder.CreateCall(str_cmp, {leftbf, rightbf});
+            result = builder.CreateICmpSLE(cmpval, llvm::ConstantInt::get(builder.getInt32Ty(), 0, true));
+        }
+        else if(left->getType() == right->getType()) {
             result = builder.CreateICmpSLE(left, right);
         }
         else {

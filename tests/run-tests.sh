@@ -132,7 +132,34 @@ function test_fib {
 
 function test_strings {
     expect_pass "strings.pt" "strings"
-    expect_out_eq "global string\nexpr string\nlocal s\na='hello', b='': a != b\na='hello', b='': a != b\na='hello', b='hello': a == b\na='hello', b='hello': a == b\na='hello', b='hell': a != b\na='hello', b='hell': a != b\na='hello', b='helló': a != b\na='hello', b='helló': a != b\na='helló', b='helló': a == b\na='helló', b='helló': a == b\n" "strings"
+    expect_out_eq "global string
+expr string
+local s
+a='hello', b='': a != b
+a='hello', b='': a != b
+a='hello', b='hello': a == b
+a='hello', b='hello': a == b
+a='hello', b='hell': a != b
+a='hello', b='hell': a != b
+a='hello', b='helló': a != b
+a='hello', b='helló': a != b
+a='helló', b='helló': a == b
+a='helló', b='helló': a == b
+a='there', b='': a > b
+a='', b='there': a <= b
+a='aaabb', b='aaaab': a > b
+a='aaabb', b='aaabb': a <= b
+a='there', b='': a >= b
+a='', b='there': a < b
+a='aaabb', b='aaabb': a >= b
+a='', b='': a >= b
+a='there', b='': a >= b
+a='a', b='z': a < b
+a='our', b='out': a < b
+a='there', b='': a > b
+a='ahoj', b='ahoj': a <= b
+a='our', b='out': a <= b
+" "strings"
 }
 
 function test_expressions {
