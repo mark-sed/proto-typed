@@ -464,7 +464,7 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
             type = this->stringType;
         break;
         case ir::OperatorKind::OP_POW:
-            if(!utils::isOneOf(tl->getName(), {FLOAT_CSTR}) || !utils::isOneOf(tr->getName(), {FLOAT_CSTR})) {
+            if(!utils::isOneOf(tl->getName(), {FLOAT_CSTR, INT_CSTR}) || !utils::isOneOf(tr->getName(), {FLOAT_CSTR, INT_CSTR})) {
                 diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
             }
             type = this->floatType;

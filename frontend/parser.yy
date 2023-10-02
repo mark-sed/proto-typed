@@ -416,9 +416,11 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          | EXT_ID DOT expr_var     { $$ = scanner->parseInfixExpr(scanner->parseVar($1), $3, ir::Operator(ir::OperatorKind::OP_ACCESS)); }
          | expr_var DOT expr_var   { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_ACCESS)); }
 
-         | expr_float POW expr_var
-         | expr_var POW expr_float
-         | expr_var POW expr_var
+         | expr_float POW expr_var { $$ = scanner->parseInfixExpr(scanner->parseFloat($1), $3, ir::Operator(ir::OperatorKind::OP_POW)); }
+         | expr_var POW expr_float { $$ = scanner->parseInfixExpr($1, scanner->parseFloat($3), ir::Operator(ir::OperatorKind::OP_POW)); }
+         | expr_var POW expr_var   { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_POW)); }
+         | expr_int POW expr_var   { $$ = scanner->parseInfixExpr(scanner->parseFloat($1) /*Float on purpose*/, $3, ir::Operator(ir::OperatorKind::OP_POW)); }
+         | expr_var POW expr_int   { $$ = scanner->parseInfixExpr($1, scanner->parseFloat($3) /*Float on purpose*/, ir::Operator(ir::OperatorKind::OP_POW)); }
 
          | expr_int MUL expr_var   { $$ = scanner->parseInfixExpr(scanner->parseInt($1), $3, ir::Operator(ir::OperatorKind::OP_MUL)); }
          | expr_float MUL expr_var { $$ = scanner->parseInfixExpr(scanner->parseFloat($1), $3, ir::Operator(ir::OperatorKind::OP_MUL)); }

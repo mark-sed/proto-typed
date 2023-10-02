@@ -103,3 +103,9 @@ int shB = 4
 print((aInt >> shB)++"\n") // -616
 aInt = 42
 print((aInt << shB)++"\n") // 672
+
+aInt = 4
+float aFloat = 2.0
+print((aInt ** 0.5)++"\n") // 2
+print((aFloat ** 2)++"\n") // 4
+print((aInt ** aFloat)++"\n") // 16

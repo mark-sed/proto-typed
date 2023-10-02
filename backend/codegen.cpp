@@ -785,7 +785,30 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     break;
     case ir::OperatorKind::OP_POW:
     {
-        // TODO:
+        LOGMAX("Creating POW instruction");
+        // Conversions if needed
+        if(e->getLeft()->getType()->getName() == INT_CSTR) {
+            left = builder.CreateSIToFP(left, floatT);
+        }
+        if(e->getRight()->getType()->getName() == INT_CSTR) {
+            right = builder.CreateSIToFP(right, floatT);
+        }
+
+        if(left->getType() == right->getType()) {
+            auto powfun = cgm.getLLVMMod()->getOrInsertFunction("pow",
+                                 llvm::FunctionType::get(
+                                    floatT,
+                                    {
+                                        floatT,
+                                        floatT
+                                    },
+                                    false
+                                 ));
+            result = builder.CreateCall(powfun, {left, right});
+        }
+        else {
+            llvm::report_fatal_error("POW does not supported given type");
+        }
     }
     break;
     case ir::OperatorKind::OP_MUL:
