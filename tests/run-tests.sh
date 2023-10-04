@@ -166,12 +166,17 @@ function test_expressions {
     expect_pass "expressions.pt" "expressions"
     expect_out_eq "4\n4\n-110.5\n-110.5\ntrue\ntrue\ntruman\ntrue\nfalse\n(0 - 3), 0, 1, 2, 3
 -1\n-43\ntrue\nfalse
-2\n0\n-1\n-616\n672\n2\n4\n16\n"
+2\n0\n-1\n-616\n672\n2\n4\n16\n" "expressions"
 }
 
 function test_maybes {
     expect_pass "maybes.pt" "maybes"
-    expect_out_eq "8\n9\n5\n42\nthere\ngeneral\n50\n1\n"
+    expect_out_eq "8\n9\n5\n42\nthere\ngeneral\n50\n1\n" "maybes"
+}
+
+function test_any {
+    expect_pass "any.pt" "any"
+    expect_out_eq "hello\nhi\ntrue\n99\n5.25\n5.25\n" "any"
 }
 
 function test_missing_return {
@@ -184,6 +189,7 @@ function run_all_tests {
     run_test missing_return
     run_test expressions
     run_test maybes
+    run_test any
 }
 
 # Count all functions starting with test_ 

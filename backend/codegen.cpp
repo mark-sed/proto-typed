@@ -196,7 +196,7 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
                                     builder.getInt64Ty(),
                                     false
                                  ));
-                auto sizeofV = builder.CreateGEP(mapType(vrdec->getType()), 
+                auto sizeofV = builder.CreateGEP(val->getType()->getPointerTo(), 
                                 llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(val->getType()->getPointerTo())),
                                 llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
                 auto size = builder.CreatePtrToInt(sizeofV, builder.getInt64Ty());
@@ -210,7 +210,21 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
                 builder.CreateStore(val, ptrValNew);
             }
             else {
-                builder.CreateStore(val, locals[decl]);
+                // Check if any to bitcast //TODO: Remove once as is implemented 
+                if(val->getType() == builder.getInt8Ty()) {
+                    if(auto li = llvm::dyn_cast<llvm::LoadInst>(val)) {
+                        auto emEx = li->getOperand(0);
+                        auto casted = builder.CreateBitCast(emEx, mapType(decl)->getPointerTo());
+                        auto loaded = builder.CreateLoad(mapType(decl), casted);
+                        builder.CreateStore(loaded, locals[decl]);
+                    }
+                    else {
+                        llvm::report_fatal_error("Cannot cast any type for parameter");
+                    }
+                }
+                else {
+                    builder.CreateStore(val, locals[decl]);
+                }
             }
         }
         else {
@@ -235,7 +249,7 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
                                     builder.getInt64Ty(),
                                     false
                                  ));
-                auto sizeofV = builder.CreateGEP((t), 
+                auto sizeofV = builder.CreateGEP(val->getType()->getPointerTo(), 
                                 llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(val->getType()->getPointerTo())),
                                 llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
                 auto size = builder.CreatePtrToInt(sizeofV, builder.getInt64Ty());
@@ -273,7 +287,7 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
                                     builder.getInt64Ty(),
                                     false
                                  ));
-                auto sizeofV = builder.CreateGEP(mapType(v->getType()), 
+                auto sizeofV = builder.CreateGEP(val->getType()->getPointerTo(), 
                                 llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(val->getType()->getPointerTo())),
                                 llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
                 auto size = builder.CreatePtrToInt(sizeofV, builder.getInt64Ty());
@@ -287,7 +301,21 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
                 builder.CreateStore(val, ptrValNew);
             }
             else {
-                builder.CreateStore(val, cgm.getGlobals(decl));
+                // Check if any to bitcast
+                if(val->getType() == builder.getInt8Ty()) {
+                    if(auto li = llvm::dyn_cast<llvm::LoadInst>(val)) {
+                        auto emEx = li->getOperand(0);
+                        auto casted = builder.CreateBitCast(emEx, mapType(decl)->getPointerTo());
+                        auto loaded = builder.CreateLoad(mapType(decl), casted);
+                        builder.CreateStore(loaded, cgm.getGlobals(decl));
+                    }
+                    else {
+                        llvm::report_fatal_error("Cannot cast any type for global value");
+                    }
+                }
+                else {
+                    builder.CreateStore(val, cgm.getGlobals(decl));
+                }
             }
         }
         else {
@@ -309,7 +337,7 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
                                 builder.getInt64Ty(),
                                 false
                                 ));
-            auto sizeofV = builder.CreateGEP(mapType(v->getType()), 
+            auto sizeofV = builder.CreateGEP(val->getType()->getPointerTo(), 
                             llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(val->getType()->getPointerTo())),
                             llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
             auto size = builder.CreatePtrToInt(sizeofV, builder.getInt64Ty());
@@ -1756,7 +1784,12 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                 vName = "";
                 // Get base type because global variable is already a pointer (address)
                 vPtr->setInitializer(llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(vType)));
-                vType = vType->getPointerElementType();
+                if(var->getType()->getName() == ANY_CSTR) {
+                    vType = mapType(value->getType());
+                }
+                else {
+                    vType = vType->getPointerElementType();
+                }
             }
             v = new llvm::GlobalVariable(*llvmMod,
                                         vType,
@@ -1963,9 +1996,18 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                             builder.getInt64Ty(),
                             false
                             ));
-        auto sizeofV = builder.CreateGEP(d->getType(), 
-                        llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(d->getType())),
+        // Check if any = string (v = i8*)
+        llvm::Value *sizeofV = nullptr;
+        if(v->getType() == builder.getInt8Ty()->getPointerTo()) {
+            sizeofV = builder.CreateGEP(stringTPtr->getPointerTo(), 
+                        llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(stringTPtr->getPointerTo())),
                         llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
+        }
+        else {
+            sizeofV = builder.CreateGEP(v->getType(), 
+                        llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(v->getType())),
+                        llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
+        }
         auto size = builder.CreatePtrToInt(sizeofV, builder.getInt64Ty());
         auto mem = builder.CreateCall(mallocF, size);
         auto valLd = builder.CreateLoad(v->getType()->getPointerElementType(), v);

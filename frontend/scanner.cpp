@@ -146,6 +146,21 @@ void Scanner::init() {
 
     {
         auto params = std::vector<ir::FormalParamDecl *>{
+            new ir::FormalParamDecl(currentIR, llvmloc, "v", this->anyType, false)
+        };
+        auto body = std::vector<ir::IR *> {};
+        auto fun = new ir::FunctionDecl(currentIR,
+                                                llvm::SMLoc(),
+                                                "to_string_any",
+                                                "to_string",
+                                                this->stringType,
+                                                params,
+                                                body);
+        currScope->insert(fun);
+    }
+
+    {
+        auto params = std::vector<ir::FormalParamDecl *>{
             new ir::FormalParamDecl(currentIR, llvmloc, "v", this->stringType, false)
         };
         auto body = std::vector<ir::IR *> {};
@@ -441,7 +456,7 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
                     }
                     type = tl;
                 }
-                else if(tl->getName() == ANY_CSTR) {
+                else if(tl->getName() == ANY_CSTR || tr->getName() == ANY_CSTR) {
                     type = tl;
                 }
                 else {

@@ -58,6 +58,7 @@ private:
     void to_string_intInit();
     void to_string_floatInit();
     void to_string_boolInit();
+    void to_string_anyInit();
     void length_stringInit();
 public:
     /**

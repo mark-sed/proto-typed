@@ -1,0 +1,44 @@
+any a ="hello\n"
+string? b
+b = a
+string c
+c = b
+print(c) // hello\n 
+
+void anyfun() {
+    any g
+    g = "hi\n"
+    string b = g
+    print(b)
+
+    any i
+    i = 42
+    i = true
+    bool? d = i
+    bool c = d
+    print(c++"\n")
+}
+
+anyfun() // hi\ntrue\n
+
+int? ma = 4
+any av
+av = ma
+ma = 99
+int maInt
+maInt = av
+print(maInt++"\n") // 99\n
+
+any floatAny = 5.25
+float flt
+flt = floatAny
+print(flt++"\n") // 5.25\n
+
+void foo(any floatAny) {
+    float flt
+    flt = floatAny
+    print(flt++"\n")
+}
+
+any f = 5.25
+foo(f) // 5.25\n
