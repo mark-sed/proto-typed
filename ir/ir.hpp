@@ -24,11 +24,12 @@
 #define FLOAT_CSTR "float"
 #define BOOL_CSTR "bool"
 #define STRING_CSTR "string"
-#define MATRIX_CSTR "matrix"
 #define VOID_CSTR "void"
+#define ANY_CSTR "any"
 #define RANGE_CSTR "range"
-#define VARARGS_CSTR "varargs"
 #define NONETYPE_CSTR "noneType"
+#define MATRIX_CSTR "matrix"
+#define VARARGS_CSTR "varargs"
 #define UNKNOWN_CSTR "*unknowntype*"
 
 namespace ptc {

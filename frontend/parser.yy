@@ -793,6 +793,7 @@ mattype : ID matsq               { $$ = scanner->parseMatrixType($1, $2); }
         | KWFLOAT matsq          { $$ = scanner->parseMatrixType(FLOAT_CSTR, $2); }
         | KWSTRING matsq         { $$ = scanner->parseMatrixType(STRING_CSTR, $2); }
         | KWBOOL matsq           { $$ = scanner->parseMatrixType(BOOL_CSTR, $2); }
+        | KWANY matsq
         | funtype matsq
         | ID KWMAYBE matsq
         | KWINT KWMAYBE matsq
@@ -819,7 +820,7 @@ type : KWINT KWMAYBE    { $$ = scanner->sym_lookup(INT_CSTR, true, true); }
      | KWFLOAT          { $$ = scanner->sym_lookup(FLOAT_CSTR, false, true); }
      | KWSTRING         { $$ = scanner->sym_lookup(STRING_CSTR, false, true); }
      | KWBOOL           { $$ = scanner->sym_lookup(BOOL_CSTR, false, true); }
-     | KWANY
+     | KWANY            { $$ = scanner->sym_lookup(ANY_CSTR, false, true); }
      | ID               { $$ = scanner->sym_lookup($1, false, true); }
      | funtype
      | mattype          { $$ = $1; }

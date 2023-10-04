@@ -105,6 +105,7 @@ public:
     llvm::Type *int1T;
     llvm::Type *int64T;
     llvm::Type *floatT;
+    llvm::Type *anyT;
     llvm::StructType *stringT;
     llvm::PointerType *stringTPtr;
     llvm::StructType *matrixT;

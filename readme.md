@@ -34,16 +34,26 @@ bool b = false;
 ```
 string a = "Hello" 
 ```
-
-#### FString
-```
-string who = "World"
-string fa = f"Hello, {who}!"
-```
   
 #### RString
 ```
 string a = r"\n\n Still one line \t\n"
+```
+
+### Maybe type
+Any type can be maybe, where it can be none or of the type it has
+```
+int? a   // none
+a = 42   // 42
+a = none // none
+```
+
+### Any
+Any type is always maybe type
+```
+any i = 42
+i = "hello"
+i = none
 ```
 
 ### Matrix (1D-nD)

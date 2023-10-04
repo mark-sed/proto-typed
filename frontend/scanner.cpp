@@ -66,6 +66,8 @@ void Scanner::init() {
     stringType = new ir::TypeDecl(currentIR, llvm::SMLoc(), STRING_CSTR);
     boolType = new ir::TypeDecl(currentIR, llvm::SMLoc(), BOOL_CSTR);
     voidType = new ir::TypeDecl(currentIR, llvm::SMLoc(), VOID_CSTR);
+    anyType = new ir::TypeDecl(currentIR, llvm::SMLoc(), ANY_CSTR);
+    anyType->setMaybe(true);
     rangeType = new ir::TypeDecl(currentIR, llvm::SMLoc(), RANGE_CSTR);
     noneType = new ir::TypeDecl(currentIR, llvm::SMLoc(), NONETYPE_CSTR);
     varargsType = new ir::TypeDecl(currentIR, llvm::SMLoc(), VARARGS_CSTR);
@@ -76,6 +78,7 @@ void Scanner::init() {
     currScope->insert(boolType);
     currScope->insert(floatType);
     currScope->insert(stringType);
+    currScope->insert(anyType);
     currScope->insert(voidType);
     currScope->insert(rangeType);
     currScope->insert(noneType);
@@ -436,6 +439,9 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
                     if(!tl->isMaybe()) {
                         diags.report(llvmloc, diag::ERR_CANNOT_ASSIGN_NONE);
                     }
+                    type = tl;
+                }
+                else if(tl->getName() == ANY_CSTR) {
                     type = tl;
                 }
                 else {

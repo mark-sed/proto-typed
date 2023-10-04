@@ -57,6 +57,8 @@ void cg::CodeGen::init() {
     int1T = llvm::Type::getInt1Ty(ctx);
     int64T = llvm::Type::getInt64Ty(ctx);
     floatT = llvm::Type::getDoubleTy(ctx);
+    // Any is maybe type so the pointer will be generated automatically
+    anyT = builder.getInt8Ty();
 
     std::vector<llvm::Type*> structElements{
         builder.getInt8Ty()->getPointerTo(),
@@ -96,6 +98,9 @@ llvm::Type *cg::CodeGen::convertType(ir::TypeDecl *t) {
     }
     else if(t->getName() == STRING_CSTR) {
         llvmT = stringT;
+    }
+    else if(t->getName() == ANY_CSTR) {
+        llvmT = anyT;
     }
     else if(t->getDecl()) {
         if(auto *v = llvm::dyn_cast<ir::StructDecl>(t->getDecl())) {
@@ -192,7 +197,7 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
                                     false
                                  ));
                 auto sizeofV = builder.CreateGEP(mapType(vrdec->getType()), 
-                                llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(mapType(vrdec->getType()))),
+                                llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(val->getType()->getPointerTo())),
                                 llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
                 auto size = builder.CreatePtrToInt(sizeofV, builder.getInt64Ty());
                 auto mem = builder.CreateCall(mallocF, size);
@@ -231,7 +236,7 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
                                     false
                                  ));
                 auto sizeofV = builder.CreateGEP((t), 
-                                llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(t)),
+                                llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(val->getType()->getPointerTo())),
                                 llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
                 auto size = builder.CreatePtrToInt(sizeofV, builder.getInt64Ty());
                 auto mem = builder.CreateCall(mallocF, size);
@@ -269,7 +274,7 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
                                     false
                                  ));
                 auto sizeofV = builder.CreateGEP(mapType(v->getType()), 
-                                llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(mapType(v->getType()))),
+                                llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(val->getType()->getPointerTo())),
                                 llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
                 auto size = builder.CreatePtrToInt(sizeofV, builder.getInt64Ty());
                 auto mem = builder.CreateCall(mallocF, size);
@@ -305,7 +310,7 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
                                 false
                                 ));
             auto sizeofV = builder.CreateGEP(mapType(v->getType()), 
-                            llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(mapType(v->getType()))),
+                            llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(val->getType()->getPointerTo())),
                             llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
             auto size = builder.CreatePtrToInt(sizeofV, builder.getInt64Ty());
             auto mem = builder.CreateCall(mallocF, size);

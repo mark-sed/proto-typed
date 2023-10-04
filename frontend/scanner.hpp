@@ -49,6 +49,7 @@ private:
     ir::TypeDecl *stringType;
     ir::TypeDecl *boolType;
     ir::TypeDecl *voidType;
+    ir::TypeDecl *anyType;
     ir::TypeDecl *noneType;
     ir::TypeDecl *rangeType;
     ir::TypeDecl *varargsType;
