@@ -659,54 +659,68 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
     }
 }
 
-void cg::CGFunction::emitMemberAssignment(ir::BinaryInfixExpr *l, llvm::Value *r) {
-    auto left = l->getLeft();
-    auto right = l->getRight();
+llvm::Value *cg::CGFunction::getElementIndex(std::vector<llvm::Value *> &indices, ir::BinaryInfixExpr *acc) {
+    auto left = acc->getLeft();
+    auto right = acc->getRight();
 
-    if(auto var = llvm::dyn_cast<ir::VarAccess>(left)) {
-        if(auto elem = llvm::dyn_cast<ir::MemberAccess>(right)) {
-            auto strucType = left->getType();
-            if(!strucType->getDecl() || !llvm::isa<ir::StructDecl>(strucType->getDecl())) {
-                llvm::report_fatal_error("Assignment variable is not a struct");
-            }
-            llvm::Value* zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(cgm.getLLVMCtx()), 0);
-            llvm::Value* stIndex = llvm::ConstantInt::get(llvm::Type::getInt32Ty(cgm.getLLVMCtx()), elem->getIndex());
-            
-            llvm::Value *llvar = nullptr;
-            if(auto v = llvm::dyn_cast<ir::VarDecl>(var->getVar())) {
-                if(v->getEnclosingIR() == cgm.getModuleDecl()) {
-                    llvar = cgm.getGlobals(var->getVar());
-                }
-                else if(v->getEnclosingIR() == fun) {
-                    llvar = currDef[currBB].defs[var->getVar()];
-                }
-                else {
-                    llvm::report_fatal_error("Unknown variable scope");
-                }
-            }
-            else if(auto v = llvm::dyn_cast<ir::FormalParamDecl>(var->getVar())) {
-                if(v->isByReference()) {
-                    llvar = formalParams[v];
-                }
-                else {
-                    llvar = builder.CreateAlloca(mapType(strucType));
-                    // TODO: Check correctness, possibly call read
-                    builder.CreateStore(currDef[currBB].defs[var->getVar()], llvar);
-                }
-            }
-            else {
-                llvm::report_fatal_error("Unknown variable type for assignment");
-            }
-            llvm::Value *elemPtr = builder.CreateGEP(mapType(strucType), llvar, {zero, stIndex});
-            builder.CreateStore(r, elemPtr);
+    if(auto elem = llvm::dyn_cast<ir::MemberAccess>(right)) {
+        auto strucType = left->getType();
+        if(!strucType->getDecl() || !llvm::isa<ir::StructDecl>(strucType->getDecl())) {
+            llvm::report_fatal_error("Assignment variable is not a struct");
         }
-        else {
-            llvm::report_fatal_error("Left hand side is not assignable");
-        }
+        
+        llvm::Value *v = llvm::ConstantInt::get(llvm::Type::getInt32Ty(cgm.getLLVMCtx()), elem->getIndex());
+        indices.insert(indices.begin(), v);
     }
     else {
-        llvm::report_fatal_error("NOT YET IMPLEMENTED nested struct assignment");
+        llvm::report_fatal_error("Left hand side is not assignable");
     }
+
+    if(auto elleft = llvm::dyn_cast<ir::BinaryInfixExpr>(left)) {
+        return getElementIndex(indices, elleft);
+    }
+    else if(auto var = llvm::dyn_cast<ir::VarAccess>(left)){
+        llvm::Value *llvar = nullptr;
+        auto strucType = left->getType();
+        if(auto v = llvm::dyn_cast<ir::VarDecl>(var->getVar())) {
+            if(v->getEnclosingIR() == cgm.getModuleDecl()) {
+                llvar = cgm.getGlobals(var->getVar());
+            }
+            else if(v->getEnclosingIR() == fun) {
+                llvar = currDef[currBB].defs[var->getVar()];
+            }
+            else {
+                llvm::report_fatal_error("Unknown variable scope");
+            }
+        }
+        else if(auto v = llvm::dyn_cast<ir::FormalParamDecl>(var->getVar())) {
+            if(v->isByReference()) {
+                llvar = formalParams[v];
+            }
+            else {
+                llvar = builder.CreateAlloca(mapType(strucType));
+                // TODO: Check correctness, possibly call read
+                builder.CreateStore(currDef[currBB].defs[var->getVar()], llvar);
+            }
+        }
+        else {
+            llvm::report_fatal_error("Unknown variable type for assignment");
+        }
+        llvm::Value *zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(cgm.getLLVMCtx()), 0);
+        indices.insert(indices.begin(), zero);
+        return builder.CreateGEP(mapType(strucType), llvar, indices);
+    }
+    llvm::report_fatal_error("Unknown construct in element access");
+    return nullptr;
+}
+
+llvm::Value *cg::CGFunction::emitStructElem(ir::BinaryInfixExpr *acc) {
+    std::vector<llvm::Value *> indices;
+    return getElementIndex(indices, acc);
+}
+
+void cg::CGFunction::emitMemberAssignment(ir::BinaryInfixExpr *l, llvm::Value *r) {
+    builder.CreateStore(r, emitStructElem(l));
 }
 
 llvm::Value *cg::CGFunction::emitUnaryPrefixExpr(ir::UnaryPrefixExpr *e) {

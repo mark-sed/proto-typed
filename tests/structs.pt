@@ -1,0 +1,40 @@
+struct C {
+    int u
+    int a
+    int gw
+    int id;
+}
+
+struct A {
+    int id2
+    int g
+    C c
+}
+
+struct B {
+    int size
+    A a
+}
+
+B b
+b.size = 1
+print(b.size++"\n") // 1
+
+C c
+print(c.u++"\n") // 0
+
+b.a.c.id = 42
+print(b.a.c.id++"\n") // 42
+
+struct Y {
+    string hello = "hello"
+    int a = -99
+    bool b = true
+    float g = 40.5
+}
+
+Y y
+print(y.hello++"\n") // hello
+print(y.a++"\n") // -99
+print(y.b++"\n") // true
+print(y.g++"\n") // 40.5

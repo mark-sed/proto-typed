@@ -179,6 +179,17 @@ function test_any {
     expect_out_eq "hello\nhi\ntrue\n99\n5.25\n5.25\n" "any"
 }
 
+function test_structs {
+    expect_pass "structs.pt" "structs"
+    expect_out_eq "1\n0\n42
+hello
+-99
+true
+40.5\n" "structs"
+}
+
+# Expect fail tests
+
 function test_missing_return {
     expect_fail "missing_return.pt" "<unknown>:0: error: Missing return in a flow path in a function ‘miss’.\n" "missing_return"
 }
@@ -186,10 +197,13 @@ function test_missing_return {
 function run_all_tests {
     run_test fib
     run_test strings
-    run_test missing_return
     run_test expressions
     run_test maybes
     run_test any
+    run_test structs
+
+    # Expect fail tests
+    run_test missing_return
 }
 
 # Count all functions starting with test_ 

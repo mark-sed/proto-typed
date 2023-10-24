@@ -217,11 +217,14 @@ protected:
     virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) override;
     virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe=false) override;
 
+    llvm::Value * getElementIndex(std::vector<llvm::Value *> &indices, ir::BinaryInfixExpr *acc);
+
     // Expression code generation
     llvm::Value *emitInfixExpr(ir::BinaryInfixExpr *e);
     llvm::Value *emitUnaryPrefixExpr(ir::UnaryPrefixExpr *e);
     llvm::Value *emitFunCall(ir::FunctionCall *e);
     llvm::Value *emitExpr(ir::Expr *e);
+    llvm::Value *emitStructElem(ir::BinaryInfixExpr *acc);
 
     // IR code generation
     void emitMemberAssignment(ir::BinaryInfixExpr *l, llvm::Value *r);
