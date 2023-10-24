@@ -9,6 +9,9 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     find_package(LLVM REQUIRED HINTS "${LLVM_CMAKE_PATH}")
     list(APPEND CMAKE_MODULE_PATH ${LLVM_DIR})
 
+    message(LLVM_CMAKE_PATH=${LLVM_CMAKE_PATH})
+    message(LLVM_CMAKE_PATH=${LLVM_DIR})
+
     #include(ChooseMSVCCRT) # For Windows only
     include(AddLLVM)
     include(HandleLLVMOptions)

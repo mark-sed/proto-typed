@@ -3051,7 +3051,7 @@ switch (yykind)
     {
       yylast_ = 2998,     ///< Last index in yytable_.
       yynnts_ = 54,  ///< Number of nonterminal symbols.
-      yyfinal_ = 124 ///< Termination state number.
+      yyfinal_ = 122 ///< Termination state number.
     };
 
 
