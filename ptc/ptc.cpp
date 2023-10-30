@@ -254,6 +254,14 @@ int main(int argc, char *argv[]) {
     }
 
     if(diags.getNumErrors() == 0) {
+        // Externals
+        for(auto mi: modulesToCompile) {
+            const auto &fileName = mi->getPath();
+            LOG1("Running external symbols resolver on "+fileName);
+            auto externalResolver = new ExternalSymbolResolver(mi, modulesToCompile, diags);
+            externalResolver->run();
+            delete externalResolver;
+        }
         // Resolver
         for(auto mi: modulesToCompile) {
             const auto &fileName = mi->getPath();

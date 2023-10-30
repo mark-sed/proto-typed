@@ -44,6 +44,7 @@ public:
     std::string getPath() { return path; }
     std::string getName() { return name; }
     Scanner *getScanner() { return scanner; }
+    ir::ModuleDecl *getModule() { return scanner->mainModule; }
     void setScanner(Scanner *s) { scanner = s; }
     bool isParsed() { return parsed; }
     void setParsed(bool p) { parsed = p; }

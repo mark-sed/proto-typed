@@ -449,6 +449,8 @@ public:
 
     Expr *getLeft() { return left; }
     Expr *getRight() { return right; }
+    void setLeft(Expr *l) { this->left = l; }
+    void setRight(Expr *r) { this->right = r; } 
     std::string debug() const override { return left->debug() + op.debug() + right->debug(); } 
     const Operator &getOperator() { return op; }
     static bool classof(const Expr *e) {
@@ -635,6 +637,8 @@ public:
     static bool classof(const Expr *e) {
         return e->getKind() == ExprKind::EX_EXT_SYMB;
     }
+    std::string getModuleName() { return moduleName; }
+    std::string getSymbolName() { return symbolName; }
     std::string debug() const override { return moduleName+"::"+symbolName; }
 };
 
@@ -718,6 +722,7 @@ public:
              e(e) {}
     
     Expr *getExpr() { return e; }
+    void setExpr(ir::Expr *e) { this->e = e; }
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_EXPR_STMT;
     }

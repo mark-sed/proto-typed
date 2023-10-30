@@ -11,11 +11,13 @@
 #ifndef _RESOLVER_HPP_
 #define _RESOLVER_HPP_
 
+#include "ptc.hpp"
 #include "ir.hpp"
 #include "logging.hpp"
 #include "scope.hpp"
 #include "scanner.hpp"
 #include "llvm/Support/SMLoc.h"
+#include <vector>
 
 namespace ptc {
 
@@ -54,6 +56,21 @@ public:
     /**
      * Runs all the resolver pipeline
      */
+    void run();
+};
+
+class ExternalSymbolResolver {
+private:
+    ModuleInfo *currMod;
+    std::vector<ModuleInfo *> allModules;
+    Diagnostics &diags;
+
+    void resolve(std::vector<ir::IR *> body);
+    void resolve(ir::Expr *expr, llvm::SMLoc loc);
+public:
+    ExternalSymbolResolver(ModuleInfo *currMod, std::vector<ModuleInfo *> allModules, Diagnostics &diags)
+        : currMod(currMod), allModules(allModules), diags(diags) {}
+
     void run();
 };
 

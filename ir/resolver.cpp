@@ -12,6 +12,7 @@
 #include "scanner.hpp"
 #include "llvm/Support/Casting.h"
 #include <initializer_list>
+#include <algorithm>
 
 using namespace ptc;
 
@@ -60,10 +61,6 @@ void UnresolvedSymbolResolver::resolve(ir::Expr * expr, llvm::SMLoc loc) {
         
         auto newe = scanner->parseUnaryPrefixExpr(e->getExpr(), e->getOperator(), e->isConst());
         expr->setType(newe->getType());
-    }
-    else if(auto e = llvm::dyn_cast<ir::UnaryPrefixExpr>(expr)) {
-        resolve(e->getExpr(), loc);
-        e->setType(e->getExpr()->getType());
     }
     else if(auto e = llvm::dyn_cast<ir::MatrixLiteral>(expr)) {
         for(auto v: e->getValue()) {
@@ -117,9 +114,6 @@ void UnresolvedSymbolResolver::resolve(std::vector<ir::IR *> body) {
             if(stmt->getInitValue() && stmt->getInitValue()->getType()->getName() == UNKNOWN_CSTR) {
                 auto *e = stmt->getInitValue();
                 e->setType(stmt->getType());
-                LOGMAX(stmt->getType()->getName());
-                LOGMAX(stmt->getInitValue()->getType()->getName());
-                LOGMAX(i->debug());
             }   
         }
     }
@@ -127,6 +121,145 @@ void UnresolvedSymbolResolver::resolve(std::vector<ir::IR *> body) {
 
 void UnresolvedSymbolResolver::run() {
     auto decls = mod->getDecls();
+    resolve(decls);
+}
+
+/*bool ExternalSymbolResolver::resolve(ir::Expr **expr, llvm::SMLoc loc) {
+    if(auto e = llvm::dyn_cast<ir::ExternalSymbolAccess>(*expr)) {
+        ModuleInfo *symbMod = nullptr;
+        for(auto m: allModules) {
+            if(m->getName() == e->getModuleName()) {
+                symbMod = m;
+                break;
+            }
+        }
+
+        if(!symbMod) {
+            diags.report(loc, diag::ERR_UNKNOWN_MODULE, e->getModuleName());
+        }
+
+        // TODO: check functions some other way?
+        auto symb = symbMod->getScanner()->globalScope->lookup(e->getSymbolName());
+        if(!symb) {
+            diags.report(loc, diag::ERR_UNDEFINED_EXT_VAR, e->getSymbolName(), e->getModuleName());
+        }
+
+        if(auto s = llvm::dyn_cast<ir::VarDecl>(symb)) {
+            *expr = new ir::VarAccess(s);
+        }
+        return true;
+    }
+    else if(auto e = llvm::dyn_cast<ir::BinaryInfixExpr>(*expr)) {
+        auto l = e->getLeft();
+        auto r = e->getRight();
+        if (resolve(&l, loc)) {
+            e->setLeft(r);
+        }
+        if (resolve(&r, loc)) {
+            e->setRight(r);
+        }
+    }
+    else if(auto e = llvm::dyn_cast<ir::UnaryPrefixExpr>(*expr)) {
+        //resolve(e->getExpr(), loc);
+    }
+    else if(auto e = llvm::dyn_cast<ir::MatrixLiteral>(*expr)) {
+        for(auto v: e->getValue()) {
+            //resolve(v, loc);
+        }
+    }
+    else if(auto e = llvm::dyn_cast<ir::Range>(*expr)) {
+        //resolve(e->getStart(), loc);
+        //resolve(e->getStep(), loc);
+        //resolve(e->getEnd(), loc);
+    }
+    return false;
+}
+*/
+void ExternalSymbolResolver::resolve(std::vector<ir::IR *> body) {
+    for(auto *i: body) {
+        // Statements to resolve further
+        if(auto *stmt = llvm::dyn_cast<ir::ReturnStmt>(i)) {
+            if(stmt->getValue())
+                resolve(stmt->getValue(), stmt->getLocation());
+        }
+        else if(auto *stmt = llvm::dyn_cast<ir::FunctionDecl>(i)) {
+            resolve(stmt->getDecl());
+        }
+        else if(auto *stmt = llvm::dyn_cast<ir::WhileStmt>(i)) {
+            resolve(stmt->getCond(), stmt->getLocation());
+            resolve(stmt->getBody());
+        }
+        else if(auto *stmt = llvm::dyn_cast<ir::ForeachStmt>(i)) {
+            resolve(stmt->getI(), stmt->getLocation());
+            resolve(stmt->getCollection(), stmt->getLocation());
+            resolve(stmt->getBody());
+        }
+        else if(auto *stmt = llvm::dyn_cast<ir::IfStatement>(i)) {
+            resolve(stmt->getCond(), stmt->getLocation());
+            resolve(stmt->getIfBranch());
+            resolve(stmt->getElseBranch());
+        }
+        else if(auto *stmt = llvm::dyn_cast<ir::ExprStmt>(i)) {
+            auto e = stmt->getExpr();
+            resolve(e, stmt->getLocation());
+        }
+        else if(auto *stmt = llvm::dyn_cast<ir::VarDecl>(i)) {
+            if(stmt->getInitValue() && stmt->getInitValue()->getType()->getName() == UNKNOWN_CSTR) {
+                auto *e = stmt->getInitValue();
+                e->setType(stmt->getType());
+            }   
+        }
+    }
+}
+
+void ExternalSymbolResolver::resolve(ir::Expr *expr, llvm::SMLoc loc) {
+    if(auto e = llvm::dyn_cast<ir::ExternalSymbolAccess>(expr)) {
+        ModuleInfo *symbMod = nullptr;
+        for(auto m: allModules) {
+            if(m->getName() == e->getModuleName()) {
+                symbMod = m;
+                break;
+            }
+        }
+
+        if(!symbMod) {
+            diags.report(loc, diag::ERR_UNKNOWN_MODULE, e->getModuleName());
+        }
+
+        // TODO: check functions some other way?
+        auto symb = symbMod->getScanner()->globalScope->lookup(e->getSymbolName());
+        if(!symb) {
+            diags.report(loc, diag::ERR_UNDEFINED_EXT_VAR, e->getSymbolName(), e->getModuleName());
+        }
+
+        if(auto s = llvm::dyn_cast<ir::VarDecl>(symb)) {
+            expr->setType(s->getType());
+        }
+        else {
+            llvm::report_fatal_error("UNIMPLEMENTED OTHER IRS");
+        }
+    }
+    else if(auto e = llvm::dyn_cast<ir::BinaryInfixExpr>(expr)) {
+        resolve(e->getLeft(), loc);
+        resolve(e->getRight(), loc);
+    }
+    else if(auto e = llvm::dyn_cast<ir::UnaryPrefixExpr>(expr)) {
+        resolve(e->getExpr(), loc);
+    }
+    else if(auto e = llvm::dyn_cast<ir::MatrixLiteral>(expr)) {
+        for(auto v: e->getValue()) {
+            resolve(v, loc);
+        }
+    }
+    else if(auto e = llvm::dyn_cast<ir::Range>(expr)) {
+        resolve(e->getStart(), loc);
+        resolve(e->getStep(), loc);
+        resolve(e->getEnd(), loc);
+    }
+}
+
+void ExternalSymbolResolver::run() {
+    auto decls = currMod->getModule()->getDecls();
     resolve(decls);
 }
 
