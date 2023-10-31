@@ -47,8 +47,8 @@ std::unique_ptr<llvm::Module> cg::CodeGenHandler::run(ir::ModuleDecl *module, st
     std::unique_ptr<llvm::Module> m = std::make_unique<llvm::Module>(fileName, ctx);
     m->setTargetTriple(target->getTargetTriple().getTriple());
     m->setDataLayout(target->createDataLayout());
-    cg::CGModule cgm(m.get());
-    cgm.run(module);
+    cgm = new cg::CGModule(m.get());
+    cgm->run(module);
     return m;
 }
 
@@ -419,70 +419,6 @@ llvm::Value *cg::CGFunction::readLocalVar(llvm::BasicBlock *BB, ir::IR *decl, bo
     return nullptr;
 }
 
-/*llvm::Value *cg::CGFunction::readLocalVarRecursive(llvm::BasicBlock *BB, ir::IR *decl) {
-    // TODO: Checks for type
-    llvm::Value *val = nullptr;
-    if(!currDef[BB].sealed) {
-        // incomplete for var
-        llvm::PHINode *phi = addEmptyPhi(BB, decl);
-        currDef[BB].incompletePhis[phi] = decl;
-        val = phi;
-    }
-    else if(auto *predBB = BB->getSinglePredecessor()) {
-        // only one predecessor
-        val = readLocalVar(predBB, decl);
-    }
-    else {
-        // Creating empty phi to break potential cycles
-        llvm::PHINode *phi = addEmptyPhi(BB, decl);
-        val = phi;
-        writeLocalVar(BB, decl, val);
-        addPhiOperands(BB, decl, phi);
-    }
-    writeLocalVar(BB, decl, val);
-    return val;
-}
-
-llvm::PHINode *cg::CGFunction::addEmptyPhi(llvm::BasicBlock *BB, ir::IR *decl) {
-    if(BB->empty()) {
-        return llvm::PHINode::Create(mapType(decl), 0, "", BB);
-    }
-    return llvm::PHINode::Create(mapType(decl), 0, "", &BB->front());
-}
-
-void cg::CGFunction::addPhiOperands(llvm::BasicBlock *BB, ir::IR *decl, llvm::PHINode *phi) {
-    for(auto i = llvm::pred_begin(BB), e = llvm::pred_end(BB); i != e; ++i) {
-        phi->addIncoming(readLocalVar(*i, decl), *i);
-    }
-    //optimizePhi(phi);
-}
-
-void cg::CGFunction::optimizePhi(llvm::PHINode *phi) {
-    // FIXME: Causes crash
-    llvm::Value *same = nullptr;
-    for(llvm::Value *v : phi->incoming_values()) {
-        if(v == same || v == phi) continue;
-        if(same && v != same) return;
-        same = v;
-    }
-    if(same == nullptr) {
-        same = llvm::UndefValue::get(phi->getType());
-    }
-    llvm::SmallVector<llvm::PHINode *, 8> candidatePhis;
-    for(llvm::Use &u: phi->uses()) {
-        if(auto *p = llvm::dyn_cast<llvm::PHINode>(u.getUser())) {
-            if(p != phi) {
-                candidatePhis.push_back(p);
-            }
-        }
-    }
-    phi->replaceAllUsesWith(same);
-    phi->eraseFromParent();
-    for(auto *p: candidatePhis) {
-        optimizePhi(p);
-    }
-}*/
-
 void cg::CGFunction::sealBlock(llvm::BasicBlock *BB) {
     /*for(auto phi: currDef[BB].incompletePhis) {
         addPhiOperands(BB, phi.second, phi.first);
@@ -516,6 +452,26 @@ llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl, bool as
         }
         else {
             return readLocalVar(BB, decl, asMaybe);
+        }
+    }
+    llvm::report_fatal_error("Unsupported variable declaration");
+    return nullptr;
+}
+
+llvm::Value *cg::CGFunction::readExtVar(cg::CGModule *mod, ir::IR *decl, bool asMaybe) {
+    if(auto *v = llvm::dyn_cast<ir::VarDecl>(decl)) {
+        if(v->getEnclosingIR()->getKind() == ir::IRKind::IR_MODULE_DECL) {
+            if(!mod) {
+                llvm::report_fatal_error("External value is from unparsed module");
+            }
+            if(v->getType()->isMaybe() && !asMaybe) {
+                auto ptrV = builder.CreateLoad(mapType(v), mod->getGlobals(decl));
+                return builder.CreateLoad(mapType(v)->getPointerElementType(), ptrV);
+            }
+            return builder.CreateLoad(mapType(v), mod->getGlobals(decl));
+        }
+        else {
+            llvm::report_fatal_error("Only global variables are accessible from other modules");
         }
     }
     llvm::report_fatal_error("Unsupported variable declaration");
@@ -652,6 +608,22 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
     case ir::ExprKind::EX_FUN_CALL: return emitFunCall(llvm::dyn_cast<ir::FunctionCall>(e));
     case ir::ExprKind::EX_MEMBER_ACCESS: return nullptr; // Member access is handeled by the left hand side
     case ir::ExprKind::EX_RANGE: return nullptr; // For loop handles this
+    case ir::ExprKind::EX_EXT_SYMB: 
+    {
+        auto extS = llvm::dyn_cast<ir::ExternalSymbolAccess>(e);
+        if(auto vd = llvm::dyn_cast<ir::VarDecl>(extS->getExtIR())) {
+            LOGMAX("Reading external var "+vd->debug());
+            if(!extS->getModDecl()) {
+                llvm::report_fatal_error("External symbol module was not resolved");
+            }
+            auto v = readExtVar(extS->getModDecl()->getCGModule(), vd);
+            llvm::dbgs() << *v << " ----\n";
+            return v;
+        }
+
+        llvm::report_fatal_error("Unknown external symbol IR");
+        return nullptr;
+    }
     // TODO: Other ones
     default:
         llvm::report_fatal_error(("Unimplemented expression kind in code generation "+e->debug()).c_str());

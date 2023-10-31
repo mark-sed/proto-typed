@@ -11,6 +11,7 @@
 #ifndef _IR_HPP_
 #define _IR_HPP_
 
+#include "codegen.hpp"
 #include "llvm/Support/SMLoc.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/APSInt.h"
@@ -33,6 +34,10 @@
 #define UNKNOWN_CSTR "*unknowntype*"
 
 namespace ptc {
+
+namespace cg {
+    class CGModule;
+}
 
 namespace ir {
 
@@ -621,6 +626,8 @@ public:
     std::string debug() const override { return var->debug(); }
 };
 
+class ModuleDecl;
+
 /**
  * Access to a variable (as a variable in an expression)
  */
@@ -628,15 +635,23 @@ class ExternalSymbolAccess : public Expr {
 private:
     std::string moduleName;
     std::string symbolName;
+    IR *extIR;
+    ModuleDecl *modDecl;
 public:
     ExternalSymbolAccess(std::string moduleName, std::string symbolName, TypeDecl *type) 
         : Expr(ExprKind::EX_EXT_SYMB, type, false), 
           moduleName(moduleName), 
-          symbolName(symbolName) {}
+          symbolName(symbolName),
+          extIR(nullptr),
+          modDecl(nullptr) {}
 
     static bool classof(const Expr *e) {
         return e->getKind() == ExprKind::EX_EXT_SYMB;
     }
+    IR *getExtIR() { return extIR; }
+    void setExtIR(IR *e) { this->extIR = e; }
+    ModuleDecl *getModDecl() { return modDecl; }
+    void setModDecl(ModuleDecl *mod) { modDecl = mod; }
     std::string getModuleName() { return moduleName; }
     std::string getSymbolName() { return symbolName; }
     std::string debug() const override { return moduleName+"::"+symbolName; }
@@ -946,19 +961,22 @@ private:
     std::vector<IR *> decls;
     bool main;
     std::unordered_set<FunctionDecl *> libFunctions;
+    cg::CGModule *cgmodule;
 public:
     ModuleDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name)
-              : IR(IRKind::IR_MODULE_DECL, enclosing_ir, loc, name), main(false) {}
+              : IR(IRKind::IR_MODULE_DECL, enclosing_ir, loc, name), main(false), cgmodule(nullptr) {}
     ModuleDecl(IR *enclosing_ir, 
                llvm::SMLoc loc,
                std::string name,
                std::vector<ir::IR *> &decls)
-              : IR(IRKind::IR_MODULE_DECL, enclosing_ir, loc, name), decls(decls), main(false) {}
+              : IR(IRKind::IR_MODULE_DECL, enclosing_ir, loc, name), decls(decls), main(false), cgmodule(nullptr) {}
     
     std::vector<ir::IR *> getDecls() { return decls; }
     void setDecls(std::vector<ir::IR *> &decls) { this->decls = decls; }
     void setMain(bool m) { this->main = m; }
     bool isMain() { return this->main; }
+    ptc::cg::CGModule *getCGModule() { return cgmodule; }
+    void setCGModule(cg::CGModule *cgm) { cgmodule = cgm; }
     void setLibFunctions(std::unordered_set<FunctionDecl *> fs) { libFunctions = fs; }
     std::unordered_set<FunctionDecl *> getLibFunctions() { return libFunctions; }
     void addLibFunction(FunctionDecl *f) { libFunctions.insert(f); }

@@ -232,9 +232,12 @@ void ExternalSymbolResolver::resolve(ir::Expr *expr, llvm::SMLoc loc) {
             diags.report(loc, diag::ERR_UNDEFINED_EXT_VAR, e->getSymbolName(), e->getModuleName());
         }
 
+        e->setModDecl(symbMod->getModule());
         if(auto s = llvm::dyn_cast<ir::VarDecl>(symb)) {
             expr->setType(s->getType());
+            e->setExtIR(s);
         }
+        // TODO: implement other
         else {
             llvm::report_fatal_error("UNIMPLEMENTED OTHER IRS");
         }

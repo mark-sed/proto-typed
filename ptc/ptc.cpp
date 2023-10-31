@@ -305,6 +305,7 @@ int main(int argc, char *argv[]) {
             // Code generation
             llvm::LLVMContext ctx;
             if(cg::CodeGenHandler *CGHandle = cg::CodeGenHandler::create(ctx, target)) {
+                mi->getModule()->setCGModule(CGHandle->cgm);
                 std::unique_ptr<llvm::Module> mainMod = CGHandle->run(mi->getScanner()->mainModule, fileName);
                 if(!emit(ptcName, mainMod.get(), target, fileName)) {
                     llvm::WithColor::error(llvm::errs(), ptcName) << "error writing output\n";

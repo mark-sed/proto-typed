@@ -21,6 +21,31 @@
 #include "llvm/ADT/StringMap.h"
 #include <map>
 
+namespace ptc{
+    namespace ir {
+        class ModuleDecl;
+        class IR;
+        class Expr;
+        class TypeDecl;
+        class MatrixLiteral;
+        class StructDecl;
+        class FunctionDecl;
+        class BinaryInfixExpr;
+        class UnaryPrefixExpr;
+        class FunctionCall;
+        class ExprStmt;
+        class ReturnStmt;
+        class BreakStmt;
+        class ContinueStmt;
+        class IfStatement;
+        class WhileStmt;
+        class ForeachStmt;
+        class Import;
+        class VarDecl;
+        class FormalParamDecl;
+    }
+}
+
 namespace ptc {
 
 namespace cg {
@@ -41,6 +66,7 @@ protected:
                  : ctx(ctx), target(target), module(nullptr) {}
 
 public:
+    cg::CGModule *cgm;
     /**
      * Creates new CodeGenHandler instance
      * @param ctx LLVM context
@@ -216,6 +242,7 @@ private:
 protected:
     virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) override;
     virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe=false) override;
+    llvm::Value *readExtVar(CGModule *mod, ir::IR *decl, bool asMaybe=false);
 
     llvm::Value * getElementIndex(std::vector<llvm::Value *> &indices, ir::BinaryInfixExpr *acc);
 
