@@ -20,6 +20,8 @@
 #include "llvm/IR/Value.h"
 #include "llvm/ADT/StringMap.h"
 #include <map>
+#include <set>
+#include <vector>
 
 namespace ptc{
     namespace ir {
@@ -182,6 +184,7 @@ private:
     std::vector<std::pair<llvm::Value *, llvm::GlobalVariable *>> stringsToInit;
     std::vector<std::pair<llvm::Value *, ir::MatrixLiteral *>> matricesToInit;
     std::vector<std::pair<llvm::GlobalVariable *, llvm::GlobalVariable *>> maybesToInit;
+    std::set<ir::Import *> modulesToInit;
     bool mainMod;
 
     PTLib *ptlibLoader;

@@ -157,6 +157,7 @@ class FormalParamDecl;
 // TODO: Dont be lazy and template this
 std::string block2List(std::vector<ir::Expr *> block);
 std::string block2List(std::vector<ir::IR *> block);
+std::string block2List(std::vector<std::string> block);
 std::string block2List(std::vector<ir::FormalParamDecl *> block);
 
 /**
@@ -282,7 +283,7 @@ public:
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_IMPORT;
     }
-    virtual std::string debug() const override { return "import ...TODO"; }
+    virtual std::string debug() const override { return "import "+block2List(names); }
 };
 
 /**

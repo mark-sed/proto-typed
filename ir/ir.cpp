@@ -48,6 +48,16 @@ std::string ir::block2List(std::vector<ir::IR *> block) {
     return ss.str();
 }
 
+std::string ir::block2List(std::vector<std::string> block) {
+    std::stringstream ss;
+    std::string separator = "";
+    for(auto i : block) {
+        ss << separator << i;
+        separator = ",";
+    }
+    return ss.str();
+}
+
 std::string ir::block2List(std::vector<ir::FormalParamDecl *> block) {
     std::stringstream ss;
     std::string separator = "";

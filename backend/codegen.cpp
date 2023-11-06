@@ -532,8 +532,6 @@ llvm::Value *cg::CGFunction::emitFunCall(ir::FunctionCall *e) {
         ++index;
     }
     // TODO: Set last arg to true is argvars
-    //llvm::FunctionType *fType = llvm::FunctionType::get(voidType, argTypes, false);
-    // Try looking up non mangled function
     if(!e->isExternal()) {
         llvm::Function *funDecl = cgm.getLLVMMod()->getFunction(mangleName(f));
         if(!funDecl) {
@@ -1922,6 +1920,12 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
         case ir::IRKind::IR_STRUCT_DECL:
             defineStruct(llvm::dyn_cast<ir::StructDecl>(decl));
         break;
+        case ir::IRKind::IR_IMPORT:
+        {
+            auto impDecl = llvm::dyn_cast<ir::Import>(decl);
+            modulesToInit.insert(impDecl);
+        }
+        break;
         default: llvm::report_fatal_error("Code generation invoked for not yet implemented IR");
         break;
         }
@@ -1957,6 +1961,19 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
     //init->setDSOLocal(true);
     llvm::BasicBlock *bb = llvm::BasicBlock::Create(getLLVMCtx(), "", init);
     setCurrBB(bb);
+
+    // Init imported modules
+    for(auto m: modulesToInit) {
+        for(auto n: m->getNames()) {
+            LOGMAX("Creating init call to module "+n);
+            auto mInitF = llvmMod->getOrInsertFunction("init_"+n, 
+                                                        llvm::FunctionType::get(
+                                                            voidT,
+                                                            false
+                                                        ));
+            builder.CreateCall(mInitF);
+        }
+    }
 
     auto stringInitF = llvmMod->getOrInsertFunction("string_Create_Init", 
                                                     llvm::FunctionType::get(

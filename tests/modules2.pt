@@ -1,3 +1,5 @@
 int value = 42
 bool bval = true
 float fval = 0.2
+string sval = "hi\n"
+int? mval = 2

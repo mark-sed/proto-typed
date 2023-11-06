@@ -3,9 +3,14 @@ import modules2
 int v
 bool bv
 float fv
+string sv
 v = modules2::value
 print(v++"\n")
 bv = modules2::bval
 print(bv++"\n")
 fv = modules2::fval
 print(fv++"\n")
+sv = modules2::sval
+print(sv)
+v = modules2::mval
+print(v++"\n")
