@@ -75,6 +75,7 @@ function run {
     # Get output binary name
     PROGNAME=$(echo "$1" | cut -f 1 -d '.')".out"
     rm -f ${TEST_DIR}${PROGNAME}
+    rm -f $objf
 }
 
 function expect_pass {
