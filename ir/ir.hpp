@@ -751,35 +751,55 @@ class FunctionCall : public Expr {
 private:
     FunctionDecl *fun;
     UnresolvedSymbolAccess *unresF;
+    ExternalSymbolAccess *extF;
     std::vector<Expr *> params;
     bool unresolved;
+    bool external;
 public:
     FunctionCall(FunctionDecl *fun, std::vector<Expr *> params) 
                 : Expr(ExprKind::EX_FUN_CALL, fun->getReturnType(), false),
                   fun(fun),
                   unresF(nullptr),
+                  extF(nullptr),
                   params(params),
-                  unresolved(false) {}
+                  unresolved(false),
+                  external(false) {}
     FunctionCall(UnresolvedSymbolAccess *unresF, std::vector<Expr *> params)
                 : Expr(ExprKind::EX_FUN_CALL, unresF->getType(), false),
                   fun(nullptr),
                   unresF(unresF),
+                  extF(nullptr),
                   params(params),
-                  unresolved(true) {}
+                  unresolved(true),
+                  external(false) {}
+    FunctionCall(ExternalSymbolAccess *extF, std::vector<Expr *> params)
+                : Expr(ExprKind::EX_FUN_CALL, extF->getType(), false),
+                  fun(nullptr),
+                  unresF(nullptr),
+                  extF(extF),
+                  params(params),
+                  unresolved(false),
+                  external(true) {}
     
     FunctionDecl *getFun() { return fun; }
     void setFun(FunctionDecl *f) { fun = f; }
     bool isUnresolved() { return unresolved; }
     void setUnresolved(bool s) { unresolved = s; }
+    bool isExternal() { return external; }
+    void setExternal(bool e) { external = e; }
+    ExternalSymbolAccess *getExternalFun() { return extF; }
     UnresolvedSymbolAccess *getUnresolvedFun() { return unresF; }
     std::vector<Expr *> getParams() { return params; }
     static bool classof(const Expr *e) {
         return e->getKind() == ExprKind::EX_FUN_CALL;
     }
     std::string debug() const override {
-        if(!unresolved)
-            return "("+fun->getReturnType()->getName()+")"+fun->getName()+"(...)";
-        return "(unresolved)"+unresF->getName()+"(...)";
+        if(unresolved)
+            return "(unresolved)"+unresF->getName()+"(...)";
+        if(external)
+            return "(external)"+extF->debug()+"(...)";
+        
+        return "("+fun->getReturnType()->getName()+")"+fun->getName()+"(...)";
     }
 };
 

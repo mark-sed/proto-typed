@@ -124,57 +124,6 @@ void UnresolvedSymbolResolver::run() {
     resolve(decls);
 }
 
-/*bool ExternalSymbolResolver::resolve(ir::Expr **expr, llvm::SMLoc loc) {
-    if(auto e = llvm::dyn_cast<ir::ExternalSymbolAccess>(*expr)) {
-        ModuleInfo *symbMod = nullptr;
-        for(auto m: allModules) {
-            if(m->getName() == e->getModuleName()) {
-                symbMod = m;
-                break;
-            }
-        }
-
-        if(!symbMod) {
-            diags.report(loc, diag::ERR_UNKNOWN_MODULE, e->getModuleName());
-        }
-
-        // TODO: check functions some other way?
-        auto symb = symbMod->getScanner()->globalScope->lookup(e->getSymbolName());
-        if(!symb) {
-            diags.report(loc, diag::ERR_UNDEFINED_EXT_VAR, e->getSymbolName(), e->getModuleName());
-        }
-
-        if(auto s = llvm::dyn_cast<ir::VarDecl>(symb)) {
-            *expr = new ir::VarAccess(s);
-        }
-        return true;
-    }
-    else if(auto e = llvm::dyn_cast<ir::BinaryInfixExpr>(*expr)) {
-        auto l = e->getLeft();
-        auto r = e->getRight();
-        if (resolve(&l, loc)) {
-            e->setLeft(r);
-        }
-        if (resolve(&r, loc)) {
-            e->setRight(r);
-        }
-    }
-    else if(auto e = llvm::dyn_cast<ir::UnaryPrefixExpr>(*expr)) {
-        //resolve(e->getExpr(), loc);
-    }
-    else if(auto e = llvm::dyn_cast<ir::MatrixLiteral>(*expr)) {
-        for(auto v: e->getValue()) {
-            //resolve(v, loc);
-        }
-    }
-    else if(auto e = llvm::dyn_cast<ir::Range>(*expr)) {
-        //resolve(e->getStart(), loc);
-        //resolve(e->getStep(), loc);
-        //resolve(e->getEnd(), loc);
-    }
-    return false;
-}
-*/
 void ExternalSymbolResolver::resolve(std::vector<ir::IR *> body) {
     for(auto *i: body) {
         // Statements to resolve further
@@ -212,15 +161,18 @@ void ExternalSymbolResolver::resolve(std::vector<ir::IR *> body) {
     }
 }
 
+ModuleInfo *ExternalSymbolResolver::getModule(std::string name) {
+    for(auto m: allModules) {
+        if(m->getName() == name) {
+            return m;
+        }
+    }
+    return nullptr;
+}
+
 void ExternalSymbolResolver::resolve(ir::Expr *expr, llvm::SMLoc loc) {
     if(auto e = llvm::dyn_cast<ir::ExternalSymbolAccess>(expr)) {
-        ModuleInfo *symbMod = nullptr;
-        for(auto m: allModules) {
-            if(m->getName() == e->getModuleName()) {
-                symbMod = m;
-                break;
-            }
-        }
+        ModuleInfo *symbMod = getModule(e->getModuleName());
 
         if(!symbMod) {
             diags.report(loc, diag::ERR_UNKNOWN_MODULE, e->getModuleName());
@@ -240,6 +192,33 @@ void ExternalSymbolResolver::resolve(ir::Expr *expr, llvm::SMLoc loc) {
         // TODO: implement other
         else {
             llvm::report_fatal_error("UNIMPLEMENTED OTHER IRS");
+        }
+    }
+    else if(auto e = llvm::dyn_cast<ir::FunctionCall>(expr)) {
+        if(e->isExternal()) {
+            auto name = e->getExternalFun()->getSymbolName();
+            LOGMAX("Resolving external function "+name);
+            ModuleInfo *symbMod = getModule(e->getExternalFun()->getModuleName());
+            if(!symbMod) {
+                diags.report(loc, diag::ERR_UNKNOWN_MODULE, e->getExternalFun()->getModuleName());
+            }
+            if(!symbMod->getScanner()->globalScope->lookupPossibleFun(name)) {
+                // Undefined
+                diags.report(loc, diag::ERR_UNDEFINED_VAR, name);
+            }
+            else {
+                std::string properName = encodeFunction(name, e->getParams());
+                auto propFIR = symbMod->getScanner()->globalScope->lookup(properName);
+                if(!propFIR) {
+                    diags.report(loc, diag::ERR_INCORRECT_ARGS, name);
+                }
+                else {
+                    LOGMAX("Resolved external function "+name)
+                    auto propF = llvm::dyn_cast<ir::FunctionDecl>(propFIR);
+                    e->setFun(propF);
+                    e->setType(propF->getReturnType());
+                }
+            }
         }
     }
     else if(auto e = llvm::dyn_cast<ir::BinaryInfixExpr>(expr)) {

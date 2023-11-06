@@ -67,6 +67,8 @@ private:
 
     void resolve(std::vector<ir::IR *> body);
     void resolve(ir::Expr *expr, llvm::SMLoc loc);
+
+    ModuleInfo *getModule(std::string name);
 public:
     ExternalSymbolResolver(ModuleInfo *currMod, std::vector<ModuleInfo *> allModules, Diagnostics &diags)
         : currMod(currMod), allModules(allModules), diags(diags) {}

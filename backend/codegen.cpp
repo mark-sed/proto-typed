@@ -534,16 +534,21 @@ llvm::Value *cg::CGFunction::emitFunCall(ir::FunctionCall *e) {
     // TODO: Set last arg to true is argvars
     //llvm::FunctionType *fType = llvm::FunctionType::get(voidType, argTypes, false);
     // Try looking up non mangled function
-    llvm::Function *funDecl = cgm.getLLVMMod()->getFunction(mangleName(f));
-    if(!funDecl) {
-        // Lib functions
-        funDecl = cgm.getLLVMMod()->getFunction(f->getName());
+    if(!e->isExternal()) {
+        llvm::Function *funDecl = cgm.getLLVMMod()->getFunction(mangleName(f));
+        if(!funDecl) {
+            // Lib functions
+            funDecl = cgm.getLLVMMod()->getFunction(f->getName());
+        }
+        if(!funDecl) {
+            auto msg = "Somehow function "+f->getOGName()+"('"+mangleName(f)+"') could not be found";
+            llvm::report_fatal_error(msg.c_str());
+        }
+        return builder.CreateCall(funDecl, args);
+    } else {
+        auto funDecl = cgm.getLLVMMod()->getOrInsertFunction(mangleName(e->getFun()), createFunctionType(e->getFun()));
+        return builder.CreateCall(funDecl, args);
     }
-    if(!funDecl) {
-        auto msg = "Somehow function "+f->getOGName()+" could not be found";
-        llvm::report_fatal_error(msg.c_str());
-    }
-    return builder.CreateCall(funDecl, args);
 }
 
 llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
