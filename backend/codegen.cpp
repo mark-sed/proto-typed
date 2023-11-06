@@ -29,7 +29,7 @@
 using namespace ptc;
 using namespace ptc::cg;
 
-cg::CGModule::CGModule(llvm::Module *llvmMod) : cg::CodeGen(llvmMod->getContext(), *this), llvmMod(llvmMod) {
+cg::CGModule::CGModule(llvm::Module *llvmMod) : cg::CodeGen(llvmMod->getContext(), *this), llvmMod(llvmMod), mainMod(false) {
     ptlibLoader = new PTLib(this, llvmMod, ctx);
 }
 
@@ -43,11 +43,12 @@ cg::CodeGenHandler *cg::CodeGenHandler::create(llvm::LLVMContext &ctx, llvm::Tar
 
 llvm::StringMap<std::pair<llvm::Type *, llvm::Constant *>> cg::CodeGen::userTypes{};
 
-std::unique_ptr<llvm::Module> cg::CodeGenHandler::run(ir::ModuleDecl *module, std::string fileName) {
+std::unique_ptr<llvm::Module> cg::CodeGenHandler::run(ir::ModuleDecl *module, std::string fileName, bool isMainMod) {
     std::unique_ptr<llvm::Module> m = std::make_unique<llvm::Module>(fileName, ctx);
     m->setTargetTriple(target->getTargetTriple().getTriple());
     m->setDataLayout(target->createDataLayout());
     cgm = new cg::CGModule(m.get());
+    cgm->setMainMod(isMainMod);
     cgm->run(module);
     return m;
 }
@@ -464,11 +465,17 @@ llvm::Value *cg::CGFunction::readExtVar(cg::CGModule *mod, ir::IR *decl, bool as
             if(!mod) {
                 llvm::report_fatal_error("External value is from unparsed module");
             }
+            auto vPtr = new llvm::GlobalVariable(*cgm.getLLVMMod(),
+                                                mapType(v),
+                                                false,
+                                                llvm::GlobalValue::ExternalLinkage,
+                                                nullptr,
+                                                mangleName(decl));
             if(v->getType()->isMaybe() && !asMaybe) {
-                auto ptrV = builder.CreateLoad(mapType(v), mod->getGlobals(decl));
+                auto ptrV = builder.CreateLoad(mapType(v), vPtr);
                 return builder.CreateLoad(mapType(v)->getPointerElementType(), ptrV);
             }
-            return builder.CreateLoad(mapType(v), mod->getGlobals(decl));
+            return builder.CreateLoad(mapType(v), vPtr);
         }
         else {
             llvm::report_fatal_error("Only global variables are accessible from other modules");
@@ -617,7 +624,6 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
                 llvm::report_fatal_error("External symbol module was not resolved");
             }
             auto v = readExtVar(extS->getModDecl()->getCGModule(), vd);
-            llvm::dbgs() << *v << " ----\n";
             return v;
         }
 
@@ -1739,6 +1745,7 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
 
     ptlibLoader->setupExternLib();
     ptlibLoader->setupLib();
+
     ir::FunctionDecl *entryFun = nullptr;
     std::vector<CGFunction *> funs;
 
@@ -1764,7 +1771,7 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                 vPtr = new llvm::GlobalVariable(*llvmMod,
                                                 vType,
                                                 false,
-                                                llvm::GlobalValue::PrivateLinkage,
+                                                llvm::GlobalValue::ExternalLinkage,
                                                 nullptr,
                                                 vName);
                 vName = "";
@@ -1780,7 +1787,7 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
             v = new llvm::GlobalVariable(*llvmMod,
                                         vType,
                                         false,
-                                        llvm::GlobalValue::PrivateLinkage,
+                                        llvm::GlobalValue::ExternalLinkage,
                                         nullptr,
                                         vName);
             if(var->getType()->isMaybe() && value && !llvm::isa<ir::NoneLiteral>(value)) {
@@ -1933,19 +1940,17 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
     for(auto f: funs) {
         f->run();
     }
-
-    // Insert _main
-    auto bytePtrPtrTy = builder.getInt8Ty()->getPointerTo()->getPointerTo();
-    llvm::Function *main = llvm::Function::Create(llvm::FunctionType::get(
-                                                builder.getInt32Ty(),
-                                                {builder.getInt32Ty(), bytePtrPtrTy},
+    
+    // Insert init
+    llvm::Function *init = llvm::Function::Create(llvm::FunctionType::get(
+                                                builder.getVoidTy(),
                                                 false
                                                ), 
                                                llvm::GlobalValue::ExternalLinkage,
-                                               "main",
+                                               "init_"+this->mod->getName(),
                                                llvmMod);
-    main->setDSOLocal(true);
-    llvm::BasicBlock *bb = llvm::BasicBlock::Create(getLLVMCtx(), "", main);
+    //init->setDSOLocal(true);
+    llvm::BasicBlock *bb = llvm::BasicBlock::Create(getLLVMCtx(), "", init);
     setCurrBB(bb);
 
     auto stringInitF = llvmMod->getOrInsertFunction("string_Create_Init", 
@@ -2004,8 +2009,27 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
     auto entryFunLLVM = llvmMod->getFunction(mangleName(entryFun));
     std::vector<llvm::Value *> args{};
     builder.CreateCall(entryFunLLVM, args);
+    builder.CreateRetVoid();
 
-    builder.CreateRet(llvm::ConstantInt::get(builder.getInt32Ty(), 0));
+    // Insert _main
+    if(mainMod) {
+        auto bytePtrPtrTy = builder.getInt8Ty()->getPointerTo()->getPointerTo();
+        llvm::Function *main = llvm::Function::Create(llvm::FunctionType::get(
+                                                    builder.getInt32Ty(),
+                                                    {builder.getInt32Ty(), bytePtrPtrTy},
+                                                    false
+                                                ), 
+                                                llvm::GlobalValue::ExternalLinkage,
+                                                "main",
+                                                llvmMod);
+        main->setDSOLocal(true);
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(getLLVMCtx(), "", main);
+        setCurrBB(bb);
+
+        builder.CreateCall(init);
+
+        builder.CreateRet(llvm::ConstantInt::get(builder.getInt32Ty(), 0));
+    }
 }
 
 llvm::FunctionType *cg::CGFunction::createFunctionType(ir::FunctionDecl *fun) {

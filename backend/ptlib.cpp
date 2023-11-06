@@ -49,7 +49,7 @@ void PTLib::print_stringInit() {
     format->setInitializer(builder.CreateGlobalStringPtr("%s", "", 0, llvmMod));
     auto funType = llvm::FunctionType::get(voidT, { stringT }, false);
     llvm::Function *f = llvm::Function::Create(funType, 
-                                            llvm::GlobalValue::ExternalLinkage,
+                                            llvm::GlobalValue::PrivateLinkage,
                                             "print_string",
                                             llvmMod);
     llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
@@ -63,7 +63,7 @@ void PTLib::print_stringInit() {
 void PTLib::to_string_intInit() {
     auto funType = llvm::FunctionType::get(stringT, { int64T }, false);
     llvm::Function *f = llvm::Function::Create(funType, 
-                                            llvm::GlobalValue::ExternalLinkage,
+                                            llvm::GlobalValue::PrivateLinkage,
                                             "to_string_int",
                                             llvmMod);
     llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
@@ -129,7 +129,7 @@ void PTLib::to_string_intInit() {
 void PTLib::to_string_floatInit() {
     auto funType = llvm::FunctionType::get(stringT, { floatT }, false);
     llvm::Function *f = llvm::Function::Create(funType, 
-                                            llvm::GlobalValue::ExternalLinkage,
+                                            llvm::GlobalValue::PrivateLinkage,
                                             "to_string_float",
                                             llvmMod);
     llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
@@ -195,7 +195,7 @@ void PTLib::to_string_floatInit() {
 void PTLib::to_string_boolInit() {
     auto funType = llvm::FunctionType::get(stringT, { int1T }, false);
     llvm::Function *f = llvm::Function::Create(funType, 
-                                            llvm::GlobalValue::ExternalLinkage,
+                                            llvm::GlobalValue::PrivateLinkage,
                                             "to_string_bool",
                                             llvmMod);
     llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
@@ -263,7 +263,7 @@ void PTLib::to_string_boolInit() {
 void PTLib::length_stringInit() {
     auto funType = llvm::FunctionType::get(int64T, { stringT }, false);
     llvm::Function *f = llvm::Function::Create(funType, 
-                                            llvm::GlobalValue::ExternalLinkage,
+                                            llvm::GlobalValue::PrivateLinkage,
                                             "length_string",
                                             llvmMod);
     llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
@@ -276,7 +276,7 @@ void PTLib::length_stringInit() {
 void PTLib::appendInit(std::string name, llvm::Type *mt, llvm::Type *vt) {
     auto funType = llvm::FunctionType::get(voidT, { mt->getPointerTo(), vt }, false);
     llvm::Function *f = llvm::Function::Create(funType, 
-                                            llvm::GlobalValue::ExternalLinkage,
+                                            llvm::GlobalValue::PrivateLinkage,
                                             name,
                                             llvmMod);
     llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
@@ -313,7 +313,7 @@ void PTLib::appendInit(std::string name, llvm::Type *mt, llvm::Type *vt) {
 void PTLib::length_matrixInit(std::string name, llvm::Type *mt) {
     auto funType = llvm::FunctionType::get(int64T, { mt }, false);
     llvm::Function *f = llvm::Function::Create(funType, 
-                                            llvm::GlobalValue::ExternalLinkage,
+                                            llvm::GlobalValue::PrivateLinkage,
                                             name,
                                             llvmMod);
     llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);

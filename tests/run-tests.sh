@@ -64,7 +64,12 @@ function failed {
 }
 
 function run {
-    CMD="$PT ${TEST_DIR}$1 0 $WRKDIR"
+    objf=()
+    for of in ${@:2:$#-1}
+    do
+        objf+=(${TEST_DIR}$of)
+    done
+    CMD="$PT ${TEST_DIR}$1 0 $WRKDIR $objf"
     $CMD 2>$OUTP_ERR 1>$OUTP_STD
     RETCODE=$(echo $?)
     # Get output binary name
@@ -73,9 +78,9 @@ function run {
 }
 
 function expect_pass {
-    run $1
+    run "${@:1:$#-1}"
     if [[ $RETCODE -ne 0 ]]; then
-        failed $2 "Compilation failed."
+        failed "${@: -1}" "Compilation failed."
         printf "Command:\n--------\n$CMD\n"
         printf "Output:\n-------\n"
         cat $OUTP_STD
@@ -188,6 +193,11 @@ true
 40.5\n" "structs"
 }
 
+function test_modules {
+    expect_pass "modules.pt" "modules2.o" "modules"
+    expect_out_eq "42\ntrue\n0.2\n"
+}
+
 # Expect fail tests
 
 function test_missing_return {
@@ -201,6 +211,7 @@ function run_all_tests {
     run_test maybes
     run_test any
     run_test structs
+    run_test modules
 
     # Expect fail tests
     run_test missing_return

@@ -976,7 +976,7 @@ public:
     void setMain(bool m) { this->main = m; }
     bool isMain() { return this->main; }
     ptc::cg::CGModule *getCGModule() { return cgmodule; }
-    void setCGModule(cg::CGModule *cgm) { cgmodule = cgm; }
+    void setCGModule(cg::CGModule *cgm) { this->cgmodule = cgm; }
     void setLibFunctions(std::unordered_set<FunctionDecl *> fs) { libFunctions = fs; }
     std::unordered_set<FunctionDecl *> getLibFunctions() { return libFunctions; }
     void addLibFunction(FunctionDecl *f) { libFunctions.insert(f); }

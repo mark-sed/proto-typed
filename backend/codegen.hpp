@@ -81,7 +81,7 @@ public:
      * @param fileName Module file name (for error reporting)
      * @return LLVM module with code generated for passed in module
      */
-    std::unique_ptr<llvm::Module> run(ir::ModuleDecl *module, std::string fileName);
+    std::unique_ptr<llvm::Module> run(ir::ModuleDecl *module, std::string fileName, bool isMainMod);
 };
 
 class CGModule;
@@ -182,6 +182,7 @@ private:
     std::vector<std::pair<llvm::Value *, llvm::GlobalVariable *>> stringsToInit;
     std::vector<std::pair<llvm::Value *, ir::MatrixLiteral *>> matricesToInit;
     std::vector<std::pair<llvm::GlobalVariable *, llvm::GlobalVariable *>> maybesToInit;
+    bool mainMod;
 
     PTLib *ptlibLoader;
 protected:
@@ -216,6 +217,9 @@ public:
      * Runs the code generation for passed in module
      */
     void run(ir::ModuleDecl *module);
+
+    void setMainMod(bool m) { this->mainMod = m; }
+    bool isMainMod() { return this->mainMod; }
 };
 
 /**

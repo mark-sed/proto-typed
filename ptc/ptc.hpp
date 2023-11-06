@@ -34,6 +34,7 @@ private:
     std::string path;
     Scanner *scanner;
     bool parsed;
+    bool mainMod;
 public:
     ModuleInfo(std::string name, bool pathSent=false);
     ~ModuleInfo() {
@@ -43,6 +44,8 @@ public:
 
     std::string getPath() { return path; }
     std::string getName() { return name; }
+    void setMainMod(bool m) { this->mainMod = m; } 
+    bool isMainMod() { return mainMod; }
     Scanner *getScanner() { return scanner; }
     ir::ModuleDecl *getModule() { return scanner->mainModule; }
     void setScanner(Scanner *s) { scanner = s; }
@@ -52,7 +55,7 @@ public:
 
 extern std::vector<ModuleInfo *> modulesToCompile;
 
-void addModuleToCompile(std::string name);
+void addModuleToCompile(std::string name, bool isMainMod=false);
 
 }
 
