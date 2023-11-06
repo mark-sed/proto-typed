@@ -14,3 +14,7 @@ sv = modules2::sval
 print(sv)
 v = modules2::mval
 print(v++"\n")
+
+modules2::value = -99
+v = modules2::value
+print(v++"\n")

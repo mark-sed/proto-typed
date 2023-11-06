@@ -359,6 +359,79 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
     }
 }
 
+void cg::CGFunction::writeExtVar(CGModule *mod, ir::IR *decl, llvm::Value *val) {
+    LOGMAX("Write external var: "+decl->debug());
+    if(auto *v = llvm::dyn_cast<ir::VarDecl>(decl)) {
+        if(v->getEnclosingIR() == mod->getModuleDecl()) {
+            if(!mod) {
+                llvm::report_fatal_error("External value is from unparsed module");
+            }
+            // Check if already declared
+            auto extVar = cgm.getLLVMMod()->getNamedGlobal(mangleName(decl));
+            if(!extVar) {
+                extVar = new llvm::GlobalVariable(*cgm.getLLVMMod(),
+                                                mapType(v),
+                                                false,
+                                                llvm::GlobalValue::ExternalLinkage,
+                                                nullptr,
+                                                mangleName(decl));
+            }
+
+            if(v->getType()->isMaybe() && !llvm::isa<llvm::ConstantPointerNull>(val) && !llvm::isa<llvm::PointerType>(val->getType())) {
+                llvm::BasicBlock *allocBB = llvm::BasicBlock::Create(ctx, "maybe.alloc", llvmFun);
+                llvm::BasicBlock *assignBB = llvm::BasicBlock::Create(ctx, "maybe.assign", llvmFun);
+                
+                auto ptrVal = builder.CreateLoad(mapType(v->getType()), extVar);
+                auto isNone = builder.CreateICmpEQ(ptrVal, llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(mapType(v->getType()))));
+                builder.CreateCondBr(isNone, allocBB, assignBB);
+
+                setCurrBB(allocBB);
+                auto mallocF = cgm.getLLVMMod()->getOrInsertFunction("malloc",
+                                 llvm::FunctionType::get(
+                                    builder.getInt8Ty()->getPointerTo(),
+                                    builder.getInt64Ty(),
+                                    false
+                                 ));
+                auto sizeofV = builder.CreateGEP(val->getType()->getPointerTo(), 
+                                llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(val->getType()->getPointerTo())),
+                                llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
+                auto size = builder.CreatePtrToInt(sizeofV, builder.getInt64Ty());
+                auto mem = builder.CreateCall(mallocF, size);
+                builder.CreateStore(mem, extVar);
+
+                builder.CreateBr(assignBB);
+                setCurrBB(assignBB);
+
+                auto ptrValNew = builder.CreateLoad(mapType(v->getType()), extVar);
+                builder.CreateStore(val, ptrValNew);
+            }
+            else {
+                // Check if any to bitcast
+                if(val->getType() == builder.getInt8Ty()) {
+                    if(auto li = llvm::dyn_cast<llvm::LoadInst>(val)) {
+                        auto emEx = li->getOperand(0);
+                        auto casted = builder.CreateBitCast(emEx, mapType(decl)->getPointerTo());
+                        auto loaded = builder.CreateLoad(mapType(decl), casted);
+                        builder.CreateStore(loaded, extVar);
+                    }
+                    else {
+                        llvm::report_fatal_error("Cannot cast any type for global value");
+                    }
+                }
+                else {
+                    builder.CreateStore(val, extVar);
+                }
+            }
+        }
+        else {
+            llvm::report_fatal_error("Cannot write into local external variable");
+        }
+    }
+    else {
+        llvm::report_fatal_error("Only external variable can be written to");
+    }
+}
+
 llvm::Value *cg::CGModule::readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe) {
     /*if(auto *v = llvm::dyn_cast<ir::VarDecl>(decl)) {
         if(v->getEnclosingIR()->getKind() == ir::IRKind::IR_MODULE_DECL) {
@@ -465,12 +538,15 @@ llvm::Value *cg::CGFunction::readExtVar(cg::CGModule *mod, ir::IR *decl, bool as
             if(!mod) {
                 llvm::report_fatal_error("External value is from unparsed module");
             }
-            auto vPtr = new llvm::GlobalVariable(*cgm.getLLVMMod(),
+            auto vPtr = cgm.getLLVMMod()->getNamedGlobal(mangleName(decl));
+            if(!vPtr) {
+                vPtr = new llvm::GlobalVariable(*cgm.getLLVMMod(),
                                                 mapType(v),
                                                 false,
                                                 llvm::GlobalValue::ExternalLinkage,
                                                 nullptr,
                                                 mangleName(decl));
+            }
             if(v->getType()->isMaybe() && !asMaybe) {
                 auto ptrV = builder.CreateLoad(mapType(v), vPtr);
                 return builder.CreateLoad(mapType(v)->getPointerElementType(), ptrV);
@@ -761,6 +837,18 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         }
         else if(auto *var = llvm::dyn_cast<ir::BinaryInfixExpr>(e->getLeft())) {
             emitMemberAssignment(var, right);
+        }
+        else if(auto *val = llvm::dyn_cast<ir::ExternalSymbolAccess>(e->getLeft())) {
+            if(auto *varDecl = llvm::dyn_cast<ir::VarDecl>(val->getExtIR())) {
+                if(e->getLeft()->getType()->isMaybe() && e->getRight()->getType()->isMaybe()) {
+                    if(auto r = llvm::dyn_cast<llvm::LoadInst>(right))
+                        right = r->getOperand(0);
+                }
+                writeExtVar(val->getModDecl()->getCGModule(), varDecl, right);
+            }
+            else {
+                llvm::report_fatal_error("Unimplemented external IR type in assignment");
+            }
         }
         else {
             llvm::report_fatal_error("Left hand side of an assignment is not assignable");

@@ -248,6 +248,7 @@ private:
     llvm::Function *createFunction(ir::FunctionDecl *fun, llvm::FunctionType *funType);
 protected:
     virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) override;
+    void writeExtVar(CGModule *mod, ir::IR *decl, llvm::Value *val);
     virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe=false) override;
     llvm::Value *readExtVar(CGModule *mod, ir::IR *decl, bool asMaybe=false);
 
