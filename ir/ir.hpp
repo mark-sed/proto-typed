@@ -796,11 +796,11 @@ public:
     }
     std::string debug() const override {
         if(unresolved)
-            return "(unresolved)"+unresF->getName()+"(...)";
+            return "(unresolved)"+unresF->getName()+"("+block2List(params)+")";
         if(external)
-            return "(external)"+extF->debug()+"(...)";
+            return "(external)"+extF->debug()+"("+block2List(params)+")";
         
-        return "("+fun->getReturnType()->getName()+")"+fun->getName()+"(...)";
+        return "("+fun->getReturnType()->getName()+")"+fun->getName()+"("+block2List(params)+")";
     }
 };
 

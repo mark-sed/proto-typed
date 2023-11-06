@@ -874,6 +874,34 @@ std::vector<ir::IR *> Scanner::parseAddStructElement(ir::IR *elem, std::vector<i
     return body;
 }
 
+static bool isUnknownType(ir::Expr *e) {
+    if(llvm::isa<ir::UnresolvedSymbolAccess>(e) || llvm::isa<ir::ExternalSymbolAccess>(e)) {
+        return true;
+    }
+
+    else if(auto s = llvm::dyn_cast<ir::FunctionCall>(e)) {
+        return s->isUnresolved() || s->isExternal();
+    }
+    else if(auto s = llvm::dyn_cast<ir::BinaryInfixExpr>(e)) {
+        return isUnknownType(s->getLeft()) || isUnknownType(s->getRight());
+    }
+    else if(auto s = llvm::dyn_cast<ir::UnaryPrefixExpr>(e)) {
+        return isUnknownType(s->getExpr());
+    }
+    else if(auto s = llvm::dyn_cast<ir::MatrixLiteral>(e)) {
+        for(auto a : s->getValue()) {
+            if(isUnknownType(a)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    else if(auto s = llvm::dyn_cast<ir::Range>(e)) {
+        return isUnknownType(s->getStart()) || isUnknownType(s->getStep()) || isUnknownType(s->getEnd());
+    }
+    return false;
+}
+
 ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
     if(!fun) {
         LOG1("Function call called with nullptr function");
@@ -884,6 +912,13 @@ ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
     auto var = llvm::dyn_cast<ir::VarAccess>(fun);
     if(var) {
         if(auto f = llvm::dyn_cast<ir::FunctionDecl>(var->getVar())) {
+            for(auto p: params) {
+                if(isUnknownType(p)) {
+                    LOGMAX("Unresolved or external parameter in a function call, returning as unresolved");
+                    return new ir::FunctionCall(new ir::UnresolvedSymbolAccess(f->getOGName(), fun->getType()), params);
+                }
+            }
+
             // The function chosen in parseVar could have different parameters
             std::string properName = encodeFunction(f->getOGName(), params);
             auto propFIR = currScope->lookup(properName);

@@ -18,6 +18,9 @@ using namespace ptc;
 
 void UnresolvedSymbolResolver::resolve(ir::Expr * expr, llvm::SMLoc loc) {
     if(auto e = llvm::dyn_cast<ir::FunctionCall>(expr)) {
+        for(auto a : e->getParams()) {
+            resolve(a, loc);
+        }
         if(e->isUnresolved()) {
             LOGMAX("Resolving function "+e->getUnresolvedFun()->getName());
             auto name = e->getUnresolvedFun()->getName();
@@ -28,6 +31,15 @@ void UnresolvedSymbolResolver::resolve(ir::Expr * expr, llvm::SMLoc loc) {
             else {
                 std::string properName = encodeFunction(name, e->getParams());
                 auto propFIR = globalScope->lookup(properName);
+                if(!propFIR) {
+                    // Lib functions
+                    // first try adding the arguments to the name
+                    std::string appendix = "";
+                    for(auto p: e->getParams()) {
+                        appendix+="_"+p->getType()->getName();
+                    }
+                    propFIR = globalScope->lookup(e->getUnresolvedFun()->getName()+appendix);
+                }
                 if(!propFIR) {
                     diags.report(loc, diag::ERR_INCORRECT_ARGS, name);
                 }
@@ -195,6 +207,9 @@ void ExternalSymbolResolver::resolve(ir::Expr *expr, llvm::SMLoc loc) {
         }
     }
     else if(auto e = llvm::dyn_cast<ir::FunctionCall>(expr)) {
+        for(auto a : e->getParams()) {
+            resolve(a, loc);
+        }
         if(e->isExternal()) {
             auto name = e->getExternalFun()->getSymbolName();
             LOGMAX("Resolving external function "+name);
