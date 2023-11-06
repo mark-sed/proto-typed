@@ -43,9 +43,9 @@ static const char *head = "Proto-typed compiler";
 
 std::vector<ptc::ModuleInfo *> ptc::modulesToCompile;
 
-ModuleInfo::ModuleInfo(std::string name, bool pathSent) : parsed(false) {
+ModuleInfo::ModuleInfo(std::string name, bool pathSent) : parsed(false), mainMod(false) {
     // Find module file
-    // TODO: Search or possible paths
+    // TODO: Search for possible paths
     if(pathSent) {
         path = name;
         this->name = std::filesystem::path(path).stem();
@@ -59,13 +59,15 @@ ModuleInfo::ModuleInfo(std::string name, bool pathSent) : parsed(false) {
     LOGMAX("Added module for parsing - name: "+name+", path: "+path);
 }
 
-void ptc::addModuleToCompile(std::string name) {
+void ptc::addModuleToCompile(std::string name, bool isMainMod) {
     for(auto p : modulesToCompile) {
         if(p->getName() == name) {
             return;
         }
     }
-    modulesToCompile.push_back(new ModuleInfo(name));
+    auto m = new ModuleInfo(name);
+    m->setMainMod(isMainMod);
+    modulesToCompile.push_back(m);
 }
 
 void printVersion(llvm::raw_ostream &OS) {
@@ -219,7 +221,9 @@ int main(int argc, char *argv[]) {
     bool parsingMain = true;
     if(inputFiles.size() > 0) {
         // TOOD: Disallow multiple files here
-        modulesToCompile.push_back(new ModuleInfo(*inputFiles.begin(), true));
+        auto m = new ModuleInfo(*inputFiles.begin(), true);
+        m->setMainMod(true);
+        modulesToCompile.push_back(m);
     }
 
     llvm::SourceMgr srcMgr;
@@ -291,8 +295,9 @@ int main(int argc, char *argv[]) {
         LOG1("Skipping resolver because of found errors");
     }
 
-    // Codegen
-    for(auto mi: modulesToCompile) {
+    // Codegen (generate in reverse order of imports)
+    for(auto mii = modulesToCompile.rbegin(); mii != modulesToCompile.rend(); ++mii) {
+        auto mi = *mii;
         const auto &fileName = mi->getPath();
         // Code generation
         llvm::TargetMachine *target = createTargetMachine(ptcName);
@@ -305,7 +310,9 @@ int main(int argc, char *argv[]) {
             // Code generation
             llvm::LLVMContext ctx;
             if(cg::CodeGenHandler *CGHandle = cg::CodeGenHandler::create(ctx, target)) {
-                std::unique_ptr<llvm::Module> mainMod = CGHandle->run(mi->getScanner()->mainModule, fileName);
+                LOGMAX("Setting cgmodule for "+fileName);
+                std::unique_ptr<llvm::Module> mainMod = CGHandle->run(mi->getScanner()->mainModule, fileName, mi->isMainMod());
+                mi->getModule()->setCGModule(CGHandle->cgm);
                 if(!emit(ptcName, mainMod.get(), target, fileName)) {
                     llvm::WithColor::error(llvm::errs(), ptcName) << "error writing output\n";
                 }
