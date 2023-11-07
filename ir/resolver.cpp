@@ -309,6 +309,15 @@ void ExternalSymbolResolver::resolve(ir::Expr *expr, llvm::SMLoc loc) {
                 std::string properName = encodeFunction(name, e->getParams());
                 auto propFIR = symbMod->getScanner()->globalScope->lookup(properName);
                 if(!propFIR) {
+                    // Lib functions
+                    // first try adding the arguments to the name
+                    std::string appendix = "";
+                    for(auto p: e->getParams()) {
+                        appendix+="_"+p->getType()->getName();
+                    }
+                    propFIR = symbMod->getScanner()->globalScope->lookup(e->getExternalFun()->getSymbolName()+appendix);
+                }
+                if(!propFIR) {
                     diags.report(loc, diag::ERR_INCORRECT_ARGS, name);
                 }
                 else {

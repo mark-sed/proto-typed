@@ -369,6 +369,7 @@ public:
     TypeDecl *getReturnType() { return returnType; }
     std::vector<FormalParamDecl *> getParams() { return params; }
     std::vector<ir::IR *> getDecl() { return decls; }
+    void setDecl(std::vector<ir::IR *> d) { decls = d; }
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_FUNCTION_DECL;
     }

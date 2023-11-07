@@ -22,3 +22,5 @@ modules2::T t
 print(t.a++"\n")
 t.a = 0
 print(t.a++"\n")
+
+modules2::_entry()

@@ -10,6 +10,7 @@
 #include "codegen.hpp"
 #include "logging.hpp"
 #include "utils.hpp"
+#include "scanner.hpp"
 #include "ir.hpp"
 #include "llvm/ADT/StringExtras.h"
 #include "llvm/IR/CFG.h"
@@ -1635,7 +1636,7 @@ void cg::CGFunction::emitStmt(ir::ForeachStmt *stmt) {
 }
 
 void cg::CGFunction::emitStmt(ir::ReturnStmt *stmt) {
-    if(fun->getName() == "_entry") {
+    if(fun->getName() == _ENTRY_NAME) {
         llvm::report_fatal_error("return can appear only inside of a function");
     }
     if(stmt->getValue()) {
@@ -1999,7 +2000,7 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
             auto *fun = llvm::dyn_cast<ir::FunctionDecl>(decl);
             // This also creates forward declaration
             CGFunction *cgf = new CGFunction(*this, fun);
-            if(fun->getName() == "_entry") {
+            if(fun->getName() == _ENTRY_NAME) {
                 entryFun = fun;
             }
             funs.push_back(cgf);

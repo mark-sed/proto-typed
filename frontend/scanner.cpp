@@ -84,6 +84,19 @@ void Scanner::init() {
     currScope->insert(noneType);
     currScope->insert(varargsType);
 
+     {
+        auto entryParams = std::vector<ir::FormalParamDecl *>{};
+        auto entryBody = std::vector<ir::IR *> {};
+        auto entryFun = new ir::FunctionDecl(currentIR,
+                                                llvm::SMLoc(),
+                                                _ENTRY_NAME,
+                                                _ENTRY_NAME,
+                                                this->voidType,
+                                                entryParams,
+                                                entryBody);
+        currScope->insert(entryFun);
+    }
+
     {
         auto printParams = std::vector<ir::FormalParamDecl *>{
             new ir::FormalParamDecl(currentIR, llvmloc, "v", this->stringType, false)
@@ -1078,9 +1091,13 @@ void Scanner::parseEntry(std::vector<ir::IR *> body) {
     LOGMAX("Parsing entry");
     std::vector<ir::IR *> entryBody;
     for(auto i: body) {
-        if(llvm::isa<ir::VarDecl>(i) ||
-            llvm::isa<ir::TypeDecl>(i) ||
-            llvm::isa<ir::FunctionDecl>(i) ||
+        if(auto f = llvm::dyn_cast<ir::FunctionDecl>(i)) {
+            if(f->getName() == _ENTRY_NAME) {
+                continue;
+            }
+            this->decls.push_back(f);
+        }
+        else if(llvm::isa<ir::VarDecl>(i) ||
             llvm::isa<ir::TypeDecl>(i) ||
             llvm::isa<ir::StructDecl>(i) ||
             llvm::isa<ir::Import>(i)) {
@@ -1090,11 +1107,12 @@ void Scanner::parseEntry(std::vector<ir::IR *> body) {
             entryBody.push_back(i);
         }
     }
+    
     std::vector<ir::FormalParamDecl *> params{};
     this->decls.push_back(new ir::FunctionDecl(mainModule,
                                                 llvmloc,
-                                                "_entry",
-                                                "_entry",
+                                                _ENTRY_NAME,
+                                                _ENTRY_NAME,
                                                 voidType,
                                                 params,
                                                 entryBody));

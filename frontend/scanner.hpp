@@ -12,6 +12,8 @@
 #ifndef _SCANNER_HPP_
 #define _SCANNER_HPP_
 
+#define _ENTRY_NAME "_entry"
+
 // Flex include has to be guarded
 #if ! defined(yyFlexLexerOnce)
 #include "FlexLexer.h"

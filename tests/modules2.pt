@@ -8,4 +8,4 @@ struct T {
     int a = 10
 }
 
-print("This should not be printed!\n");
+print("In _entry\n");
