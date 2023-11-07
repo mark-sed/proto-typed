@@ -459,6 +459,9 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
                 else if(tl->getName() == ANY_CSTR || tr->getName() == ANY_CSTR) {
                     type = tl;
                 }
+                else if(tr->isUnresolved()) {
+                    type = tl;
+                }
                 else {
                     diags.report(llvmloc, diag::ERR_INVALID_CONVERSION, tr->getName(), tl->getName());
                 }
@@ -608,7 +611,9 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
                 // TODO: this can be also an expr (nested access) or a function call
                 // TODO: Allow also structLiteral?
                 // Split access into var assignments
-                diags.report(llvmloc, diag::ERR_TYPE_NOT_STRUCT, struType->getName());
+                if(!struType->isUnresolved()) {
+                    diags.report(llvmloc, diag::ERR_TYPE_NOT_STRUCT, struType->getName());
+                }
             }
         }
         break;
@@ -673,6 +678,15 @@ void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT) {
                                             body);
     globalScope->insert(funLength);
     mainModule->addLibFunction(funLength);
+}
+
+ir::IR *Scanner::parseExtType(std::string name, bool isMaybe) {
+    LOGMAX("Parsing external type");
+    auto t = new ir::TypeDecl(currentIR, llvmloc, name);
+    t->setMaybe(isMaybe);
+    t->setUnresolved(true);
+    t->setExternalIR(llvm::dyn_cast<ir::ExternalSymbolAccess>(parseVar(name, true)));
+    return t;
 }
 
 ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &matsize, bool isMaybe) {

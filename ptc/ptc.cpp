@@ -259,15 +259,17 @@ int main(int argc, char *argv[]) {
 
     if(diags.getNumErrors() == 0) {
         // Externals
-        for(auto mi: modulesToCompile) {
+        for(auto mii = modulesToCompile.rbegin(); mii != modulesToCompile.rend(); ++mii) {
+            auto mi = *mii;
             const auto &fileName = mi->getPath();
             LOG1("Running external symbols resolver on "+fileName);
-            auto externalResolver = new ExternalSymbolResolver(mi, modulesToCompile, diags);
+            auto externalResolver = new ExternalSymbolResolver(mi, modulesToCompile, diags, mi->getScanner());
             externalResolver->run();
             delete externalResolver;
         }
         // Resolver
-        for(auto mi: modulesToCompile) {
+        for(auto mii = modulesToCompile.rbegin(); mii != modulesToCompile.rend(); ++mii) {
+            auto mi = *mii;
             const auto &fileName = mi->getPath();
             LOG1("Running resolver on "+fileName);
             auto unresolvedResolver = new UnresolvedSymbolResolver(mi->getScanner()->mainModule, mi->getScanner()->globalScope, diags, mi->getScanner());

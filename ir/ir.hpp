@@ -153,6 +153,7 @@ std::string block2String(std::vector<ir::IR *> block);
 
 class Expr;
 class FormalParamDecl;
+class ExternalSymbolAccess;
 
 // TODO: Dont be lazy and template this
 std::string block2List(std::vector<ir::Expr *> block);
@@ -168,17 +169,23 @@ private:
     IR *decl;
     std::vector<Expr *> matrixSize;
     bool maybe;
+    bool unresolved;
+    ExternalSymbolAccess *externalIR;
 public:
     TypeDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name, IR *decl=nullptr)
             : IR(IRKind::IR_TYPE_DECL, enclosing_ir, loc, name),
               decl(decl),
               matrixSize{},
-              maybe(false) {}
+              maybe(false),
+              unresolved(false),
+              externalIR(nullptr) {}
     TypeDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name, std::vector<Expr *> matsize, IR *decl=nullptr)
             : IR(IRKind::IR_TYPE_DECL, enclosing_ir, loc, name),
               decl(decl),
               matrixSize(matsize),
-              maybe(false) {}
+              maybe(false),
+              unresolved(false),
+              externalIR(nullptr) {}
 
     TypeDecl *clone() {
         return new TypeDecl(*this);
@@ -196,15 +203,22 @@ public:
     bool isMatrix() { return !matrixSize.empty(); }
     bool isMaybe() { return maybe; }
     void setMaybe(bool m) { maybe = m; }
+    ExternalSymbolAccess *getExternalIR() { return externalIR; }
+    void setExternalIR(ExternalSymbolAccess *e) { externalIR = e; }
     std::vector<Expr *> getMatrixSize() { return matrixSize; }
     IR *getDecl() { return decl; }
+    bool isUnresolved() { return unresolved; }
+    void setUnresolved(bool r) { unresolved = r; }
     std::string debug() const override {
-        std::string n;
+        std::string n = "";
+        if(unresolved) {
+            n += "(unresolved type)";
+        }
         if(!matrixSize.empty()) {
-            n = name + "<" + block2List(matrixSize) + ">";
+            n += name + "<" + block2List(matrixSize) + ">";
         }
         else {
-            n = name;
+            n += name;
         }
         if(maybe) {
             n+="?";
@@ -227,6 +241,7 @@ public:
              initValue(initValue) {}
     
     TypeDecl *getType() { return td; }
+    void setType(TypeDecl *t) { this->td = t; }
     Expr *getInitValue() { return initValue; }
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_VAR_DECL;
@@ -674,7 +689,7 @@ public:
     static bool classof(const Expr *e) {
         return e->getKind() == ExprKind::EX_UNRESOLVED_SYMB;
     }
-    std::string debug() const override { return "(unresolved)"+symbolName; }
+    std::string debug() const override { return "(unresolved symbol)"+symbolName; }
 };
 
 /**
@@ -796,7 +811,7 @@ public:
     }
     std::string debug() const override {
         if(unresolved)
-            return "(unresolved)"+unresF->getName()+"("+block2List(params)+")";
+            return "(unresolved call)"+unresF->getName()+"("+block2List(params)+")";
         if(external)
             return "(external)"+extF->debug()+"("+block2List(params)+")";
         

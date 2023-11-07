@@ -150,6 +150,7 @@ public:
     ir::IR *parseBreak();
     ir::IR *parseContinue();
     ir::IR *parseImports(std::vector<std::string> names);
+    ir::IR *parseExtType(std::string name, bool isMaybe=false);
     ir::Expr *parseInt(long v);
     ir::Expr *parseFloat(double v);
     ir::Expr *parseBool(bool v);

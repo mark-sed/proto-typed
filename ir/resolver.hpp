@@ -36,12 +36,14 @@ private:
      * @param body list of statements 
      */
     void resolve(std::vector<ir::IR *> body);
+
+    void resolve(ir::IR *body);
     /**
      * Runs analysis on specific expression
      * @param expr Expression to resolve
      * @param loc Location information for expr
      */
-    void resolve(ir::Expr * expr, llvm::SMLoc loc);
+    void resolve(ir::Expr *expr, llvm::SMLoc loc);
 
 public:
     /**
@@ -64,14 +66,16 @@ private:
     ModuleInfo *currMod;
     std::vector<ModuleInfo *> allModules;
     Diagnostics &diags;
+    Scanner *scanner;
 
     void resolve(std::vector<ir::IR *> body);
+    void resolve(ir::IR *body);
     void resolve(ir::Expr *expr, llvm::SMLoc loc);
 
     ModuleInfo *getModule(std::string name);
 public:
-    ExternalSymbolResolver(ModuleInfo *currMod, std::vector<ModuleInfo *> allModules, Diagnostics &diags)
-        : currMod(currMod), allModules(allModules), diags(diags) {}
+    ExternalSymbolResolver(ModuleInfo *currMod, std::vector<ModuleInfo *> allModules, Diagnostics &diags, Scanner *scanner)
+        : currMod(currMod), allModules(allModules), diags(diags), scanner(scanner) {}
 
     void run();
 };

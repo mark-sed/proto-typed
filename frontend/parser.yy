@@ -814,6 +814,7 @@ type : KWINT KWMAYBE    { $$ = scanner->sym_lookup(INT_CSTR, true, true); }
      | KWSTRING KWMAYBE { $$ = scanner->sym_lookup(STRING_CSTR, true, true); }
      | KWBOOL KWMAYBE   { $$ = scanner->sym_lookup(BOOL_CSTR, true, true); }
      | ID KWMAYBE       { $$ = scanner->sym_lookup($1, true, true); }
+     | EXT_ID KWMAYBE   
      | funtype KWMAYBE  
      | mattype KWMAYBE  
      | KWINT            { $$ = scanner->sym_lookup(INT_CSTR, false, true); }
@@ -822,6 +823,7 @@ type : KWINT KWMAYBE    { $$ = scanner->sym_lookup(INT_CSTR, true, true); }
      | KWBOOL           { $$ = scanner->sym_lookup(BOOL_CSTR, false, true); }
      | KWANY            { $$ = scanner->sym_lookup(ANY_CSTR, false, true); }
      | ID               { $$ = scanner->sym_lookup($1, false, true); }
+     | EXT_ID           { $$ = scanner->parseExtType($1, false); }
      | funtype
      | mattype          { $$ = $1; }
      ;

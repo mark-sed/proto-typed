@@ -55,7 +55,17 @@ void UnresolvedSymbolResolver::resolve(ir::Expr * expr, llvm::SMLoc loc) {
     }
     else if(auto e = llvm::dyn_cast<ir::BinaryInfixExpr>(expr)) {
         resolve(e->getLeft(), loc);
-        resolve(e->getRight(), loc);
+        if(e->getOperator().getKind() == ir::OperatorKind::OP_ACCESS && llvm::isa<ir::UnresolvedSymbolAccess>(e->getRight())) {
+            // FIX: Type of e->getLeft()->getDecl() is somehow nullptr?!
+            // --> works: LOGMAX(e->getLeft()->getType()->getDecl()->debug());
+            auto newe = scanner->parseInfixExpr(e->getLeft(), e->getRight(), e->getOperator(), e->isConst());
+            expr->setType(newe->getType());
+            return;
+        }
+        else {
+            resolve(e->getRight(), loc);
+        }
+        
         // Unknown matrix type
         if(e->getOperator().getKind() == ir::OperatorKind::OP_ASSIGN &&
                 llvm::isa<ir::MatrixLiteral>(e->getRight()) &&
@@ -93,41 +103,48 @@ void UnresolvedSymbolResolver::resolve(ir::Expr * expr, llvm::SMLoc loc) {
             diags.report(loc, diag::ERR_UNDEFINED_VAR, e->getName());
         }
     }
+    else if(auto e = llvm::dyn_cast<ir::VarAccess>(expr)) {
+        resolve(e->getVar());
+    }
+}
+
+void UnresolvedSymbolResolver::resolve(ir::IR* i) {
+    // Statements to resolve further
+    if(auto *stmt = llvm::dyn_cast<ir::ReturnStmt>(i)) {
+        if(stmt->getValue())
+            resolve(stmt->getValue(), stmt->getLocation());
+    }
+    else if(auto *stmt = llvm::dyn_cast<ir::FunctionDecl>(i)) {
+        resolve(stmt->getDecl());
+    }
+    else if(auto *stmt = llvm::dyn_cast<ir::WhileStmt>(i)) {
+        resolve(stmt->getCond(), stmt->getLocation());
+        resolve(stmt->getBody());
+    }
+    else if(auto *stmt = llvm::dyn_cast<ir::ForeachStmt>(i)) {
+        resolve(stmt->getI(), stmt->getLocation());
+        resolve(stmt->getCollection(), stmt->getLocation());
+        resolve(stmt->getBody());
+    }
+    else if(auto *stmt = llvm::dyn_cast<ir::IfStatement>(i)) {
+        resolve(stmt->getCond(), stmt->getLocation());
+        resolve(stmt->getIfBranch());
+        resolve(stmt->getElseBranch());
+    }
+    else if(auto *stmt = llvm::dyn_cast<ir::ExprStmt>(i)) {
+        resolve(stmt->getExpr(), stmt->getLocation());   
+    }
+    else if(auto *stmt = llvm::dyn_cast<ir::VarDecl>(i)) {
+        if(stmt->getInitValue() && stmt->getInitValue()->getType()->getName() == UNKNOWN_CSTR) {
+            auto *e = stmt->getInitValue();
+            e->setType(stmt->getType());
+        }   
+    }
 }
 
 void UnresolvedSymbolResolver::resolve(std::vector<ir::IR *> body) {
     for(auto *i : body) {
-        // Statements to resolve further
-        if(auto *stmt = llvm::dyn_cast<ir::ReturnStmt>(i)) {
-            if(stmt->getValue())
-                resolve(stmt->getValue(), stmt->getLocation());
-        }
-        else if(auto *stmt = llvm::dyn_cast<ir::FunctionDecl>(i)) {
-            resolve(stmt->getDecl());
-        }
-        else if(auto *stmt = llvm::dyn_cast<ir::WhileStmt>(i)) {
-            resolve(stmt->getCond(), stmt->getLocation());
-            resolve(stmt->getBody());
-        }
-        else if(auto *stmt = llvm::dyn_cast<ir::ForeachStmt>(i)) {
-            resolve(stmt->getI(), stmt->getLocation());
-            resolve(stmt->getCollection(), stmt->getLocation());
-            resolve(stmt->getBody());
-        }
-        else if(auto *stmt = llvm::dyn_cast<ir::IfStatement>(i)) {
-            resolve(stmt->getCond(), stmt->getLocation());
-            resolve(stmt->getIfBranch());
-            resolve(stmt->getElseBranch());
-        }
-        else if(auto *stmt = llvm::dyn_cast<ir::ExprStmt>(i)) {
-            resolve(stmt->getExpr(), stmt->getLocation());   
-        }
-        else if(auto *stmt = llvm::dyn_cast<ir::VarDecl>(i)) {
-            if(stmt->getInitValue() && stmt->getInitValue()->getType()->getName() == UNKNOWN_CSTR) {
-                auto *e = stmt->getInitValue();
-                e->setType(stmt->getType());
-            }   
-        }
+        resolve(i);
     }
 }
 
@@ -136,40 +153,67 @@ void UnresolvedSymbolResolver::run() {
     resolve(decls);
 }
 
+void ExternalSymbolResolver::resolve(ir::IR *i) {
+    // Statements to resolve further
+    if(auto *stmt = llvm::dyn_cast<ir::ReturnStmt>(i)) {
+        if(stmt->getValue())
+            resolve(stmt->getValue(), stmt->getLocation());
+    }
+    else if(auto *stmt = llvm::dyn_cast<ir::FunctionDecl>(i)) {
+        resolve(stmt->getDecl());
+    }
+    else if(auto *stmt = llvm::dyn_cast<ir::WhileStmt>(i)) {
+        resolve(stmt->getCond(), stmt->getLocation());
+        resolve(stmt->getBody());
+    }
+    else if(auto *stmt = llvm::dyn_cast<ir::ForeachStmt>(i)) {
+        resolve(stmt->getI(), stmt->getLocation());
+        resolve(stmt->getCollection(), stmt->getLocation());
+        resolve(stmt->getBody());
+    }
+    else if(auto *stmt = llvm::dyn_cast<ir::IfStatement>(i)) {
+        resolve(stmt->getCond(), stmt->getLocation());
+        resolve(stmt->getIfBranch());
+        resolve(stmt->getElseBranch());
+    }
+    else if(auto *stmt = llvm::dyn_cast<ir::ExprStmt>(i)) {
+        auto e = stmt->getExpr();
+        resolve(e, stmt->getLocation());
+    }
+    else if(auto *stmt = llvm::dyn_cast<ir::VarDecl>(i)) {
+        auto stmtT = stmt->getType();
+        // Resolve type
+        if(stmtT->isUnresolved()) {
+            LOGMAX("Resolving external vardecl "+stmt->debug());
+            ModuleInfo *symbMod = getModule(stmtT->getExternalIR()->getModuleName());
+            if(!symbMod) {
+                diags.report(i->getLocation(), diag::ERR_UNKNOWN_MODULE, stmtT->getExternalIR()->getModuleName());
+            }
+
+            auto symb = symbMod->getScanner()->globalScope->lookup(stmtT->getExternalIR()->getSymbolName());
+            if(!symb) {
+                diags.report(i->getLocation(), diag::ERR_UNDEFINED_EXT_TYPE, stmtT->getExternalIR()->getSymbolName(), stmtT->getExternalIR()->getModuleName());
+            }
+
+            if(auto smt = llvm::dyn_cast<ir::TypeDecl>(symb)) {
+                stmt->setType(smt);
+                stmt->getType()->setUnresolved(false);
+            }
+            else {
+                diags.report(i->getLocation(), diag::ERR_NOT_A_TYPE, stmtT->getName());
+            }
+        } 
+
+        if(stmt->getInitValue() && stmt->getInitValue()->getType()->getName() == UNKNOWN_CSTR) {
+            auto *e = stmt->getInitValue();
+            e->setType(stmt->getType());
+        }   
+    }
+}
+
 void ExternalSymbolResolver::resolve(std::vector<ir::IR *> body) {
     for(auto *i: body) {
-        // Statements to resolve further
-        if(auto *stmt = llvm::dyn_cast<ir::ReturnStmt>(i)) {
-            if(stmt->getValue())
-                resolve(stmt->getValue(), stmt->getLocation());
-        }
-        else if(auto *stmt = llvm::dyn_cast<ir::FunctionDecl>(i)) {
-            resolve(stmt->getDecl());
-        }
-        else if(auto *stmt = llvm::dyn_cast<ir::WhileStmt>(i)) {
-            resolve(stmt->getCond(), stmt->getLocation());
-            resolve(stmt->getBody());
-        }
-        else if(auto *stmt = llvm::dyn_cast<ir::ForeachStmt>(i)) {
-            resolve(stmt->getI(), stmt->getLocation());
-            resolve(stmt->getCollection(), stmt->getLocation());
-            resolve(stmt->getBody());
-        }
-        else if(auto *stmt = llvm::dyn_cast<ir::IfStatement>(i)) {
-            resolve(stmt->getCond(), stmt->getLocation());
-            resolve(stmt->getIfBranch());
-            resolve(stmt->getElseBranch());
-        }
-        else if(auto *stmt = llvm::dyn_cast<ir::ExprStmt>(i)) {
-            auto e = stmt->getExpr();
-            resolve(e, stmt->getLocation());
-        }
-        else if(auto *stmt = llvm::dyn_cast<ir::VarDecl>(i)) {
-            if(stmt->getInitValue() && stmt->getInitValue()->getType()->getName() == UNKNOWN_CSTR) {
-                auto *e = stmt->getInitValue();
-                e->setType(stmt->getType());
-            }   
-        }
+        resolve(i);
     }
 }
 
@@ -184,6 +228,7 @@ ModuleInfo *ExternalSymbolResolver::getModule(std::string name) {
 
 void ExternalSymbolResolver::resolve(ir::Expr *expr, llvm::SMLoc loc) {
     if(auto e = llvm::dyn_cast<ir::ExternalSymbolAccess>(expr)) {
+        LOGMAX("Resolving external symbol "+e->debug());
         ModuleInfo *symbMod = getModule(e->getModuleName());
 
         if(!symbMod) {
@@ -239,6 +284,9 @@ void ExternalSymbolResolver::resolve(ir::Expr *expr, llvm::SMLoc loc) {
     else if(auto e = llvm::dyn_cast<ir::BinaryInfixExpr>(expr)) {
         resolve(e->getLeft(), loc);
         resolve(e->getRight(), loc);
+
+        auto newe = scanner->parseInfixExpr(e->getLeft(), e->getRight(), e->getOperator(), e->isConst());
+        expr->setType(newe->getType());
     }
     else if(auto e = llvm::dyn_cast<ir::UnaryPrefixExpr>(expr)) {
         resolve(e->getExpr(), loc);
@@ -252,6 +300,35 @@ void ExternalSymbolResolver::resolve(ir::Expr *expr, llvm::SMLoc loc) {
         resolve(e->getStart(), loc);
         resolve(e->getStep(), loc);
         resolve(e->getEnd(), loc);
+    }
+    else if(auto e = llvm::dyn_cast<ir::VarAccess>(expr)) {
+        if(auto stmt = llvm::dyn_cast<ir::VarDecl>(e->getVar())) {
+            auto stmtT = stmt->getType();
+            if(stmtT->isUnresolved()) {
+                LOGMAX("Resolving external VarAccess "+e->debug());
+                ModuleInfo *symbMod = getModule(stmtT->getExternalIR()->getModuleName());
+                if(!symbMod) {
+                    diags.report(loc, diag::ERR_UNKNOWN_MODULE, stmtT->getExternalIR()->getModuleName());
+                }
+
+                auto symb = symbMod->getScanner()->globalScope->lookup(stmtT->getExternalIR()->getSymbolName());
+                if(!symb) {
+                    diags.report(loc, diag::ERR_UNDEFINED_EXT_TYPE, stmtT->getExternalIR()->getSymbolName(), stmtT->getExternalIR()->getModuleName());
+                }
+
+                if(auto smt = llvm::dyn_cast<ir::TypeDecl>(symb)) {
+                    stmt->setType(smt);
+                }
+                else {
+                    diags.report(loc, diag::ERR_NOT_A_TYPE, stmtT->getName());
+                }
+            }
+            else if(e->getType()->isUnresolved()) {
+                LOGMAX("Resolving varaccess type "+e->debug());
+                e->setType(stmt->getType());
+                e->getType()->setUnresolved(false);
+            }
+        }
     }
 }
 
