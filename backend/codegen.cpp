@@ -2116,9 +2116,6 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
         builder.CreateStore(mem, d);
     }
 
-    auto entryFunLLVM = llvmMod->getFunction(mangleName(entryFun));
-    std::vector<llvm::Value *> args{};
-    builder.CreateCall(entryFunLLVM, args);
     builder.CreateRetVoid();
 
     // Insert _main
@@ -2137,6 +2134,9 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
         setCurrBB(bb);
 
         builder.CreateCall(init);
+        auto entryFunLLVM = llvmMod->getFunction(mangleName(entryFun));
+        std::vector<llvm::Value *> args{};
+        builder.CreateCall(entryFunLLVM, args);
 
         builder.CreateRet(llvm::ConstantInt::get(builder.getInt32Ty(), 0));
     }
