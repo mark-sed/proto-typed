@@ -462,6 +462,9 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
                 else if(tr->isUnresolved()) {
                     type = tl;
                 }
+                else if(tl->isUnresolved()) {
+                    type = tr;
+                }
                 else {
                     diags.report(llvmloc, diag::ERR_INVALID_CONVERSION, tr->getName(), tl->getName());
                 }

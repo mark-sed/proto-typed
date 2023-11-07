@@ -1016,6 +1016,7 @@ public:
     void setLibFunctions(std::unordered_set<FunctionDecl *> fs) { libFunctions = fs; }
     std::unordered_set<FunctionDecl *> getLibFunctions() { return libFunctions; }
     void addLibFunction(FunctionDecl *f) { libFunctions.insert(f); }
+    void prependDecl(IR *d) { decls.insert(decls.begin(), d); }
 
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_MODULE_DECL;

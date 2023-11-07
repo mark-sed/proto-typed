@@ -196,7 +196,7 @@ true
 
 function test_modules {
     expect_pass "modules.pt" "modules2.o" "modules"
-    expect_out_eq "42\ntrue\n0.2\nhi\n2\n-99\n"
+    expect_out_eq "42\ntrue\n0.2\nhi\n2\n-99\n10\n0\n"
 }
 
 # Expect fail tests

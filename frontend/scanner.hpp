@@ -119,6 +119,14 @@ public:
      */
     void fatal_error(diag::diagmsg d, std::string msg);
 
+    void prependDecl(ir::IR *d) {
+        LOGMAX("Prepending IR: "+d->debug());
+        LOGMAX(mainModule->debug());
+        mainModule->prependDecl(d);
+        LOGMAX("-------");
+        LOGMAX(mainModule->debug());
+    }
+
     /**
      * Looks up a symbol in the current scope
      * @param name Symbol to lookup

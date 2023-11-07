@@ -17,3 +17,8 @@ print(v++"\n")
 
 modules2::value = -99
 print(modules2::value++"\n")
+
+modules2::T t
+print(t.a++"\n")
+t.a = 0
+print(t.a++"\n")

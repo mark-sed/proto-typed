@@ -58,8 +58,47 @@ void UnresolvedSymbolResolver::resolve(ir::Expr * expr, llvm::SMLoc loc) {
         if(e->getOperator().getKind() == ir::OperatorKind::OP_ACCESS && llvm::isa<ir::UnresolvedSymbolAccess>(e->getRight())) {
             // FIX: Type of e->getLeft()->getDecl() is somehow nullptr?!
             // --> works: LOGMAX(e->getLeft()->getType()->getDecl()->debug());
-            auto newe = scanner->parseInfixExpr(e->getLeft(), e->getRight(), e->getOperator(), e->isConst());
-            expr->setType(newe->getType());
+
+            auto elem = llvm::dyn_cast<ir::UnresolvedSymbolAccess>(e->getRight());
+            auto struDecl = llvm::dyn_cast<ir::StructDecl>(e->getLeft()->getType()->getDecl());
+            if(struDecl) {
+                // Check if the element is present in the struct
+                ir::IR *found = nullptr;
+                int index = 0;
+                for(index = 0; static_cast<size_t>(index) < struDecl->getElements().size(); ++index) {
+                    if(struDecl->getElements()[index]->getName() == elem->getName()) {
+                        found = struDecl->getElements()[index];
+                        break;
+                    }
+                }
+                if(found) {
+                    if(auto fvar = llvm::dyn_cast<ir::VarDecl>(found)) {
+                        e->setType(fvar->getType());
+                        //auto oldR = r;
+                        e->setRight(new ir::MemberAccess(found, index, fvar->getType()));
+                        this->scanner->prependDecl(struDecl);
+                        // FIXME: delete oldR
+                        //delete oldR;
+                        return;
+                    }
+                    else if(auto fvar = llvm::dyn_cast<ir::StructDecl>(found)) {
+                        //TODO: Handle and set r correctly
+                        (void)fvar;
+                        diags.report(loc, diag::ERR_INTERNAL, "NOT YET IMPLEMENTED Structs inside of structs access");
+                    }
+                    else {
+                        diags.report(loc, diag::ERR_INTERNAL, "unknown element type in a struct");
+                    }
+                }
+                else {
+                    diags.report(loc, diag::ERR_HAS_NO_MEMBER, "struct "+struDecl->getName(), elem->getName());
+                }
+            }
+            else {
+                diags.report(loc, diag::ERR_TYPE_NOT_STRUCT, e->getLeft()->getType()->getName());
+            }
+
+
             return;
         }
         else {
