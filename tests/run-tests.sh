@@ -199,6 +199,11 @@ function test_modules {
     expect_out_eq "42\ntrue\n0.2\nhi\n2\n-99\n10\n0\nIn _entry\n"
 }
 
+function test_empty {
+    expect_pass "empty.pt" empty
+    expect_out_eq ""
+}
+
 # Expect fail tests
 
 function test_missing_return {
@@ -213,6 +218,7 @@ function run_all_tests {
     run_test any
     run_test structs
     run_test modules
+    run_test empty
 
     # Expect fail tests
     run_test missing_return

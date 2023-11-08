@@ -228,7 +228,7 @@
 %%
 
 // Start
-start : END_FILE
+start : END_FILE        { scanner->parseEntry(std::vector<ptc::ir::IR *>{}); }
       | stmt END_FILE   { scanner->parseEntry($1); }
       ;
 stmt : stmts            { $$ = scanner->parseStmtBody($1); }
