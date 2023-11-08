@@ -782,6 +782,8 @@ expr_bool : BOOL { $$ = $1; }
 // Function signature (as a type)
 funtype : type LPAR typelist RPAR
         | type LPAR RPAR
+        | KWVOID LPAR typelist RPAR
+        | KWVOID LPAR RPAR
         ;
 typelist : type
          | type COMMA typelist
@@ -793,7 +795,7 @@ mattype : ID matsq               { $$ = scanner->parseMatrixType($1, $2); }
         | KWFLOAT matsq          { $$ = scanner->parseMatrixType(FLOAT_CSTR, $2); }
         | KWSTRING matsq         { $$ = scanner->parseMatrixType(STRING_CSTR, $2); }
         | KWBOOL matsq           { $$ = scanner->parseMatrixType(BOOL_CSTR, $2); }
-        | KWANY matsq
+        | KWANY matsq            { $$ = scanner->parseMatrixType(ANY_CSTR, $2); }
         | funtype matsq
         | ID KWMAYBE matsq
         | KWINT KWMAYBE matsq
