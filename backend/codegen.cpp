@@ -1991,6 +1991,11 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                 globals[var] = vPtr;
             }
             else {
+                if(var->getType()->isMaybe()) {
+                    // Maybe (pointer) has to be always set to null for the check
+                    auto ptt = llvm::dyn_cast<llvm::PointerType>(mapType(var->getType()));
+                    v->setInitializer(llvm::ConstantPointerNull::get(ptt));
+                }
                 globals[var] = v;
             }
         }
