@@ -40,7 +40,7 @@ print(c++"\n") //8
 
 call_mint_test() //9
 
-int? x2
+int? x2 = none
 x2 = 4
 int? y2
 y2 = x2
@@ -54,7 +54,7 @@ print(c2++"\n") // 42
 
 mstring_test() // there\ngeneral\n
 
-int? x3
+int? x3 = none
 mint_test3(x3)
 int c3
 c3 = x3

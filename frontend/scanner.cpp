@@ -316,6 +316,9 @@ ir::IR *Scanner::parseVarDecl(ir::IR *type, const std::string name, ir::Expr *va
     LOGMAX(type->getName()+" "+name);
     ir::TypeDecl *t = llvm::dyn_cast<ir::TypeDecl>(type);
     if(t) {
+        if(value && type->getName() != value->getType()->getName()) {
+            diags.report(type->getLocation(), diag::ERR_INCORRECT_ASSIGNMENT, value->getType()->getName(), type->getName());
+        }
         auto v = new ir::VarDecl(currentIR, type->getLocation(), name, t, value);
         if(currScope->insert(v)) {
             //this->decls.push_back(v);
@@ -479,7 +482,7 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
                     type = tr;
                 }
                 else {
-                    diags.report(llvmloc, diag::ERR_INVALID_CONVERSION, tr->getName(), tl->getName());
+                    diags.report(llvmloc, diag::ERR_INCORRECT_ASSIGNMENT, tr->getName(), tl->getName());
                 }
             }
         break;
