@@ -1083,7 +1083,11 @@ ir::IR *Scanner::parseFun(ir::IR *type, std::string name, std::vector<ir::Formal
     LOGMAX("Parsing a function "+name);
     auto ctype = llvm::dyn_cast<ir::TypeDecl>(type);
     auto f = llvm::dyn_cast<ir::FunctionDecl>(currentIR);
-    f->resolveFunction(llvmloc, encodeFunction(name, params), name, ctype, params, body);
+    std::string encname = encodeFunction(name, params);
+    if(sym_lookup(encname)) {
+        diags.report(llvmloc, diag::ERR_FUNCTION_REDEFINITION, name);
+    }
+    f->resolveFunction(llvmloc, encname, name, ctype, params, body);
     leaveScope();
     currScope->insert(f);
 
