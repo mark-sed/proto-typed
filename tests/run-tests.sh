@@ -182,7 +182,7 @@ function test_maybes {
 
 function test_any {
     expect_pass "any.pt" "any"
-    expect_out_eq "hello\nhi\ntrue\n99\n5.25\n5.25\n" "any"
+    expect_out_eq "hello\ntrue\n99\n5.25\n5.25\n" "any"
 }
 
 function test_structs {

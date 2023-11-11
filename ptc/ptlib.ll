@@ -33,9 +33,16 @@ define fastcc void @string_Create_Default(%string* %this) nounwind {
 	ret void
 }
 
-declare i8* @malloc(i32)
-declare void @free(i8*)
+;declare i8* @malloc(i32)
+declare i8* @GC_malloc(i64)
+declare void @GC_free(i8*)
 declare i8* @memcpy(i8*, i8*, i32)
+
+define i8* @gc_Alloc(i32 %size) {
+	%size64 = sext i32 %size to i64
+	%buff = call i8* @GC_malloc(i64 %size64)
+	ret i8* %buff
+}
 
 define fastcc void @string_Delete(%string* %this) nounwind {
 	; Check if we need to call 'free'.
@@ -45,7 +52,7 @@ define fastcc void @string_Delete(%string* %this) nounwind {
 	br i1 %3, label %free_begin, label %free_close
 
 free_begin:
-	call void @free(i8* %2)
+	call void @GC_free(i8* %2)
 	br label %free_close
 
 free_close:
@@ -54,7 +61,7 @@ free_close:
 
 define fastcc void @string_Resize(%string* %this, i32 %value) {
 	; %output = malloc(%value)
-	%output = call i8* @malloc(i32 %value)
+	%output = call i8* @gc_Alloc(i32 %value)
 
 	; todo: check return value
 
@@ -70,7 +77,7 @@ define fastcc void @string_Resize(%string* %this, i32 %value) {
 	%3 = call i8* @memcpy(i8* %output, i8* %buffer, i32 %length)
 
 	; free(%buffer)
-	call void @free(i8* %buffer)
+	call void @GC_free(i8* %buffer)
 
 	; this->buffer = %output
 	store i8* %output, i8** %1
@@ -256,7 +263,7 @@ define fastcc void @matrix_Delete(%matrix* %this) nounwind {
 	br i1 %3, label %free_begin, label %free_close
 
 free_begin:
-	call void @free(i8* %2)
+	call void @GC_free(i8* %2)
 	br label %free_close
 
 free_close:
@@ -265,7 +272,7 @@ free_close:
 
 define fastcc void @matrix_Resize(%matrix* %this, i32 %value) {
 	; %output = malloc(%value)
-	%output = call i8* @malloc(i32 %value)
+	%output = call i8* @gc_Alloc(i32 %value)
 
 	; todo: check return value
 
@@ -281,7 +288,7 @@ define fastcc void @matrix_Resize(%matrix* %this, i32 %value) {
 	%3 = call i8* @memcpy(i8* %output, i8* %buffer, i32 %length)
 
 	; free(%buffer)
-	call void @free(i8* %buffer)
+	call void @GC_free(i8* %buffer)
 
 	; this->buffer = %output
 	store i8* %output, i8** %1

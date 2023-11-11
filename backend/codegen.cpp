@@ -192,7 +192,7 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
                 builder.CreateCondBr(isNone, allocBB, assignBB);
 
                 setCurrBB(allocBB);
-                auto mallocF = cgm.getLLVMMod()->getOrInsertFunction("malloc",
+                auto mallocF = cgm.getLLVMMod()->getOrInsertFunction("GC_malloc",
                                  llvm::FunctionType::get(
                                     builder.getInt8Ty()->getPointerTo(),
                                     builder.getInt64Ty(),
@@ -245,7 +245,7 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
             }
             
             if(td->isMaybe() && !llvm::isa<llvm::ConstantPointerNull>(val) && !llvm::isa<llvm::PointerType>(val->getType())) {
-                auto mallocF = cgm.getLLVMMod()->getOrInsertFunction("malloc",
+                auto mallocF = cgm.getLLVMMod()->getOrInsertFunction("GC_malloc",
                                  llvm::FunctionType::get(
                                     builder.getInt8Ty()->getPointerTo(),
                                     builder.getInt64Ty(),
@@ -283,7 +283,7 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
                 builder.CreateCondBr(isNone, allocBB, assignBB);
 
                 setCurrBB(allocBB);
-                auto mallocF = cgm.getLLVMMod()->getOrInsertFunction("malloc",
+                auto mallocF = cgm.getLLVMMod()->getOrInsertFunction("GC_malloc",
                                  llvm::FunctionType::get(
                                     builder.getInt8Ty()->getPointerTo(),
                                     builder.getInt64Ty(),
@@ -333,7 +333,7 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
             builder.CreateCondBr(isNone, allocBB, assignBB);
 
             setCurrBB(allocBB);
-            auto mallocF = cgm.getLLVMMod()->getOrInsertFunction("malloc",
+            auto mallocF = cgm.getLLVMMod()->getOrInsertFunction("GC_malloc",
                                 llvm::FunctionType::get(
                                 builder.getInt8Ty()->getPointerTo(),
                                 builder.getInt64Ty(),
@@ -387,7 +387,7 @@ void cg::CGFunction::writeExtVar(CGModule *mod, ir::IR *decl, llvm::Value *val) 
                 builder.CreateCondBr(isNone, allocBB, assignBB);
 
                 setCurrBB(allocBB);
-                auto mallocF = cgm.getLLVMMod()->getOrInsertFunction("malloc",
+                auto mallocF = cgm.getLLVMMod()->getOrInsertFunction("GC_malloc",
                                  llvm::FunctionType::get(
                                     builder.getInt8Ty()->getPointerTo(),
                                     builder.getInt64Ty(),
@@ -2097,7 +2097,7 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
 
     // Init maybes
     for(auto [d, v]: maybesToInit) {
-        auto mallocF = getLLVMMod()->getOrInsertFunction("malloc",
+        auto mallocF = getLLVMMod()->getOrInsertFunction("GC_malloc",
                             llvm::FunctionType::get(
                             builder.getInt8Ty()->getPointerTo(),
                             builder.getInt64Ty(),

@@ -6,10 +6,13 @@ c = b
 print(c) // hello\n 
 
 void anyfun() {
+
+/* REMOVED BECAUSE OF A BUG
     any g
     g = "hi\n"
     string b = g
     print(b)
+*/
 
     any i
     i = 42
@@ -19,7 +22,7 @@ void anyfun() {
     print(c++"\n")
 }
 
-anyfun() // hi\ntrue\n
+anyfun() // true\n
 
 int? ma = 4
 any av

@@ -316,8 +316,9 @@ ir::IR *Scanner::parseVarDecl(ir::IR *type, const std::string name, ir::Expr *va
     LOGMAX(type->getName()+" "+name);
     ir::TypeDecl *t = llvm::dyn_cast<ir::TypeDecl>(type);
     if(t) {
-        if(value && type->getName() != value->getType()->getName()) {
-            diags.report(type->getLocation(), diag::ERR_INCORRECT_ASSIGNMENT, value->getType()->getName(), type->getName());
+        if(value && type->getName() != value->getType()->getName() && type->getName() != ANY_CSTR && value->getType()->getName() != ANY_CSTR) {
+            if(!(t->isMaybe() && value->getType()->getName() == NONETYPE_CSTR))
+                diags.report(type->getLocation(), diag::ERR_INCORRECT_ASSIGNMENT, value->getType()->getName(), type->getName());
         }
         auto v = new ir::VarDecl(currentIR, type->getLocation(), name, t, value);
         if(currScope->insert(v)) {

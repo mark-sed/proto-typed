@@ -20,4 +20,7 @@ else
     DIR=./
 fi
 
-$DIR"build/ptc/ptc" ${PROG}.pt -verbose ${VERBOSE} -filetype=obj -relocation-model=pic && gcc ${PROG}.o $DIR"ptlib.o" $@ -o ${DIR}${PROG}.out -lm && rm ${PROG}.o && ${DIR}${PROG}.out
+GC="gc"
+LPATH=$DIR"gc/"
+
+$DIR"build/ptc/ptc" ${PROG}.pt -verbose ${VERBOSE} -filetype=obj -relocation-model=pic && gcc -L${LPATH} ${PROG}.o $DIR"ptlib.o" $@ -o ${DIR}${PROG}.out -lm -l${GC} && rm ${PROG}.o && ${DIR}${PROG}.out
