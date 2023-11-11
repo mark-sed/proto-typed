@@ -20,7 +20,7 @@
 #define MACRO_TO_STR(x) MACRO_TO_STR_HELPER(x)
 
 #define PTC_VERSION_MAJOR 0  ///< Compiler's major version
-#define PTC_VERSION_MINOR 5  ///< Compiler's minor version
+#define PTC_VERSION_MINOR 6  ///< Compiler's minor version
 #define PTC_VERSION_PATCH 0  ///< Compiler's patch
 
 /** PTC version as a string */
