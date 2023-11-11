@@ -268,6 +268,7 @@ public:
             if(llvm::dyn_cast<VarDecl>(v)->getInitValue() ||
                 llvm::dyn_cast<VarDecl>(v)->getType()->getName() == STRING_CSTR ||
                 (llvm::dyn_cast<VarDecl>(v)->getType()->getDecl() && 
+                llvm::isa<StructDecl>(llvm::dyn_cast<VarDecl>(v)->getType()->getDecl()) &&
                 !llvm::dyn_cast<StructDecl>(llvm::dyn_cast<VarDecl>(v)->getType()->getDecl())->is_zero_init())) {
                 zero_init = false;
                 break;
