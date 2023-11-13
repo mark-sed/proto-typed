@@ -1315,6 +1315,10 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             else if(left->getType() == int1T) {
                 lval = builder.CreateCall(to_str_bool, { left });
             }
+            else if(e->getLeft()->getType()->getName() == NONETYPE_CSTR) {
+                std::string noneS = "none";
+                lval = emitExpr(new ir::StringLiteral(llvm::SMLoc(), noneS, e->getType()));
+            }
         }
         // TODO: Uncomment once ptlib.pt(.o) is being linked 
         else {
@@ -1346,6 +1350,10 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             }
             else if(right->getType() == int1T) {
                 rval = builder.CreateCall(to_str_bool, { right });
+            }
+            else if(e->getRight()->getType()->getName() == NONETYPE_CSTR) {
+                std::string noneS = "none";
+                rval = emitExpr(new ir::StringLiteral(llvm::SMLoc(), noneS, e->getType()));
             }
         }
         else {

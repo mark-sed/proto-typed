@@ -426,9 +426,6 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          | expr_float MUL expr_var { $$ = scanner->parseInfixExpr(scanner->parseFloat($1), $3, ir::Operator(ir::OperatorKind::OP_MUL)); }
          | expr_var MUL expr_int   { $$ = scanner->parseInfixExpr($1, scanner->parseInt($3), ir::Operator(ir::OperatorKind::OP_MUL)); }
          | expr_var MUL expr_float { $$ = scanner->parseInfixExpr($1, scanner->parseFloat($3), ir::Operator(ir::OperatorKind::OP_MUL)); }
-         | expr_mat MUL expr_mat
-         | expr_mat MUL expr_var
-         | expr_var MUL expr_mat
          | expr_var MUL expr_var   { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_MUL)); }
 
          | expr_int DIV expr_var   { $$ = scanner->parseInfixExpr(scanner->parseInt($1), $3, ir::Operator(ir::OperatorKind::OP_DIV)); }
@@ -456,9 +453,6 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          | expr_float MINUS expr_var { $$ = scanner->parseInfixExpr(scanner->parseFloat($1), $3, ir::Operator(ir::OperatorKind::OP_SUB)); } 
          | expr_var MINUS expr_int   { $$ = scanner->parseInfixExpr($1, scanner->parseInt($3), ir::Operator(ir::OperatorKind::OP_SUB)); }
          | expr_var MINUS expr_float { $$ = scanner->parseInfixExpr($1, scanner->parseFloat($3), ir::Operator(ir::OperatorKind::OP_SUB)); } 
-         | expr_mat MINUS expr_mat
-         | expr_var MINUS expr_mat
-         | expr_mat MINUS expr_var
          | expr_var MINUS expr_var   { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_SUB)); }
 
          | expr_int BLSHFT expr_var { $$ = scanner->parseInfixExpr(scanner->parseInt($1), $3, ir::Operator(ir::OperatorKind::OP_BLSHFT)); }
@@ -578,29 +572,16 @@ expr_var : ID { $$ = scanner->parseVar($1); }
 
          | BNOT expr_var { $$ = scanner->parseUnaryPrefixExpr($2, ir::Operator(ir::OperatorKind::OP_BNOT)); }
 
-         | expr_int CONCAT expr_struct
-         | expr_float CONCAT expr_struct
-         | expr_str CONCAT expr_struct
-         | expr_bool CONCAT expr_struct
-         | expr_none CONCAT expr_struct
-         | expr_struct CONCAT expr_int
-         | expr_struct CONCAT expr_float
-         | expr_struct CONCAT expr_str
-         | expr_struct CONCAT expr_bool
-         | expr_struct CONCAT expr_none
-         | expr_struct CONCAT expr_struct
          | expr_int CONCAT expr_var       { $$ = scanner->parseInfixExpr(scanner->parseInt($1), $3, ir::Operator(ir::OperatorKind::OP_CONCAT)); }
          | expr_float CONCAT expr_var     { $$ = scanner->parseInfixExpr(scanner->parseFloat($1), $3, ir::Operator(ir::OperatorKind::OP_CONCAT)); }
          | expr_str CONCAT expr_var       { $$ = scanner->parseInfixExpr(scanner->parseString($1), $3, ir::Operator(ir::OperatorKind::OP_CONCAT)); }
          | expr_bool CONCAT expr_var      { $$ = scanner->parseInfixExpr(scanner->parseBool($1), $3, ir::Operator(ir::OperatorKind::OP_CONCAT)); }  
-         | expr_none CONCAT expr_var
-         | expr_struct CONCAT expr_var
+         | expr_none CONCAT expr_var      { $$ = scanner->parseInfixExpr(scanner->parseNone(), $3, ir::Operator(ir::OperatorKind::OP_CONCAT)); }
          | expr_var CONCAT expr_int       { $$ = scanner->parseInfixExpr($1, scanner->parseInt($3), ir::Operator(ir::OperatorKind::OP_CONCAT)); }
          | expr_var CONCAT expr_float     { $$ = scanner->parseInfixExpr($1, scanner->parseFloat($3), ir::Operator(ir::OperatorKind::OP_CONCAT)); }
          | expr_var CONCAT expr_str       { $$ = scanner->parseInfixExpr($1, scanner->parseString($3), ir::Operator(ir::OperatorKind::OP_CONCAT)); }
          | expr_var CONCAT expr_bool      { $$ = scanner->parseInfixExpr($1, scanner->parseBool($3), ir::Operator(ir::OperatorKind::OP_CONCAT)); }
-         | expr_var CONCAT expr_none
-         | expr_var CONCAT expr_struct
+         | expr_var CONCAT expr_none      { $$ = scanner->parseInfixExpr($1, scanner->parseNone(), ir::Operator(ir::OperatorKind::OP_CONCAT)); }
          | expr_var CONCAT expr_var       { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_CONCAT)); }
          ;
 
