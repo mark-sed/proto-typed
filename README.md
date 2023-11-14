@@ -1,4 +1,4 @@
-# Proto-typed Project
+# Proto-typed
 
 Proto-typed (pt) is a compiled statically typed language with garbage collection and modern syntax.
 
@@ -8,8 +8,17 @@ This repository contains Proto-typed Compiler (ptc) and the language definition 
 
 #### Table of contents
 - [Proto-typed Project](#proto-typed-project)
-- [Proto-typed Programming Language](#proto-typed-programming-language)
 - [Proto-typed Compiler](#proto-typed-compiler)
+- [Proto-typed Programming Language](#proto-typed-programming-language)
+
+# Proto-typed Compiler
+TODO
+
+## Installation
+TODO
+
+## Compiling and running programs
+TODO
 
 # Proto-typed Programming Language
 
@@ -116,11 +125,133 @@ Strings are represented as simple objects and therefore their size can be easily
 
 ### Struct
 
+Structs can hold variables of any type, but cannot contain function definitions withing their scope. When referring to a struct type only the name can be used (without the `struct` keyword).
+
+```cpp
+struct Pair {
+    int first
+    int second
+}
+
+Pair p
+p.first = foo()
+p.second = bar()
+
+print(p.first++", "++p.second)
+```
+
+Structs can also have default initializers for their elements:
+```cpp
+struct Player {
+    string name = "Unknown"
+    float strength = 10.5
+    int x = 350
+    int y = 200
+}
+```
+
 ### Array (matrix)
+
+Arrays in pt are dynamic (you can think of them as vectors in C++).
+Array type is defined by putting `[]` after type name:
+```c
+int[] values
+for (int i : 0..20) {
+    append(values, i)
+}
+
+for (int c: values) {
+    print(c++" ")
+}
+```
+
+Multidimensional arrays (matrices) work in the same way:
+```c
+int[][] pos = [
+    [0, 1, 2, 8],
+    [9, 0, 8, 3],
+    [2, 3, 5, 6],
+    [0, 1, 1, 4]
+]
+
+string[][] tt = [
+    ["x", "o", "x"],
+    ["x", "x", "o"],
+    ["o", "x", "o"]
+]
+
+string center = tt[1][1]
+```
+
+Array is also result of slicing. Slicing has a form of `[start:end]` or `[start:step:end]`, where start and end can be left out:
+```c
+float x = [0.2, 1.3, 4.5, 5.0, 0.0, 9.9, 7.1, 1.0]
+for (float i : x[1:2:6]) {
+    print(i++" ") // 1.3 5.0 9.9 
+}
+
+float y = x[:2] // [0.2, 1.3] 
+```
 
 ### Maybe
 
+Maybe value can either hold value of its base type or `none`.
+
+```c
+int? x // none by default
+x = -7
+```
+
+Every maybe value is passed by a reference to a function and can therefore be used to modify input arguments:
+```c
+void pow2(int? x) {
+    x = x * x
+}
+
+int v = 5
+pow2(v)
+print(v++"\n")
+```
+
+But don't think of maybe values as of pointers or references since any function taking a maybe value can accept any base value, including a constant:
+```c
+void pow2(int? x) {
+    x = x * x
+}
+
+pow2(42)
+```
+
+When assigning a maybe value to another maybe value, both of these will contain the same address and therefore the same value:
+```c
+string? a = "hi"
+string? b
+
+b = a
+b = "bye"
+print(a) // bye
+```
+
 ### Any
+
+Any type (not surprisingly) can hold any value. But what it holds is only known to the user not the compiler and therefore it is easy to get a runtime error. To extract a value it has to be assigned or implicitly casted.
+
+```c
+any x = 42
+// code ...
+x = "forty two"
+string y = x
+print(y)
+```
+
+Any type also has to be internally represented as a maybe type (to be able to hold `none`), which might cause some problems with maybe to maybe assignment and memory sharing:
+```c
+any x = 32
+int? y
+y = x
+x = "Ca vas pas"
+print(y++"\n") // Incorrect value - string read as int
+```
 
 ## Syntax
 
@@ -228,20 +359,20 @@ if (a == 0) {
 If does not require `{}` if it is followed only by one statement, but keep in mind that in proto-typed new line is the terminator for a statement and therefore, unlike C, it does not allow for arbitrary amount of new lines after if. Fortunately, proto-typed will emit an error when such incorrect case happens.
 
 ```c
-if(a)
-    print("Hi")   // Syntax error
+if (a)
+    print("Hi")    // Syntax error
 
-else print("Bye") // Syntax error
+else print("Bye")  // Syntax error
 
-if(a) print("Hi") // Correct
-else print("Bye") // Correct
+if (a) print("Hi") // Correct
+else print("Bye")  // Correct
 ```
 
 Also keep in mind that the statement following if has to be terminated as well, either by a new line or a semicolon and therefore when writing a one-line if-else, one must use semicolon (or `{}`) after each statement:
 
 ```c
-if(a) print("Hi") else print("Bye")  // Syntax error
-if(a) print("Hi"); else print("Bye") // Correct
+if (a) print("Hi") else print("Bye")  // Syntax error
+if (a) print("Hi"); else print("Bye") // Correct
 ```
 
 ### While and Do-while loops
@@ -267,28 +398,28 @@ For works more like a for each loop, where it iterates over ranges, arrays or st
 ```c
 float[] values
 // init values
-for(float i : values) {
+for (float i : values) {
     print(i++"\n")
 }
 
 string text = "Some text"
-for(string letter: text) {
+for (string letter: text) {
     print(letter++" ")
 }
 ```
 
 Proto-typed also offers special type `range` (see more bellow), which can be used counted for loops:
 ```c
-for(int i : 0..5) {
+for (int i : 0..5) {
     print(i++" ") // 0 1 2 3 4
 }
 
-for(int j : 0,2..5) {
+for (int j : 0,2..5) {
     print(j++" ") // 0 2 4
 }
 
 string text = "Some more text"
-for(int k : 0..length(text)) {
+for (int k : 0..length(text)) {
     print(k++": "++text[k]++"\n")
 }
 ```
@@ -317,4 +448,3 @@ mod2::_entry()
 
 Module could possibly call its own entry function.
 
-# Proto-typed Compiler
