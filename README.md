@@ -9,16 +9,70 @@ This repository contains Proto-typed Compiler (ptc) and the language definition 
 #### Table of contents
 - [Proto-typed Project](#proto-typed-project)
 - [Proto-typed Compiler](#proto-typed-compiler)
+  - [Download](#download)
+  - [Installation from source](#installation-from-source)
+  - [Compiling and running programs](#compiling-and-running-programs)
 - [Proto-typed Programming Language](#proto-typed-programming-language)
+  - [Code examples](#code-examples)
+  - [Types](#types)
+  - [Syntax](#syntax)
+  - [Semantics](#semantics)
+  - [Standard library](#standard-library)
 
 # Proto-typed Compiler
-TODO
 
-## Installation
-TODO
+Proto-typed compiler (ptc) uses LLVM and can target any of big amount of targets LLVM can compile for. The ptc also relies on LibC. 
+
+## Download
+
+Soon precompiled ptc releases should be available under release section in GitHub (https://github.com/mark-sed/proto-typed/releases).
+
+## Installation from source
+
+As mentioned before, ptc relies on LLVM and expects it to be installed.
+The ptc can be compiled from [source](https://github.com/mark-sed/proto-typed) using CMake with the following steps.
+
+1. Clone the repository (or download it as a zip in GitHub):
+```shell
+git clone https://github.com/mark-sed/proto-typed.git
+```
+2. Enter the repository and create a `build` directory:
+```shell
+cd proto-typed
+mkdir build
+```
+3. Run CMake:
+```shell
+cmake -S . -B build
+cmake --build build --target ptc
+```
+After running this inside of `build` you should find compiled proto-typed compiler named `ptc`.
 
 ## Compiling and running programs
-TODO
+
+__NOTE:__ This process is temporary and will be simplified in upcoming changes
+
+Keep in mind that ptc is only a compiler and not a linker and so the compilation itself will generate object file, which needs to be linked. In the current state this needs to be done by hand, but that should hopefully soon change and get done by `pt` tool.
+
+One must compile the `ptlib.ll` file located in `ptc/` using LLVM's llc:
+```shell
+llc ptc/ptlib.ll -o ptlib.o -filetype=obj -relocation-model=pic
+```
+
+The proto-typed program itself can be easily compiled using `ptc` and only the file, which is the main one should be passed in, all the others imported should be in the same directory and will be found by the compiler:
+```shell
+ptc main.pt -filetype=obj -relocation-model=pic
+```
+
+After this you should have `ptlib.o`, `main.o` and possibly all the other imported files as `*.o` in the current directory. Now they only need to be linked, but also with the grabage collector in `gc/` (don't forget to list all the imported files as well):
+```shell
+gcc -Lgc/ main.o ptlib.o -o main.out -lm -lgc
+```
+
+After this, you should see `main.out` binary, which can be run:
+```shell
+./main.out
+```
 
 # Proto-typed Programming Language
 
@@ -447,4 +501,23 @@ mod2::_entry()
 ```
 
 Module could possibly call its own entry function.
+
+## Standard library
+Calls to standard library do not require any module name prefix and any of the functions can be overridden by custom definitions.
+
+### String function
+* __`length`__ - String length.
+    * `int length(string s)` - Returns the length of the string `s`.
+* __`to_string`__ - Conversion of types to string.
+    * `string to_string(int i)` - Converts int `i` to string.
+    * `string to_string(float f)` - Converts float `f` to string.
+    * `string to_string(bool b)` - Converts bool `b` to string.
+
+### Array functions
+These functions are templated for any array (matrix) type, the type `T` stands for this general array type. Type `TBase` stands for the base type of `T` (e.g.: `T` might be `int[][]` and then `TBase` would be `int[]`). Type `TElem` is the base non-array type of `T` (e.g.: `T` might be `int[][]` and then `TElem` would be `int`).
+
+* __`append`__ - Append to an array.
+    * `void append(T a, TBase v)` - Append `v` at the end of array `a`.
+* __`length`__ - Array length.
+    * `int length(T a)` - Returns the length of the array `a`. 
 
