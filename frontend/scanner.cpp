@@ -247,19 +247,20 @@ std::string Scanner::escapeString(std::string str) {
             break;
             // TODO: https://en.cppreference.com/w/cpp/language/escape
             case 'x':
+            case 'X':
                 diags.report(llvmloc, diag::ERR_INTERNAL, "Hexadecimal escape sequences are not yet implemented");
             break;
-            case 'o':
+            case 'q':
+            case 'Q':
                 diags.report(llvmloc, diag::ERR_INTERNAL, "Octal escape sequences are not yet implemented");
             break;
             case 'u':
-                diags.report(llvmloc, diag::ERR_INTERNAL, "Unicode escape sequences are not yet implemented");
-            break;
             case 'U':
                 diags.report(llvmloc, diag::ERR_INTERNAL, "Unicode escape sequences are not yet implemented");
             break;
-            case 'N':
-                diags.report(llvmloc, diag::ERR_INTERNAL, "Unicode escape sequences are not yet implemented");
+            case 'n'
+            case 'N': // TODO: Should this be kept?
+                diags.report(llvmloc, diag::ERR_INTERNAL, "Named unicode escape sequences are not yet implemented");
             break;
             default:
                 diags.report(llvmloc, diag::ERR_UNKNOWN_ESC_SEQ, std::string("\\")+c);
