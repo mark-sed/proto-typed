@@ -436,25 +436,11 @@ void cg::CGFunction::writeExtVar(CGModule *mod, ir::IR *decl, llvm::Value *val) 
 }
 
 llvm::Value *cg::CGModule::readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe) {
-    /*if(auto *v = llvm::dyn_cast<ir::VarDecl>(decl)) {
-        if(v->getEnclosingIR()->getKind() == ir::IRKind::IR_MODULE_DECL) {
-            return builder.CreateLoad(mapType(v), getGlobals(decl));
-        }
-        else {
-            llvm::report_fatal_error("Unsupported variable access in module");
-        }
-    } else {
-        llvm::report_fatal_error("Unsupported variable declaration");
-    }*/
     llvm::report_fatal_error("UNIMPLEMENTED module var read");
 }
 
 llvm::Value *cg::CGFunction::readLocalVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe) {
     // TODO: Checks for type
-    /*auto val = currDef[BB].defs.find(decl);
-    if(val != currDef[BB].defs.end()) {
-        return val->second;
-    }*/
     LOGMAX("Read var "+decl->debug());
     auto val = locals.find(decl);
     if(val != locals.end()) {
@@ -494,14 +480,6 @@ llvm::Value *cg::CGFunction::readLocalVar(llvm::BasicBlock *BB, ir::IR *decl, bo
         }
     }
     return nullptr;
-}
-
-void cg::CGFunction::sealBlock(llvm::BasicBlock *BB) {
-    /*for(auto phi: currDef[BB].incompletePhis) {
-        addPhiOperands(BB, phi.second, phi.first);
-    }
-    currDef[BB].incompletePhis.clear();*/
-    currDef[BB].sealed = true;
 }
 
 llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe) {
@@ -1449,14 +1427,11 @@ void cg::CGFunction::emitStmt(ir::IfStatement *stmt) {
     llvm::Value *cnd = emitExpr(stmt->getCond());
     builder.CreateCondBr(cnd, ifBB, hasElse ? elseBB : afterBB);
 
-    sealBlock(currBB);
-
     setCurrBB(ifBB);
     emit(stmt->getIfBranch());
     if(!currBB->getTerminator()) {
         builder.CreateBr(afterBB);
     }
-    sealBlock(currBB);
 
     if(hasElse) {
         setCurrBB(elseBB);
@@ -1464,7 +1439,6 @@ void cg::CGFunction::emitStmt(ir::IfStatement *stmt) {
         if(!currBB->getTerminator()) {
             builder.CreateBr(afterBB);
         }
-        sealBlock(currBB);
     }
 
     setCurrBB(afterBB);
@@ -1484,7 +1458,6 @@ void cg::CGFunction::emitStmt(ir::WhileStmt *stmt) {
     else {
         builder.CreateBr(whileCondBB);
     }
-    sealBlock(currBB);
     setCurrBB(whileCondBB);
     llvm::Value *cond = emitExpr(stmt->getCond());
     builder.CreateCondBr(cond, whileBodyBB, whileAfterBB);
@@ -1505,8 +1478,6 @@ void cg::CGFunction::emitStmt(ir::WhileStmt *stmt) {
     emit(stmt->getBody());
     builder.CreateCall(stackrestore, { stp });
     builder.CreateBr(whileCondBB);
-    sealBlock(currBB);
-    sealBlock(whileCondBB);
 
     setCurrBB(whileAfterBB);
 }
@@ -1537,7 +1508,6 @@ void cg::CGFunction::emitStmt(ir::ForeachStmt *stmt) {
     }
     builder.CreateBr(forCondBB);
 
-    sealBlock(currBB);
     setCurrBB(forCondBB);
 
     auto stacksave = cgm.getLLVMMod()->getOrInsertFunction("llvm.stacksave", 
@@ -1626,7 +1596,6 @@ void cg::CGFunction::emitStmt(ir::ForeachStmt *stmt) {
     emit(stmt->getBody());
     builder.CreateBr(forNextIterBB);
 
-    sealBlock(currBB);
     setCurrBB(forNextIterBB);
     
     llvm::Value *newIndex = nullptr;
@@ -1639,8 +1608,6 @@ void cg::CGFunction::emitStmt(ir::ForeachStmt *stmt) {
     builder.CreateStore(newIndex, indexPtr);
     builder.CreateCall(stackrestore, { stp });
     builder.CreateBr(forCondBB);
-    sealBlock(forNextIterBB);
-    sealBlock(forCondBB);
     setCurrBB(forAfterBB);
 
 }
@@ -2225,5 +2192,4 @@ void cg::CGFunction::run() {
     if(!currBB->getTerminator()) {
         builder.CreateRetVoid();
     }
-    sealBlock(currBB);
 }

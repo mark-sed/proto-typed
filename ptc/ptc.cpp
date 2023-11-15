@@ -162,14 +162,6 @@ bool emit(std::string ptcName, llvm::Module *module, llvm::TargetMachine *target
     return true;
 }
 
-/*static std::unique_ptr<llvm::Module> parseIR(llvm::LLVMContext &C, const char *IR) {
-  llvm::SMDiagnostic Err;
-  std::unique_ptr<llvm::Module> Mod = llvm::parseAssemblyString(IR, Err, C);
-  if (!Mod)
-    Err.print("UtilsTests", llvm::errs());
-  return Mod;
-}*/
-
 static ModuleInfo *getNextModuleForParsing() {
     for(auto a: modulesToCompile) {
         if(!a->isParsed()) {
