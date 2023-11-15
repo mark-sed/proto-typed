@@ -30,6 +30,8 @@
 using namespace ptc;
 using namespace ptc::cg;
 
+static llvm::cl::opt<bool> cgNoMain("no-main", llvm::cl::desc("Does not generate main function for passed in program"), llvm::cl::init(false));
+
 cg::CGModule::CGModule(llvm::Module *llvmMod) : cg::CodeGen(llvmMod->getContext(), *this), llvmMod(llvmMod), mainMod(false) {
     ptlibLoader = new PTLib(this, llvmMod, ctx);
 }
@@ -2133,7 +2135,7 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
     builder.CreateRetVoid();
 
     // Insert _main
-    if(mainMod) {
+    if(mainMod && !cgNoMain) {
         auto bytePtrPtrTy = builder.getInt8Ty()->getPointerTo()->getPointerTo();
         llvm::Function *main = llvm::Function::Create(llvm::FunctionType::get(
                                                     builder.getInt32Ty(),

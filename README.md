@@ -298,7 +298,7 @@ string y = x
 print(y)
 ```
 
-Any type also has to be internally represented as a maybe type (to be able to hold `none`), which might cause some problems with maybe to maybe assignment and memory sharing:
+Any type has to be internally represented as a maybe type (to be able to hold `none`), which might cause some problems with maybe to maybe assignment and memory sharing:
 ```c
 any x = 32
 int? y
