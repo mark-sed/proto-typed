@@ -30,7 +30,8 @@
 using namespace ptc;
 using namespace ptc::cg;
 
-static llvm::cl::opt<bool> cgNoMain("no-main", llvm::cl::desc("Does not generate main function for passed in program"), llvm::cl::init(false));
+llvm::cl::OptionCategory CodeGenerationCat("Code Generation Options", "");
+static llvm::cl::opt<bool> cgNoMain("no-main", llvm::cl::desc("Does not generate main function for passed in program"), llvm::cl::init(false), llvm::cl::cat(CodeGenerationCat));
 
 cg::CGModule::CGModule(llvm::Module *llvmMod) : cg::CodeGen(llvmMod->getContext(), *this), llvmMod(llvmMod), mainMod(false) {
     ptlibLoader = new PTLib(this, llvmMod, ctx);
