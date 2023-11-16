@@ -65,3 +65,14 @@ mint_test2(a)
 print(a++"\n") // 1
 
 mint_test2(0) // no output, should just pass
+
+bool? mmb = true
+int? mmi = 48
+float? mmf = 6.2
+string? mms
+
+print(mto_string(mmb)++"\n")
+print(mto_string(mmi)++"\n")
+print(mto_string(mmf)++"\n")
+print(mto_string(mms)++"\n")
+print(mmb++"\n"++mmi++"\n"++mmf++"\n"++mms++"\n")

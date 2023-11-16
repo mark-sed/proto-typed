@@ -1,7 +1,0 @@
-string to_string(int? v) {
-    if(v == none) {
-        return "none"
-    }
-    int a = v
-    return to_string(a)
-}

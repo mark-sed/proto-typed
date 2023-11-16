@@ -25,25 +25,43 @@ using namespace ptc;
 
 // Helper functions
 
-std::string ptc::encodeFunction(std::string name, std::vector<ir::FormalParamDecl *> params) {
+std::string ptc::encodeFunction(std::string name, std::vector<ir::FormalParamDecl *> params, bool lib) {
     assert(name.size() > 0 && "Function name cannot be empty");
-    std::string paramStr;
-    for(auto p : params) {
-        paramStr += p->getType()->getName()+"_";
+    if (!lib) {
+        std::string paramStr;
+        for(auto p : params) {
+            paramStr += p->getType()->getName()+"_";
+        }
+        return name+"_"+std::to_string(params.size())+paramStr;
     }
-    return name+"_"+std::to_string(params.size())+paramStr;
+    else {
+        std::string paramStr;
+        for(auto p : params) {
+            paramStr += "_"+p->getType()->getName();
+        }
+        return name+paramStr;
+    }
 }
 
-std::string ptc::encodeFunction(std::string name, std::vector<ir::Expr *> params) {
+std::string ptc::encodeFunction(std::string name, std::vector<ir::Expr *> params, bool lib) {
     assert(name.size() > 0 && "Function name cannot be empty");
-    std::string paramStr;
-    for(auto p : params) {
-        paramStr += p->getType()->getName()+"_";
+    if (!lib) {
+        std::string paramStr;
+        for(auto p : params) {
+            paramStr += p->getType()->getName()+"_";
+        }
+        return name+"_"+std::to_string(params.size())+paramStr;
     }
-    return name+"_"+std::to_string(params.size())+paramStr;
+    else {
+        std::string paramStr;
+        for(auto p : params) {
+            paramStr += "_"+p->getType()->getName();
+        }
+        return name+paramStr;
+    }
 }
 
-Scanner::Scanner(Diagnostics &diags, std::string moduleName) : currentIR(nullptr), diags(diags), moduleName(moduleName) {
+Scanner::Scanner(Diagnostics &diags, std::string moduleName, bool lib) : currentIR(nullptr), diags(diags), moduleName(moduleName), lib(lib) {
     loc = new Parser::location_type();
     init();
 }
@@ -157,15 +175,60 @@ void Scanner::init() {
         currScope->insert(fun);
     }
 
-    {
+    if (!lib) {
         auto params = std::vector<ir::FormalParamDecl *>{
-            new ir::FormalParamDecl(currentIR, llvmloc, "v", this->anyType, false)
+            new ir::FormalParamDecl(currentIR, llvmloc, "v", this->intType, true)
         };
         auto body = std::vector<ir::IR *> {};
         auto fun = new ir::FunctionDecl(currentIR,
                                                 llvm::SMLoc(),
-                                                "to_string_any",
-                                                "to_string",
+                                                "mto_string_int",
+                                                "mto_string",
+                                                this->stringType,
+                                                params,
+                                                body);
+        currScope->insert(fun);
+    }
+
+    if (!lib) {
+        auto params = std::vector<ir::FormalParamDecl *>{
+            new ir::FormalParamDecl(currentIR, llvmloc, "v", this->floatType, true)
+        };
+        auto body = std::vector<ir::IR *> {};
+        auto fun = new ir::FunctionDecl(currentIR,
+                                                llvm::SMLoc(),
+                                                "mto_string_float",
+                                                "mto_string",
+                                                this->stringType,
+                                                params,
+                                                body);
+        currScope->insert(fun);
+    }
+
+    if (!lib) {
+        auto params = std::vector<ir::FormalParamDecl *>{
+            new ir::FormalParamDecl(currentIR, llvmloc, "v", this->boolType, true)
+        };
+        auto body = std::vector<ir::IR *> {};
+        auto fun = new ir::FunctionDecl(currentIR,
+                                                llvm::SMLoc(),
+                                                "mto_string_bool",
+                                                "mto_string",
+                                                this->stringType,
+                                                params,
+                                                body);
+        currScope->insert(fun);
+    }
+
+    if (!lib) {
+        auto params = std::vector<ir::FormalParamDecl *>{
+            new ir::FormalParamDecl(currentIR, llvmloc, "v", this->stringType, true)
+        };
+        auto body = std::vector<ir::IR *> {};
+        auto fun = new ir::FunctionDecl(currentIR,
+                                                llvm::SMLoc(),
+                                                "mto_string_string",
+                                                "mto_string",
                                                 this->stringType,
                                                 params,
                                                 body);
@@ -954,7 +1017,7 @@ ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
             }
 
             // The function chosen in parseVar could have different parameters
-            std::string properName = encodeFunction(f->getOGName(), params);
+            std::string properName = encodeFunction(f->getOGName(), params, lib);
             auto propFIR = currScope->lookup(properName);
             if(!propFIR) {
                 // Lib functions
@@ -1084,7 +1147,7 @@ ir::IR *Scanner::parseFun(ir::IR *type, std::string name, std::vector<ir::Formal
     LOGMAX("Parsing a function "+name);
     auto ctype = llvm::dyn_cast<ir::TypeDecl>(type);
     auto f = llvm::dyn_cast<ir::FunctionDecl>(currentIR);
-    std::string encname = encodeFunction(name, params);
+    std::string encname = encodeFunction(name, params, lib);
     if(sym_lookup(encname)) {
         diags.report(llvmloc, diag::ERR_FUNCTION_REDEFINITION, name);
     }

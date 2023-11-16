@@ -28,8 +28,8 @@
 
 namespace ptc {
 
-std::string encodeFunction(std::string name, std::vector<ir::FormalParamDecl *> params);
-std::string encodeFunction(std::string name, std::vector<ir::Expr *> params);
+std::string encodeFunction(std::string name, std::vector<ir::FormalParamDecl *> params, bool lib=false);
+std::string encodeFunction(std::string name, std::vector<ir::Expr *> params, bool lib=false);
 
 /**
  * Scanning, parsing and semantics driver
@@ -69,9 +69,10 @@ public:
     ptc::Parser::location_type *loc = nullptr;     ///< Current parsing location
     ir::ModuleDecl *mainModule;
     std::string moduleName;
+    bool lib;
     Scope *globalScope;
 
-    Scanner(Diagnostics &diags, std::string moduleName);
+    Scanner(Diagnostics &diags, std::string moduleName, bool lib=false);
     ~Scanner();
 
     /**

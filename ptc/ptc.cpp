@@ -53,7 +53,13 @@ ModuleInfo::ModuleInfo(std::string name, bool pathSent) : parsed(false), mainMod
     else {
         // Main file has the main dir to search
         this->name = name;
-        std::string mainPath = std::filesystem::path(modulesToCompile.front()->getPath()).parent_path();
+        ModuleInfo *mmod = nullptr;
+        for(auto m: modulesToCompile) {
+            if(m->isMainMod()) {
+                mmod = m;
+            }
+        }
+        std::string mainPath = std::filesystem::path(mmod->getPath()).parent_path();
         path = mainPath+"/"+name+".pt";
     }
     LOGMAX("Added module for parsing - name: "+name+", path: "+path);
@@ -208,7 +214,15 @@ int main(int argc, char *argv[]) {
         exit(EXIT_SUCCESS);
     } 
 
+    // Add ptlib to parse
+    // TODO: fix path to cl::opt
+    LOGMAX("Adding ptlib to parsing");
+    auto ptlibModule = new ModuleInfo("ptc/libpt.pt", true);
+    ptlibModule->setLib(true);
+    modulesToCompile.push_back(ptlibModule);
+
     // Parsing
+    LOGMAX("Adding main program to parsing");
     const char *ptcName = argv[0];
     bool parsingMain = true;
     if(inputFiles.size() > 0) {
@@ -238,7 +252,7 @@ int main(int argc, char *argv[]) {
         std::ifstream code(fileName);
 
         std::string moduleName = std::filesystem::path(fileName).stem();
-        auto scanner = new Scanner(diags, moduleName);
+        auto scanner = new Scanner(diags, moduleName, moduleInfo->isLib());
         moduleInfo->setScanner(scanner);
         scanner->parse(&code);
         if(parsingMain) {
@@ -305,7 +319,7 @@ int main(int argc, char *argv[]) {
             llvm::LLVMContext ctx;
             if(cg::CodeGenHandler *CGHandle = cg::CodeGenHandler::create(ctx, target)) {
                 LOGMAX("Setting cgmodule for "+fileName);
-                std::unique_ptr<llvm::Module> mainMod = CGHandle->run(mi->getScanner()->mainModule, fileName, mi->isMainMod());
+                std::unique_ptr<llvm::Module> mainMod = CGHandle->run(mi->getScanner()->mainModule, ptlibModule->getModule(), fileName, mi->isMainMod());
                 mi->getModule()->setCGModule(CGHandle->cgm);
                 if(!emit(ptcName, mainMod.get(), target, fileName)) {
                     llvm::WithColor::error(llvm::errs(), ptcName) << "error writing output\n";

@@ -177,7 +177,8 @@ function test_expressions {
 
 function test_maybes {
     expect_pass "maybes.pt" "maybes"
-    expect_out_eq "8\n9\n5\n42\nthere\ngeneral\n50\n1\n" "maybes"
+    expect_out_eq "8\n9\n5\n42\nthere\ngeneral\n50\n1
+true\n48\n6.2\nnone\ntrue\n48\n6.2\nnone\n" "maybes"
 }
 
 function test_any {

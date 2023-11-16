@@ -62,10 +62,9 @@ class CodeGenHandler {
 private:
     llvm::LLVMContext &ctx;
     llvm::TargetMachine *target;
-    ir::ModuleDecl *module;
 protected:
     CodeGenHandler(llvm::LLVMContext &ctx, llvm::TargetMachine *target)
-                 : ctx(ctx), target(target), module(nullptr) {}
+                 : ctx(ctx), target(target) {}
 
 public:
     cg::CGModule *cgm;
@@ -83,7 +82,7 @@ public:
      * @param fileName Module file name (for error reporting)
      * @return LLVM module with code generated for passed in module
      */
-    std::unique_ptr<llvm::Module> run(ir::ModuleDecl *module, std::string fileName, bool isMainMod);
+    std::unique_ptr<llvm::Module> run(ir::ModuleDecl *module, ir::ModuleDecl *ptlibMod, std::string fileName, bool isMainMod);
 };
 
 class CGModule;
@@ -95,13 +94,14 @@ class CodeGen {
 protected:
     llvm::LLVMContext &ctx;
 
-    CodeGen(llvm::LLVMContext &ctx, CGModule &currModule) : ctx(ctx), builder(ctx), currBB(nullptr), currModule(currModule) {
+    CodeGen(llvm::LLVMContext &ctx, CGModule &currModule, ir::ModuleDecl *ptlibMod) : ctx(ctx), builder(ctx), currBB(nullptr), currModule(currModule), ptlibMod(ptlibMod) {
         init();
     }
 
     llvm::IRBuilder<> builder;
     llvm::BasicBlock *currBB;
     CGModule &currModule;
+    ir::ModuleDecl *ptlibMod;
 
     void setCurrBB(llvm::BasicBlock *BB) {
         currBB = BB;
@@ -126,6 +126,8 @@ protected:
     virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe=false) = 0;
 
     llvm::StructType *getStringIR();
+
+    llvm::FunctionType *createFunctionType(ir::FunctionDecl *fun);
 
 public:
     // LLVM versions of PT types
@@ -178,7 +180,6 @@ public:
 class CGModule : public CodeGen {
 private:
     llvm::Module *llvmMod;
-    ir::ModuleDecl *mod;
     llvm::DenseMap<ir::IR *, llvm::GlobalObject *> globals;
     llvm::GlobalVariable *str_empty;
     std::vector<std::pair<llvm::Value *, llvm::GlobalVariable *>> stringsToInit;
@@ -193,10 +194,12 @@ protected:
     virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe=false) override;
 
 public:
+    ir::ModuleDecl *mod;
+    
     /**
      * @param llvmMod module which to which the code will be generated
      */
-    CGModule(llvm::Module *llvmMod);
+    CGModule(llvm::Module *llvmMod, ir::ModuleDecl *ptlibMod);
     ~CGModule();
 
     llvm::LLVMContext &getLLVMCtx() { return llvmMod->getContext(); }
@@ -239,7 +242,6 @@ private:
     llvm::Value *readLocalVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe=false);
     void writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val);
 
-    llvm::FunctionType *createFunctionType(ir::FunctionDecl *fun);
     llvm::Function *createFunction(ir::FunctionDecl *fun, llvm::FunctionType *funType);
 protected:
     virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) override;
@@ -273,7 +275,7 @@ public:
      * @param cgm Code generator for module in which this function resides
      * @param fun IR declaration of this function
      */
-    CGFunction(CGModule &cgm, ir::FunctionDecl *fun) : CodeGen(cgm.getLLVMCtx(), cgm), cgm(cgm), fun(fun) {
+    CGFunction(CGModule &cgm, ir::FunctionDecl *fun, ir::ModuleDecl *ptlibMod) : CodeGen(cgm.getLLVMCtx(), cgm, ptlibMod), cgm(cgm), fun(fun) {
         funType = createFunctionType(fun);
         this->llvmFun = createFunction(fun, funType);
     } 

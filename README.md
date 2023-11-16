@@ -54,9 +54,9 @@ __NOTE:__ This process is temporary and will be simplified in upcoming changes
 
 Keep in mind that ptc is only a compiler and not a linker and so the compilation itself will generate object file, which needs to be linked. In the current state this needs to be done by hand, but that should hopefully soon change and get done by `pt` tool.
 
-One must compile the `ptlib.ll` file located in `ptc/` using LLVM's llc:
+One must compile the `libptl.ll` (libpt parts written in LLVM assembly) file located in `ptc/` using LLVM's llc:
 ```shell
-llc ptc/ptlib.ll -o ptlib.o -filetype=obj -relocation-model=pic
+llc ptc/libptl.ll -o libptl.o -filetype=obj -relocation-model=pic
 ```
 
 The proto-typed program itself can be easily compiled using `ptc` and only the file, which is the main one should be passed in, all the others imported should be in the same directory and will be found by the compiler:
@@ -64,9 +64,9 @@ The proto-typed program itself can be easily compiled using `ptc` and only the f
 ptc main.pt -filetype=obj -relocation-model=pic
 ```
 
-After this you should have `ptlib.o`, `main.o` and possibly all the other imported files as `*.o` in the current directory. Now they only need to be linked, but also with the grabage collector in `gc/` (don't forget to list all the imported files as well):
+After this you should have `libptl.o`, `main.o` and possibly all the other imported files as `*.o` in the current directory. Now they only need to be linked, but also with the grabage collector in `gc/` (don't forget to list all the imported files as well):
 ```shell
-gcc -Lgc/ main.o ptlib.o -o main.out -lm -lgc
+gcc -Lgc/ main.o ptlib.o ptc/libpt.o -o main.out -lm -lgc
 ```
 
 After this, you should see `main.out` binary, which can be run:

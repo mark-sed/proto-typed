@@ -33,7 +33,7 @@ using namespace ptc::cg;
 llvm::cl::OptionCategory CodeGenerationCat("Code Generation Options", "");
 static llvm::cl::opt<bool> cgNoMain("no-main", llvm::cl::desc("Does not generate main function for passed in program"), llvm::cl::init(false), llvm::cl::cat(CodeGenerationCat));
 
-cg::CGModule::CGModule(llvm::Module *llvmMod) : cg::CodeGen(llvmMod->getContext(), *this), llvmMod(llvmMod), mainMod(false) {
+cg::CGModule::CGModule(llvm::Module *llvmMod, ir::ModuleDecl *ptlibMod) : cg::CodeGen(llvmMod->getContext(), *this, ptlibMod), llvmMod(llvmMod), mainMod(false) {
     ptlibLoader = new PTLib(this, llvmMod, ctx);
 }
 
@@ -47,11 +47,11 @@ cg::CodeGenHandler *cg::CodeGenHandler::create(llvm::LLVMContext &ctx, llvm::Tar
 
 llvm::StringMap<std::pair<llvm::Type *, llvm::Constant *>> cg::CodeGen::userTypes{};
 
-std::unique_ptr<llvm::Module> cg::CodeGenHandler::run(ir::ModuleDecl *module, std::string fileName, bool isMainMod) {
+std::unique_ptr<llvm::Module> cg::CodeGenHandler::run(ir::ModuleDecl *module, ir::ModuleDecl *ptlibMod, std::string fileName, bool isMainMod) {
     std::unique_ptr<llvm::Module> m = std::make_unique<llvm::Module>(fileName, ctx);
     m->setTargetTriple(target->getTargetTriple().getTriple());
     m->setDataLayout(target->createDataLayout());
-    cgm = new cg::CGModule(m.get());
+    cgm = new cg::CGModule(m.get(), ptlibMod);
     cgm->setMainMod(isMainMod);
     cgm->run(module);
     return m;
@@ -125,6 +125,10 @@ llvm::Type *cg::CodeGen::convertType(ir::TypeDecl *t) {
 }
 
 std::string cg::CodeGen::mangleName(ir::IR *ir) {
+    if(currModule.mod == ptlibMod) {
+        return ir->getName();
+    }
+
     std::string mangled;
     while(ir) {
         mangled.insert(0, ir->getName()+"_");
@@ -1251,31 +1255,31 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
                                     int1T,
                                     false
                                  ));
-        /*auto to_str_mint = cgm.getLLVMMod()->getOrInsertFunction("to_string_m_int",
+        auto to_str_mint = cgm.getLLVMMod()->getOrInsertFunction("mto_string_int",
                                  llvm::FunctionType::get(
                                     stringT,
-                                    int64T->getPointerTo(),
+                                    int64T->getPointerTo()->getPointerTo(),
                                     false
                                  ));
-        auto to_str_mfloat = cgm.getLLVMMod()->getOrInsertFunction("to_string_m_float",
+        auto to_str_mfloat = cgm.getLLVMMod()->getOrInsertFunction("mto_string_float",
                                  llvm::FunctionType::get(
                                     stringT,
-                                    floatT->getPointerTo(),
+                                    floatT->getPointerTo()->getPointerTo(),
                                     false
                                  ));
-        auto to_str_mbool = cgm.getLLVMMod()->getOrInsertFunction("to_string_m_bool",
+        auto to_str_mbool = cgm.getLLVMMod()->getOrInsertFunction("mto_string_bool",
                                  llvm::FunctionType::get(
                                     stringT,
-                                    int1T->getPointerTo(),
+                                    int1T->getPointerTo()->getPointerTo(),
                                     false
                                  ));
         // Cannot be just loaded in case of none
-        auto to_str_mstring = cgm.getLLVMMod()->getOrInsertFunction("to_string_m_string",
+        auto to_str_mstring = cgm.getLLVMMod()->getOrInsertFunction("mto_string_string",
                                  llvm::FunctionType::get(
                                     stringT,
-                                    int1T->getPointerTo(),
+                                    stringT->getPointerTo()->getPointerTo(),
                                     false
-                                 ));*/
+                                 ));
         auto str_concat = cgm.getLLVMMod()->getOrInsertFunction("string_Add_Str",
                                  llvm::FunctionType::get(
                                     voidT,
@@ -1301,25 +1305,24 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
                 lval = emitExpr(new ir::StringLiteral(llvm::SMLoc(), noneS, e->getType()));
             }
         }
-        // TODO: Uncomment once ptlib.pt(.o) is being linked 
         else {
-            llvm::report_fatal_error("Concat for maybe is not yet implemented");
-            /*left = llvm::dyn_cast<llvm::LoadInst>(left)->getOperand(0);
-            if(left->getType() == int64T->getPointerTo()) {
-                lval = builder.CreateCall(to_str_mint, { left });
+            auto mleft = llvm::dyn_cast<llvm::LoadInst>(left)->getOperand(0);
+            mleft = llvm::dyn_cast<llvm::LoadInst>(mleft)->getOperand(0);
+            if(left->getType() == int64T) {
+                lval = builder.CreateCall(to_str_mint, { mleft });
             }
-            else if(left->getType() == floatT->getPointerTo()) {
-                lval = builder.CreateCall(to_str_mfloat, { left });
+            else if(left->getType() == floatT) {
+                lval = builder.CreateCall(to_str_mfloat, { mleft });
             }
-            else if(left->getType() == int1T->getPointerTo()) {
-                lval = builder.CreateCall(to_str_mbool, { left });
+            else if(left->getType() == int1T) {
+                lval = builder.CreateCall(to_str_mbool, { mleft });
             }
-            else if(left->getType() == stringT->getPointerTo()) {
-                lval = builder.CreateCall(to_str_mstring, { left });
+            else if(left->getType() == stringT) {
+                lval = builder.CreateCall(to_str_mstring, { mleft });
             }
             else {
                 llvm::report_fatal_error("Unknown type in concat");
-            }*/
+            }
         }
 
         if(!e->getRight()->getType()->isMaybe()) {
@@ -1338,23 +1341,23 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             }
         }
         else {
-            llvm::report_fatal_error("Concat for maybe is not yet implemented");
-            /*right = llvm::dyn_cast<llvm::LoadInst>(right)->getOperand(0);
-            if(right->getType() == int64T->getPointerTo()) {
-                rval = builder.CreateCall(to_str_mint, { right });
+            auto mright = llvm::dyn_cast<llvm::LoadInst>(right)->getOperand(0);
+            mright = llvm::dyn_cast<llvm::LoadInst>(mright)->getOperand(0);
+            if(right->getType() == int64T) {
+                rval = builder.CreateCall(to_str_mint, { mright });
             }
-            else if(right->getType() == floatT->getPointerTo()) {
-                rval = builder.CreateCall(to_str_mfloat, { right });
+            else if(right->getType() == floatT) {
+                rval = builder.CreateCall(to_str_mfloat, { mright });
             }
-            else if(right->getType() == int1T->getPointerTo()) {
-                rval = builder.CreateCall(to_str_mbool, { right });
+            else if(right->getType() == int1T) {
+                rval = builder.CreateCall(to_str_mbool, { mright });
             }
-            else if(right->getType() == stringT->getPointerTo()) {
-                rval = builder.CreateCall(to_str_mstring, { right });
+            else if(right->getType() == stringT) {
+                rval = builder.CreateCall(to_str_mstring, { mright });
             }
             else {
                 llvm::report_fatal_error("Unknown type in concat");
-            }*/
+            }
         }
 
         auto res = builder.CreateAlloca(stringT);
@@ -1815,6 +1818,16 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
 
     ptlibLoader->setupExternLib();
     ptlibLoader->setupLib();
+    //ptlibLoader->setupSourceLib(ptlibMod);
+
+    // Forward declare ptlib functions
+    if(mod != ptlibMod) {
+        for(auto d: ptlibMod->getDecls()) {
+            if(auto f = llvm::dyn_cast<ir::FunctionDecl>(d)) {
+                llvmMod->getOrInsertFunction(f->getName(), createFunctionType(f));
+            }
+        }
+    }
 
     ir::FunctionDecl *entryFun = nullptr;
     std::vector<CGFunction *> funs;
@@ -1982,7 +1995,7 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
         {
             auto *fun = llvm::dyn_cast<ir::FunctionDecl>(decl);
             // This also creates forward declaration
-            CGFunction *cgf = new CGFunction(*this, fun);
+            CGFunction *cgf = new CGFunction(*this, fun, ptlibMod);
             if(fun->getName() == _ENTRY_NAME) {
                 entryFun = fun;
             }
@@ -2126,7 +2139,7 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
     }
 }
 
-llvm::FunctionType *cg::CGFunction::createFunctionType(ir::FunctionDecl *fun) {
+llvm::FunctionType *cg::CodeGen::createFunctionType(ir::FunctionDecl *fun) {
     // FIXME: Handle values passed by reference
     llvm::Type *retType = mapType(fun->getReturnType());
     llvm::SmallVector<llvm::Type *> paramTypes;

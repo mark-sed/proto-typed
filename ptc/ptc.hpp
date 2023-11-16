@@ -35,6 +35,7 @@ private:
     Scanner *scanner;
     bool parsed;
     bool mainMod;
+    bool lib;
 public:
     ModuleInfo(std::string name, bool pathSent=false);
     ~ModuleInfo() {
@@ -51,6 +52,8 @@ public:
     void setScanner(Scanner *s) { scanner = s; }
     bool isParsed() { return parsed; }
     void setParsed(bool p) { parsed = p; }
+    void setLib(bool l) { lib = l; }
+    bool isLib() { return lib; }
 };
 
 extern std::vector<ModuleInfo *> modulesToCompile;

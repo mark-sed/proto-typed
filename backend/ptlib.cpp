@@ -333,7 +333,7 @@ void PTLib::setupLib() {
 
 void PTLib::setupExternLib() {
     // printf
-    auto bytePtrTy = builder.getInt8Ty()->getPointerTo();
+    /*auto bytePtrTy = builder.getInt8Ty()->getPointerTo();
     llvmMod->getOrInsertFunction("printf",
                                  llvm::FunctionType::get(
                                     builder.getInt32Ty(),
@@ -346,5 +346,5 @@ void PTLib::setupExternLib() {
                                     builder.getInt32Ty(),
                                     bytePtrTy,
                                     false
-                                 ));
+                                 ));*/
 }

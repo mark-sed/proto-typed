@@ -1,0 +1,44 @@
+/**
+ * Proto-typed standard library 
+ *
+ * Author: Marek Sedlacek
+ * Copyright (c) 2023 Marek Sedlacek
+ * MIT licensed
+ */
+
+
+/***************************/
+/*--- String functions ----*/
+/***************************/
+
+string mto_string(int? v) {
+    if(v == none) {
+        return "none"
+    }
+    int a = v
+    return to_string(a)
+}
+
+string mto_string(float? v) {
+    if(v == none) {
+        return "none"
+    }
+    float a = v
+    return to_string(a)
+}
+
+string mto_string(bool? v) {
+    if(v == none) {
+        return "none"
+    }
+    bool a = v
+    return to_string(a)
+}
+
+string mto_string(string? v) {
+    if(v == none) {
+        return "none"
+    }
+    string a = v
+    return a
+}
