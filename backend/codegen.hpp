@@ -129,6 +129,8 @@ protected:
 
     llvm::FunctionType *createFunctionType(ir::FunctionDecl *fun);
 
+    llvm::ConstantInt *stringSizeBytes;
+
 public:
     // LLVM versions of PT types
     llvm::Type *voidT;

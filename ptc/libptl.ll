@@ -44,21 +44,6 @@ define i8* @gc_Alloc(i32 %size) {
 	ret i8* %buff
 }
 
-define fastcc void @string_Delete(%string* %this) nounwind {
-	; Check if we need to call 'free'.
-	%1 = getelementptr %string, %string* %this, i32 0, i32 0
-	%2 = load i8*, i8** %1
-	%3 = icmp ne i8* %2, null
-	br i1 %3, label %free_begin, label %free_close
-
-free_begin:
-	call void @GC_free(i8* %2)
-	br label %free_close
-
-free_close:
-	ret void
-}
-
 define fastcc void @string_Resize(%string* %this, i32 %value) {
 	; %output = malloc(%value)
 	%output = call i8* @gc_Alloc(i32 %value)
@@ -252,21 +237,6 @@ define fastcc void @matrix_Create_Default(%matrix* %this) nounwind {
 	%4 = getelementptr %matrix, %matrix* %this, i32 0, i32 3
 	store i32 16, i32* %4
 
-	ret void
-}
-
-define fastcc void @matrix_Delete(%matrix* %this) nounwind {
-	; Check if we need to call 'free'.
-	%1 = getelementptr %matrix, %matrix* %this, i32 0, i32 0
-	%2 = load i8*, i8** %1
-	%3 = icmp ne i8* %2, null
-	br i1 %3, label %free_begin, label %free_close
-
-free_begin:
-	call void @GC_free(i8* %2)
-	br label %free_close
-
-free_close:
 	ret void
 }
 

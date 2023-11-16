@@ -25,6 +25,7 @@
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/StringMap.h"
+#include "llvm/IR/DataLayout.h"
 #include <vector>
 
 using namespace ptc;
@@ -82,6 +83,8 @@ void cg::CodeGen::init() {
     };
     matrixT = llvm::StructType::create(ctx, matrixElements, MATRIX_CSTR);
     matrixTPtr = matrixT->getPointerTo();
+
+    stringSizeBytes = llvm::ConstantInt::get(builder.getInt64Ty(), 16, true);
 }
 
 llvm::Type *cg::CodeGen::convertType(ir::TypeDecl *t) {
@@ -205,11 +208,9 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
                                     builder.getInt64Ty(),
                                     false
                                  ));
-                auto sizeofV = builder.CreateGEP(val->getType()->getPointerTo(), 
-                                llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(val->getType()->getPointerTo())),
-                                llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
-                auto size = builder.CreatePtrToInt(sizeofV, builder.getInt64Ty());
-                auto mem = builder.CreateCall(mallocF, size);
+                llvm::DataLayout* dataLayout = new llvm::DataLayout(cgm.getLLVMMod());
+                auto ts = dataLayout->getTypeAllocSize(val->getType());
+                auto mem = builder.CreateCall(mallocF, llvm::ConstantInt::get(builder.getInt64Ty(), ts, true));
                 builder.CreateStore(mem, locals[decl]);
 
                 builder.CreateBr(assignBB);
@@ -258,11 +259,9 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
                                     builder.getInt64Ty(),
                                     false
                                  ));
-                auto sizeofV = builder.CreateGEP(val->getType()->getPointerTo(), 
-                                llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(val->getType()->getPointerTo())),
-                                llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
-                auto size = builder.CreatePtrToInt(sizeofV, builder.getInt64Ty());
-                auto mem = builder.CreateCall(mallocF, size);
+                llvm::DataLayout* dataLayout = new llvm::DataLayout(cgm.getLLVMMod());
+                auto ts = dataLayout->getTypeAllocSize(val->getType());
+                auto mem = builder.CreateCall(mallocF, llvm::ConstantInt::get(builder.getInt64Ty(), ts, true));
                 auto vPtrPtr = builder.CreateAlloca(t);
                 builder.CreateStore(val, mem);
                 builder.CreateStore(mem, vPtrPtr);
@@ -296,11 +295,9 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
                                     builder.getInt64Ty(),
                                     false
                                  ));
-                auto sizeofV = builder.CreateGEP(val->getType()->getPointerTo(), 
-                                llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(val->getType()->getPointerTo())),
-                                llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
-                auto size = builder.CreatePtrToInt(sizeofV, builder.getInt64Ty());
-                auto mem = builder.CreateCall(mallocF, size);
+                llvm::DataLayout* dataLayout = new llvm::DataLayout(cgm.getLLVMMod());
+                auto ts = dataLayout->getTypeAllocSize(val->getType());
+                auto mem = builder.CreateCall(mallocF, llvm::ConstantInt::get(builder.getInt64Ty(), ts, true));
                 builder.CreateStore(mem, cgm.getGlobals(decl));
 
                 builder.CreateBr(assignBB);
@@ -346,11 +343,9 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
                                 builder.getInt64Ty(),
                                 false
                                 ));
-            auto sizeofV = builder.CreateGEP(val->getType()->getPointerTo(), 
-                            llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(val->getType()->getPointerTo())),
-                            llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
-            auto size = builder.CreatePtrToInt(sizeofV, builder.getInt64Ty());
-            auto mem = builder.CreateCall(mallocF, size);
+            llvm::DataLayout* dataLayout = new llvm::DataLayout(cgm.getLLVMMod());
+            auto ts = dataLayout->getTypeAllocSize(val->getType());
+            auto mem = builder.CreateCall(mallocF, llvm::ConstantInt::get(builder.getInt64Ty(), ts, true));
             builder.CreateStore(mem, formalParams[v]);
 
             builder.CreateBr(assignBB);
@@ -400,11 +395,9 @@ void cg::CGFunction::writeExtVar(CGModule *mod, ir::IR *decl, llvm::Value *val) 
                                     builder.getInt64Ty(),
                                     false
                                  ));
-                auto sizeofV = builder.CreateGEP(val->getType()->getPointerTo(), 
-                                llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(val->getType()->getPointerTo())),
-                                llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
-                auto size = builder.CreatePtrToInt(sizeofV, builder.getInt64Ty());
-                auto mem = builder.CreateCall(mallocF, size);
+                llvm::DataLayout* dataLayout = new llvm::DataLayout(cgm.getLLVMMod());
+                auto ts = dataLayout->getTypeAllocSize(val->getType());
+                auto mem = builder.CreateCall(mallocF, llvm::ConstantInt::get(builder.getInt64Ty(), ts, true));
                 builder.CreateStore(mem, extVar);
 
                 builder.CreateBr(assignBB);
@@ -2094,20 +2087,9 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                             builder.getInt64Ty(),
                             false
                             ));
-        // Check if any = string (v = i8*)
-        llvm::Value *sizeofV = nullptr;
-        if(v->getType() == builder.getInt8Ty()->getPointerTo()) {
-            sizeofV = builder.CreateGEP(stringTPtr->getPointerTo(), 
-                        llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(stringTPtr->getPointerTo())),
-                        llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
-        }
-        else {
-            sizeofV = builder.CreateGEP(v->getType(), 
-                        llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(v->getType())),
-                        llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
-        }
-        auto size = builder.CreatePtrToInt(sizeofV, builder.getInt64Ty());
-        auto mem = builder.CreateCall(mallocF, size);
+        llvm::DataLayout* dataLayout = new llvm::DataLayout(llvmMod);
+        auto ts = dataLayout->getTypeAllocSize(v->getType()->getPointerElementType());
+        auto mem = builder.CreateCall(mallocF, llvm::ConstantInt::get(builder.getInt64Ty(), ts, true));
         auto valLd = builder.CreateLoad(v->getType()->getPointerElementType(), v);
         builder.CreateStore(valLd, mem);
         builder.CreateStore(mem, d);
