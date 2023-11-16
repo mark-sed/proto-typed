@@ -252,7 +252,11 @@ int main(int argc, char *argv[]) {
         std::ifstream code(fileName);
 
         std::string moduleName = std::filesystem::path(fileName).stem();
-        auto scanner = new Scanner(diags, moduleName, moduleInfo->isLib());
+        ir::ModuleDecl *ptlibModDecl = nullptr;
+        if(!moduleInfo->isLib()) {
+            ptlibModDecl = ptlibModule->getModule();
+        }
+        auto scanner = new Scanner(diags, moduleName, ptlibModDecl, moduleInfo->isLib());
         moduleInfo->setScanner(scanner);
         scanner->parse(&code);
         if(parsingMain) {

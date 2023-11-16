@@ -61,7 +61,7 @@ std::string ptc::encodeFunction(std::string name, std::vector<ir::Expr *> params
     }
 }
 
-Scanner::Scanner(Diagnostics &diags, std::string moduleName, bool lib) : currentIR(nullptr), diags(diags), moduleName(moduleName), lib(lib) {
+Scanner::Scanner(Diagnostics &diags, std::string moduleName, ir::ModuleDecl *ptlibMod, bool lib) : currentIR(nullptr), diags(diags), moduleName(moduleName), ptlibMod(ptlibMod), lib(lib) {
     loc = new Parser::location_type();
     init();
 }
@@ -175,66 +175,6 @@ void Scanner::init() {
         currScope->insert(fun);
     }
 
-    if (!lib) {
-        auto params = std::vector<ir::FormalParamDecl *>{
-            new ir::FormalParamDecl(currentIR, llvmloc, "v", this->intType, true)
-        };
-        auto body = std::vector<ir::IR *> {};
-        auto fun = new ir::FunctionDecl(currentIR,
-                                                llvm::SMLoc(),
-                                                "mto_string_int",
-                                                "mto_string",
-                                                this->stringType,
-                                                params,
-                                                body);
-        currScope->insert(fun);
-    }
-
-    if (!lib) {
-        auto params = std::vector<ir::FormalParamDecl *>{
-            new ir::FormalParamDecl(currentIR, llvmloc, "v", this->floatType, true)
-        };
-        auto body = std::vector<ir::IR *> {};
-        auto fun = new ir::FunctionDecl(currentIR,
-                                                llvm::SMLoc(),
-                                                "mto_string_float",
-                                                "mto_string",
-                                                this->stringType,
-                                                params,
-                                                body);
-        currScope->insert(fun);
-    }
-
-    if (!lib) {
-        auto params = std::vector<ir::FormalParamDecl *>{
-            new ir::FormalParamDecl(currentIR, llvmloc, "v", this->boolType, true)
-        };
-        auto body = std::vector<ir::IR *> {};
-        auto fun = new ir::FunctionDecl(currentIR,
-                                                llvm::SMLoc(),
-                                                "mto_string_bool",
-                                                "mto_string",
-                                                this->stringType,
-                                                params,
-                                                body);
-        currScope->insert(fun);
-    }
-
-    if (!lib) {
-        auto params = std::vector<ir::FormalParamDecl *>{
-            new ir::FormalParamDecl(currentIR, llvmloc, "v", this->stringType, true)
-        };
-        auto body = std::vector<ir::IR *> {};
-        auto fun = new ir::FunctionDecl(currentIR,
-                                                llvm::SMLoc(),
-                                                "mto_string_string",
-                                                "mto_string",
-                                                this->stringType,
-                                                params,
-                                                body);
-        currScope->insert(fun);
-    }
-
     {
         auto params = std::vector<ir::FormalParamDecl *>{
             new ir::FormalParamDecl(currentIR, llvmloc, "v", this->stringType, false)
@@ -248,6 +188,14 @@ void Scanner::init() {
                                                 params,
                                                 body);
         currScope->insert(fun);
+    }
+
+    if(!lib) {
+        for(auto d: ptlibMod->getDecls()) {
+            if(auto f = llvm::dyn_cast<ir::FunctionDecl>(d)) {
+                currScope->insert(f);
+            }
+        }
     }
 }
 

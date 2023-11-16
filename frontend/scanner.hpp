@@ -69,10 +69,11 @@ public:
     ptc::Parser::location_type *loc = nullptr;     ///< Current parsing location
     ir::ModuleDecl *mainModule;
     std::string moduleName;
+    ir::ModuleDecl *ptlibMod;
     bool lib;
     Scope *globalScope;
 
-    Scanner(Diagnostics &diags, std::string moduleName, bool lib=false);
+    Scanner(Diagnostics &diags, std::string moduleName, ir::ModuleDecl *ptlibMod, bool lib=false);
     ~Scanner();
 
     /**
