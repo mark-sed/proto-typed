@@ -954,7 +954,7 @@ ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
 
 ir::IR *Scanner::parseIfStmt(ir::Expr *cond, std::vector<ir::IR *> &ifBranch, std::vector<ir::IR *> &elseBranch) {
     LOGMAX("Parsing if statement");
-    if(cond->getType() != boolType) {
+    if(cond->getType() != boolType && cond->getType()->getName() != UNKNOWN_CSTR) {
         diags.report(llvmloc, diag::ERR_IF_COND_MUST_BE_BOOL, cond->getType()->getName());
     }
     auto ifstmt = new ir::IfStatement(currentIR, llvmloc, "if", cond, ifBranch, elseBranch);
@@ -970,7 +970,7 @@ ir::IR *Scanner::parseIfStmt(ir::Expr *cond, std::vector<ir::IR *> &ifBranch, st
 
 ir::IR *Scanner::parseWhile(ir::Expr *cond, std::vector<ir::IR *> &body) {
     LOGMAX("Parsing while");
-    if(cond->getType() != boolType) {
+    if(cond->getType() != boolType && cond->getType()->getName() != UNKNOWN_CSTR) {
         diags.report(llvmloc, diag::ERR_WHILE_COND_MUST_BE_BOOL, cond->getType()->getName());
     }
     auto whl = new ir::WhileStmt(currentIR, llvmloc, "while", cond, body);
@@ -983,7 +983,7 @@ ir::IR *Scanner::parseWhile(ir::Expr *cond, std::vector<ir::IR *> &body) {
 
 ir::IR *Scanner::parseDoWhile(ir::Expr *cond, std::vector<ir::IR *> &body) {
     LOGMAX("Parsing do while");
-    if(cond->getType() != boolType) {
+    if(cond->getType() != boolType && cond->getType()->getName() != UNKNOWN_CSTR) {
         diags.report(llvmloc, diag::ERR_WHILE_COND_MUST_BE_BOOL, cond->getType()->getName());
     }
     auto whl = new ir::WhileStmt(currentIR, llvmloc, "do", cond, body, true);
@@ -996,10 +996,11 @@ ir::IR *Scanner::parseDoWhile(ir::Expr *cond, std::vector<ir::IR *> &body) {
 
 ir::IR *Scanner::parseForeach(ir::Expr *i, ir::Expr *collection, std::vector<ir::IR *> &body, bool defineI) {
     LOGMAX("Parsing foreach");
-    if(collection->getType()->getName() == STRING_CSTR && i->getType()->getName() != STRING_CSTR) {
+    bool hasUnknown = collection->getType()->getName() == UNKNOWN_CSTR || i->getType()->getName() == UNKNOWN_CSTR;
+    if(!hasUnknown && collection->getType()->getName() == STRING_CSTR && i->getType()->getName() != STRING_CSTR) {
         diags.report(llvmloc, diag::ERR_MISMATCHED_FOR_TYPES, i->getType()->getName(), collection->getType()->getName());
     }
-    else if(collection->getType()->isMatrix()) {
+    else if(!hasUnknown && collection->getType()->isMatrix()) {
         if(!collection->getType()->getDecl()) {
             diags.report(llvmloc, diag::ERR_MISMATCHED_FOR_TYPES, i->getType()->getName(), collection->getType()->getName());
         }
@@ -1007,12 +1008,12 @@ ir::IR *Scanner::parseForeach(ir::Expr *i, ir::Expr *collection, std::vector<ir:
             diags.report(llvmloc, diag::ERR_MISMATCHED_FOR_TYPES, i->getType()->getName(), collection->getType()->getName());
         }
     }
-    else if(collection->getType()->getName() == RANGE_CSTR) {
+    else if(!hasUnknown && collection->getType()->getName() == RANGE_CSTR) {
         if(i->getType()->getName() != INT_CSTR) {
             diags.report(llvmloc, diag::ERR_MISMATCHED_RANGE_TYPE);
         }
     }
-    else if(collection->getType()->getName() != STRING_CSTR && i->getType()->getName() != STRING_CSTR){
+    else if(!hasUnknown && collection->getType()->getName() != STRING_CSTR && i->getType()->getName() != STRING_CSTR){
         diags.report(llvmloc, diag::ERR_UNSUPPORTED_FOR_TYPE, collection->getType()->getName());
     }
     auto freach = new ir::ForeachStmt(currentIR, llvmloc, "for", i, collection, body, defineI);
