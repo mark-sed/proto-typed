@@ -1,11 +1,13 @@
 /**
- * Proto-typed standard library 
- *
+ * Proto-typed standard library.
+ * 
+ * This file contains only non-internal functions,
+ * not all functions in std library can be found here.
+ * 
  * Author: Marek Sedlacek
  * Copyright (c) 2023 Marek Sedlacek
  * MIT licensed
  */
-
 
 /***************************/
 /*--- String functions ----*/

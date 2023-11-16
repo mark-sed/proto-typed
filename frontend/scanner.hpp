@@ -19,6 +19,7 @@
 #include "FlexLexer.h"
 #endif
 #include <istream>
+#include <initializer_list>
 #include <vector>
 #include "parser.hpp"
 #include "ir.hpp"
@@ -122,6 +123,8 @@ public:
      * If possible use the diags argument
      */
     void fatal_error(diag::diagmsg d, std::string msg);
+
+    bool defineFun(std::string name, std::string ogName, ir::TypeDecl *retType, std::initializer_list<ir::FormalParamDecl*> params);
 
     void prependDecl(ir::IR *d) {
         LOGMAX("Prepending IR: "+d->debug());

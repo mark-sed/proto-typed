@@ -102,93 +102,26 @@ void Scanner::init() {
     currScope->insert(noneType);
     currScope->insert(varargsType);
 
-     {
-        auto entryParams = std::vector<ir::FormalParamDecl *>{};
-        auto entryBody = std::vector<ir::IR *> {};
-        auto entryFun = new ir::FunctionDecl(currentIR,
-                                                llvm::SMLoc(),
-                                                _ENTRY_NAME,
-                                                _ENTRY_NAME,
-                                                this->voidType,
-                                                entryParams,
-                                                entryBody);
-        currScope->insert(entryFun);
-    }
-
-    {
-        auto printParams = std::vector<ir::FormalParamDecl *>{
-            new ir::FormalParamDecl(currentIR, llvmloc, "v", this->stringType, false)
-        };
-        auto printBody = std::vector<ir::IR *> {};
-        auto printFun = new ir::FunctionDecl(currentIR,
-                                                llvm::SMLoc(),
-                                                "print_string",
-                                                "print",
-                                                this->voidType,
-                                                printParams,
-                                                printBody);
-        currScope->insert(printFun);
-    }
-
-    {
-        auto params = std::vector<ir::FormalParamDecl *>{
-            new ir::FormalParamDecl(currentIR, llvmloc, "v", this->intType, false)
-        };
-        auto body = std::vector<ir::IR *> {};
-        auto fun = new ir::FunctionDecl(currentIR,
-                                                llvm::SMLoc(),
-                                                "to_string_int",
-                                                "to_string",
-                                                this->stringType,
-                                                params,
-                                                body);
-        currScope->insert(fun);
-    }
-
-    {
-        auto params = std::vector<ir::FormalParamDecl *>{
-            new ir::FormalParamDecl(currentIR, llvmloc, "v", this->floatType, false)
-        };
-        auto body = std::vector<ir::IR *> {};
-        auto fun = new ir::FunctionDecl(currentIR,
-                                                llvm::SMLoc(),
-                                                "to_string_float",
-                                                "to_string",
-                                                this->stringType,
-                                                params,
-                                                body);
-        currScope->insert(fun);
-    }
-
-    {
-        auto params = std::vector<ir::FormalParamDecl *>{
-            new ir::FormalParamDecl(currentIR, llvmloc, "v", this->boolType, false)
-        };
-        auto body = std::vector<ir::IR *> {};
-        auto fun = new ir::FunctionDecl(currentIR,
-                                                llvm::SMLoc(),
-                                                "to_string_bool",
-                                                "to_string",
-                                                this->stringType,
-                                                params,
-                                                body);
-        currScope->insert(fun);
-    }
-
-    {
-        auto params = std::vector<ir::FormalParamDecl *>{
-            new ir::FormalParamDecl(currentIR, llvmloc, "v", this->stringType, false)
-        };
-        auto body = std::vector<ir::IR *> {};
-        auto fun = new ir::FunctionDecl(currentIR,
-                                                llvm::SMLoc(),
-                                                "length_string",
-                                                "length",
-                                                this->intType,
-                                                params,
-                                                body);
-        currScope->insert(fun);
-    }
+    // _entry
+    defineFun(_ENTRY_NAME, _ENTRY_NAME, voidType, {});
+    // print
+    defineFun("print_string", "print", voidType, {
+        new ir::FormalParamDecl(currentIR, llvmloc, "v", this->stringType, false)
+    });
+    // to_string
+    defineFun("to_string_int", "to_string", stringType, {
+        new ir::FormalParamDecl(currentIR, llvmloc, "v", this->intType, false)
+    });
+    defineFun("to_string_float", "to_string", stringType, {
+        new ir::FormalParamDecl(currentIR, llvmloc, "v", this->floatType, false)
+    });
+    defineFun("to_string_bool", "to_string", stringType, {
+        new ir::FormalParamDecl(currentIR, llvmloc, "v", this->boolType, false)
+    });
+    // length
+    defineFun("length_string", "length", intType, {
+        new ir::FormalParamDecl(currentIR, llvmloc, "v", this->stringType, false)
+    });
 
     if(!lib) {
         for(auto d: ptlibMod->getDecls()) {
@@ -221,6 +154,19 @@ void Scanner::parse(std::istream *code) {
         std::cout << a->debug() << "\n";
     }*/
 }
+
+bool Scanner::defineFun(std::string name, std::string ogName, ir::TypeDecl *retType, std::initializer_list<ir::FormalParamDecl*> params) {
+    auto body = std::vector<ir::IR *> {};
+    auto fun = new ir::FunctionDecl(currentIR,
+                                    llvm::SMLoc(),
+                                    name,
+                                    ogName,
+                                    retType,
+                                    params,
+                                    body);
+    return currScope->insert(fun);
+}
+
 
 std::string Scanner::escapeString(std::string str) {
     std::stringstream res;
