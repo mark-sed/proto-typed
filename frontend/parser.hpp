@@ -697,7 +697,6 @@ namespace  ptc  {
 
       // stmt
       // block
-      // body
       // scope_body
       // else
       // decllist
@@ -934,13 +933,13 @@ namespace  ptc  {
         S_stmts = 83,                            // stmts
         S_stmts_ne = 84,                         // stmts_ne
         S_block = 85,                            // block
-        S_body = 86,                             // body
-        S_scope_body = 87,                       // scope_body
-        S_import = 88,                           // import
-        S_id_list = 89,                          // id_list
-        S_flowctl = 90,                          // flowctl
-        S_return = 91,                           // return
-        S_for = 92,                              // for
+        S_scope_body = 86,                       // scope_body
+        S_import = 87,                           // import
+        S_id_list = 88,                          // id_list
+        S_flowctl = 89,                          // flowctl
+        S_return = 90,                           // return
+        S_for = 91,                              // for
+        S_for_kw = 92,                           // for_kw
         S_while = 93,                            // while
         S_wh_kw = 94,                            // wh_kw
         S_dowhile = 95,                          // dowhile
@@ -1083,7 +1082,6 @@ namespace  ptc  {
 
       case symbol_kind::S_stmt: // stmt
       case symbol_kind::S_block: // block
-      case symbol_kind::S_body: // body
       case symbol_kind::S_scope_body: // scope_body
       case symbol_kind::S_else: // else
       case symbol_kind::S_decllist: // decllist
@@ -1347,7 +1345,6 @@ switch (yykind)
 
       case symbol_kind::S_stmt: // stmt
       case symbol_kind::S_block: // block
-      case symbol_kind::S_body: // body
       case symbol_kind::S_scope_body: // scope_body
       case symbol_kind::S_else: // else
       case symbol_kind::S_decllist: // decllist
@@ -3049,7 +3046,7 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 2931,     ///< Last index in yytable_.
+      yylast_ = 2889,     ///< Last index in yytable_.
       yynnts_ = 54,  ///< Number of nonterminal symbols.
       yyfinal_ = 125 ///< Termination state number.
     };
@@ -3063,7 +3060,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 3067 "frontend/parser.hpp"
+#line 3064 "frontend/parser.hpp"
 
 
 

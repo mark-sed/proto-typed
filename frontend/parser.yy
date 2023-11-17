@@ -213,7 +213,6 @@
 %type <std::vector<ptc::ir::Expr *> > callarglist
 %type <std::vector<ptc::ir::Expr *> > matsq
 %type <std::vector<ptc::ir::Expr *> > matvals
-%type <std::vector<ptc::ir::IR *> > body
 %type <std::vector<ptc::ir::IR *> > scope_body
 %type <std::vector<ptc::ir::IR *> > block
 %type <std::vector<ptc::ir::IR *> > else
@@ -265,10 +264,6 @@ block : LBR RBR                 { $$ = scanner->parseStmtBody(nullptr); }
       | END LBR stmt RBR END    { $$ = $3; }
       ;
 // Code block or single statement
-body : stmts_ne { $$ = scanner->parseStmtBody($1); }
-     | block    { $$ = $1; }
-     ;
-// Code block or single statement
 scope_body : stmts_ne { $$ = scanner->parseStmtBody($1); scanner->leaveScope(); }
            | block    { $$ = $1; scanner->leaveScope(); }
            ;
@@ -290,13 +285,14 @@ return : KWRETURN       { $$ = scanner->parseReturn(nullptr); }
        ;
 
 // For loop
-for : KWFOR LPAR vardecl COLON expr RPAR body { $$ = scanner->parseForeach($3, $5, $7); }
-    | KWFOR LPAR ID COLON expr RPAR body  { $$ = scanner->parseForeach(scanner->parseVar($3), $5, $7); }
-    | KWFOR LPAR EXT_ID COLON expr RPAR body  { $$ = scanner->parseForeach(scanner->parseVar($3), $5, $7); }
-    | KWFOR LPAR vardecl COLON range RPAR body { $$ = scanner->parseForeach($3, $5, $7); }
-    | KWFOR LPAR ID COLON range RPAR body  { $$ = scanner->parseForeach(scanner->parseVar($3), $5, $7); }
-    | KWFOR LPAR EXT_ID COLON range RPAR body  { $$ = scanner->parseForeach(scanner->parseVar($3), $5, $7); }
+for : for_kw LPAR vardecl COLON expr RPAR scope_body  { $$ = scanner->parseForeach($3, $5, $7); }
+    | for_kw LPAR ID COLON expr RPAR scope_body       { $$ = scanner->parseForeach(scanner->parseVar($3), $5, $7); }
+    | for_kw LPAR EXT_ID COLON expr RPAR scope_body   { $$ = scanner->parseForeach(scanner->parseVar($3), $5, $7); }
+    | for_kw LPAR vardecl COLON range RPAR scope_body { $$ = scanner->parseForeach($3, $5, $7); }
+    | for_kw LPAR ID COLON range RPAR scope_body      { $$ = scanner->parseForeach(scanner->parseVar($3), $5, $7); }
+    | for_kw LPAR EXT_ID COLON range RPAR scope_body  { $$ = scanner->parseForeach(scanner->parseVar($3), $5, $7); }
     ;
+for_kw : KWFOR { scanner->enterBlockScope(); }
 
 // While loop
 while : wh_kw LPAR expr RPAR scope_body { $$ = scanner->parseWhile($3, $5); }
@@ -311,7 +307,7 @@ do_kw : KWDO { scanner->enterBlockScope(); }
 if : if_kw LPAR expr RPAR scope_body else { $$ = scanner->parseIfStmt($3, $5, $6); }
    ;
 else : el_kw scope_body  { $$ = $2; }
-     |              { $$ = scanner->parseStmtBody(nullptr); }
+     |                   { $$ = scanner->parseStmtBody(nullptr); }
      ;
 if_kw : KWIF { scanner->enterBlockScope(); }
 el_kw : KWELSE { scanner->enterBlockScope(); }

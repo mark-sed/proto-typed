@@ -210,6 +210,11 @@ function test_arrays {
     expect_out_eq "43 44 45 \n3 2 1 false true true 0 1.5 2.6 \nLet's find out \n"
 }
 
+function test_statements {
+    expect_pass "statements.pt" "statements"
+    expect_out_eq "3 2 1 4\n"
+}
+
 # Expect fail tests
 
 function test_missing_return {
@@ -226,6 +231,7 @@ function run_all_tests {
     run_test modules
     run_test empty
     run_test arrays
+    run_test statements
 
     # Expect fail tests
     run_test missing_return
