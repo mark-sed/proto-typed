@@ -58,9 +58,9 @@ void bar(string? actstr) {
 string? h1
 bar(h1)
 print(h1)
-//string h2
-//bar(h2)
-//print(h2) // DOES NOT WORK, FIX
+string h2 = "no\n"
+bar(h2)
+print(h2)
 bar("no")
 
 void getK(int? x) {

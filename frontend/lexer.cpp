@@ -340,8 +340,8 @@ int yyFlexLexer::yylex()
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-#define YY_NUM_RULES 89
-#define YY_END_OF_BUFFER 90
+#define YY_NUM_RULES 87
+#define YY_END_OF_BUFFER 88
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -351,24 +351,24 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[170] =
     {   0,
-        0,    0,   90,   88,    1,    4,   88,   77,   31,   36,
+        0,    0,   88,   86,    1,    4,   86,   77,   31,   36,
         6,    7,   30,   27,   50,   28,   49,   29,   78,   78,
-       51,    5,   45,   52,   44,   53,   87,    8,    9,   38,
-       87,   87,   87,   87,   87,   87,   87,   87,   87,   87,
-       87,   87,   87,   87,   10,   37,   11,   39,   43,   18,
+       51,    5,   45,   52,   44,   53,   85,    8,    9,   38,
+       85,   85,   85,   85,   85,   85,   85,   85,   85,   85,
+       85,   85,   85,   85,   10,   37,   11,   39,   43,   18,
        19,   26,   17,   25,   14,   78,   78,   15,   48,    2,
         3,   16,    0,   78,    0,    0,    0,   40,   47,   42,
-       46,   41,   87,    0,   21,   87,   87,   87,   87,   61,
-       87,   87,   87,   87,   57,   87,   35,   87,   33,   76,
-       87,   87,   87,   87,   87,   87,   87,   20,   22,   13,
+       46,   41,   85,    0,   21,   85,   85,   85,   85,   61,
+       85,   85,   85,   85,   57,   85,   35,   85,   33,   76,
+       85,   85,   85,   85,   85,   85,   85,   20,   22,   13,
 
-       12,    3,   84,    0,   80,   81,   79,   23,   24,    0,
-       32,   55,   87,   87,   87,   87,   87,   87,   59,   87,
-       66,   87,   34,   87,   87,   87,   87,   54,   87,   87,
-        0,   82,   86,   69,   87,   87,   87,   58,   87,   87,
-       87,   75,   87,   87,   87,   87,   73,   71,   87,   86,
-       63,   65,   87,   74,   67,   87,   72,   87,   87,   87,
-       60,   87,   56,   62,   68,   70,   87,   64,    0
+       12,    3,   83,    0,   80,   81,   79,   23,   24,    0,
+       32,   55,   85,   85,   85,   85,   85,   85,   59,   85,
+       66,   85,   34,   85,   85,   85,   85,   54,   85,   85,
+        0,   82,   84,   69,   85,   85,   85,   58,   85,   85,
+       85,   75,   85,   85,   85,   85,   73,   71,   85,   84,
+       63,   65,   85,   74,   67,   85,   72,   85,   85,   85,
+       60,   85,   56,   62,   68,   70,   85,   64,    0
     } ;
 
 static const YY_CHAR yy_ec[256] =
@@ -556,13 +556,13 @@ static const flex_int16_t yy_chk[395] =
     } ;
 
 /* Table of booleans, true if rule could match eol. */
-static const flex_int32_t yy_rule_can_match_eol[90] =
+static const flex_int32_t yy_rule_can_match_eol[88] =
     {   0,
 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,     };
+    0, 0, 0, 0, 0, 0, 0, 0,     };
 
 /* The intent behind this definition is that it'll catch
  * any uses of REJECT which flex missed.
@@ -1301,7 +1301,7 @@ YY_RULE_SETUP
 case 83:
 YY_RULE_SETUP
 #line 225 "frontend/lexer.ll"
-{   // Float in scientific notation
+{   // Float
                   yylval->build<double>(std::stod(yytext)); 
                   return token::FLOAT;
                 }
@@ -1309,49 +1309,33 @@ YY_RULE_SETUP
 case 84:
 YY_RULE_SETUP
 #line 229 "frontend/lexer.ll"
-{   // Float
-                  yylval->build<double>(std::stod(yytext)); 
-                  return token::FLOAT;
+{
+                    yylval->build<std::string>(yytext);
+                    return token::EXT_ID;
                 }
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
 #line 233 "frontend/lexer.ll"
-{   // Float
-                  yylval->build<double>(std::stod(yytext));
-                  return token::FLOAT;
+{
+                    yylval->build<std::string>(yytext);
+                    return token::ID;
                 }
 	YY_BREAK
 case 86:
 YY_RULE_SETUP
 #line 237 "frontend/lexer.ll"
 {
-                    yylval->build<std::string>(yytext);
-                    return token::EXT_ID;
+                  auto msg = std::string("ERROR: Unknown token '")+ yytext + std::string("'");
+                  ptc::log::error(msg);
                 }
 	YY_BREAK
 case 87:
 YY_RULE_SETUP
 #line 241 "frontend/lexer.ll"
-{
-                    yylval->build<std::string>(yytext);
-                    return token::ID;
-                }
-	YY_BREAK
-case 88:
-YY_RULE_SETUP
-#line 245 "frontend/lexer.ll"
-{
-                  auto msg = std::string("ERROR: Unknown token '")+ yytext + std::string("'");
-                  ptc::log::error(msg);
-                }
-	YY_BREAK
-case 89:
-YY_RULE_SETUP
-#line 249 "frontend/lexer.ll"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 1355 "frontend/lexer.cpp"
+#line 1339 "frontend/lexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2323,5 +2307,5 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 249 "frontend/lexer.ll"
+#line 241 "frontend/lexer.ll"
 

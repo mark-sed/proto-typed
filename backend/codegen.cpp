@@ -662,7 +662,9 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
     case ir::ExprKind::EX_FLOAT: return llvm::ConstantFP::get(floatT,llvm::dyn_cast<ir::FloatLiteral>(e)->getValue());
     case ir::ExprKind::EX_MATRIX:
     {
+        auto matPtr = builder.CreateAlloca(matrixTPtr);
         auto matobj = builder.CreateAlloca(matrixT);
+        builder.CreateStore(matobj, matPtr);
         auto matrixCreateF = cgm.getLLVMMod()->getOrInsertFunction("matrix_Create_Default", 
                                                       llvm::FunctionType::get(
                                                         voidT,
@@ -677,7 +679,7 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
             llvm::report_fatal_error(("Somehow correctly templated append function was not generated: append_"+mex->getType()->getName()+"_"+mex->getType()->getDecl()->getName()).c_str());
         }
         for(auto v: mex->getValue()) {
-            builder.CreateCall(matrixAppend, {matobj, emitExpr(v)});
+            builder.CreateCall(matrixAppend, {matPtr, emitExpr(v)});
         }
         return builder.CreateLoad(matrixT, matobj);
     }
@@ -1906,7 +1908,9 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                     v->setInitializer(init);
                 }
                 else if(var->getType()->isMatrix()) {
-                    llvm::report_fatal_error("Matrix initialization is not yet implemented");
+                    auto init = llvm::ConstantAggregateZero::get(matrixT);
+                    v->setInitializer(init);
+                    matricesToInit.push_back(std::make_pair(v, llvm::dyn_cast<ir::MatrixLiteral>(value)));
                 }
                 else {
                     llvm::report_fatal_error("Global variable initializer is not a constant");
@@ -2088,6 +2092,59 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
     // Init matrices
     for(auto m: matricesToInit) {
         builder.CreateCall(matrixCreateF, { m.first });
+        if(m.second) {
+            auto mex = m.second;
+            // TODO: change to non cyclic call once add matrix is created or init matrix
+            auto mPtr = builder.CreateAlloca(matrixTPtr);
+            builder.CreateStore(m.first, mPtr);
+            auto matrixAppend = llvmMod->getFunction("append_"+mex->getType()->getName()+"_"+mex->getType()->getDecl()->getName());
+            if(!matrixAppend) {
+                llvm::report_fatal_error(("Somehow correctly templated append function was not generated: append_"+mex->getType()->getName()+"_"+mex->getType()->getDecl()->getName()).c_str());
+            }
+            for(auto v: mex->getValue()) {
+                llvm::Value *intV = nullptr;
+                if(auto e = llvm::dyn_cast<ir::IntLiteral>(v)) {
+                    intV = llvm::ConstantInt::get(int64T, e->getValue());
+                }
+                else if(auto e = llvm::dyn_cast<ir::BoolLiteral>(v)) {
+                    intV = llvm::ConstantInt::get(int1T, e->getValue());
+                }
+                else if(auto e = llvm::dyn_cast<ir::FloatLiteral>(v)) {
+                    intV = llvm::ConstantFP::get(floatT, e->getValue());
+                }
+                else if(llvm::isa<ir::NoneLiteral>(v)) {
+                    intV = llvm::ConstantPointerNull::get(builder.getInt8Ty()->getPointerTo());
+                }
+                else if(auto e = llvm::dyn_cast<ir::StringLiteral>(v)) {
+                    llvm::GlobalVariable *glv = new llvm::GlobalVariable(*llvmMod,
+                                                            builder.getInt8Ty()->getPointerTo(),
+                                                            false,
+                                                            llvm::GlobalValue::PrivateLinkage,
+                                                            nullptr);
+                    glv->setInitializer(builder.CreateGlobalStringPtr(e->getValue().c_str(), "", 0, llvmMod));
+                    
+                    auto strobj = builder.CreateAlloca(stringT);
+
+                    auto stringInitF = llvmMod->getOrInsertFunction("string_Create_Init", 
+                                                                llvm::FunctionType::get(
+                                                                    voidT,
+                                                                    {
+                                                                        stringTPtr,
+                                                                        builder.getInt8Ty()->getPointerTo()
+                                                                    },
+                                                                    false
+                                                                ));
+                    // Init string
+                    auto vloaded = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), glv);
+                    builder.CreateCall(stringInitF, { strobj, vloaded });
+                    intV = builder.CreateLoad(stringT, strobj);
+                }
+                else {
+                    llvm::report_fatal_error("Global matrix initializer has to be a constant");
+                }
+                builder.CreateCall(matrixAppend, {mPtr, intV});
+            }
+        }
     }
 
     // Init maybes

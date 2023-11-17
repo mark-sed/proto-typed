@@ -8,7 +8,7 @@ This repository contains Proto-typed Compiler (ptc) and the language definition 
 
 #### Table of contents
 - [Proto-typed Project](#proto-typed-project)
-- [Proto-typed Compiler](#proto-typed-compiler)
+- [How to run programs](#how-to-run-programs)
   - [Download](#download)
   - [Installation from source](#installation-from-source)
   - [Compiling and running programs](#compiling-and-running-programs)
@@ -18,10 +18,12 @@ This repository contains Proto-typed Compiler (ptc) and the language definition 
   - [Syntax](#syntax)
   - [Semantics](#semantics)
   - [Standard library](#standard-library)
+- [Proto-typed Compiler](#proto-typed-compiler)
+  - [Known issues](#known-issues)
 
-# Proto-typed Compiler
+# How to run programs
 
-Proto-typed compiler (ptc) uses LLVM and can target any of big amount of targets LLVM can compile for. The ptc also relies on LibC. 
+Currently only the ptc compiler is available, but there are plans for tool to simplify the whole compilation and linking process.
 
 ## Download
 
@@ -115,6 +117,8 @@ print("Fibonacci for index "++index++" is "++fib(index))
 Proto-typed offers simple types and user defined structures. These types can then be constructed into arrays or maybe versions.
 
 All variables are initialized to their default value if not initialized explicitly.
+
+There are in fact 2 groups of types, the first does not require runtime initialization (`int`, `float`, `bool` and value `none`) and the second, which required runtime initialization (`string`, maybe type including `any`, arrays and `struct`).
 
 ### Int
 
@@ -537,3 +541,19 @@ These functions are templated for any array (matrix) type, the type `T` stands f
 * __`length`__ - Array length.
     * `int length(T a)` - Returns the length of the array `a`. 
 
+# Proto-typed compiler
+Proto-typed compiler (ptc) uses LLVM and can target any of big amount of targets LLVM can compile for. The ptc also relies on LibC. 
+
+## Known issues
+
+If you encounter any issues not mentioned here, you can report it in GitHub [issues](https://github.com/mark-sed/proto-typed/issues) section.
+
+### Global array initialization in declaration
+Because of some types requiring initialization, only non-initialized types can be assigned to a global variable in its declaration, but a workaround is to assign it after the declaration:
+```c
+int a = 4
+int[] arr_wrong = [a, a+1, a+2] // Won't currently work
+
+int[] arr_corr
+arr_corr = [a, a+1, a+2] // Will work
+```

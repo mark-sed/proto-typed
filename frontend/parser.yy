@@ -786,9 +786,9 @@ mattype : ID matsq               { $$ = scanner->parseMatrixType($1, $2); }
         | funtype KWMAYBE matsq
         ;
 matsq : LSQ RSQ                 { $$ = scanner->parseMatrixSize(scanner->parseInt(-1)); }
-      | LSQ int_val RSQ         { $$ = scanner->parseMatrixSize($2); }
+      //| LSQ int_val RSQ         { $$ = scanner->parseMatrixSize($2); }
       | LSQ RSQ matsq           { $$ = scanner->parseAddMatrixSize($3, scanner->parseInt(-1)); }
-      | LSQ int_val RSQ matsq   { $$ = scanner->parseAddMatrixSize($4, $2); }
+      //| LSQ int_val RSQ matsq   { $$ = scanner->parseAddMatrixSize($4, $2); }
       ;
 
 // Variable types

@@ -183,7 +183,7 @@ true\n48\n6.2\nnone\ntrue\n48\n6.2\nnone\n" "maybes"
 
 function test_any {
     expect_pass "any.pt" "any"
-    expect_out_eq "hello\nhi\ntrue\n99\n5.25\n5.25\nstr\nstr\n7542\n0\n" "any"
+    expect_out_eq "hello\nhi\ntrue\n99\n5.25\n5.25\nstr\nstr\nno\n7542\n0\n" "any"
 }
 
 function test_structs {
@@ -201,8 +201,13 @@ function test_modules {
 }
 
 function test_empty {
-    expect_pass "empty.pt" empty
+    expect_pass "empty.pt" "empty"
     expect_out_eq ""
+}
+
+function test_arrays {
+    expect_pass "arrays.pt" "arrays"
+    expect_out_eq "43 44 45 \n3 2 1 false true true 0 1.5 2.6 \nLet's find out \n"
 }
 
 # Expect fail tests
@@ -220,6 +225,7 @@ function run_all_tests {
     run_test structs
     run_test modules
     run_test empty
+    run_test arrays
 
     # Expect fail tests
     run_test missing_return

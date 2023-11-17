@@ -1,0 +1,28 @@
+int a = 42
+int[] arr 
+arr = [1+a, a+2, a+3]
+
+for(int i : arr) {
+    print(i++" ")
+}
+
+int[] int_arr = [3, 2, 1]
+bool[] bool_arr = [false, true, true]
+float[] float_arr = [0.0, 1.5, 2.6]
+string[] str_arr = ["Let's","find","out"]
+
+print("\n")
+for(int ii : int_arr) {
+    print(ii++" ")
+}
+for(bool bi : bool_arr) {
+    print(bi++" ")
+}
+for(float fi : float_arr) {
+    print(fi++" ")
+}
+print("\n")
+for(string si : str_arr) {
+    print(si++" ")
+}
+print("\n")
