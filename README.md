@@ -276,6 +276,22 @@ void pow2(int? x) {
 pow2(42)
 ```
 
+But there is still a difference when passing maybe and actual value to a function. Maybe to maybe assignment will work only for actual maybe value passed in. In the following example the assignment in function `getK` assigns address to passed in argument, but when the passed in value is not a maybe type, what is modified is the address of parameter (`x`), not the address of passed in variable (`k`):
+```c
+void getK(int? x) {
+    any KVAL = 7542
+    x = KVAL
+}
+
+int? maybe_k
+int k
+
+getK(maybe_k)
+getK(k)
+
+print(maybe_k++" "++k) // 7542 0
+```
+
 When assigning a maybe value to another maybe value, both of these will contain the same address and therefore the same value:
 ```c
 string? a = "hi"

@@ -6,13 +6,10 @@ c = b
 print(c) // hello\n 
 
 void anyfun() {
-
-/* REMOVED BECAUSE OF A BUG
     any g
     g = "hi\n"
     string b = g
     print(b)
-*/
 
     any i
     i = 42
@@ -45,3 +42,36 @@ void foo(any floatAny) {
 
 any f = 5.25
 foo(f) // 5.25\n
+
+any astring
+astring = 1
+astring = "str\n"
+string? actstr
+actstr = astring
+print(actstr++"")
+
+void bar(string? actstr) {
+    any astring = "str\n"
+    actstr = astring
+}
+
+string? h1
+bar(h1)
+print(h1)
+//string h2
+//bar(h2)
+//print(h2) // DOES NOT WORK, FIX
+bar("no")
+
+void getK(int? x) {
+    any KVAL = 7542
+    x = KVAL
+}
+
+int? maybe_k
+int k
+
+getK(maybe_k)
+getK(k)
+
+print(maybe_k++"\n"++k++"\n") // 7542\n0\n

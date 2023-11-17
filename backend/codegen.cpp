@@ -173,7 +173,7 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
         llvm::isa<ir::FormalParamDecl>(decl)) &&
         "Declaration must be variable or formal parameter");
     assert(val && "Value is nullptr");
-    LOGMAX("Read var: "+decl->debug());
+    LOGMAX("Write local var: "+decl->debug());
     currDef[BB].defs[decl] = val;
     // Check if it is a parameter
     if (auto *fpd = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
@@ -196,7 +196,7 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
             if(vrdec->getType()->isMaybe() && !llvm::isa<llvm::ConstantPointerNull>(val) && !llvm::isa<llvm::PointerType>(val->getType())) {
                 llvm::BasicBlock *allocBB = llvm::BasicBlock::Create(ctx, "maybe.alloc", llvmFun);
                 llvm::BasicBlock *assignBB = llvm::BasicBlock::Create(ctx, "maybe.assign", llvmFun);
-                
+
                 auto ptrVal = builder.CreateLoad(mapType(vrdec->getType()), locals[decl]);
                 auto isNone = builder.CreateICmpEQ(ptrVal, llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(mapType(vrdec->getType()))));
                 builder.CreateCondBr(isNone, allocBB, assignBB);
@@ -269,6 +269,17 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
             }
             else {
                 auto vPtr = builder.CreateAlloca(t);
+                // Check if any to bitcast //TODO: Remove once as is implemented 
+                if(val->getType() == builder.getInt8Ty()) {
+                    if(auto li = llvm::dyn_cast<llvm::LoadInst>(val)) {
+                        auto emEx = li->getOperand(0);
+                        auto casted = builder.CreateBitCast(emEx, mapType(decl)->getPointerTo());
+                        val = builder.CreateLoad(mapType(decl), casted);
+                    }
+                    else {
+                        llvm::report_fatal_error("Cannot cast any type for parameter");
+                    }
+                }
                 builder.CreateStore(val, vPtr);
                 locals[decl] = vPtr;
             }
