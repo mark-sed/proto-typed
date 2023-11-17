@@ -248,7 +248,9 @@ int main(int argc, char *argv[]) {
 
         srcMgr.AddNewSourceBuffer(std::move(*fileOrErr), llvm::SMLoc());
 
-        // TODO: use SourceMgr
+        std::ifstream t(fileName); // Has to be done twice
+        std::string codeAsString((std::istreambuf_iterator<char>(t)),
+                                std::istreambuf_iterator<char>());
         std::ifstream code(fileName);
 
         std::string moduleName = std::filesystem::path(fileName).stem();
@@ -256,7 +258,7 @@ int main(int argc, char *argv[]) {
         if(!moduleInfo->isLib()) {
             ptlibModDecl = ptlibModule->getModule();
         }
-        auto scanner = new Scanner(diags, moduleName, ptlibModDecl, moduleInfo->isLib());
+        auto scanner = new Scanner(diags, codeAsString, moduleName, fileName, ptlibModDecl, moduleInfo->isLib());
         moduleInfo->setScanner(scanner);
         scanner->parse(&code);
         if(parsingMain) {

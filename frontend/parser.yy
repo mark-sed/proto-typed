@@ -811,6 +811,6 @@ type : KWINT KWMAYBE    { $$ = scanner->sym_lookup(INT_CSTR, true, true); }
 
 /* Error method */
 void ptc::Parser::error(const location_type &l, const std::string &err_message) {
-    auto msg = std::to_string(scanner->loc->begin.line) + ":" + std::to_string(scanner->loc->begin.column) + ": " + err_message;
+    auto msg = std::to_string(scanner->llvmloc->begin.line) + ":" + std::to_string(scanner->llvmloc->begin.column) + ": " + err_message;
     scanner->fatal_error(ptc::diag::ERR_SYNTAX, msg);
 }

@@ -8,6 +8,7 @@
  */
 
 #include "codegen.hpp"
+#include "parser.hpp"
 #include "logging.hpp"
 #include "utils.hpp"
 #include "scanner.hpp"
@@ -1308,7 +1309,7 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             }
             else if(e->getLeft()->getType()->getName() == NONETYPE_CSTR) {
                 std::string noneS = "none";
-                lval = emitExpr(new ir::StringLiteral(llvm::SMLoc(), noneS, e->getType()));
+                lval = emitExpr(new ir::StringLiteral(ir::SourceInfo(), noneS, e->getType()));
             }
         }
         else {
@@ -1343,7 +1344,7 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             }
             else if(e->getRight()->getType()->getName() == NONETYPE_CSTR) {
                 std::string noneS = "none";
-                rval = emitExpr(new ir::StringLiteral(llvm::SMLoc(), noneS, e->getType()));
+                rval = emitExpr(new ir::StringLiteral(ir::SourceInfo(), noneS, e->getType()));
             }
         }
         else {
@@ -1395,7 +1396,7 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         else {
             // string
             std::string emstr = "";
-            auto resStrIR = new ir::StringLiteral(llvm::SMLoc(), emstr, e->getLeft()->getType());
+            auto resStrIR = new ir::StringLiteral(ir::SourceInfo(), emstr, e->getLeft()->getType());
             auto resStr = emitExpr(resStrIR);
             delete resStrIR;
             auto resStrPtr = llvm::dyn_cast<llvm::LoadInst>(resStr)->getOperand(0);
@@ -1578,7 +1579,7 @@ void cg::CGFunction::emitStmt(ir::ForeachStmt *stmt) {
         else {
             // string
             std::string emstr = "";
-            auto resStrIR = new ir::StringLiteral(llvm::SMLoc(), emstr, stmt->getCollection()->getType());
+            auto resStrIR = new ir::StringLiteral(ir::SourceInfo(), emstr, stmt->getCollection()->getType());
             auto resStr = emitExpr(resStrIR);
             delete resStrIR;
             auto resStrPtr = llvm::dyn_cast<llvm::LoadInst>(resStr)->getOperand(0);

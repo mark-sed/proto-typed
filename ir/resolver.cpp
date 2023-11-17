@@ -9,6 +9,7 @@
  */
 
 #include "resolver.hpp"
+#include "parser.hpp"
 #include "scanner.hpp"
 #include "llvm/Support/Casting.h"
 #include <initializer_list>
@@ -16,7 +17,7 @@
 
 using namespace ptc;
 
-void UnresolvedSymbolResolver::resolve(ir::Expr * expr, llvm::SMLoc loc) {
+void UnresolvedSymbolResolver::resolve(ir::Expr * expr, ir::SourceInfo loc) {
     if(auto e = llvm::dyn_cast<ir::FunctionCall>(expr)) {
         for(auto a : e->getParams()) {
             resolve(a, loc);
@@ -265,7 +266,7 @@ ModuleInfo *ExternalSymbolResolver::getModule(std::string name) {
     return nullptr;
 }
 
-void ExternalSymbolResolver::resolve(ir::Expr *expr, llvm::SMLoc loc) {
+void ExternalSymbolResolver::resolve(ir::Expr *expr, ir::SourceInfo loc) {
     if(auto e = llvm::dyn_cast<ir::ExternalSymbolAccess>(expr)) {
         LOGMAX("Resolving external symbol "+e->debug());
         ModuleInfo *symbMod = getModule(e->getModuleName());

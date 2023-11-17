@@ -586,7 +586,7 @@ static const flex_int32_t yy_rule_can_match_eol[88] =
 #undef YY_DECL
 #define YY_DECL int ptc::Scanner::yylex(ptc::Parser::semantic_type * const lval, ptc::Parser::location_type *location)
 
-#define YY_USER_ACTION loc->step(); loc->columns(yyleng);
+#define YY_USER_ACTION llvmloc->step(); llvmloc->columns(yyleng); cread();
 
 // Typedef to shorten scope
 using token = ptc::Parser::token;
@@ -815,7 +815,8 @@ YY_RULE_SETUP
                     int c; 
                     while((c = yyinput()) != 0) {
                         if(c == '\n') {
-                            loc->lines();
+                            llvmloc->lines();
+                            nl();
                         }
                         else if(c == '*') {
                             if((c = yyinput()) == '/')
@@ -828,361 +829,362 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 62 "frontend/lexer.ll"
+#line 63 "frontend/lexer.ll"
 { /* Line comment */ ; }
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 63 "frontend/lexer.ll"
+#line 64 "frontend/lexer.ll"
 {
-                  loc->lines();
+                  llvmloc->lines();
+                  nl();
                   return token::END;
                 }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 67 "frontend/lexer.ll"
+#line 69 "frontend/lexer.ll"
 { return token::END; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 69 "frontend/lexer.ll"
+#line 71 "frontend/lexer.ll"
 { return token::LPAR; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 70 "frontend/lexer.ll"
+#line 72 "frontend/lexer.ll"
 { return token::RPAR; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 71 "frontend/lexer.ll"
+#line 73 "frontend/lexer.ll"
 { return token::LSQ; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 72 "frontend/lexer.ll"
+#line 74 "frontend/lexer.ll"
 { return token::RSQ; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 73 "frontend/lexer.ll"
+#line 75 "frontend/lexer.ll"
 { return token::LBR; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 74 "frontend/lexer.ll"
+#line 76 "frontend/lexer.ll"
 { return token::RBR; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 76 "frontend/lexer.ll"
+#line 78 "frontend/lexer.ll"
 { return token::SETCONCAT; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 77 "frontend/lexer.ll"
+#line 79 "frontend/lexer.ll"
 { return token::SETPOW; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 78 "frontend/lexer.ll"
+#line 80 "frontend/lexer.ll"
 { return token::SETPLUS; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 79 "frontend/lexer.ll"
+#line 81 "frontend/lexer.ll"
 { return token::SETMINUS; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 80 "frontend/lexer.ll"
+#line 82 "frontend/lexer.ll"
 { return token::SETDIV; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 81 "frontend/lexer.ll"
+#line 83 "frontend/lexer.ll"
 { return token::SETMUL; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 82 "frontend/lexer.ll"
+#line 84 "frontend/lexer.ll"
 { return token::SETMOD; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 84 "frontend/lexer.ll"
+#line 86 "frontend/lexer.ll"
 { return token::SETBAND; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 85 "frontend/lexer.ll"
+#line 87 "frontend/lexer.ll"
 { return token::SETBOR; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 86 "frontend/lexer.ll"
+#line 88 "frontend/lexer.ll"
 { return token::SETBXOR; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 87 "frontend/lexer.ll"
+#line 89 "frontend/lexer.ll"
 { return token::SETBNOT; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 88 "frontend/lexer.ll"
+#line 90 "frontend/lexer.ll"
 { return token::SETBLSHFT; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 89 "frontend/lexer.ll"
+#line 91 "frontend/lexer.ll"
 { return token::SETBRSHFT; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 91 "frontend/lexer.ll"
+#line 93 "frontend/lexer.ll"
 { return token::CONCAT; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 92 "frontend/lexer.ll"
+#line 94 "frontend/lexer.ll"
 { return token::POW; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 93 "frontend/lexer.ll"
+#line 95 "frontend/lexer.ll"
 { return token::PLUS; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 94 "frontend/lexer.ll"
+#line 96 "frontend/lexer.ll"
 { return token::MINUS; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 95 "frontend/lexer.ll"
+#line 97 "frontend/lexer.ll"
 { return token::DIV; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 96 "frontend/lexer.ll"
+#line 98 "frontend/lexer.ll"
 { return token::MUL; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 97 "frontend/lexer.ll"
+#line 99 "frontend/lexer.ll"
 { return token::MOD; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 99 "frontend/lexer.ll"
+#line 101 "frontend/lexer.ll"
 { return token::LAND; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 100 "frontend/lexer.ll"
+#line 102 "frontend/lexer.ll"
 { return token::LOR; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 101 "frontend/lexer.ll"
+#line 103 "frontend/lexer.ll"
 { return token::LNOT; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 102 "frontend/lexer.ll"
+#line 104 "frontend/lexer.ll"
 { return token::IN; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 104 "frontend/lexer.ll"
+#line 106 "frontend/lexer.ll"
 { return token::BAND; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 105 "frontend/lexer.ll"
+#line 107 "frontend/lexer.ll"
 { return token::BOR; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 106 "frontend/lexer.ll"
+#line 108 "frontend/lexer.ll"
 { return token::BXOR; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 107 "frontend/lexer.ll"
+#line 109 "frontend/lexer.ll"
 { return token::BNOT; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 108 "frontend/lexer.ll"
+#line 110 "frontend/lexer.ll"
 { return token::BLSHFT; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 109 "frontend/lexer.ll"
+#line 111 "frontend/lexer.ll"
 { return token::BRSHFT; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 111 "frontend/lexer.ll"
+#line 113 "frontend/lexer.ll"
 { return token::EQ; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 112 "frontend/lexer.ll"
+#line 114 "frontend/lexer.ll"
 { return token::NEQ; }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 113 "frontend/lexer.ll"
+#line 115 "frontend/lexer.ll"
 { return token::BT; }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 114 "frontend/lexer.ll"
+#line 116 "frontend/lexer.ll"
 { return token::LT; }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 115 "frontend/lexer.ll"
+#line 117 "frontend/lexer.ll"
 { return token::BEQ; }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 116 "frontend/lexer.ll"
+#line 118 "frontend/lexer.ll"
 { return token::LEQ; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 118 "frontend/lexer.ll"
+#line 120 "frontend/lexer.ll"
 { return token::RANGE; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 119 "frontend/lexer.ll"
+#line 121 "frontend/lexer.ll"
 { return token::DOT; }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 120 "frontend/lexer.ll"
+#line 122 "frontend/lexer.ll"
 { return token::COMMA; }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 121 "frontend/lexer.ll"
+#line 123 "frontend/lexer.ll"
 { return token::COLON; }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 123 "frontend/lexer.ll"
+#line 125 "frontend/lexer.ll"
 { return token::SET; }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 124 "frontend/lexer.ll"
+#line 126 "frontend/lexer.ll"
 { return token::KWMAYBE; }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 126 "frontend/lexer.ll"
+#line 128 "frontend/lexer.ll"
 { return token::KWVAR; }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 127 "frontend/lexer.ll"
+#line 129 "frontend/lexer.ll"
 { return token::KWANY; }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 128 "frontend/lexer.ll"
+#line 130 "frontend/lexer.ll"
 { return token::KWIMPORT; }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 129 "frontend/lexer.ll"
+#line 131 "frontend/lexer.ll"
 { return token::KWIF; }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 130 "frontend/lexer.ll"
+#line 132 "frontend/lexer.ll"
 { return token::KWELSE; }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 131 "frontend/lexer.ll"
+#line 133 "frontend/lexer.ll"
 { return token::KWFOR; }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 132 "frontend/lexer.ll"
+#line 134 "frontend/lexer.ll"
 { return token::KWWHILE; }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 133 "frontend/lexer.ll"
+#line 135 "frontend/lexer.ll"
 { return token::KWDO; }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 134 "frontend/lexer.ll"
+#line 136 "frontend/lexer.ll"
 { return token::KWRETURN; }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 135 "frontend/lexer.ll"
+#line 137 "frontend/lexer.ll"
 { return token::KWBREAK; }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 136 "frontend/lexer.ll"
+#line 138 "frontend/lexer.ll"
 { return token::KWCONTINUE; }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 137 "frontend/lexer.ll"
+#line 139 "frontend/lexer.ll"
 { return token::KWCONST; }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 138 "frontend/lexer.ll"
+#line 140 "frontend/lexer.ll"
 { return token::KWINT; }
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 139 "frontend/lexer.ll"
+#line 141 "frontend/lexer.ll"
 { return token::KWFLOAT; }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 140 "frontend/lexer.ll"
+#line 142 "frontend/lexer.ll"
 { return token::KWSTRING; }
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 141 "frontend/lexer.ll"
+#line 143 "frontend/lexer.ll"
 { return token::KWBOOL; }
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 142 "frontend/lexer.ll"
+#line 144 "frontend/lexer.ll"
 { return token::KWSTRUCT; }
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 143 "frontend/lexer.ll"
+#line 145 "frontend/lexer.ll"
 { return token::KWVOID; }
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 144 "frontend/lexer.ll"
+#line 146 "frontend/lexer.ll"
 { return token::KWRANGE; }
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 146 "frontend/lexer.ll"
+#line 148 "frontend/lexer.ll"
 {
                   yylval->emplace<bool>(true);
                   return token::BOOL; 
@@ -1190,7 +1192,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 150 "frontend/lexer.ll"
+#line 152 "frontend/lexer.ll"
 {
                   yylval->emplace<bool>(false);
                   return token::BOOL; 
@@ -1198,7 +1200,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 154 "frontend/lexer.ll"
+#line 156 "frontend/lexer.ll"
 {
                   //yylval->emplace<>();
                   return token::NONE; 
@@ -1206,7 +1208,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 158 "frontend/lexer.ll"
+#line 160 "frontend/lexer.ll"
 { // Raw string
                   std::string txt;
                   int c;
@@ -1233,7 +1235,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 181 "frontend/lexer.ll"
+#line 183 "frontend/lexer.ll"
 { // String
                   std::string txt;
                   int c;
@@ -1256,7 +1258,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 201 "frontend/lexer.ll"
+#line 203 "frontend/lexer.ll"
 { /* Integer (long) */
                   // atol can be used since syntactical analysis was done here
                   yylval->emplace<long>(atol(yytext));
@@ -1265,7 +1267,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
-#line 206 "frontend/lexer.ll"
+#line 208 "frontend/lexer.ll"
 { /* Hex Integer (long) */
                   // atol can be used since syntactical analysis was done here
                   yylval->emplace<long>(std::strtol(yytext, nullptr, 16));
@@ -1274,7 +1276,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
-#line 211 "frontend/lexer.ll"
+#line 213 "frontend/lexer.ll"
 { /* Binary Integer (long) */
                   // atol can be used since syntactical analysis was done here
                   yylval->emplace<long>(std::strtol(&(yytext[2]), nullptr, 2));
@@ -1283,7 +1285,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
-#line 216 "frontend/lexer.ll"
+#line 218 "frontend/lexer.ll"
 { /* Octal Integer (long) */
                   // atol can be used since syntactical analysis was done here
                   yylval->emplace<long>(std::strtol(&(yytext[2]), nullptr, 8));
@@ -1292,7 +1294,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 221 "frontend/lexer.ll"
+#line 223 "frontend/lexer.ll"
 {   // Float in scientific notation
                   yylval->build<double>(std::stod(yytext)); 
                   return token::FLOAT;
@@ -1300,7 +1302,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 83:
 YY_RULE_SETUP
-#line 225 "frontend/lexer.ll"
+#line 227 "frontend/lexer.ll"
 {   // Float
                   yylval->build<double>(std::stod(yytext)); 
                   return token::FLOAT;
@@ -1308,7 +1310,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 84:
 YY_RULE_SETUP
-#line 229 "frontend/lexer.ll"
+#line 231 "frontend/lexer.ll"
 {
                     yylval->build<std::string>(yytext);
                     return token::EXT_ID;
@@ -1316,7 +1318,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
-#line 233 "frontend/lexer.ll"
+#line 235 "frontend/lexer.ll"
 {
                     yylval->build<std::string>(yytext);
                     return token::ID;
@@ -1324,7 +1326,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 86:
 YY_RULE_SETUP
-#line 237 "frontend/lexer.ll"
+#line 239 "frontend/lexer.ll"
 {
                   auto msg = std::string("ERROR: Unknown token '")+ yytext + std::string("'");
                   ptc::log::error(msg);
@@ -1332,10 +1334,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 87:
 YY_RULE_SETUP
-#line 241 "frontend/lexer.ll"
+#line 243 "frontend/lexer.ll"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 1339 "frontend/lexer.cpp"
+#line 1341 "frontend/lexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2307,5 +2309,5 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 241 "frontend/lexer.ll"
+#line 243 "frontend/lexer.ll"
 

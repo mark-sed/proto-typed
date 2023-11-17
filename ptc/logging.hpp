@@ -11,6 +11,8 @@
 #ifndef _LOGGING_HPP_
 #define _LOGGING_HPP_
 
+#include "parser.hpp"
+#include "ir.hpp"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/Support/FormatVariadic.h"
 #include "llvm/Support/SMLoc.h"
@@ -62,11 +64,20 @@ public:
      * @param arguments Arguments to fill in report message if needed
      */
     template <typename... Args>
-    void report(llvm::SMLoc loc, unsigned diagID, Args &&... arguments) {
+    void report(ir::SourceInfo loc, unsigned diagID, Args &&... arguments) {
         std::string msg = llvm::formatv(getDiagnosticText(diagID),
                       std::forward<Args>(arguments)...).str();
         llvm::SourceMgr::DiagKind kind = getDiagnosticKind(diagID);
-        srcMgr.PrintMessage(loc, kind, msg);
+        // llvm::SMLoc(), kind, msg
+        llvm::SmallVector<std::pair<unsigned, unsigned>, 4> ColRanges;
+        ColRanges.push_back(std::make_pair(loc.l_end - loc.l_start,
+                                           loc.c_end - loc.l_end));
+        auto smdiag = llvm::SMDiagnostic(srcMgr, llvm::SMLoc(), 
+                                          loc.filename, loc.l_start,
+                                          loc.c_start, kind, msg, 
+                                          loc.snippet,
+                                          ColRanges);
+        srcMgr.PrintMessage(llvm::errs(), smdiag);
         numErrors += (kind == llvm::SourceMgr::DK_Error);
     }
 };

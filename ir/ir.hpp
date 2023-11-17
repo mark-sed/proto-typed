@@ -118,6 +118,18 @@ enum OperatorKind {
     OP_UNKNOWN
 };
 
+struct SourceInfo {
+    int l_start;
+    int c_start;
+    int l_end;
+    int c_end;
+    std::string filename;
+    std::string snippet;
+    SourceInfo(std::string filename, int line, int start, int line_end, int c_end, std::string snippet) 
+        : l_start(line), c_start(start), l_end(line_end), c_end(c_end), filename(filename), snippet(snippet) {}
+    SourceInfo() {}
+};
+
 /**
  * Parent class for all IR objects - declarations
  */
@@ -126,21 +138,22 @@ private:
     const IRKind kind;
 protected:
     IR *enclosing_ir;
-    llvm::SMLoc loc;
     std::string name;
+    SourceInfo loc;
 public:
-    IR(IRKind kind, IR *enclosing_ir, llvm::SMLoc loc, std::string name) : kind(kind),
-                                                                               enclosing_ir(enclosing_ir),
-                                                                               loc(loc),
-                                                                               name(name) {
+    IR(IRKind kind, IR *enclosing_ir, SourceInfo loc, std::string name) : kind(kind),
+                                                                            enclosing_ir(enclosing_ir),
+                                                                            name(name),
+                                                                            loc(loc) {
     }
 
     IRKind getKind() const { return kind; }
-    llvm::SMLoc getLocation() { return loc; }
     std::string getName() { return name; }
     virtual std::string debug() const { return "IR"; }
     IR *getEnclosingIR() { return enclosing_ir; }
     void setEnclosingIR(ir::IR *parent) { enclosing_ir = parent; }
+    void setLocation(SourceInfo srcInfo) { this->loc = srcInfo; }
+    SourceInfo getLocation() { return loc; }
 };
 
 /**
@@ -172,14 +185,14 @@ private:
     bool unresolved;
     ExternalSymbolAccess *externalIR;
 public:
-    TypeDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name, IR *decl=nullptr)
+    TypeDecl(IR *enclosing_ir, SourceInfo loc, std::string name, IR *decl=nullptr)
             : IR(IRKind::IR_TYPE_DECL, enclosing_ir, loc, name),
               decl(decl),
               matrixSize{},
               maybe(false),
               unresolved(false),
               externalIR(nullptr) {}
-    TypeDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name, std::vector<Expr *> matsize, IR *decl=nullptr)
+    TypeDecl(IR *enclosing_ir, SourceInfo loc, std::string name, std::vector<Expr *> matsize, IR *decl=nullptr)
             : IR(IRKind::IR_TYPE_DECL, enclosing_ir, loc, name),
               decl(decl),
               matrixSize(matsize),
@@ -235,7 +248,7 @@ private:
     TypeDecl *td;
     Expr *initValue;
 public:
-    VarDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name, TypeDecl *td, Expr *initValue=nullptr)
+    VarDecl(IR *enclosing_ir, SourceInfo loc, std::string name, TypeDecl *td, Expr *initValue=nullptr)
            : IR(IRKind::IR_VAR_DECL, enclosing_ir, loc, name),
              td(td),
              initValue(initValue) {}
@@ -257,7 +270,7 @@ private:
     std::vector<ir::IR *> elements;
     bool zero_init;
 public:
-    StructDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name, std::vector<ir::IR *> elements)
+    StructDecl(IR *enclosing_ir, SourceInfo loc, std::string name, std::vector<ir::IR *> elements)
             : IR(IRKind::IR_STRUCT_DECL, enclosing_ir, loc, name),
               elements(elements),
               zero_init(true) {
@@ -291,7 +304,7 @@ class Import : public IR {
 private:
     std::vector<std::string> names;
 public:
-    Import(IR *enclosing_ir, llvm::SMLoc loc, std::vector<std::string>& names)
+    Import(IR *enclosing_ir, SourceInfo loc, std::vector<std::string>& names)
         : IR(IRKind::IR_IMPORT, enclosing_ir, loc, "import"),
           names(names) {}
 
@@ -310,7 +323,7 @@ private:
     TypeDecl *td;
     bool byReference;
 public:
-    FormalParamDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name, TypeDecl *td, bool byReference=false)
+    FormalParamDecl(IR *enclosing_ir, SourceInfo loc, std::string name, TypeDecl *td, bool byReference=false)
            : IR(IRKind::IR_FORMAL_PARAM_DECL, enclosing_ir, loc, name),
              td(td),
              byReference(byReference) {}
@@ -335,7 +348,7 @@ private:
     bool prototype;
 public:
     FunctionDecl(IR *enclosing_ir, 
-                 llvm::SMLoc loc,
+                 SourceInfo loc,
                  std::string name,
                  std::string og_name,
                  TypeDecl *returnType,
@@ -347,11 +360,11 @@ public:
              params(params),
              decls(decls),
              prototype(false) {}
-    FunctionDecl(IR *enclosing_ir) : IR(IRKind::IR_FUNCTION_DECL, enclosing_ir, llvm::SMLoc(), "unknownfunc"),
+    FunctionDecl(IR *enclosing_ir, SourceInfo loc) : IR(IRKind::IR_FUNCTION_DECL, enclosing_ir, loc, "unknownfunc"),
                                      returnType(nullptr),
                                      prototype(true) {}
 
-    void resolveFunction(llvm::SMLoc loc,
+    void resolveFunction(SourceInfo loc,
                          std::string name,
                          std::string og_name,
                          TypeDecl *returnType,
@@ -387,7 +400,7 @@ public:
  */
 class Operator {
 private:
-    //llvm::SMLoc loc;
+    //SourceInfo loc;
     OperatorKind kind;
     bool unspecified;
 public:
@@ -396,7 +409,7 @@ public:
                                                           unspecified(unspecified) {
     }
 
-    //llvm::SMLoc getLocation() const { return loc; }
+    //SourceInfo getLocation() const { return loc; }
     OperatorKind getKind() const { return kind; }
     std::string debug() const { 
         switch(kind) {
@@ -508,10 +521,10 @@ public:
  */
 class IntLiteral : public Expr {
 private:
-    llvm::SMLoc loc;
+    SourceInfo loc;
     llvm::APSInt value;
 public:
-    IntLiteral(llvm::SMLoc loc, const llvm::APSInt &value, TypeDecl *type)
+    IntLiteral(SourceInfo loc, const llvm::APSInt &value, TypeDecl *type)
               : Expr(ExprKind::EX_INT, type, true),
                 loc(loc),
                 value(value) {
@@ -529,10 +542,10 @@ public:
  */
 class FloatLiteral : public Expr {
 private:
-    llvm::SMLoc loc;
+    SourceInfo loc;
     llvm::APFloat value;
 public:
-    FloatLiteral(llvm::SMLoc loc, const llvm::APFloat &value, TypeDecl *type)
+    FloatLiteral(SourceInfo loc, const llvm::APFloat &value, TypeDecl *type)
               : Expr(ExprKind::EX_FLOAT, type, true),
                 loc(loc),
                 value(value) {
@@ -550,10 +563,10 @@ public:
  */
 class BoolLiteral : public Expr {
 private:
-    llvm::SMLoc loc;
+    SourceInfo loc;
     bool value;
 public:
-    BoolLiteral(llvm::SMLoc loc, const bool &value, TypeDecl *type)
+    BoolLiteral(SourceInfo loc, const bool &value, TypeDecl *type)
               : Expr(ExprKind::EX_BOOL, type, true),
                 loc(loc),
                 value(value) {
@@ -571,10 +584,10 @@ public:
  */
 class StringLiteral : public Expr {
 private:
-    llvm::SMLoc loc;
+    SourceInfo loc;
     std::string value;
 public:
-    StringLiteral(llvm::SMLoc loc, std::string &value, TypeDecl *type)
+    StringLiteral(SourceInfo loc, std::string &value, TypeDecl *type)
               : Expr(ExprKind::EX_STRING, type, true),
                 loc(loc),
                 value(value) {
@@ -592,10 +605,10 @@ public:
  */
 class MatrixLiteral : public Expr {
 private:
-    llvm::SMLoc loc;
+    SourceInfo loc;
     std::vector<Expr *> value;
 public:
-    MatrixLiteral(llvm::SMLoc loc, std::vector<Expr *> &value, TypeDecl *type)
+    MatrixLiteral(SourceInfo loc, std::vector<Expr *> &value, TypeDecl *type)
               : Expr(ExprKind::EX_MATRIX, type, true),
                 loc(loc),
                 value(value) {
@@ -613,9 +626,9 @@ public:
  */
 class NoneLiteral : public Expr {
 private:
-    llvm::SMLoc loc;
+    SourceInfo loc;
 public:
-    NoneLiteral(llvm::SMLoc loc, TypeDecl *type)
+    NoneLiteral(SourceInfo loc, TypeDecl *type)
               : Expr(ExprKind::EX_NONE, type, true),
                 loc(loc) {
     }
@@ -750,7 +763,7 @@ class ExprStmt : public IR {
 private:
     Expr *e;
 public:
-    ExprStmt(IR *enclosing_ir, llvm::SMLoc loc, std::string name, Expr *e)
+    ExprStmt(IR *enclosing_ir, SourceInfo loc, std::string name, Expr *e)
            : IR(IRKind::IR_EXPR_STMT, enclosing_ir, loc, name),
              e(e) {}
     
@@ -831,7 +844,7 @@ private:
     std::vector<ir::IR *> elseBranch;
 public:
     IfStatement(IR *enclosing_ir, 
-                llvm::SMLoc loc,
+                SourceInfo loc,
                 std::string name,
                 Expr *cond,
                 std::vector<ir::IR *> &ifBranch,
@@ -864,7 +877,7 @@ private:
     bool doWhile;
 public:
     WhileStmt(IR *enclosing_ir, 
-              llvm::SMLoc loc,
+              SourceInfo loc,
               std::string name,
               Expr *cond,
               std::vector<ir::IR *> body,
@@ -903,7 +916,7 @@ private:
     llvm::BasicBlock *nextIterBB;
 public:
     ForeachStmt(IR *enclosing_ir,
-                llvm::SMLoc loc,
+                SourceInfo loc,
                 std::string name,
                 Expr *i,
                 Expr *collection,
@@ -940,7 +953,7 @@ class ReturnStmt: public IR {
 private:
     Expr *val;
 public:
-    ReturnStmt(Expr *val, IR *enclosing_ir, llvm::SMLoc loc, std::string name)
+    ReturnStmt(Expr *val, IR *enclosing_ir, SourceInfo loc, std::string name)
         : IR(IRKind::IR_RETURN, enclosing_ir, loc, name), val(val) {}
 
     Expr *getValue() { return val; }
@@ -962,7 +975,7 @@ public:
  */
 class BreakStmt: public IR {
 public:
-    BreakStmt(IR *enclosing_ir, llvm::SMLoc loc)
+    BreakStmt(IR *enclosing_ir, SourceInfo loc)
         : IR(IRKind::IR_BREAK, enclosing_ir, loc, "break") {}
 
     static bool classof(const IR *s) {
@@ -979,7 +992,7 @@ public:
  */
 class ContinueStmt: public IR {
 public:
-    ContinueStmt(IR *enclosing_ir, llvm::SMLoc loc)
+    ContinueStmt(IR *enclosing_ir, SourceInfo loc)
         : IR(IRKind::IR_CONTINUE, enclosing_ir, loc, "continue") {}
 
     static bool classof(const IR *s) {
@@ -1001,10 +1014,10 @@ private:
     std::unordered_set<FunctionDecl *> libFunctions;
     cg::CGModule *cgmodule;
 public:
-    ModuleDecl(IR *enclosing_ir, llvm::SMLoc loc, std::string name)
+    ModuleDecl(IR *enclosing_ir, SourceInfo loc, std::string name)
               : IR(IRKind::IR_MODULE_DECL, enclosing_ir, loc, name), main(false), cgmodule(nullptr) {}
     ModuleDecl(IR *enclosing_ir, 
-               llvm::SMLoc loc,
+               SourceInfo loc,
                std::string name,
                std::vector<ir::IR *> &decls)
               : IR(IRKind::IR_MODULE_DECL, enclosing_ir, loc, name), decls(decls), main(false), cgmodule(nullptr) {}

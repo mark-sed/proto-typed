@@ -20,6 +20,7 @@
 #include <initializer_list>
 #include <algorithm>
 #include <iostream>
+#include <iterator>
 
 using namespace ptc;
 
@@ -61,8 +62,9 @@ std::string ptc::encodeFunction(std::string name, std::vector<ir::Expr *> params
     }
 }
 
-Scanner::Scanner(Diagnostics &diags, std::string moduleName, ir::ModuleDecl *ptlibMod, bool lib) : currentIR(nullptr), diags(diags), moduleName(moduleName), ptlibMod(ptlibMod), lib(lib) {
-    loc = new Parser::location_type();
+Scanner::Scanner(Diagnostics &diags, std::string srcCode, std::string moduleName, std::string fileName, ir::ModuleDecl *ptlibMod, bool lib)
+        : currentIR(nullptr), diags(diags), moduleName(moduleName), fileName(fileName), ptlibMod(ptlibMod), srcCode(srcCode), lib(lib), parseByte(0), lastNl(0), preLastNl(0) {
+    llvmloc = new Parser::location_type();
     init();
 }
 
@@ -74,23 +76,24 @@ void Scanner::init() {
     currScope = new Scope();
     globalScope = currScope; // This will be overriden by module scope
 
-    llvmloc = llvm::SMLoc();
-
-    mainModule = new ir::ModuleDecl(nullptr, llvm::SMLoc(), moduleName);
+    mainModule = new ir::ModuleDecl(nullptr, llvmloc2Src(), moduleName);
     currentIR = mainModule;
+    parseByte = 0;
+    lastNl = 0;
+    preLastNl = 0;
 
-    intType = new ir::TypeDecl(currentIR, llvm::SMLoc(), INT_CSTR);
-    floatType = new ir::TypeDecl(currentIR, llvm::SMLoc(), FLOAT_CSTR);
-    stringType = new ir::TypeDecl(currentIR, llvm::SMLoc(), STRING_CSTR);
-    boolType = new ir::TypeDecl(currentIR, llvm::SMLoc(), BOOL_CSTR);
-    voidType = new ir::TypeDecl(currentIR, llvm::SMLoc(), VOID_CSTR);
-    anyType = new ir::TypeDecl(currentIR, llvm::SMLoc(), ANY_CSTR);
+    intType = new ir::TypeDecl(currentIR, llvmloc2Src(), INT_CSTR);
+    floatType = new ir::TypeDecl(currentIR, llvmloc2Src(), FLOAT_CSTR);
+    stringType = new ir::TypeDecl(currentIR, llvmloc2Src(), STRING_CSTR);
+    boolType = new ir::TypeDecl(currentIR, llvmloc2Src(), BOOL_CSTR);
+    voidType = new ir::TypeDecl(currentIR, llvmloc2Src(), VOID_CSTR);
+    anyType = new ir::TypeDecl(currentIR, llvmloc2Src(), ANY_CSTR);
     anyType->setMaybe(true);
-    rangeType = new ir::TypeDecl(currentIR, llvm::SMLoc(), RANGE_CSTR);
-    noneType = new ir::TypeDecl(currentIR, llvm::SMLoc(), NONETYPE_CSTR);
-    varargsType = new ir::TypeDecl(currentIR, llvm::SMLoc(), VARARGS_CSTR);
+    rangeType = new ir::TypeDecl(currentIR, llvmloc2Src(), RANGE_CSTR);
+    noneType = new ir::TypeDecl(currentIR, llvmloc2Src(), NONETYPE_CSTR);
+    varargsType = new ir::TypeDecl(currentIR, llvmloc2Src(), VARARGS_CSTR);
 
-    unknownType = new ir::TypeDecl(currentIR, llvm::SMLoc(), UNKNOWN_CSTR);
+    unknownType = new ir::TypeDecl(currentIR, llvmloc2Src(), UNKNOWN_CSTR);
 
     currScope->insert(intType);
     currScope->insert(boolType);
@@ -106,21 +109,21 @@ void Scanner::init() {
     defineFun(_ENTRY_NAME, _ENTRY_NAME, voidType, {});
     // print
     defineFun("print_string", "print", voidType, {
-        new ir::FormalParamDecl(currentIR, llvmloc, "v", this->stringType, false)
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", this->stringType, false)
     });
     // to_string
     defineFun("to_string_int", "to_string", stringType, {
-        new ir::FormalParamDecl(currentIR, llvmloc, "v", this->intType, false)
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", this->intType, false)
     });
     defineFun("to_string_float", "to_string", stringType, {
-        new ir::FormalParamDecl(currentIR, llvmloc, "v", this->floatType, false)
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", this->floatType, false)
     });
     defineFun("to_string_bool", "to_string", stringType, {
-        new ir::FormalParamDecl(currentIR, llvmloc, "v", this->boolType, false)
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", this->boolType, false)
     });
     // length
     defineFun("length_string", "length", intType, {
-        new ir::FormalParamDecl(currentIR, llvmloc, "v", this->stringType, false)
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", this->stringType, false)
     });
 
     if(!lib) {
@@ -134,7 +137,7 @@ void Scanner::init() {
 
 void Scanner::parse(std::istream *code) {
     this->switch_streams(code);
-    loc = new Parser::location_type();
+    llvmloc = new Parser::location_type();
     auto parser = new Parser(this);
 
     enterScope(mainModule);
@@ -158,7 +161,7 @@ void Scanner::parse(std::istream *code) {
 bool Scanner::defineFun(std::string name, std::string ogName, ir::TypeDecl *retType, std::initializer_list<ir::FormalParamDecl*> params) {
     auto body = std::vector<ir::IR *> {};
     auto fun = new ir::FunctionDecl(currentIR,
-                                    llvm::SMLoc(),
+                                    llvmloc2Src(),
                                     name,
                                     ogName,
                                     retType,
@@ -205,21 +208,21 @@ std::string Scanner::escapeString(std::string str) {
             // TODO: https://en.cppreference.com/w/cpp/language/escape
             case 'x':
             case 'X':
-                diags.report(llvmloc, diag::ERR_INTERNAL, "Hexadecimal escape sequences are not yet implemented");
+                diags.report(llvmloc2Src(), diag::ERR_INTERNAL, "Hexadecimal escape sequences are not yet implemented");
             break;
             case 'q':
             case 'Q':
-                diags.report(llvmloc, diag::ERR_INTERNAL, "Octal escape sequences are not yet implemented");
+                diags.report(llvmloc2Src(), diag::ERR_INTERNAL, "Octal escape sequences are not yet implemented");
             break;
             case 'u':
             case 'U':
-                diags.report(llvmloc, diag::ERR_INTERNAL, "Unicode escape sequences are not yet implemented");
+                diags.report(llvmloc2Src(), diag::ERR_INTERNAL, "Unicode escape sequences are not yet implemented");
             break;
             case 'N': // TODO: Should this be kept?
-                diags.report(llvmloc, diag::ERR_INTERNAL, "Named unicode escape sequences are not yet implemented");
+                diags.report(llvmloc2Src(), diag::ERR_INTERNAL, "Named unicode escape sequences are not yet implemented");
             break;
             default:
-                diags.report(llvmloc, diag::ERR_UNKNOWN_ESC_SEQ, std::string("\\")+c);
+                diags.report(llvmloc2Src(), diag::ERR_UNKNOWN_ESC_SEQ, std::string("\\")+c);
             }
             backslash = false;
             continue;
@@ -234,7 +237,7 @@ std::string Scanner::escapeString(std::string str) {
 }
 
 void Scanner::fatal_error(diag::diagmsg d, std::string msg) {
-    diags.report(llvm::SMLoc(), d, msg);
+    diags.report(llvmloc2Src(), d, msg);
 }
 
 void Scanner::enterScope(ir::IR *decl) {
@@ -246,14 +249,14 @@ void Scanner::enterScope(ir::IR *decl) {
 void Scanner::enterFunScope() {
     LOGMAX("Creating new function scope");
     currScope = new Scope(currScope);
-    currentIR = new ir::FunctionDecl(currentIR);
+    currentIR = new ir::FunctionDecl(currentIR, llvmloc2Src());
 }
 
 void Scanner::enterBlockScope() {
     LOGMAX("Creating new block scope");
     currScope = new Scope(currScope);
     // PlaceHolder IR
-    currentIR = new ir::FunctionDecl(currentIR);
+    currentIR = new ir::FunctionDecl(currentIR, llvmloc2Src());
 }
 
 void Scanner::leaveScope() {
@@ -294,52 +297,52 @@ ir::IR *Scanner::parseVarDecl(ir::IR *type, const std::string name, ir::Expr *va
 
 ir::IR *Scanner::parseExprStmt(ir::Expr *e) {
     LOGMAX("Parsing expression '"+e->debug()+"' into a statement");
-    auto v = new ir::ExprStmt(currentIR, llvmloc, "Expression", e);
+    auto v = new ir::ExprStmt(currentIR, llvmloc2Src(), "Expression", e);
     //this->decls.push_back(v);
     return v;
 }
 
 ir::IR *Scanner::parseReturn(ir::Expr *e) {
     LOGMAX("Parsing return");
-    return new ir::ReturnStmt(e, currentIR, llvmloc, "Return");
+    return new ir::ReturnStmt(e, currentIR, llvmloc2Src(), "Return");
 }
 
 ir::IR *Scanner::parseBreak() {
     LOGMAX("Parsing break");
-    return new ir::BreakStmt(currentIR, llvmloc);
+    return new ir::BreakStmt(currentIR, llvmloc2Src());
 }
 
 ir::IR *Scanner::parseContinue() {
     LOGMAX("Parsing break");
-    return new ir::ContinueStmt(currentIR, llvmloc);
+    return new ir::ContinueStmt(currentIR, llvmloc2Src());
 }
 
 ir::Expr *Scanner::parseInt(long v) {
     LOGMAX("Parsing int "+std::to_string(v));
     llvm::APInt vInt(64, v, true);
     llvm::APSInt vsInt(vInt);
-    return new ir::IntLiteral(llvmloc, vsInt, intType);
+    return new ir::IntLiteral(llvmloc2Src(), vsInt, intType);
 }
 
 ir::Expr *Scanner::parseFloat(double v) {
     LOGMAX("Parsing float "+std::to_string(v));
     llvm::APFloat vFloat(v);
-    return new ir::FloatLiteral(llvmloc, vFloat, floatType);
+    return new ir::FloatLiteral(llvmloc2Src(), vFloat, floatType);
 }
 
 ir::Expr *Scanner::parseBool(bool v) {
     LOGMAX("Parsing bool "+std::string(v ? "true" : "false"));
-    return new ir::BoolLiteral(llvmloc, v, boolType);
+    return new ir::BoolLiteral(llvmloc2Src(), v, boolType);
 }
 
 ir::Expr *Scanner::parseString(std::string v) {
     LOGMAX("Parsing string "+v);
-    return new ir::StringLiteral(llvmloc, v, stringType);
+    return new ir::StringLiteral(llvmloc2Src(), v, stringType);
 }
 
 ir::Expr *Scanner::parseNone() {
     LOGMAX("Parsing none");
-    return new ir::NoneLiteral(llvmloc, noneType);
+    return new ir::NoneLiteral(llvmloc2Src(), noneType);
 }
 
 ir::Expr *Scanner::parseVar(std::string v, bool external) {
@@ -360,7 +363,7 @@ ir::Expr *Scanner::parseVar(std::string v, bool external) {
                 return new ir::VarAccess(llvm::dyn_cast<ir::FormalParamDecl>(var));
             }
             else {
-                diags.report(llvmloc, diag::ERR_INTERNAL, "Only variable and function access is just yet implemented");
+                diags.report(llvmloc2Src(), diag::ERR_INTERNAL, "Only variable and function access is just yet implemented");
             }
         }
         else {
@@ -389,15 +392,15 @@ ir::Expr *Scanner::parseUnaryPrefixExpr(ir::Expr *l, ir::Operator op, bool is_co
         switch(op.getKind()) {
             case ir::OperatorKind::OP_LNOT:
                 if(tl->getName() != BOOL_CSTR) {
-                    diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE_UNARY, op.debug(), tl->getName());
+                    diags.report(llvmloc2Src(), diag::ERR_UNSUPPORTED_OP_TYPE_UNARY, op.debug(), tl->getName());
                 }
             break;
             case ir::OperatorKind::OP_BNOT:
                 if(tl->getName() != INT_CSTR) {
-                    diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE_UNARY, op.debug(), tl->getName());
+                    diags.report(llvmloc2Src(), diag::ERR_UNSUPPORTED_OP_TYPE_UNARY, op.debug(), tl->getName());
                 }
             break;
-            default: diags.report(llvmloc, diag::ERR_INTERNAL, "Unknown operator in an expression");
+            default: diags.report(llvmloc2Src(), diag::ERR_INTERNAL, "Unknown operator in an expression");
             break;
         }
     }
@@ -426,7 +429,7 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
                 else */
                 if(tr->getName() == NONETYPE_CSTR) {
                     if(!tl->isMaybe()) {
-                        diags.report(llvmloc, diag::ERR_CANNOT_ASSIGN_NONE);
+                        diags.report(llvmloc2Src(), diag::ERR_CANNOT_ASSIGN_NONE);
                     }
                     type = tl;
                 }
@@ -440,7 +443,7 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
                     type = tr;
                 }
                 else {
-                    diags.report(llvmloc, diag::ERR_INCORRECT_ASSIGNMENT, tr->getName(), tl->getName());
+                    diags.report(llvmloc2Src(), diag::ERR_INCORRECT_ASSIGNMENT, tr->getName(), tl->getName());
                 }
             }
         break;
@@ -451,7 +454,7 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
         case ir::OperatorKind::OP_DIV:
         case ir::OperatorKind::OP_MOD:
             if(!utils::isOneOf(tl->getName(), {INT_CSTR, FLOAT_CSTR}) || !utils::isOneOf(tr->getName(), {INT_CSTR, FLOAT_CSTR})) {
-                diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+                diags.report(llvmloc2Src(), diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
             }
             else {
                 // Int or Float
@@ -466,7 +469,7 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
         break;
         case ir::OperatorKind::OP_POW:
             if(!utils::isOneOf(tl->getName(), {FLOAT_CSTR, INT_CSTR}) || !utils::isOneOf(tr->getName(), {FLOAT_CSTR, INT_CSTR})) {
-                diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+                diags.report(llvmloc2Src(), diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
             }
             type = this->floatType;
         break;
@@ -476,7 +479,7 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
         case ir::OperatorKind::OP_BXOR:
         case ir::OperatorKind::OP_BOR:
             if(!utils::isOneOf(tl->getName(), {INT_CSTR}) || !utils::isOneOf(tr->getName(), {INT_CSTR})) {
-                diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+                diags.report(llvmloc2Src(), diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
             }
             type = this->intType;
         break;
@@ -486,11 +489,11 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
         case ir::OperatorKind::OP_LEQ:
             if(!utils::isOneOf(tl->getName(), {INT_CSTR, FLOAT_CSTR, STRING_CSTR}) ||
                 !utils::isOneOf(tr->getName(), {INT_CSTR, FLOAT_CSTR, STRING_CSTR})) {
-                diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+                diags.report(llvmloc2Src(), diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
             }
             if(tl->getName() == STRING_CSTR || tr->getName() == STRING_CSTR) {
                 if(tl->getName() != tr->getName()) {
-                    diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+                    diags.report(llvmloc2Src(), diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
                 }
             }
             type = this->boolType;
@@ -502,7 +505,7 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
         case ir::OperatorKind::OP_LAND:
         case ir::OperatorKind::OP_LOR:
             if(!utils::isOneOf(tl->getName(), {BOOL_CSTR}) || !utils::isOneOf(tr->getName(), {BOOL_CSTR})) {
-                diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+                diags.report(llvmloc2Src(), diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
             }
             type = this->boolType;
         break;
@@ -512,16 +515,16 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
         break;
         case ir::OperatorKind::OP_SUBSCR:
             if((!tl->isMatrix() && !utils::isOneOf(tl->getName(), {STRING_CSTR})) || !utils::isOneOf(tr->getName(), {INT_CSTR})) {
-                diags.report(llvmloc, diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+                diags.report(llvmloc2Src(), diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
             }
 
             if(tl->isMatrix()) {
                 if(!tl->getDecl()) {
-                    diags.report(llvmloc, diag::ERR_INTERNAL, "Somehow root type for matrix was not set");
+                    diags.report(llvmloc2Src(), diag::ERR_INTERNAL, "Somehow root type for matrix was not set");
                 }
                 type = llvm::dyn_cast<ir::TypeDecl>(tl->getDecl());
                 if(!type) {
-                    diags.report(llvmloc, diag::ERR_INTERNAL, "Somehow root type for matrix is incorrect");
+                    diags.report(llvmloc2Src(), diag::ERR_INTERNAL, "Somehow root type for matrix is incorrect");
                 }
             }
             else {
@@ -541,7 +544,7 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
                 elemName = elem->getDecl()->getName();
             }
             else {
-                diags.report(llvmloc, diag::ERR_BAD_STRUCT_ELEM);
+                diags.report(llvmloc2Src(), diag::ERR_BAD_STRUCT_ELEM);
             }
             ir::TypeDecl *struType = l->getType();
             if(struType->getDecl()) {
@@ -567,18 +570,18 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
                         else if(auto fvar = llvm::dyn_cast<ir::StructDecl>(found)) {
                             //TODO: Handle and set r correctly
                             (void)fvar;
-                            diags.report(llvmloc, diag::ERR_INTERNAL, "NOT YET IMPLEMENTED Structs inside of structs access");
+                            diags.report(llvmloc2Src(), diag::ERR_INTERNAL, "NOT YET IMPLEMENTED Structs inside of structs access");
                         }
                         else {
-                            diags.report(llvmloc, diag::ERR_INTERNAL, "unknown element type in a struct");
+                            diags.report(llvmloc2Src(), diag::ERR_INTERNAL, "unknown element type in a struct");
                         }
                     }
                     else {
-                        diags.report(llvmloc, diag::ERR_HAS_NO_MEMBER, "struct "+struDecl->getName(), elemName);
+                        diags.report(llvmloc2Src(), diag::ERR_HAS_NO_MEMBER, "struct "+struDecl->getName(), elemName);
                     }
                 }
                 else {
-                    diags.report(llvmloc, diag::ERR_TYPE_NOT_STRUCT, struType->getName());
+                    diags.report(llvmloc2Src(), diag::ERR_TYPE_NOT_STRUCT, struType->getName());
                 }
             }
             /*else if(auto lmem = llvm::dyn_cast<ir::UnresolvedSymbolAccess>(l)) {
@@ -589,12 +592,12 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
                 // TODO: Allow also structLiteral?
                 // Split access into var assignments
                 if(!struType->isUnresolved()) {
-                    diags.report(llvmloc, diag::ERR_TYPE_NOT_STRUCT, struType->getName());
+                    diags.report(llvmloc2Src(), diag::ERR_TYPE_NOT_STRUCT, struType->getName());
                 }
             }
         }
         break;
-        default: diags.report(llvmloc, diag::ERR_INTERNAL, "Unknown operator in an expression");
+        default: diags.report(llvmloc2Src(), diag::ERR_INTERNAL, "Unknown operator in an expression");
         break;
         }
     }
@@ -629,12 +632,12 @@ void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT) {
     ir::TypeDecl *tPtr = t->clone();
     tPtr->setMaybe(true);
     auto params = std::vector<ir::FormalParamDecl *>{
-        new ir::FormalParamDecl(currentIR, llvmloc, "m", tPtr, true),
-        new ir::FormalParamDecl(currentIR, llvmloc, "v", elemT, false)
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "m", tPtr, true),
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", elemT, false)
     };
     auto body = std::vector<ir::IR *> {};
     auto funAppend = new ir::FunctionDecl(currentIR,
-                                            llvm::SMLoc(),
+                                            llvmloc2Src(),
                                             "append_"+t->getName()+"_"+elemT->getName(),
                                             "append",
                                             this->voidType,
@@ -644,10 +647,10 @@ void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT) {
     mainModule->addLibFunction(funAppend);
 
     auto paramsMat = std::vector<ir::FormalParamDecl *>{
-        new ir::FormalParamDecl(currentIR, llvmloc, "m", t, false)
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "m", t, false)
     };
     auto funLength = new ir::FunctionDecl(currentIR,
-                                            llvm::SMLoc(),
+                                            llvmloc2Src(),
                                             "length_"+t->getName(),
                                             "length",
                                             this->intType,
@@ -659,7 +662,7 @@ void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT) {
 
 ir::IR *Scanner::parseExtType(std::string name, bool isMaybe) {
     LOGMAX("Parsing external type");
-    auto t = new ir::TypeDecl(currentIR, llvmloc, name);
+    auto t = new ir::TypeDecl(currentIR, llvmloc2Src(), name);
     t->setMaybe(isMaybe);
     t->setUnresolved(true);
     t->setExternalIR(llvm::dyn_cast<ir::ExternalSymbolAccess>(parseVar(name, true)));
@@ -682,15 +685,15 @@ ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &mats
             for(size_t j = 0; j <= i; ++j) {
                 elemSize.push_back(matsize[j]);
             }
-            elemT = new ir::TypeDecl(currentIR, llvmloc, elemName, elemSize, elemT);
+            elemT = new ir::TypeDecl(currentIR, llvmloc2Src(), elemName, elemSize, elemT);
         }
-        auto t = new ir::TypeDecl(currentIR, llvmloc, name, matsize, elemT);
+        auto t = new ir::TypeDecl(currentIR, llvmloc2Src(), name, matsize, elemT);
 
         addMatrixTemplatedFunction(t, elemT);
 
         return t;
     }
-    diags.report(llvmloc, diag::ERR_NOT_A_TYPE, name);
+    diags.report(llvmloc2Src(), diag::ERR_NOT_A_TYPE, name);
     return nullptr;
 }
 
@@ -714,7 +717,7 @@ ir::Expr *Scanner::parseMatrix(std::vector<ir::Expr *> values) {
         t = new ir::TypeDecl(elT->getEnclosingIR(), elT->getLocation(), elT->getName()+"[]", values, elT);
         addMatrixTemplatedFunction(t, elT);
     }
-    return new ir::MatrixLiteral(llvmloc, values, t);
+    return new ir::MatrixLiteral(llvmloc2Src(), values, t);
 }
 
 static bool isIntvalExpr(ir::Expr *e) {
@@ -730,13 +733,13 @@ static bool isIntvalExpr(ir::Expr *e) {
 ir::Expr *Scanner::parseRange(ir::Expr *start, ir::Expr *second, ir::Expr *end) {
     LOGMAX("Parsing range ["+start->debug()+","+second->debug()+".."+end->debug()+"]");
     if(!isIntvalExpr(start)) {
-        diags.report(llvmloc, diag::ERR_INCORRECT_RANGE_TYPE, "first", start->getType()->getName());
+        diags.report(llvmloc2Src(), diag::ERR_INCORRECT_RANGE_TYPE, "first", start->getType()->getName());
     }
     if(!isIntvalExpr(second)) {
-        diags.report(llvmloc, diag::ERR_INCORRECT_RANGE_TYPE, "second", second->getType()->getName());
+        diags.report(llvmloc2Src(), diag::ERR_INCORRECT_RANGE_TYPE, "second", second->getType()->getName());
     }
     if(!isIntvalExpr(end)) {
-        diags.report(llvmloc, diag::ERR_INCORRECT_RANGE_TYPE, "last", end->getType()->getName());
+        diags.report(llvmloc2Src(), diag::ERR_INCORRECT_RANGE_TYPE, "last", end->getType()->getName());
     }
     return new ir::Range(start, parseInfixExpr(second, start, ir::Operator(ir::OperatorKind::OP_SUB), false), end, rangeType);
 }
@@ -744,10 +747,10 @@ ir::Expr *Scanner::parseRange(ir::Expr *start, ir::Expr *second, ir::Expr *end) 
 ir::Expr *Scanner::parseRange(ir::Expr *start, ir::Expr *end) {
     LOGMAX("Parsing range ["+start->debug()+".."+end->debug()+"]");
     if(!isIntvalExpr(start)) {
-        diags.report(llvmloc, diag::ERR_INCORRECT_RANGE_TYPE, "first", start->getType()->getName());
+        diags.report(llvmloc2Src(), diag::ERR_INCORRECT_RANGE_TYPE, "first", start->getType()->getName());
     }
     if(!isIntvalExpr(end)) {
-        diags.report(llvmloc, diag::ERR_INCORRECT_RANGE_TYPE, "last", end->getType()->getName());
+        diags.report(llvmloc2Src(), diag::ERR_INCORRECT_RANGE_TYPE, "last", end->getType()->getName());
     }
     return new ir::Range(start, parseInt(1), end, rangeType);
 }
@@ -757,7 +760,7 @@ ir::IR *Scanner::parseImports(std::vector<std::string> names) {
     for(auto n: names) {
         addModuleToCompile(n);
     }
-    return new ir::Import(currentIR, llvmloc, names);
+    return new ir::Import(currentIR, llvmloc2Src(), names);
 }
 
 std::vector<std::string> Scanner::parseImportName(std::string name) {
@@ -776,7 +779,7 @@ std::vector<ir::FormalParamDecl *> Scanner::parseFunParam(ir::IR *type, std::str
     LOGMAX("Creating new function param list with "+type->getName()+" "+name);
     // TODO: Handle by reference
     auto t = llvm::dyn_cast<ir::TypeDecl>(type);
-    auto fp = new ir::FormalParamDecl(currentIR, llvmloc, name, t, t->isMaybe());
+    auto fp = new ir::FormalParamDecl(currentIR, llvmloc2Src(), name, t, t->isMaybe());
     std::vector<ir::FormalParamDecl *> list{fp};
     currScope->insert(fp);
     //this->decls.push_back(fp);
@@ -787,7 +790,7 @@ std::vector<ir::FormalParamDecl *> Scanner::parseAddFunParam(std::vector<ir::For
     LOGMAX("Pushing new argument into function param list: "+name);
     // TODO: Handle by reference
     auto t = llvm::dyn_cast<ir::TypeDecl>(type);
-    auto fp = new ir::FormalParamDecl(currentIR, llvmloc, name, t, t->isMaybe());
+    auto fp = new ir::FormalParamDecl(currentIR, llvmloc2Src(), name, t, t->isMaybe());
     list.push_back(fp);
     currScope->insert(fp);
     //this->decls.push_back(fp);
@@ -819,8 +822,8 @@ std::vector<ir::IR *> Scanner::parseStmtBodyAdd(std::vector<ir::IR *> &body, ir:
 
 ir::IR *Scanner::parseStruct(std::string name, std::vector<ir::IR *> body) {
     LOGMAX("Parsing struct "+name);
-    auto structDecl = new ir::StructDecl(currentIR, llvmloc, name, body);
-    auto structType = new ir::TypeDecl(currentIR, llvm::SMLoc(), name, structDecl);
+    auto structDecl = new ir::StructDecl(currentIR, llvmloc2Src(), name, body);
+    auto structType = new ir::TypeDecl(currentIR, llvmloc2Src(), name, structDecl);
     for(auto b = body.begin(), end = body.end(); b != end; ++b) {
         auto e = *b;
         if(ir::VarDecl *elem = llvm::dyn_cast<ir::VarDecl>(e)) {
@@ -829,15 +832,15 @@ ir::IR *Scanner::parseStruct(std::string name, std::vector<ir::IR *> body) {
                     return llvm::isa<ir::VarDecl>(i) && 
                     (llvm::dyn_cast<ir::VarDecl>(i)->getName() == elem->getName()); 
                 }) != 1) {
-                diags.report(llvmloc, diag::ERR_DUPL_STRUCT_MEMBER, elem->getName(), name);
+                diags.report(llvmloc2Src(), diag::ERR_DUPL_STRUCT_MEMBER, elem->getName(), name);
             }
         }
         else {
-            diags.report(llvmloc, diag::ERR_SYNTAX, "Unknown construct inside of struct declaration");
+            diags.report(llvmloc2Src(), diag::ERR_SYNTAX, "Unknown construct inside of struct declaration");
         }
     }
     if(!currScope->insert(structType)) {
-        diags.report(llvmloc, diag::ERR_SYM_ALREADY_DECLARED, name);
+        diags.report(llvmloc2Src(), diag::ERR_SYM_ALREADY_DECLARED, name);
     }
     return structDecl;
 }
@@ -926,7 +929,7 @@ ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
                 }*/
             }
             if(!propFIR) {
-                diags.report(llvmloc, diag::ERR_INCORRECT_ARGS_DET, f->getOGName(), ir::block2List(f->getParams()), ir::block2List(params));
+                diags.report(llvmloc2Src(), diag::ERR_INCORRECT_ARGS_DET, f->getOGName(), ir::block2List(f->getParams()), ir::block2List(params));
                 return nullptr;
             }
             auto propF = llvm::dyn_cast<ir::FunctionDecl>(propFIR);
@@ -935,7 +938,7 @@ ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
             return fc;
         }
         else {
-            diags.report(llvmloc, diag::ERR_NOT_CALLABLE, var->getVar()->getName());
+            diags.report(llvmloc2Src(), diag::ERR_NOT_CALLABLE, var->getVar()->getName());
         }
     }
     else {
@@ -946,7 +949,7 @@ ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
             return new ir::FunctionCall(symb, params);
         }
         else {
-            diags.report(llvmloc, diag::ERR_INTERNAL, "Function call is not implemented for expressions");
+            diags.report(llvmloc2Src(), diag::ERR_INTERNAL, "Function call is not implemented for expressions");
         }
     }
     return nullptr;
@@ -955,9 +958,9 @@ ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
 ir::IR *Scanner::parseIfStmt(ir::Expr *cond, std::vector<ir::IR *> &ifBranch, std::vector<ir::IR *> &elseBranch) {
     LOGMAX("Parsing if statement");
     if(cond->getType() != boolType && cond->getType()->getName() != UNKNOWN_CSTR) {
-        diags.report(llvmloc, diag::ERR_IF_COND_MUST_BE_BOOL, cond->getType()->getName());
+        diags.report(llvmloc2Src(), diag::ERR_IF_COND_MUST_BE_BOOL, cond->getType()->getName());
     }
-    auto ifstmt = new ir::IfStatement(currentIR, llvmloc, "if", cond, ifBranch, elseBranch);
+    auto ifstmt = new ir::IfStatement(currentIR, llvmloc2Src(), "if", cond, ifBranch, elseBranch);
     // Set enclosing IR for all statements in the body to this
     for(auto i : ifBranch) {
         i->setEnclosingIR(ifstmt);
@@ -971,9 +974,9 @@ ir::IR *Scanner::parseIfStmt(ir::Expr *cond, std::vector<ir::IR *> &ifBranch, st
 ir::IR *Scanner::parseWhile(ir::Expr *cond, std::vector<ir::IR *> &body) {
     LOGMAX("Parsing while");
     if(cond->getType() != boolType && cond->getType()->getName() != UNKNOWN_CSTR) {
-        diags.report(llvmloc, diag::ERR_WHILE_COND_MUST_BE_BOOL, cond->getType()->getName());
+        diags.report(llvmloc2Src(), diag::ERR_WHILE_COND_MUST_BE_BOOL, cond->getType()->getName());
     }
-    auto whl = new ir::WhileStmt(currentIR, llvmloc, "while", cond, body);
+    auto whl = new ir::WhileStmt(currentIR, llvmloc2Src(), "while", cond, body);
     // Set enclosing IR for all statements in the body to this
     for(auto i : body) {
         i->setEnclosingIR(whl);
@@ -984,9 +987,9 @@ ir::IR *Scanner::parseWhile(ir::Expr *cond, std::vector<ir::IR *> &body) {
 ir::IR *Scanner::parseDoWhile(ir::Expr *cond, std::vector<ir::IR *> &body) {
     LOGMAX("Parsing do while");
     if(cond->getType() != boolType && cond->getType()->getName() != UNKNOWN_CSTR) {
-        diags.report(llvmloc, diag::ERR_WHILE_COND_MUST_BE_BOOL, cond->getType()->getName());
+        diags.report(llvmloc2Src(), diag::ERR_WHILE_COND_MUST_BE_BOOL, cond->getType()->getName());
     }
-    auto whl = new ir::WhileStmt(currentIR, llvmloc, "do", cond, body, true);
+    auto whl = new ir::WhileStmt(currentIR, llvmloc2Src(), "do", cond, body, true);
     // Set enclosing IR for all statements in the body to this
     for(auto i : body) {
         i->setEnclosingIR(whl);
@@ -998,25 +1001,25 @@ ir::IR *Scanner::parseForeach(ir::Expr *i, ir::Expr *collection, std::vector<ir:
     LOGMAX("Parsing foreach");
     bool hasUnknown = collection->getType()->getName() == UNKNOWN_CSTR || i->getType()->getName() == UNKNOWN_CSTR;
     if(!hasUnknown && collection->getType()->getName() == STRING_CSTR && i->getType()->getName() != STRING_CSTR) {
-        diags.report(llvmloc, diag::ERR_MISMATCHED_FOR_TYPES, i->getType()->getName(), collection->getType()->getName());
+        diags.report(llvmloc2Src(), diag::ERR_MISMATCHED_FOR_TYPES, i->getType()->getName(), collection->getType()->getName());
     }
     else if(!hasUnknown && collection->getType()->isMatrix()) {
         if(!collection->getType()->getDecl()) {
-            diags.report(llvmloc, diag::ERR_MISMATCHED_FOR_TYPES, i->getType()->getName(), collection->getType()->getName());
+            diags.report(llvmloc2Src(), diag::ERR_MISMATCHED_FOR_TYPES, i->getType()->getName(), collection->getType()->getName());
         }
         else if(collection->getType()->getDecl()->getName() != i->getType()->getName()) {
-            diags.report(llvmloc, diag::ERR_MISMATCHED_FOR_TYPES, i->getType()->getName(), collection->getType()->getName());
+            diags.report(llvmloc2Src(), diag::ERR_MISMATCHED_FOR_TYPES, i->getType()->getName(), collection->getType()->getName());
         }
     }
     else if(!hasUnknown && collection->getType()->getName() == RANGE_CSTR) {
         if(i->getType()->getName() != INT_CSTR) {
-            diags.report(llvmloc, diag::ERR_MISMATCHED_RANGE_TYPE);
+            diags.report(llvmloc2Src(), diag::ERR_MISMATCHED_RANGE_TYPE);
         }
     }
     else if(!hasUnknown && collection->getType()->getName() != STRING_CSTR && i->getType()->getName() != STRING_CSTR){
-        diags.report(llvmloc, diag::ERR_UNSUPPORTED_FOR_TYPE, collection->getType()->getName());
+        diags.report(llvmloc2Src(), diag::ERR_UNSUPPORTED_FOR_TYPE, collection->getType()->getName());
     }
-    auto freach = new ir::ForeachStmt(currentIR, llvmloc, "for", i, collection, body, defineI);
+    auto freach = new ir::ForeachStmt(currentIR, llvmloc2Src(), "for", i, collection, body, defineI);
     // Set enclosing IR for all statements in the body to this
     for(auto i : body) {
         i->setEnclosingIR(freach);
@@ -1033,7 +1036,7 @@ ir::IR *Scanner::parseForeach(ir::IR *i, ir::Expr *collection, std::vector<ir::I
         return parseForeach(new ir::VarAccess(ivd), collection, body, true);
     }
     else {
-        diags.report(llvmloc, diag::ERR_INCORRECT_FOR_CONSTRUCT);
+        diags.report(llvmloc2Src(), diag::ERR_INCORRECT_FOR_CONSTRUCT);
         return nullptr;
     }
 }
@@ -1044,9 +1047,9 @@ ir::IR *Scanner::parseFun(ir::IR *type, std::string name, std::vector<ir::Formal
     auto f = llvm::dyn_cast<ir::FunctionDecl>(currentIR);
     std::string encname = encodeFunction(name, params, lib);
     if(sym_lookup(encname)) {
-        diags.report(llvmloc, diag::ERR_FUNCTION_REDEFINITION, name);
+        diags.report(llvmloc2Src(), diag::ERR_FUNCTION_REDEFINITION, name);
     }
-    f->resolveFunction(llvmloc, encname, name, ctype, params, body);
+    f->resolveFunction(llvmloc2Src(), encname, name, ctype, params, body);
     leaveScope();
     currScope->insert(f);
 
@@ -1076,7 +1079,7 @@ void Scanner::parseEntry(std::vector<ir::IR *> body) {
     
     std::vector<ir::FormalParamDecl *> params{};
     this->decls.push_back(new ir::FunctionDecl(mainModule,
-                                                llvmloc,
+                                                llvmloc2Src(),
                                                 _ENTRY_NAME,
                                                 _ENTRY_NAME,
                                                 voidType,

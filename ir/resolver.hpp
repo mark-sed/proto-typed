@@ -43,7 +43,7 @@ private:
      * @param expr Expression to resolve
      * @param loc Location information for expr
      */
-    void resolve(ir::Expr *expr, llvm::SMLoc loc);
+    void resolve(ir::Expr *expr, ir::SourceInfo loc);
 
 public:
     /**
@@ -70,7 +70,7 @@ private:
 
     void resolve(std::vector<ir::IR *> body);
     void resolve(ir::IR *body);
-    void resolve(ir::Expr *expr, llvm::SMLoc loc);
+    void resolve(ir::Expr *expr, ir::SourceInfo loc);
 
     ModuleInfo *getModule(std::string name);
 public:

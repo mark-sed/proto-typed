@@ -13,7 +13,7 @@
 #undef YY_DECL
 #define YY_DECL int ptc::Scanner::yylex(ptc::Parser::semantic_type * const lval, ptc::Parser::location_type *location)
 
-#define YY_USER_ACTION loc->step(); loc->columns(yyleng);
+#define YY_USER_ACTION llvmloc->step(); llvmloc->columns(yyleng); cread();
 
 // Typedef to shorten scope
 using token = ptc::Parser::token;
@@ -48,7 +48,8 @@ oct     0[Qq][0-7]+
                     int c; 
                     while((c = yyinput()) != 0) {
                         if(c == '\n') {
-                            loc->lines();
+                            llvmloc->lines();
+                            nl();
                         }
                         else if(c == '*') {
                             if((c = yyinput()) == '/')
@@ -60,7 +61,8 @@ oct     0[Qq][0-7]+
                 }
 "//".*          { /* Line comment */ ; }
 \n              {
-                  loc->lines();
+                  llvmloc->lines();
+                  nl();
                   return token::END;
                 }
 ";"             { return token::END; }
