@@ -101,6 +101,7 @@ oct     0[Qq][0-7]+
 "or"            { return token::LOR; }
 "not"           { return token::LNOT; }
 "in"            { return token::IN; }
+"as"            { return token::AS; }
 
 "&"             { return token::BAND; }
 "|"             { return token::BOR; }

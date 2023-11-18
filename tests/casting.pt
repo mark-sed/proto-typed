@@ -1,0 +1,45 @@
+string s = "String\n"
+int i = 42
+float f = 0.5
+bool b = true
+
+print(s as string as string as string)
+print(i as string ++ "\n")
+print(f as string ++ "\n")
+print(b as string ++ "\n")
+
+// Maybe values
+string? ms = "String\n"
+int? mi = 42
+float? mf = 0.5
+bool? mb = true
+
+print(ms as string)
+print(mi as string ++ "\n")
+print(mf as string ++ "\n")
+print(mb as string ++ "\n")
+
+float f1 = 0.0
+print(f1 as bool ++ "\n")
+f1 = -0.0
+print(f1 as bool ++ "\n")
+f1 = 1.0
+print(f1 as bool ++ "\n")
+f1 = -15e-7
+print(f1 as bool ++ "\n")
+
+int a1 = 4
+print(a1 as float as string++"\n")
+print(a1 as float as bool as string++"\n")
+int? a2 = 0
+print(a2 as float as string++"\n")
+print(a2 as float as bool as string++"\n")
+
+bool b1 = true
+bool? mb1 = true
+bool b2 = false
+print(b1 as int as string)
+print(b1 as float ++ "")
+print(mb1 as int as string)
+print(mb1 as float as string)
+print(b2 as int ++ "\n")

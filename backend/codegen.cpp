@@ -623,11 +623,13 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
     case ir::ExprKind::EX_VAR:
     {
         auto *decl = llvm::dyn_cast<ir::VarAccess>(e)->getVar();
-        LOGMAX("Accessing variable: "+e->debug());
+        // VarAccess might by type for as operator
+        if(llvm::isa<ir::TypeDecl>(decl)) {
+            return nullptr;
+        }
         return readVar(currBB, decl);
     }
     case ir::ExprKind::EX_INT:
-        LOGMAX("Accessing int value");
         return llvm::ConstantInt::get(int64T, llvm::dyn_cast<ir::IntLiteral>(e)->getValue());
     case ir::ExprKind::EX_NONE:
         return llvm::ConstantPointerNull::get(builder.getInt8Ty()->getPointerTo());
@@ -691,7 +693,6 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
     {
         auto extS = llvm::dyn_cast<ir::ExternalSymbolAccess>(e);
         if(auto vd = llvm::dyn_cast<ir::VarDecl>(extS->getExtIR())) {
-            LOGMAX("Reading external var "+vd->debug());
             if(!extS->getModDecl()) {
                 llvm::report_fatal_error("External symbol module was not resolved");
             }
@@ -1416,6 +1417,147 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             builder.CreateCall(str_add, {resStrPtr, charextr});
             return builder.CreateLoad(stringT, resStrPtr);
         }
+    }
+    break;
+    case ir::OperatorKind::OP_AS:
+    {
+        ir::TypeDecl *ogType = e->getLeft()->getType();
+        ir::TypeDecl *asType = e->getRight()->getType();
+
+        if(asType->isMaybe()) {
+            llvm::report_fatal_error("Values cannot be casted to maybe type. Use assignment.");
+        }
+
+        if(ogType->getName() == asType->getName() && ogType->isMaybe() == asType->isMaybe()) {
+            // as itself
+            return left;
+        }
+
+        //llvm::Type *asllvmType = mapType(asType);
+
+        auto to_str_int = cgm.getLLVMMod()->getOrInsertFunction("to_string_int",
+                                 llvm::FunctionType::get(
+                                    stringT,
+                                    int64T,
+                                    false
+                                 ));
+        auto to_str_float = cgm.getLLVMMod()->getOrInsertFunction("to_string_float",
+                                 llvm::FunctionType::get(
+                                    stringT,
+                                    floatT,
+                                    false
+                                 ));
+        auto to_str_bool = cgm.getLLVMMod()->getOrInsertFunction("to_string_bool",
+                                 llvm::FunctionType::get(
+                                    stringT,
+                                    int1T,
+                                    false
+                                 ));
+        auto to_str_mint = cgm.getLLVMMod()->getOrInsertFunction("mto_string_int",
+                                 llvm::FunctionType::get(
+                                    stringT,
+                                    int64T->getPointerTo()->getPointerTo(),
+                                    false
+                                 ));
+        auto to_str_mfloat = cgm.getLLVMMod()->getOrInsertFunction("mto_string_float",
+                                 llvm::FunctionType::get(
+                                    stringT,
+                                    floatT->getPointerTo()->getPointerTo(),
+                                    false
+                                 ));
+        auto to_str_mbool = cgm.getLLVMMod()->getOrInsertFunction("mto_string_bool",
+                                 llvm::FunctionType::get(
+                                    stringT,
+                                    int1T->getPointerTo()->getPointerTo(),
+                                    false
+                                 ));
+        auto to_str_mstring = cgm.getLLVMMod()->getOrInsertFunction("mto_string_string",
+                                 llvm::FunctionType::get(
+                                    stringT,
+                                    stringT->getPointerTo()->getPointerTo(),
+                                    false
+                                 ));
+
+        if(!ogType->isMaybe()) {
+            if(ogType->getName() == INT_CSTR) {
+                if(asType->getName() == STRING_CSTR) {
+                    return builder.CreateCall(to_str_int, { left });
+                }
+                if(asType->getName() == FLOAT_CSTR) {
+                    return builder.CreateSIToFP(left, floatT);
+                }
+                if(asType->getName() == BOOL_CSTR) {
+                    return builder.CreateICmpNE(left, llvm::ConstantInt::get(int64T, 0));
+                }
+            }
+            else if(ogType->getName() == FLOAT_CSTR) {
+                if(asType->getName() == STRING_CSTR) {
+                    return builder.CreateCall(to_str_float, { left });
+                }
+                if(asType->getName() == INT_CSTR) {
+                    return builder.CreateFPToSI(left, int64T);
+                }
+                if(asType->getName() == BOOL_CSTR) {
+                    return builder.CreateFCmpUNE(left, llvm::ConstantFP::get(floatT, 0.0));
+                }
+            }
+            else if(ogType->getName() == BOOL_CSTR) {
+                if(asType->getName() == STRING_CSTR) {
+                    return builder.CreateCall(to_str_bool, { left });
+                }
+                if(asType->getName() == INT_CSTR) {
+                    return builder.CreateZExt(left, int64T);
+                }
+                if(asType->getName() == FLOAT_CSTR) {
+                    return builder.CreateUIToFP(left, floatT);
+                }
+            }
+        }
+        else {
+            auto mleft = llvm::dyn_cast<llvm::LoadInst>(left)->getOperand(0);
+            mleft = llvm::dyn_cast<llvm::LoadInst>(mleft)->getOperand(0);
+            // Maybe type
+            if(ogType->getName() == INT_CSTR) {
+                if(asType->getName() == STRING_CSTR) {
+                    return builder.CreateCall(to_str_mint, { mleft });
+                }
+                if(asType->getName() == FLOAT_CSTR) {
+                    return builder.CreateSIToFP(left, floatT);
+                }
+                if(asType->getName() == BOOL_CSTR) {
+                    return builder.CreateICmpNE(left, llvm::ConstantInt::get(int64T, 0));
+                }
+            }
+            else if(ogType->getName() == FLOAT_CSTR) {
+                if(asType->getName() == STRING_CSTR) {
+                    return builder.CreateCall(to_str_mfloat, { mleft });
+                }
+                if(asType->getName() == INT_CSTR) {
+                    return builder.CreateFPToSI(left, int64T);
+                }
+                if(asType->getName() == BOOL_CSTR) {
+                    return builder.CreateFCmpUNE(left, llvm::ConstantFP::get(floatT, 0.0));
+                }
+            }
+            else if(ogType->getName() == BOOL_CSTR) {
+                if(asType->getName() == STRING_CSTR) {
+                    return builder.CreateCall(to_str_mbool, { mleft });
+                }
+                if(asType->getName() == INT_CSTR) {
+                    return builder.CreateZExt(left, int64T);
+                }
+                if(asType->getName() == FLOAT_CSTR) {
+                    return builder.CreateUIToFP(left, floatT);
+                }
+            }
+            else if(ogType->getName() == STRING_CSTR) {
+                if(asType->getName() == STRING_CSTR) {
+                    return builder.CreateCall(to_str_mstring, { mleft });
+                }
+            }
+        }
+
+        llvm::report_fatal_error("Incorrect or unimplemented cast");
     }
     break;
     default: llvm::report_fatal_error("Uknown operator in code generation");

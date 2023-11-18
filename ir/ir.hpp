@@ -115,6 +115,7 @@ enum OperatorKind {
     OP_SUBSCR,
     OP_LNOT,
     OP_BNOT,
+    OP_AS,
     OP_UNKNOWN
 };
 
@@ -439,6 +440,7 @@ public:
         case OP_SUBSCR: return "[]";
         case OP_LNOT: return "!";
         case OP_BNOT: return "~";
+        case OP_AS: return "as";
         case OP_UNKNOWN: return "unknown";
         default: return "not-listed-op";
         }
@@ -649,6 +651,7 @@ public:
     VarAccess(VarDecl *var) : Expr(ExprKind::EX_VAR, var->getType(), false), var(var) {}
     VarAccess(FormalParamDecl *var) : Expr(ExprKind::EX_VAR, var->getType(), false), var(var) {}
     VarAccess(FunctionDecl *var, TypeDecl *type) : Expr(ExprKind::EX_VAR, type, false), var(var) {}
+    VarAccess(TypeDecl *var) : Expr(ExprKind::EX_VAR, var, false), var(var) {}
     
     IR *getVar() { return var; }
     static bool classof(const Expr *e) {

@@ -362,6 +362,9 @@ ir::Expr *Scanner::parseVar(std::string v, bool external) {
             else if(llvm::isa<ir::FormalParamDecl>(var)) {
                 return new ir::VarAccess(llvm::dyn_cast<ir::FormalParamDecl>(var));
             }
+            else if(llvm::isa<ir::TypeDecl>(var)) {
+                return new ir::VarAccess(llvm::dyn_cast<ir::TypeDecl>(var));
+            }
             else {
                 diags.report(llvmloc2Src(), diag::ERR_INTERNAL, "Only variable and function access is just yet implemented");
             }
@@ -530,6 +533,13 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
             else {
                 type = tl;
             }
+        break;
+        case ir::OperatorKind::OP_AS:
+            // TODO: Add checks for compatible conversions
+            if(tr->isMaybe()) {
+                diags.report(llvmloc2Src(), diag::ERR_CANNOT_CAST_TO_MAYBE);
+            }
+            type = tr;
         break;
         case ir::OperatorKind::OP_ACCESS:
         {
