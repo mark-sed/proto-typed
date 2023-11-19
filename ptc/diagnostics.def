@@ -51,6 +51,7 @@ DIAG(ERR_CANNOT_ASSIGN_NONE, Error, "‘none’ can be assigned only to maybe ty
 DIAG(ERR_UNKNOWN_MODULE, Error, "unknown module ‘{0}’.")
 DIAG(ERR_CANNOT_CAST_TO_MAYBE, Error, "only any type can be casted to maybe type.")
 DIAG(ERR_USE_CAST_FOR_ANY, Error, "incorrect assignment of type ‘{0}’ to ‘{1}’. Cast the value using ‘as’ operator.")
+DIAG(ERR_UNKNOWN_TOKEN, Error, "unknown token ‘{0}’.")
 
 DIAG(ERR_EXPECTED, Error, "expected ‘{0}’ but found ‘{1}’.")
 //DIAG(note_module_identifier_declaration, Note, "module identifier declared here")

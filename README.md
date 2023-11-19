@@ -500,10 +500,12 @@ for (int k : 0..length(text)) {
 
 ### Operators
 
+Following table contains pt operators from highest precedence to the lowest.
+
 | **Operator**                                                                                 | **Description**                                                  | **Associativity** |
 |----------------------------------------------------------------------------------------------|------------------------------------------------------------------|-------------------|
 | `::`                                                                                         | Module scope                                                     | none              |
-| `()`, `[]`                                                                                   | Function call, array indexing                                    | none              |
+| `()`, `[]`, `[::]`                                                                           | Function call, array indexing, slicing                           | none              |
 | `as`                                                                                         | Type casting                                                     | left              |
 | `.`                                                                                          | Structure member access                                          | left              |
 | `not`, `~`                                                                                   | Logical NOT, bitwise NOT                                         | right             |

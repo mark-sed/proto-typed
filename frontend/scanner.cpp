@@ -143,9 +143,7 @@ void Scanner::parse(std::istream *code) {
     enterScope(mainModule);
     globalScope = currScope;
     if(parser->parse() != 0) {
-        // TODO: ERROR
-        log::error("Could not parse the source code.");
-        exit(1);
+        // Fail
     }
     leaveScope();
 

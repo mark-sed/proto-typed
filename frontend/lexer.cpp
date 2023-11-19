@@ -1333,16 +1333,15 @@ case 87:
 YY_RULE_SETUP
 #line 240 "frontend/lexer.ll"
 {
-                  auto msg = std::string("ERROR: Unknown token '")+ yytext + std::string("'");
-                  ptc::log::error(msg);
+                  fatal_error(diag::ERR_UNKNOWN_TOKEN, std::string(yytext));
                 }
 	YY_BREAK
 case 88:
 YY_RULE_SETUP
-#line 244 "frontend/lexer.ll"
+#line 243 "frontend/lexer.ll"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 1346 "frontend/lexer.cpp"
+#line 1345 "frontend/lexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2314,5 +2313,5 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 244 "frontend/lexer.ll"
+#line 243 "frontend/lexer.ll"
 

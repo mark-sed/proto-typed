@@ -13,11 +13,6 @@
 
 using namespace ptc;
 
-void log::error(std::string msg) {
-    llvm::outs() << "ERROR: " << msg << "\n";
-    Logger::get().add_error();
-}
-
 using namespace ptc::log;
 
 BaseLogger::BaseLogger() : disable(false), log_everything(false), logging_level{0} {

@@ -237,7 +237,6 @@ oct     0[Qq][0-7]+
                     return token::ID;
                 }
 .               {
-                  auto msg = std::string("ERROR: Unknown token '")+ yytext + std::string("'");
-                  ptc::log::error(msg);
+                  fatal_error(diag::ERR_UNKNOWN_TOKEN, std::string(yytext));
                 }
 %%

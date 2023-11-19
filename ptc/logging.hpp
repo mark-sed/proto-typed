@@ -86,13 +86,6 @@ public:
 namespace log {
 
 /**
- * Error message output
- * @warning Use Diagnostics for real error messages
- * @param msg Error message
- */
-void error(std::string msg);
-
-/**
  * Base class for all loggers
  */ 
 class BaseLogger {
