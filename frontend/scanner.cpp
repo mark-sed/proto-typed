@@ -346,7 +346,7 @@ ir::Expr *Scanner::parseNone() {
 ir::Expr *Scanner::parseVar(std::string v, bool external, bool maybe_type) {
     LOGMAX("Parsing a variable "+v);
     if(!external) {
-        auto var = currScope->lookup(v);
+        auto var = currScope->lookup(v, maybe_type);
         if(!var) {
             var = currScope->lookupPossibleFun(v);
         }
@@ -361,7 +361,6 @@ ir::Expr *Scanner::parseVar(std::string v, bool external, bool maybe_type) {
                 return new ir::VarAccess(llvm::dyn_cast<ir::FormalParamDecl>(var));
             }
             else if(auto t = llvm::dyn_cast<ir::TypeDecl>(var)) {
-                t->setMaybe(maybe_type);
                 return new ir::VarAccess(t);
             }
             else {

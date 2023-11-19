@@ -1582,8 +1582,14 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
                 }
             }
             else if(ogType->getName() == ANY_CSTR) {
-                // TODO: 
-                llvm::report_fatal_error("Any cast is unimplemented");
+                if(asType->isMaybe()) {
+                    auto casted = builder.CreateBitCast(pleft, mapType(asType));
+                    return casted;
+                }
+                else {
+                    auto casted = builder.CreateBitCast(pleft, mapType(asType)->getPointerTo());
+                    return builder.CreateLoad(mapType(asType), casted);
+                }
             }
         }
 
