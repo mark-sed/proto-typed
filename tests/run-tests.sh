@@ -221,6 +221,11 @@ function test_casting {
 false\nfalse\ntrue\ntrue\n4\ntrue\n0\nfalse\n11110\n"
 }
 
+function test_floats {
+    expect_pass "floats.pt" "floats"
+    expect_out_eq "true\ntrue\nfalse\ntrue\nfalse\n"
+}
+
 # Expect fail tests
 
 #function test_missing_return {
@@ -239,6 +244,7 @@ function run_all_tests {
     run_test arrays
     run_test statements
     run_test casting
+    run_test floats
 
     # Expect fail tests
     # run_test missing_return # TODO: Enable as just fail

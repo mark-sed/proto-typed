@@ -1,0 +1,13 @@
+float f1
+float f2 = 0.0
+
+bool feq(float a, float b) {
+    return a == b
+}
+
+print(feq(0.0, 0.0)++"\n")
+print(feq(0.0, -0.0)++"\n")
+print(feq(0.001, 0.0)++"\n")
+print(f1 == f2 ++ "\n")
+f2 = 7.0e-32
+print(f1 == f2++"\n")

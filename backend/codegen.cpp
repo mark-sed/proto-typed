@@ -1028,7 +1028,12 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             result = builder.CreateICmpSGT(cmpval, llvm::ConstantInt::get(builder.getInt32Ty(), 0, true));
         }
         else if(left->getType() == right->getType()) {
-            result = builder.CreateICmpSGT(left, right);
+            if(e->getLeft()->getType()->getName() == FLOAT_CSTR) {
+                result = builder.CreateFCmpOGT(left, right);
+            }
+            else {
+                result = builder.CreateICmpSGT(left, right);
+            }
         }
         else {
             llvm::report_fatal_error("BT does not supported given type");
@@ -1054,7 +1059,12 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             result = builder.CreateICmpSGE(cmpval, llvm::ConstantInt::get(builder.getInt32Ty(), 0, true));
         }
         else if(left->getType() == right->getType()) {
-            result = builder.CreateICmpSGE(left, right);
+            if(e->getLeft()->getType()->getName() == FLOAT_CSTR) {
+                result = builder.CreateFCmpOGE(left, right);
+            }
+            else {
+                result = builder.CreateICmpSGE(left, right);
+            }
         }
         else {
             llvm::report_fatal_error("BEQ does not supported given type");
@@ -1080,7 +1090,12 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             result = builder.CreateICmpSLT(cmpval, llvm::ConstantInt::get(builder.getInt32Ty(), 0, true));
         }
         else if(left->getType() == right->getType()) {
-            result = builder.CreateICmpSLT(left, right);
+            if(e->getLeft()->getType()->getName() == FLOAT_CSTR) {
+                result = builder.CreateFCmpOLT(left, right);
+            }
+            else {
+                result = builder.CreateICmpSLT(left, right);
+            }
         }
         else {
             llvm::report_fatal_error("LT does not supported given type ");
@@ -1106,7 +1121,12 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             result = builder.CreateICmpSLE(cmpval, llvm::ConstantInt::get(builder.getInt32Ty(), 0, true));
         }
         else if(left->getType() == right->getType()) {
-            result = builder.CreateICmpSLE(left, right);
+            if(e->getLeft()->getType()->getName() == FLOAT_CSTR) {
+                result = builder.CreateFCmpOLE(left, right);
+            }
+            else {
+                result = builder.CreateICmpSLE(left, right);
+            }
         }
         else {
             llvm::report_fatal_error("LEQ does not supported given type");
@@ -1129,7 +1149,12 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             result = builder.CreateCall(str_eq, {left, right});
         }
         else if(left->getType() == right->getType()) {
-            result = builder.CreateICmpEQ(left, right);
+            if(e->getLeft()->getType()->getName() == FLOAT_CSTR) {
+                result = builder.CreateFCmpOEQ(left, right);
+            }
+            else {
+                result = builder.CreateICmpEQ(left, right);
+            }
         }
         else if(e->getLeft()->getType()->getName() == NONETYPE_CSTR && e->getRight()->getType()->isMaybe()) {
             auto ldv = llvm::dyn_cast<llvm::LoadInst>(right)->getOperand(0);
