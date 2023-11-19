@@ -1,22 +1,19 @@
 any a ="hello\n"
 string? b
-b = a
-string c
-c = b
-print(c) // hello\n 
+b = a as string?
+print(b) // hello\n 
 
 void anyfun() {
     any g
     g = "hi\n"
-    string b = g
+    string b = g as string
     print(b)
 
     any i
     i = 42
     i = true
-    bool? d = i
-    bool c = d
-    print(c++"\n")
+    bool? d = i as bool?
+    print(d++"\n")
 }
 
 anyfun() // true\n
@@ -26,17 +23,17 @@ any av
 av = ma
 ma = 99
 int maInt
-maInt = av
+maInt = av as int
 print(maInt++"\n") // 99\n
 
 any floatAny = 5.25
 float flt
-flt = floatAny
+flt = floatAny as float
 print(flt++"\n") // 5.25\n
 
 void foo(any floatAny) {
     float flt
-    flt = floatAny
+    flt = floatAny as float
     print(flt++"\n")
 }
 
@@ -47,12 +44,12 @@ any astring
 astring = 1
 astring = "str\n"
 string? actstr
-actstr = astring
+actstr = astring as string?
 print(actstr++"")
 
 void bar(string? actstr) {
     any astring = "str\n"
-    actstr = astring
+    actstr = astring as string?
 }
 
 string? h1
@@ -65,7 +62,7 @@ bar("no")
 
 void getK(int? x) {
     any KVAL = 7542
-    x = KVAL
+    x = KVAL as int?
 }
 
 int? maybe_k
@@ -75,3 +72,11 @@ getK(maybe_k)
 getK(k)
 
 print(maybe_k++"\n"++k++"\n") // 7542\n0\n
+
+int? az
+any bz = 4
+az = bz as int?
+az = 8
+int? cz
+cz = bz as int?
+print(cz as string)

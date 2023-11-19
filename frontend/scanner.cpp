@@ -432,6 +432,9 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
                     diags.report(llvmloc2Src(), diag::ERR_USE_CAST_FOR_ANY, tr->getName(), tl->getName());
                     type = tl;
                 }
+                else if(tl->getName() == ANY_CSTR) {
+                    type = tl;
+                }
                 else if(tr->isUnresolved()) {
                     type = tl;
                 }

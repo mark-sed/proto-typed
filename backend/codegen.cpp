@@ -222,7 +222,7 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
             }
             else {
                 // Check if any to bitcast //TODO: Remove once as is implemented 
-                if(val->getType() == builder.getInt8Ty()) {
+                /*if(val->getType() == builder.getInt8Ty()) {
                     if(auto li = llvm::dyn_cast<llvm::LoadInst>(val)) {
                         auto emEx = li->getOperand(0);
                         auto casted = builder.CreateBitCast(emEx, mapType(decl)->getPointerTo());
@@ -233,9 +233,9 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
                         llvm::report_fatal_error("Cannot cast any type for parameter");
                     }
                 }
-                else {
+                else {*/
                     builder.CreateStore(val, locals[decl]);
-                }
+                //}
             }
         }
         else {
@@ -271,7 +271,7 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
             else {
                 auto vPtr = builder.CreateAlloca(t);
                 // Check if any to bitcast //TODO: Remove once as is implemented 
-                if(val->getType() == builder.getInt8Ty()) {
+                /*if(val->getType() == builder.getInt8Ty()) {
                     if(auto li = llvm::dyn_cast<llvm::LoadInst>(val)) {
                         auto emEx = li->getOperand(0);
                         auto casted = builder.CreateBitCast(emEx, mapType(decl)->getPointerTo());
@@ -280,7 +280,7 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
                     else {
                         llvm::report_fatal_error("Cannot cast any type for parameter");
                     }
-                }
+                }*/
                 builder.CreateStore(val, vPtr);
                 locals[decl] = vPtr;
             }
@@ -320,7 +320,7 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
             }
             else {
                 // Check if any to bitcast
-                if(val->getType() == builder.getInt8Ty()) {
+                /*if(val->getType() == builder.getInt8Ty()) {
                     if(auto li = llvm::dyn_cast<llvm::LoadInst>(val)) {
                         auto emEx = li->getOperand(0);
                         auto casted = builder.CreateBitCast(emEx, mapType(decl)->getPointerTo());
@@ -331,9 +331,9 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
                         llvm::report_fatal_error("Cannot cast any type for global value");
                     }
                 }
-                else {
-                    builder.CreateStore(val, cgm.getGlobals(decl));
-                }
+                else {*/
+                builder.CreateStore(val, cgm.getGlobals(decl));
+                //}
             }
         }
         else {
@@ -420,7 +420,7 @@ void cg::CGFunction::writeExtVar(CGModule *mod, ir::IR *decl, llvm::Value *val) 
             }
             else {
                 // Check if any to bitcast
-                if(val->getType() == builder.getInt8Ty()) {
+                /*if(val->getType() == builder.getInt8Ty()) {
                     if(auto li = llvm::dyn_cast<llvm::LoadInst>(val)) {
                         auto emEx = li->getOperand(0);
                         auto casted = builder.CreateBitCast(emEx, mapType(decl)->getPointerTo());
@@ -431,9 +431,9 @@ void cg::CGFunction::writeExtVar(CGModule *mod, ir::IR *decl, llvm::Value *val) 
                         llvm::report_fatal_error("Cannot cast any type for global value");
                     }
                 }
-                else {
+                else {*/
                     builder.CreateStore(val, extVar);
-                }
+                //}
             }
         }
         else {
@@ -1539,8 +1539,9 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             }
         }
         else {
-            auto mleft = llvm::dyn_cast<llvm::LoadInst>(left)->getOperand(0);
-            mleft = llvm::dyn_cast<llvm::LoadInst>(mleft)->getOperand(0);
+            auto pleft = llvm::dyn_cast<llvm::LoadInst>(left)->getOperand(0);
+            auto mleft = llvm::dyn_cast<llvm::LoadInst>(pleft)->getOperand(0);
+
             // Maybe type
             if(ogType->getName() == INT_CSTR) {
                 if(asType->getName() == STRING_CSTR) {
@@ -1579,6 +1580,10 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
                 if(asType->getName() == STRING_CSTR) {
                     return builder.CreateCall(to_str_mstring, { mleft });
                 }
+            }
+            else if(ogType->getName() == ANY_CSTR) {
+                // TODO: 
+                llvm::report_fatal_error("Any cast is unimplemented");
             }
         }
 
