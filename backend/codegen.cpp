@@ -1449,7 +1449,7 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         ir::TypeDecl *ogType = e->getLeft()->getType();
         ir::TypeDecl *asType = e->getRight()->getType();
 
-        if(asType->isMaybe()) {
+        if(asType->isMaybe() && e->getLeft()->getType()->getName() != ANY_CSTR) {
             llvm::report_fatal_error("Values cannot be casted to maybe type. Use assignment.");
         }
 

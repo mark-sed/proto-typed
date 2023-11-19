@@ -211,7 +211,7 @@ public:
     ir::Expr *parseFloat(double v);
     ir::Expr *parseBool(bool v);
     ir::Expr *parseString(std::string v);
-    ir::Expr *parseVar(std::string v, bool external=false);
+    ir::Expr *parseVar(std::string v, bool external=false, bool maybe_type=false);
     ir::Expr *parseMatrix(std::vector<ir::Expr *> values);
     ir::Expr *parseNone();
     ir::Expr *parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, bool is_const=false);

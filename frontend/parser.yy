@@ -405,12 +405,15 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          | EXT_ID LSQ int_val RSQ   { $$ = scanner->parseInfixExpr(scanner->parseVar($1), $3, ir::Operator(ir::OperatorKind::OP_SUBSCR)); }
          | expr_var LSQ int_val RSQ { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_SUBSCR)); }
 
-         | ID AS EXT_ID       { $$ = scanner->parseInfixExpr(scanner->parseVar($1), scanner->parseVar(scanner->parseExtType($3, false)->getName(), true), ir::Operator(ir::OperatorKind::OP_AS)); }
-         | EXT_ID AS EXT_ID   { $$ = scanner->parseInfixExpr(scanner->parseVar($1, true), scanner->parseVar(scanner->parseExtType($3, false)->getName(), true), ir::Operator(ir::OperatorKind::OP_AS)); }
-         | expr_var AS EXT_ID { $$ = scanner->parseInfixExpr($1, scanner->parseVar(scanner->parseExtType($3, false)->getName(), true), ir::Operator(ir::OperatorKind::OP_AS)); }
-         | ID AS type         { $$ = scanner->parseInfixExpr(scanner->parseVar($1), scanner->parseVar($3->getName()), ir::Operator(ir::OperatorKind::OP_AS)); }
-         | EXT_ID AS type     { $$ = scanner->parseInfixExpr(scanner->parseVar($1, true), scanner->parseVar($3->getName()), ir::Operator(ir::OperatorKind::OP_AS)); }
-         | expr_var AS type   { $$ = scanner->parseInfixExpr($1, scanner->parseVar($3->getName()), ir::Operator(ir::OperatorKind::OP_AS)); }
+         | ID AS EXT_ID       { $$ = scanner->parseInfixExpr(scanner->parseVar($1), scanner->parseVar(scanner->parseExtType($3, false)->getName(), true, false), ir::Operator(ir::OperatorKind::OP_AS)); }
+         | EXT_ID AS EXT_ID   { $$ = scanner->parseInfixExpr(scanner->parseVar($1, true), scanner->parseVar(scanner->parseExtType($3, false)->getName(), true, false), ir::Operator(ir::OperatorKind::OP_AS)); }
+         | expr_var AS EXT_ID { $$ = scanner->parseInfixExpr($1, scanner->parseVar(scanner->parseExtType($3, false)->getName(), true, false), ir::Operator(ir::OperatorKind::OP_AS)); }
+         | ID AS EXT_ID KWMAYBE       { $$ = scanner->parseInfixExpr(scanner->parseVar($1), scanner->parseVar(scanner->parseExtType($3, true)->getName(), true, true), ir::Operator(ir::OperatorKind::OP_AS)); }
+         | EXT_ID AS EXT_ID KWMAYBE   { $$ = scanner->parseInfixExpr(scanner->parseVar($1, true), scanner->parseVar(scanner->parseExtType($3, true)->getName(), true, true), ir::Operator(ir::OperatorKind::OP_AS)); }
+         | expr_var AS EXT_ID KWMAYBE { $$ = scanner->parseInfixExpr($1, scanner->parseVar(scanner->parseExtType($3, true)->getName(), true, true), ir::Operator(ir::OperatorKind::OP_AS)); }
+         | ID AS type         { $$ = scanner->parseInfixExpr(scanner->parseVar($1), scanner->parseVar($3->getName(), false, llvm::dyn_cast<ptc::ir::TypeDecl>($3)->isMaybe()), ir::Operator(ir::OperatorKind::OP_AS)); }
+         | EXT_ID AS type     { $$ = scanner->parseInfixExpr(scanner->parseVar($1, true), scanner->parseVar($3->getName(), false, llvm::dyn_cast<ptc::ir::TypeDecl>($3)->isMaybe()), ir::Operator(ir::OperatorKind::OP_AS)); }
+         | expr_var AS type   { $$ = scanner->parseInfixExpr($1, scanner->parseVar($3->getName(), false, llvm::dyn_cast<ptc::ir::TypeDecl>($3)->isMaybe()), ir::Operator(ir::OperatorKind::OP_AS)); }
 
          | expr_mat slice
          | ID slice

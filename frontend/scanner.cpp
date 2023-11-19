@@ -345,7 +345,7 @@ ir::Expr *Scanner::parseNone() {
     return new ir::NoneLiteral(llvmloc2Src(), noneType);
 }
 
-ir::Expr *Scanner::parseVar(std::string v, bool external) {
+ir::Expr *Scanner::parseVar(std::string v, bool external, bool maybe_type) {
     LOGMAX("Parsing a variable "+v);
     if(!external) {
         auto var = currScope->lookup(v);
@@ -362,8 +362,9 @@ ir::Expr *Scanner::parseVar(std::string v, bool external) {
             else if(llvm::isa<ir::FormalParamDecl>(var)) {
                 return new ir::VarAccess(llvm::dyn_cast<ir::FormalParamDecl>(var));
             }
-            else if(llvm::isa<ir::TypeDecl>(var)) {
-                return new ir::VarAccess(llvm::dyn_cast<ir::TypeDecl>(var));
+            else if(auto t = llvm::dyn_cast<ir::TypeDecl>(var)) {
+                t->setMaybe(maybe_type);
+                return new ir::VarAccess(t);
             }
             else {
                 diags.report(llvmloc2Src(), diag::ERR_INTERNAL, "Only variable and function access is just yet implemented");
@@ -423,20 +424,14 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
         switch(op.getKind()) {
         case ir::OperatorKind::OP_ASSIGN:
             if(tl->getName() != tr->getName()) {
-                /*
-                // I've removed implicit conversion of
-                if((tl->getName() == FLOAT_CSTR && tr->getName() == INT_CSTR)
-                || (tl->getName() == INT_CSTR && tr->getName() == FLOAT_CSTR)) {
-                    type = tl;
-                }
-                else */
                 if(tr->getName() == NONETYPE_CSTR) {
                     if(!tl->isMaybe()) {
                         diags.report(llvmloc2Src(), diag::ERR_CANNOT_ASSIGN_NONE);
                     }
                     type = tl;
                 }
-                else if(tl->getName() == ANY_CSTR || tr->getName() == ANY_CSTR) {
+                else if(tl->isMaybe() && tr->getName() == ANY_CSTR) {
+                    diags.report(llvmloc2Src(), diag::ERR_USE_CAST_FOR_ANY, tr->getName(), tl->getName());
                     type = tl;
                 }
                 else if(tr->isUnresolved()) {
@@ -536,7 +531,7 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
         break;
         case ir::OperatorKind::OP_AS:
             // TODO: Add checks for compatible conversions
-            if(tr->isMaybe()) {
+            if(tr->isMaybe() && tl->getName() != ANY_CSTR) {
                 diags.report(llvmloc2Src(), diag::ERR_CANNOT_CAST_TO_MAYBE);
             }
             type = tr;

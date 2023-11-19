@@ -498,6 +498,31 @@ for (int k : 0..length(text)) {
 }
 ```
 
+### Operators
+
+| **Operator**                                                                                 | **Description**                                                  | **Associativity** |
+|----------------------------------------------------------------------------------------------|------------------------------------------------------------------|-------------------|
+| `::`                                                                                         | Module scope                                                     | none              |
+| `()`, `[]`                                                                                   | Function call, array indexing                                    | none              |
+| `as`                                                                                         | Type casting                                                     | left              |
+| `.`                                                                                          | Structure member access                                          | left              |
+| `not`, `~`                                                                                   | Logical NOT, bitwise NOT                                         | right             |
+| `**`                                                                                         | Exponentiation (returns `float`)                                 | right             |
+| `*`, `/`, `%`                                                                                | Multiplication, division, reminder                               | left              |
+| `+`, `-`                                                                                     | Addition, subtraction                                            | left              |
+| `<<`, `>>`                                                                                   | Bitwise left shift, bitwise right shift                          | left              |
+| `..`                                                                                         | Range                                                            | left              |
+| `>`, `>=`, `<`, `<=`                                                                         | Bigger than, bigger than or equal, less than, less than or equal | left              |
+| `==`, `!=`                                                                                   | Equality, inequality                                             | left              |
+| `&`                                                                                          | Bitwise AND                                                      | left              |
+| `^`                                                                                          | Bitwise XOR                                                      | left              |
+| `\|`                                                                                         | Bitwise OR                                                       | left              |
+| `in`                                                                                         | Membership                                                       | left              |
+| `and`                                                                                        | Logical AND                                                      | left              |
+| `or`                                                                                         | Logical OR                                                       | left              |
+| `++`                                                                                         | Concatenation                                                    | left              |
+| `=`, `++=`, `**=`, `+=`,  `-=`, `/=`, `*=`, `%=`,  `&=`, `\|=`, `^=`, `~=`,  `<<=`, `>>=`    | Assignment, compound assignments                                 | left              |
+
 ## Semantics
 
 Proto-typed does not provide some of the higher level constructs such as classes and objects, but at the same time tries to provide abstractions for simple and quick coding. Example of such abstractions is the memory managements handled by the garbage collector or not present pointer type. 
@@ -521,6 +546,31 @@ mod2::_entry()
 ```
 
 Module could possibly call its own entry function.
+
+### Casting (`as` operator)
+
+Casting can be done only to non-maybe type, unless the casted value is of type `any`. The reason for this is that maybe is dynamically allocated memory and casting (reading) this memory as different type (size) does not make sense. For `any`, this cast only reads the value.
+```c
+void foo(string? c) {
+    c = "changed"
+}
+
+int? a = 4
+foo(a as string?) // Error
+// This does not make sense as a would be
+// modified to contain string
+
+string? str_a
+str_a = a as string
+foo(str_a) // Works
+```
+
+If you really wish to play god and treat memory as different type, you can utilize the `any` type for this:
+```c
+any ivalue = 1
+float? fvalue
+fvalue = ivalue as float?
+```
 
 ## Standard library
 Calls to standard library do not require any module name prefix and any of the functions can be overridden by custom definitions.
