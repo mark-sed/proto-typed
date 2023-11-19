@@ -92,16 +92,17 @@ function expect_pass {
 
 function expect_fail {
     run $1
+    local errmsg=$(cat "$OUTP_ERR")
     if [[ $RETCODE -eq 0 ]]; then
         failed $3 "Test was supposed to fail, but passed."
-    elif ! cmp -s "$OUTP_ERR" <(printf "$2") ; then
+    elif ! [[ "$errmsg" =~ "$2" ]] ; then
         failed $3 "Error message differs."
         printf "Command:\n--------\n$CMD\n"
         printf "Output:\n-------\n"
         cat $OUTP_STD
         printf "Error output:\n-------------\n"
         cat $OUTP_ERR
-        printf "Expected error:\n--------------\n${2}\n"
+        printf "Expected error regex:\n--------------\n${2}\n"
     fi
 }
 
@@ -228,9 +229,9 @@ function test_floats {
 
 # Expect fail tests
 
-#function test_missing_return {
-#    expect_fail "missing_return.pt" "<unknown>:0: error: Missing return in a flow path in a function ‘miss’.\n" "missing_return"
-#}
+function test_missing_return {
+    expect_fail "missing_return.pt" "Missing return in a flow path in a function ‘miss’" "missing_return"
+}
 
 function run_all_tests {
     run_test fib
@@ -247,7 +248,7 @@ function run_all_tests {
     run_test floats
 
     # Expect fail tests
-    # run_test missing_return # TODO: Enable as just fail
+    run_test missing_return
 }
 
 # Count all functions starting with test_ 
