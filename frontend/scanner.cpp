@@ -126,10 +126,25 @@ void Scanner::init() {
         new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", this->stringType, false)
     });
 
+    // Math functions
+    // Trigonometry
+    defineFun("sin_float", "sin", floatType, {
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", this->floatType, false)
+    });
+    defineFun("cos_float", "cos", floatType, {
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", this->floatType, false)
+    });
+    defineFun("tan_float", "tan", floatType, {
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", this->floatType, false)
+    });
+
     if(!lib) {
         for(auto d: ptlibMod->getDecls()) {
-            if(auto f = llvm::dyn_cast<ir::FunctionDecl>(d)) {
-                currScope->insert(f);
+            if(auto v = llvm::dyn_cast<ir::FunctionDecl>(d)) {
+                currScope->insert(v);
+            }
+            else if(auto v = llvm::dyn_cast<ir::VarDecl>(d)) {
+                currScope->insert(v);
             }
         }
     }
@@ -151,9 +166,6 @@ void Scanner::parse(std::istream *code) {
 
     LOG1("\n-----\nIR generated:\n");
     LOG1(mainModule->debug());
-    /*for(auto a : this->decls) {
-        std::cout << a->debug() << "\n";
-    }*/
 }
 
 bool Scanner::defineFun(std::string name, std::string ogName, ir::TypeDecl *retType, std::initializer_list<ir::FormalParamDecl*> params) {

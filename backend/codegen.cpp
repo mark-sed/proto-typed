@@ -2011,6 +2011,15 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
             if(auto f = llvm::dyn_cast<ir::FunctionDecl>(d)) {
                 llvmMod->getOrInsertFunction(f->getName(), createFunctionType(f));
             }
+            else if(auto v = llvm::dyn_cast<ir::VarDecl>(d)) {
+                auto vPtr = new llvm::GlobalVariable(*llvmMod,
+                                                mapType(v),
+                                                false,
+                                                llvm::GlobalValue::ExternalLinkage,
+                                                nullptr,
+                                                v->getName());
+                globals[v] = vPtr;
+            }
         }
     }
 

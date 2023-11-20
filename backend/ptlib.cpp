@@ -273,6 +273,53 @@ void PTLib::length_stringInit() {
     builder.CreateRet(len64);
 }
 
+void PTLib::trigonFuncsInit() {
+    auto funType = llvm::FunctionType::get(floatT, { floatT }, false);
+    // float sin(float)
+    {
+        auto sinF = llvmMod->getOrInsertFunction("llvm.sin.f64", 
+                                                llvm::FunctionType::get(floatT, floatT, false));
+
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "sin_float",
+                                                llvmMod);
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        setCurrBB(bb);
+        llvm::Value *v = builder.CreateCall(sinF, f->getArg(0));
+        builder.CreateRet(v);
+    }
+    // float cos(float)
+    {
+        auto cosF = llvmMod->getOrInsertFunction("llvm.cos.f64", 
+                                                llvm::FunctionType::get(floatT, floatT, false));
+
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "cos_float",
+                                                llvmMod);
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        setCurrBB(bb);
+        llvm::Value *v = builder.CreateCall(cosF, f->getArg(0));
+        builder.CreateRet(v);
+    }
+    // float tan(float)
+    {
+        // LLVM does not have intrinsic for this, call tanl from libc
+        auto tanF = llvmMod->getOrInsertFunction("tan", 
+                                                llvm::FunctionType::get(floatT, floatT, false));
+
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "tan_float",
+                                                llvmMod);
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        setCurrBB(bb);
+        llvm::Value *v = builder.CreateCall(tanF, f->getArg(0));
+        builder.CreateRet(v);
+    }
+}
+
 void PTLib::appendInit(std::string name, llvm::Type *mt, llvm::Type *vt) {
     auto funType = llvm::FunctionType::get(voidT, { mt->getPointerTo(), vt }, false);
     llvm::Function *f = llvm::Function::Create(funType, 
@@ -329,6 +376,8 @@ void PTLib::setupLib() {
     to_string_floatInit();
     to_string_boolInit();
     length_stringInit();
+
+    trigonFuncsInit();
 }
 
 void PTLib::setupExternLib() {

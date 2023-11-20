@@ -22,6 +22,10 @@ target triple = "x86_64-pc-linux-gnu"
 @9 = private unnamed_addr constant [6 x i8] c"false\00", align 1
 @10 = private global i8* getelementptr inbounds ([1 x i8], [1 x i8]* @11, i32 0, i32 0)
 @11 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@M_PI = global double 0x400921FB54442D18
+@M_E = global double 0x4005BF0A8B145769
+@M_PHI = global double 0x3FF9E3779B97F4A8
+@M_EGAMMA = global double 0x3FE2788CFC6FB619
 @12 = private global i8* getelementptr inbounds ([5 x i8], [5 x i8]* @13, i32 0, i32 0)
 @13 = private unnamed_addr constant [5 x i8] c"none\00", align 1
 @14 = private global i8* getelementptr inbounds ([5 x i8], [5 x i8]* @15, i32 0, i32 0)
@@ -110,6 +114,32 @@ entry:
   %1 = extractvalue %string %0, 1
   %2 = sext i32 %1 to i64
   ret i64 %2
+}
+
+; Function Attrs: nofree nosync nounwind readnone speculatable willreturn
+declare double @llvm.sin.f64(double) #0
+
+define private double @sin_float(double %0) {
+entry:
+  %1 = call double @llvm.sin.f64(double %0)
+  ret double %1
+}
+
+; Function Attrs: nofree nosync nounwind readnone speculatable willreturn
+declare double @llvm.cos.f64(double) #0
+
+define private double @cos_float(double %0) {
+entry:
+  %1 = call double @llvm.cos.f64(double %0)
+  ret double %1
+}
+
+declare double @tan(double)
+
+define private double @tan_float(double %0) {
+entry:
+  %1 = call double @tan(double %0)
+  ret double %1
 }
 
 define %string.0 @mto_string_int(i64** %v) {
@@ -220,3 +250,5 @@ define void @init_libpt() {
 }
 
 declare void @matrix_Create_Default(%matrix*)
+
+attributes #0 = { nofree nosync nounwind readnone speculatable willreturn }

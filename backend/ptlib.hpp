@@ -60,6 +60,8 @@ private:
     void to_string_boolInit();
     void to_string_anyInit();
     void length_stringInit();
+
+    void trigonFuncsInit();
 public:
     /**
      * @param mod Codegen module
