@@ -81,3 +81,20 @@ int? cz
 cz = bz as int?
 print(cz as string)
 print("\n")
+
+any u1 = "hi\n"
+string u1s 
+u1s = u1 as string
+print(u1s)
+any u2 = 6
+int u2i
+u2i = u2 as int
+print(u2i++"\n")
+any u3 = true
+bool u3b
+u3b = u3 as bool
+print(u3b as string ++ "\n")
+any u4 = -0.0
+float u4f
+u4f = u4 as float
+print(u4f ++ "\n")
