@@ -45,6 +45,34 @@ string mto_string(string? v) {
     return a
 }
 
+string upper(string s) {
+    string r
+    for(string c : s) {
+        int o = ord(c)
+        if(o > 96 and o < 123) {
+            r ++= chr(o ^ 32);
+        }
+        else {
+            r ++= c
+        }
+    }
+    return r
+}
+
+string lower(string s) {
+    string r
+    for(string c : s) {
+        int o = ord(c)
+        if(o > 64 and o < 91) {
+            r ++= chr(o ^ 32);
+        }
+        else {
+            r ++= c
+        }
+    }
+    return r
+}
+
 /************************/
 /*--- Math functions ---*/
 /************************/

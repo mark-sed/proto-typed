@@ -1,0 +1,41 @@
+string g = "hello there 32\n"
+string G
+G = upper(g)
+print(G)
+string H = "ER SFD 43 ]}{\tRP;[]+455\n"
+print(lower(H))
+
+void ord_test(string? c) {
+    print(ord(c)++"\n")
+    string a = "!"
+    print(ord(a)++"\n")
+    print(ord("longer")++"\n")
+}
+
+string sA = "772"
+ord_test(sA)
+
+void chr_test(int a) {
+    print(chr(a))
+    print(chr(42))
+    print(chr(63)++"\n")
+}
+
+chr_test(100)
+
+void test_all_chr_ord() {
+    string ALPHAB = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+    int pos = 0
+    for(int i : 33 .. length(ALPHAB)+33) {
+        string c = chr(i)
+        string c2 = ALPHAB[pos]
+        if(ord(c) != ord(c2)) {
+            print("Error for ord and chr for i = "++i++"\n")
+        }
+        pos += 1
+    }
+    // Print pos to know function was executed and so was for loop
+    print(pos++"\n")
+}
+
+test_all_chr_ord() // 94\n

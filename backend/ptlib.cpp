@@ -347,20 +347,9 @@ void PTLib::stringFuncsInit() {
         
         auto strobj = builder.CreateAlloca(stringT);
         auto stringInitF = llvmMod->getOrInsertFunction("string_Create_Default", 
-                                                    llvm::FunctionType::get(
-                                                        voidT,
-                                                        stringTPtr,
-                                                        false
-                                                    ));
+                                                    llvm::FunctionType::get(voidT, stringTPtr, false));
         auto stringAddChr = llvmMod->getOrInsertFunction("string_Add_Char", 
-                                                        llvm::FunctionType::get(
-                                                            voidT,
-                                                            { 
-                                                                stringTPtr,
-                                                                builder.getInt8Ty()
-                                                            },
-                                                            false
-                                                        ));
+                                                        llvm::FunctionType::get(voidT, { stringTPtr, builder.getInt8Ty() }, false));
         // Init string
         builder.CreateCall(stringInitF, { strobj });
         auto parChr = builder.CreateTrunc(f->getArg(0), builder.getInt8Ty());
@@ -368,7 +357,28 @@ void PTLib::stringFuncsInit() {
         auto rval = builder.CreateLoad(stringT, strobj);
         builder.CreateRet(rval);
     }
-
+    // string upper(string)
+    /*{
+        auto funType = llvm::FunctionType::get(stringT, { int64T }, false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "upper_string",
+                                                llvmMod);
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        setCurrBB(bb);
+        
+        auto strobj = builder.CreateAlloca(stringT);
+        auto stringInitF = llvmMod->getOrInsertFunction("string_Create_Default", 
+                                                    llvm::FunctionType::get(voidT, stringTPtr, false));
+        auto stringAddChr = llvmMod->getOrInsertFunction("toupper", 
+                                                        llvm::FunctionType::get(intT, builder.getInt32Ty(), false));
+        // Init string
+        builder.CreateCall(stringInitF, { strobj });
+        auto parChr = builder.CreateTrunc(f->getArg(0), builder.getInt8Ty());
+        builder.CreateCall(stringAddChr, { strobj, parChr });
+        auto rval = builder.CreateLoad(stringT, strobj);
+        builder.CreateRet(rval);
+    }*/
 }
 
 void PTLib::appendInit(std::string name, llvm::Type *mt, llvm::Type *vt) {
