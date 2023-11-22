@@ -111,6 +111,7 @@ void Scanner::init() {
     defineFun("print_string", "print", voidType, {
         new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", this->stringType, false)
     });
+    // String function
     // to_string
     defineFun("to_string_int", "to_string", stringType, {
         new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", this->intType, false)
@@ -124,6 +125,12 @@ void Scanner::init() {
     // length
     defineFun("length_string", "length", intType, {
         new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", this->stringType, false)
+    });
+    defineFun("ord_string", "ord", intType, {
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", this->stringType, false)
+    });
+    defineFun("chr_int", "chr", stringType, {
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", this->intType, false)
     });
 
     // Math functions

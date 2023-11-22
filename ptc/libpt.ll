@@ -142,6 +142,26 @@ entry:
   ret double %1
 }
 
+define private i64 @ord_string(%string %0) {
+entry:
+  %1 = extractvalue %string %0, 0
+  %2 = load i8, i8* %1, align 1
+  %3 = zext i8 %2 to i64
+  ret i64 %3
+}
+
+define private %string @chr_int(i64 %0) {
+entry:
+  %1 = alloca %string, align 8
+  call void @string_Create_Default(%string* %1)
+  %2 = trunc i64 %0 to i8
+  call void @string_Add_Char(%string* %1, i8 %2)
+  %3 = load %string, %string* %1, align 8
+  ret %string %3
+}
+
+declare void @string_Add_Char(%string*, i8)
+
 define %string.0 @mto_string_int(i64** %v) {
 entry:
   %0 = load i64*, i64** %v, align 8

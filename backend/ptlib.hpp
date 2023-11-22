@@ -62,6 +62,7 @@ private:
     void length_stringInit();
 
     void trigonFuncsInit();
+    void stringFuncsInit();
 public:
     /**
      * @param mod Codegen module

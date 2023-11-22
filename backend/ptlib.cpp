@@ -320,6 +320,57 @@ void PTLib::trigonFuncsInit() {
     }
 }
 
+void PTLib::stringFuncsInit() {
+    // int ord(string)
+    {
+        auto funType = llvm::FunctionType::get(int64T, { stringT }, false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "ord_string",
+                                                llvmMod);
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        setCurrBB(bb);
+        llvm::Value *cstr = builder.CreateExtractValue(f->getArg(0), 0);
+        llvm::Value *chr0 = builder.CreateLoad(builder.getInt8Ty(), cstr);
+        llvm::Value *extChr = builder.CreateZExt(chr0, int64T);
+        builder.CreateRet(extChr);
+    }
+    // string chr(int)
+    {
+        auto funType = llvm::FunctionType::get(stringT, { int64T }, false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "chr_int",
+                                                llvmMod);
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        setCurrBB(bb);
+        
+        auto strobj = builder.CreateAlloca(stringT);
+        auto stringInitF = llvmMod->getOrInsertFunction("string_Create_Default", 
+                                                    llvm::FunctionType::get(
+                                                        voidT,
+                                                        stringTPtr,
+                                                        false
+                                                    ));
+        auto stringAddChr = llvmMod->getOrInsertFunction("string_Add_Char", 
+                                                        llvm::FunctionType::get(
+                                                            voidT,
+                                                            { 
+                                                                stringTPtr,
+                                                                builder.getInt8Ty()
+                                                            },
+                                                            false
+                                                        ));
+        // Init string
+        builder.CreateCall(stringInitF, { strobj });
+        auto parChr = builder.CreateTrunc(f->getArg(0), builder.getInt8Ty());
+        builder.CreateCall(stringAddChr, { strobj, parChr });
+        auto rval = builder.CreateLoad(stringT, strobj);
+        builder.CreateRet(rval);
+    }
+
+}
+
 void PTLib::appendInit(std::string name, llvm::Type *mt, llvm::Type *vt) {
     auto funType = llvm::FunctionType::get(voidT, { mt->getPointerTo(), vt }, false);
     llvm::Function *f = llvm::Function::Create(funType, 
@@ -378,6 +429,7 @@ void PTLib::setupLib() {
     length_stringInit();
 
     trigonFuncsInit();
+    stringFuncsInit();
 }
 
 void PTLib::setupExternLib() {
