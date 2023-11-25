@@ -1672,7 +1672,53 @@ void cg::CGFunction::emitStmt(ir::WhileStmt *stmt) {
 }
 
 void cg::CGFunction::emitStmt(ir::ForeachStmt *stmt) {
+    auto range = llvm::dyn_cast<ir::Range>(stmt->getCollection());
+
+    auto indexPtr = builder.CreateAlloca(int64T);
+
+    auto stepPtr = builder.CreateAlloca(int64T);
+
+    if(range) {
+        auto strVal = emitExpr(range->getStart());
+        builder.CreateStore(strVal, indexPtr);
+
+        // generate step detection (can be 1 or -1)
+        if(!range->getStep()) {
+            llvm::BasicBlock *stepPos = llvm::BasicBlock::Create(ctx, "range.step.pos", llvmFun);
+            llvm::BasicBlock *stepNeg = llvm::BasicBlock::Create(ctx, "range.step.neg", llvmFun);
+            llvm::BasicBlock *stepEnd = llvm::BasicBlock::Create(ctx, "range.step.end", llvmFun);
+
+            auto endVal = emitExpr(range->getEnd());
+
+            auto eGEs = builder.CreateICmpSGE(endVal, strVal);
+            builder.CreateCondBr(eGEs, stepPos, stepNeg);
+
+            setCurrBB(stepPos);
+            builder.CreateStore(llvm::ConstantInt::get(int64T, 1, true), stepPtr);
+            builder.CreateBr(stepEnd);
+
+            setCurrBB(stepNeg);
+            builder.CreateStore(llvm::ConstantInt::get(int64T, -1, true), stepPtr);
+            builder.CreateBr(stepEnd);
+
+            setCurrBB(stepEnd);
+        } else {
+            auto stpE = emitExpr(range->getStep());
+            builder.CreateStore(stpE, stepPtr);
+        }
+    } else {
+        builder.CreateStore(llvm::ConstantInt::get(int64T, 0, true), indexPtr);
+        builder.CreateStore(llvm::ConstantInt::get(int64T, 1, true), stepPtr);
+    }
+    if(stmt->getDefineI()) {
+        auto vracc = llvm::dyn_cast<ir::VarAccess>(stmt->getI());
+        auto vrdcl = llvm::dyn_cast<ir::VarDecl>(vracc->getVar());
+        emitStmt(vrdcl);
+    }
+
     llvm::BasicBlock *forCondBB = llvm::BasicBlock::Create(ctx, "for.cond", llvmFun);
+    llvm::BasicBlock *forCondPosStepBB = llvm::BasicBlock::Create(ctx, "range.posstep", llvmFun);
+    llvm::BasicBlock *forCondNegStepBB = llvm::BasicBlock::Create(ctx, "range.negstep", llvmFun);
     llvm::BasicBlock *forBodyBB = llvm::BasicBlock::Create(ctx, "for.body", llvmFun);
     llvm::BasicBlock *forNextIterBB = llvm::BasicBlock::Create(ctx, "for.next", llvmFun);
     llvm::BasicBlock *forAfterBB = llvm::BasicBlock::Create(ctx, "for.after", llvmFun);
@@ -1681,20 +1727,6 @@ void cg::CGFunction::emitStmt(ir::ForeachStmt *stmt) {
     stmt->setCondBB(forCondBB);
     stmt->setNextIterBB(forNextIterBB);
 
-    auto range = llvm::dyn_cast<ir::Range>(stmt->getCollection());
-
-    auto indexPtr = builder.CreateAlloca(int64T);
-
-    if(range) {
-        builder.CreateStore(emitExpr(range->getStart()), indexPtr);
-    } else {
-        builder.CreateStore(llvm::ConstantInt::get(int64T, 0, true), indexPtr);
-    }
-    if(stmt->getDefineI()) {
-        auto vracc = llvm::dyn_cast<ir::VarAccess>(stmt->getI());
-        auto vrdcl = llvm::dyn_cast<ir::VarDecl>(vracc->getVar());
-        emitStmt(vrdcl);
-    }
     builder.CreateBr(forCondBB);
 
     setCurrBB(forCondBB);
@@ -1716,8 +1748,18 @@ void cg::CGFunction::emitStmt(ir::ForeachStmt *stmt) {
 
     if(range) {
         auto endVal = emitExpr(range->getEnd());
-        auto cmpEnd = builder.CreateICmpSLT(index, endVal);
-        builder.CreateCondBr(cmpEnd, forBodyBB, forAfterBB);
+
+        auto stepLd = builder.CreateLoad(int64T, stepPtr);
+        auto posStep = builder.CreateICmpSGT(stepLd, llvm::ConstantInt::get(int64T, 0, true));
+        builder.CreateCondBr(posStep, forCondPosStepBB, forCondNegStepBB);
+
+        setCurrBB(forCondPosStepBB);
+        auto cmpEndPos = builder.CreateICmpSLT(index, endVal);
+        builder.CreateCondBr(cmpEndPos, forBodyBB, forAfterBB);
+
+        setCurrBB(forCondNegStepBB);
+        auto cmpEndNeg = builder.CreateICmpSGT(index, endVal);
+        builder.CreateCondBr(cmpEndNeg, forBodyBB, forAfterBB);
 
         setCurrBB(forBodyBB);
         
@@ -1787,13 +1829,8 @@ void cg::CGFunction::emitStmt(ir::ForeachStmt *stmt) {
 
     setCurrBB(forNextIterBB);
     
-    llvm::Value *newIndex = nullptr;
-    if(range) {
-        newIndex = builder.CreateNSWAdd(index, emitExpr(range->getStep()));
-    }
-    else {
-        newIndex = builder.CreateNSWAdd(index, llvm::ConstantInt::get(int64T, 1, true));
-    }
+    llvm::Value *step = builder.CreateLoad(int64T, stepPtr);
+    llvm::Value *newIndex = builder.CreateAdd(index, step);
     builder.CreateStore(newIndex, indexPtr);
     builder.CreateCall(stackrestore, { stp });
     builder.CreateBr(forCondBB);

@@ -213,7 +213,7 @@ function test_arrays {
 
 function test_statements {
     expect_pass "statements.pt" "statements"
-    expect_out_eq "3 2 1 4\n"
+    expect_out_eq "3 2 1 4\n0 1 2 3 \n5 4 3 2 \n10 7 4 1 \na b c \n"
 }
 
 function test_casting {

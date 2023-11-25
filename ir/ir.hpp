@@ -755,6 +755,8 @@ public:
         return e->getKind() == ExprKind::EX_RANGE;
     }
     std::string debug() const override { 
+        if(!step)
+            return "["+start->debug()+" .. "+end->debug()+"]";
         return "["+start->debug()+" step: "+step->debug()+" .. "+end->debug()+"]"; 
     }
 };

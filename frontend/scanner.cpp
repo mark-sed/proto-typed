@@ -776,7 +776,7 @@ ir::Expr *Scanner::parseRange(ir::Expr *start, ir::Expr *end) {
     if(!isIntvalExpr(end)) {
         diags.report(llvmloc2Src(), diag::ERR_INCORRECT_RANGE_TYPE, "last", end->getType()->getName());
     }
-    return new ir::Range(start, parseInt(1), end, rangeType);
+    return new ir::Range(start, nullptr, end, rangeType);
 }
 
 ir::IR *Scanner::parseImports(std::vector<std::string> names) {

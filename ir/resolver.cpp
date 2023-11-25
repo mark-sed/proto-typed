@@ -131,7 +131,9 @@ void UnresolvedSymbolResolver::resolve(ir::Expr * expr, ir::SourceInfo loc) {
     }
     else if(auto e = llvm::dyn_cast<ir::Range>(expr)) {
         resolve(e->getStart(), loc);
-        resolve(e->getStep(), loc);
+        if(e->getStep()) {
+            resolve(e->getStep(), loc);
+        }
         resolve(e->getEnd(), loc);
     }
     else if(auto e = llvm::dyn_cast<ir::UnresolvedSymbolAccess>(expr)) {
@@ -347,7 +349,9 @@ void ExternalSymbolResolver::resolve(ir::Expr *expr, ir::SourceInfo loc) {
     }
     else if(auto e = llvm::dyn_cast<ir::Range>(expr)) {
         resolve(e->getStart(), loc);
-        resolve(e->getStep(), loc);
+        if(e->getStep()) {
+            resolve(e->getStep(), loc);
+        }
         resolve(e->getEnd(), loc);
     }
     else if(auto e = llvm::dyn_cast<ir::VarAccess>(expr)) {

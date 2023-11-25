@@ -8,6 +8,8 @@ target triple = "x86_64-pc-linux-gnu"
 %string.2 = type { i8*, i32, i32, i32 }
 %string.4 = type { i8*, i32, i32, i32 }
 %string.6 = type { i8*, i32, i32, i32 }
+%string.8 = type { i8*, i32, i32, i32 }
+%string.10 = type { i8*, i32, i32, i32 }
 %matrix = type { i8*, i32, i32, i32 }
 
 @0 = private global i8* getelementptr inbounds ([3 x i8], [3 x i8]* @1, i32 0, i32 0)
@@ -34,6 +36,18 @@ target triple = "x86_64-pc-linux-gnu"
 @17 = private unnamed_addr constant [5 x i8] c"none\00", align 1
 @18 = private global i8* getelementptr inbounds ([5 x i8], [5 x i8]* @19, i32 0, i32 0)
 @19 = private unnamed_addr constant [5 x i8] c"none\00", align 1
+@20 = private global i8* getelementptr inbounds ([1 x i8], [1 x i8]* @21, i32 0, i32 0)
+@21 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@22 = private global i8* getelementptr inbounds ([1 x i8], [1 x i8]* @23, i32 0, i32 0)
+@23 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@24 = private global i8* getelementptr inbounds ([1 x i8], [1 x i8]* @25, i32 0, i32 0)
+@25 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@26 = private global i8* getelementptr inbounds ([1 x i8], [1 x i8]* @27, i32 0, i32 0)
+@27 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@28 = private global i8* getelementptr inbounds ([1 x i8], [1 x i8]* @29, i32 0, i32 0)
+@29 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@30 = private global i8* getelementptr inbounds ([1 x i8], [1 x i8]* @31, i32 0, i32 0)
+@31 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
 
 declare i32 @printf(i8*, i8*, ...)
 
@@ -258,12 +272,202 @@ if.after:                                         ; preds = %entry
   ret %string.6 %10
 }
 
+define %string.8 @upper_string(%string.8 %s) {
+entry:
+  %0 = alloca %string.8, align 8
+  store %string.8 %s, %string.8* %0, align 8
+  %1 = alloca %string.8, align 8
+  %2 = alloca %string.8, align 8
+  %3 = load i8*, i8** @20, align 8
+  call void bitcast (void (%string.0*, i8*)* @string_Create_Init to void (%string.8*, i8*)*)(%string.8* %2, i8* %3)
+  %4 = load %string.8, %string.8* %2, align 8
+  %5 = alloca %string.8, align 8
+  store %string.8 %4, %string.8* %5, align 8
+  %6 = alloca i64, align 8
+  %7 = alloca i64, align 8
+  store i64 0, i64* %6, align 8
+  store i64 1, i64* %7, align 8
+  %8 = alloca %string.8, align 8
+  %9 = load i8*, i8** @22, align 8
+  call void bitcast (void (%string.0*, i8*)* @string_Create_Init to void (%string.8*, i8*)*)(%string.8* %8, i8* %9)
+  %10 = load %string.8, %string.8* %8, align 8
+  %11 = alloca %string.8, align 8
+  store %string.8 %10, %string.8* %11, align 8
+  br label %for.cond
+
+for.cond:                                         ; preds = %for.next, %entry
+  %12 = load i64, i64* %6, align 8
+  %13 = load %string.8, %string.8* %0, align 8
+  %14 = call i64 bitcast (i64 (%string)* @length_string to i64 (%string.8)*)(%string.8 %13)
+  %15 = icmp slt i64 %12, %14
+  br i1 %15, label %for.body, label %for.after
+
+for.body:                                         ; preds = %for.cond
+  %16 = call i8* @llvm.stacksave()
+  %17 = alloca %string.8, align 8
+  %18 = load i8*, i8** @24, align 8
+  call void bitcast (void (%string.0*, i8*)* @string_Create_Init to void (%string.8*, i8*)*)(%string.8* %17, i8* %18)
+  %19 = load %string.8, %string.8* %17, align 8
+  %20 = extractvalue %string.8 %13, 0
+  %21 = getelementptr i8, i8* %20, i64 %12
+  %22 = load i8, i8* %21, align 1
+  call void bitcast (void (%string*, i8)* @string_Add_Char to void (%string.8*, i8)*)(%string.8* %17, i8 %22)
+  %23 = load %string.8, %string.8* %17, align 8
+  %24 = load %string.8, %string.8* %11, align 8
+  store %string.8 %23, %string.8* %11, align 8
+  %25 = load %string.8, %string.8* %11, align 8
+  %26 = call i64 @ord_string(%string.8 %25)
+  %27 = alloca i64, align 8
+  store i64 %26, i64* %27, align 8
+  %28 = load i64, i64* %27, align 8
+  %29 = icmp sgt i64 %28, 96
+  %30 = load i64, i64* %27, align 8
+  %31 = icmp slt i64 %30, 123
+  %32 = and i1 %29, %31
+  br i1 %32, label %if.body, label %if.else
+
+for.next:                                         ; preds = %if.after
+  %33 = load i64, i64* %7, align 8
+  %34 = add i64 %12, %33
+  store i64 %34, i64* %6, align 8
+  call void @llvm.stackrestore(i8* %16)
+  br label %for.cond
+
+for.after:                                        ; preds = %for.cond
+  %35 = load %string.8, %string.8* %5, align 8
+  ret %string.8 %35
+
+if.body:                                          ; preds = %for.body
+  %36 = load %string.8, %string.8* %5, align 8
+  %37 = load %string.8, %string.8* %5, align 8
+  %38 = load i64, i64* %27, align 8
+  %39 = xor i64 %38, 32
+  %40 = call %string @chr_int(i64 %39)
+  %41 = alloca %string.8, align 8
+  call void @string_Add_Str(%string.8* %41, %string.8 %37, %string %40)
+  %42 = load %string.8, %string.8* %41, align 8
+  store %string.8 %42, %string.8* %5, align 8
+  br label %if.after
+
+if.else:                                          ; preds = %for.body
+  %43 = load %string.8, %string.8* %5, align 8
+  %44 = load %string.8, %string.8* %5, align 8
+  %45 = load %string.8, %string.8* %11, align 8
+  %46 = alloca %string.8, align 8
+  call void @string_Add_Str(%string.8* %46, %string.8 %44, %string.8 %45)
+  %47 = load %string.8, %string.8* %46, align 8
+  store %string.8 %47, %string.8* %5, align 8
+  br label %if.after
+
+if.after:                                         ; preds = %if.else, %if.body
+  br label %for.next
+}
+
+define %string.10 @lower_string(%string.10 %s) {
+entry:
+  %0 = alloca %string.10, align 8
+  store %string.10 %s, %string.10* %0, align 8
+  %1 = alloca %string.10, align 8
+  %2 = alloca %string.10, align 8
+  %3 = load i8*, i8** @26, align 8
+  call void bitcast (void (%string.0*, i8*)* @string_Create_Init to void (%string.10*, i8*)*)(%string.10* %2, i8* %3)
+  %4 = load %string.10, %string.10* %2, align 8
+  %5 = alloca %string.10, align 8
+  store %string.10 %4, %string.10* %5, align 8
+  %6 = alloca i64, align 8
+  %7 = alloca i64, align 8
+  store i64 0, i64* %6, align 8
+  store i64 1, i64* %7, align 8
+  %8 = alloca %string.10, align 8
+  %9 = load i8*, i8** @28, align 8
+  call void bitcast (void (%string.0*, i8*)* @string_Create_Init to void (%string.10*, i8*)*)(%string.10* %8, i8* %9)
+  %10 = load %string.10, %string.10* %8, align 8
+  %11 = alloca %string.10, align 8
+  store %string.10 %10, %string.10* %11, align 8
+  br label %for.cond
+
+for.cond:                                         ; preds = %for.next, %entry
+  %12 = load i64, i64* %6, align 8
+  %13 = load %string.10, %string.10* %0, align 8
+  %14 = call i64 bitcast (i64 (%string)* @length_string to i64 (%string.10)*)(%string.10 %13)
+  %15 = icmp slt i64 %12, %14
+  br i1 %15, label %for.body, label %for.after
+
+for.body:                                         ; preds = %for.cond
+  %16 = call i8* @llvm.stacksave()
+  %17 = alloca %string.10, align 8
+  %18 = load i8*, i8** @30, align 8
+  call void bitcast (void (%string.0*, i8*)* @string_Create_Init to void (%string.10*, i8*)*)(%string.10* %17, i8* %18)
+  %19 = load %string.10, %string.10* %17, align 8
+  %20 = extractvalue %string.10 %13, 0
+  %21 = getelementptr i8, i8* %20, i64 %12
+  %22 = load i8, i8* %21, align 1
+  call void bitcast (void (%string*, i8)* @string_Add_Char to void (%string.10*, i8)*)(%string.10* %17, i8 %22)
+  %23 = load %string.10, %string.10* %17, align 8
+  %24 = load %string.10, %string.10* %11, align 8
+  store %string.10 %23, %string.10* %11, align 8
+  %25 = load %string.10, %string.10* %11, align 8
+  %26 = call i64 @ord_string(%string.10 %25)
+  %27 = alloca i64, align 8
+  store i64 %26, i64* %27, align 8
+  %28 = load i64, i64* %27, align 8
+  %29 = icmp sgt i64 %28, 64
+  %30 = load i64, i64* %27, align 8
+  %31 = icmp slt i64 %30, 91
+  %32 = and i1 %29, %31
+  br i1 %32, label %if.body, label %if.else
+
+for.next:                                         ; preds = %if.after
+  %33 = load i64, i64* %7, align 8
+  %34 = add i64 %12, %33
+  store i64 %34, i64* %6, align 8
+  call void @llvm.stackrestore(i8* %16)
+  br label %for.cond
+
+for.after:                                        ; preds = %for.cond
+  %35 = load %string.10, %string.10* %5, align 8
+  ret %string.10 %35
+
+if.body:                                          ; preds = %for.body
+  %36 = load %string.10, %string.10* %5, align 8
+  %37 = load %string.10, %string.10* %5, align 8
+  %38 = load i64, i64* %27, align 8
+  %39 = xor i64 %38, 32
+  %40 = call %string @chr_int(i64 %39)
+  %41 = alloca %string.10, align 8
+  call void bitcast (void (%string.8*, %string.8, %string.8)* @string_Add_Str to void (%string.10*, %string.10, %string.10)*)(%string.10* %41, %string.10 %37, %string %40)
+  %42 = load %string.10, %string.10* %41, align 8
+  store %string.10 %42, %string.10* %5, align 8
+  br label %if.after
+
+if.else:                                          ; preds = %for.body
+  %43 = load %string.10, %string.10* %5, align 8
+  %44 = load %string.10, %string.10* %5, align 8
+  %45 = load %string.10, %string.10* %11, align 8
+  %46 = alloca %string.10, align 8
+  call void bitcast (void (%string.8*, %string.8, %string.8)* @string_Add_Str to void (%string.10*, %string.10, %string.10)*)(%string.10* %46, %string.10 %44, %string.10 %45)
+  %47 = load %string.10, %string.10* %46, align 8
+  store %string.10 %47, %string.10* %5, align 8
+  br label %if.after
+
+if.after:                                         ; preds = %if.else, %if.body
+  br label %for.next
+}
+
 define void @_entry() {
 entry:
   ret void
 }
 
 declare void @string_Create_Init(%string.0*, i8*)
+
+; Function Attrs: nofree nosync nounwind willreturn
+declare i8* @llvm.stacksave() #1
+
+; Function Attrs: nofree nosync nounwind willreturn
+declare void @llvm.stackrestore(i8*) #1
+
+declare void @string_Add_Str(%string.8*, %string.8, %string.8)
 
 define void @init_libpt() {
   ret void
@@ -272,3 +476,4 @@ define void @init_libpt() {
 declare void @matrix_Create_Default(%matrix*)
 
 attributes #0 = { nofree nosync nounwind readnone speculatable willreturn }
+attributes #1 = { nofree nosync nounwind willreturn }
