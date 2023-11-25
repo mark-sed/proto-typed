@@ -73,6 +73,14 @@ string lower(string s) {
     return r
 }
 
+string reverse(string s) {
+    string r
+    for(int i : length(s) - 1 .. -1) {
+        r ++= s[i]
+    }
+    return r
+}
+
 /************************/
 /*--- Math functions ---*/
 /************************/

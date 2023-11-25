@@ -39,3 +39,5 @@ void test_all_chr_ord() {
 }
 
 test_all_chr_ord() // 94\n
+
+print(reverse("\nmarek"))

@@ -229,7 +229,8 @@ function test_floats {
 
 function test_ptlib_strings {
     expect_pass "ptlib_strings.pt" "ptlib_strings"
-    expect_out_eq "HELLO THERE 32\ner sfd 43 ]}{\trp;[]+455\n55\n33\n108\nd*?\n94\n"
+    expect_out_eq "HELLO THERE 32\ner sfd 43 ]}{\trp;[]+455\n55\n33\n108\nd*?\n94
+keram\n"
 }
 
 # Expect fail tests
