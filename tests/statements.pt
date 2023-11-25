@@ -23,3 +23,12 @@ for(string i: "abc") {
     print(i++" ")
 }
 print("\n");
+
+for(int i: -4,-2..1) {
+    print(i++" ")
+}
+print("\n");
+
+for(int i: 0..length("hi there\n")) {
+    print("hi there\n"[i])
+}
