@@ -43,7 +43,7 @@ static const char *head = "Proto-typed compiler";
 
 std::vector<ptc::ModuleInfo *> ptc::modulesToCompile;
 
-ModuleInfo::ModuleInfo(std::string name, bool pathSent) : parsed(false), mainMod(false) {
+ModuleInfo::ModuleInfo(std::string name, bool pathSent) : parsed(false), mainMod(false), lib(false) {
     // Find module file
     // TODO: Search for possible paths
     if(pathSent) {
@@ -310,7 +310,10 @@ int main(int argc, char *argv[]) {
     }
 
     // Codegen (generate in reverse order of imports), but have ptlib be first
-    std::rotate(modulesToCompile.begin(), modulesToCompile.end()-1, modulesToCompile.end());
+    auto ptlPos = modulesToCompile[0];
+    modulesToCompile.erase(modulesToCompile.begin());
+    modulesToCompile.push_back(ptlPos);
+    
     for(auto mii = modulesToCompile.rbegin(); mii != modulesToCompile.rend(); ++mii) {
         auto mi = *mii;
         const auto &fileName = mi->getPath();

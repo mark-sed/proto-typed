@@ -262,7 +262,7 @@ function run_all_tests {
 TEST_AMOUNT=$(declare -F | grep "test_" | wc -l)
 start_time=`date +%s`
 run_all_tests
-if [[ ${#FAILED_TESTS[@]} -ne 0 ]]; then
+if [ ! -z "$FAILED_TESTS" -a "$FAILED_TESTS" != " " ]; then
     UNQ_TST=""
     failedam=0
     for i in $FAILED_TESTS; do

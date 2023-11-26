@@ -297,7 +297,12 @@ public:
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_STRUCT_DECL;
     }
-    std::string debug() const override { return "struct "+name+" {\n"+block2String(elements)+"}"; }
+    std::string debug() const override { 
+        std::string l = "";
+        if(libType)
+            l = "(lib type)";
+        return "struct "+l+name+" {\n"+block2String(elements)+"}";
+    }
     std::vector<ir::IR *> getElements() { return elements; }
     bool is_zero_init() { return zero_init; }
     bool isLibType() { return libType; }
