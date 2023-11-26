@@ -18,6 +18,7 @@
 #if ! defined(yyFlexLexerOnce)
 #include "FlexLexer.h"
 #endif
+#include <map>
 #include <istream>
 #include <initializer_list>
 #include <vector>
@@ -214,6 +215,7 @@ public:
     ir::Expr *parseString(std::string v);
     ir::Expr *parseVar(std::string v, bool external=false, bool maybe_type=false);
     ir::Expr *parseMatrix(std::vector<ir::Expr *> values);
+    ir::Expr *parseStruct(ir::IR *type, std::map<std::string, ir::Expr *> values);
     ir::Expr *parseNone();
     ir::Expr *parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, bool is_const=false);
     ir::Expr *parseUnaryPrefixExpr(ir::Expr *l, ir::Operator op, bool is_const=false);
@@ -226,6 +228,8 @@ public:
     std::vector<ir::Expr *> parseAddMatrixSize(std::vector<ir::Expr *> &list, ir::Expr *e);
     std::vector<ir::Expr *> parseMatrixValue(ir::Expr *e);
     std::vector<ir::Expr *> parseAddMatrixValue(std::vector<ir::Expr *> &list, ir::Expr *e);
+    std::map<std::string, ir::Expr *> parseStructVals(std::string name, ir::Expr *e);
+    std::map<std::string, ir::Expr *> parseStructVals(std::map<std::string, ir::Expr *> &list, std::string name, ir::Expr *e);
     std::vector<ir::FormalParamDecl *> parseFunParam(ir::IR *type, std::string name);
     std::vector<ir::FormalParamDecl *> parseAddFunParam(std::vector<ir::FormalParamDecl *> &list, ir::IR *type, std::string name);
     std::vector<std::string> parseImportName(std::string name);

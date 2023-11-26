@@ -129,6 +129,11 @@ void UnresolvedSymbolResolver::resolve(ir::Expr * expr, ir::SourceInfo loc) {
             resolve(v, loc);
         }
     }
+    else if(auto e = llvm::dyn_cast<ir::StructLiteral>(expr)) {
+        for(auto [_, v]: e->getValues()) {
+            resolve(v, loc);
+        }
+    }
     else if(auto e = llvm::dyn_cast<ir::Range>(expr)) {
         resolve(e->getStart(), loc);
         if(e->getStep()) {
@@ -344,6 +349,11 @@ void ExternalSymbolResolver::resolve(ir::Expr *expr, ir::SourceInfo loc) {
     }
     else if(auto e = llvm::dyn_cast<ir::MatrixLiteral>(expr)) {
         for(auto v: e->getValue()) {
+            resolve(v, loc);
+        }
+    }
+    else if(auto e = llvm::dyn_cast<ir::StructLiteral>(expr)) {
+        for(auto [_, v]: e->getValues()) {
             resolve(v, loc);
         }
     }

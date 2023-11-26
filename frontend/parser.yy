@@ -30,6 +30,8 @@
         }
     }
 
+    #include <map>
+
     #ifndef YY_NULLPTR
         #if defined __cplusplus && 201103L <= __cplusplus
             #define YY_NULLPTR nullptr
@@ -45,6 +47,7 @@
 /* Includes */
 %code {
 
+    #include <map>
     #include <cmath>
     #include <sstream>
     #include <vector>
@@ -208,6 +211,7 @@
 %type <ptc::ir::Expr *> int_val
 %type <ptc::ir::Expr *> expr_var
 %type <ptc::ir::Expr *> expr_mat
+%type <ptc::ir::Expr *> expr_struct
 %type <ptc::ir::Expr *> expr_none
 %type <ptc::ir::Expr *> set
 %type <ptc::ir::Expr *> matrix
@@ -215,6 +219,8 @@
 %type <std::vector<ptc::ir::Expr *> > callarglist
 %type <std::vector<ptc::ir::Expr *> > matsq
 %type <std::vector<ptc::ir::Expr *> > matvals
+%type <std::map<std::string, ptc::ir::Expr *> > struct_val
+%type <std::map<std::string, ptc::ir::Expr *> > struct_list
 %type <std::vector<ptc::ir::IR *> > scope_body
 %type <std::vector<ptc::ir::IR *> > block
 %type <std::vector<ptc::ir::IR *> > else
@@ -637,14 +643,15 @@ expr_none : NONE            { $$ = scanner->parseNone(); }
           ;
 
 // Struct expression
-expr_struct : ID struct_val
-            | LPAR ID struct_val RPAR
+expr_struct : ID struct_val         { $$ = scanner->parseStruct(scanner->sym_lookup($1, true, true), $2); }
+            | EXT_ID struct_val     { $$ = scanner->parseStruct(scanner->parseExtType($1, false), $2); }
+            | LPAR expr_struct RPAR { $$ = $2; }
             ;
-struct_val : LBR RBR
-           | LBR struct_list RBR
+struct_val : LBR RBR                { $$ = std::map<std::string, ptc::ir::Expr*>{}; }
+           | LBR struct_list RBR    { $$ = $2; }
            ;
-struct_list : DOT ID SET expr
-            | DOT ID SET expr COMMA struct_list
+struct_list : DOT ID SET expr                   { $$ = scanner->parseStructVals($2, $4); }
+            | struct_list COMMA DOT ID SET expr { $$ = scanner->parseStructVals($1, $4, $6); }
             ;
 
 // Integer expression

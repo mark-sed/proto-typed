@@ -688,6 +688,33 @@ void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT) {
     mainModule->addLibFunction(funLength);
 }
 
+std::map<std::string, ir::Expr *> Scanner::parseStructVals(std::string name, ir::Expr *e) {
+    LOGMAX("Creating new stuct value "+e->debug());
+    std::map<std::string, ir::Expr *> list;
+    list[name] = e;
+    return list;
+}
+
+std::map<std::string, ir::Expr *> Scanner::parseStructVals(std::map<std::string, ir::Expr *> &list, std::string name, ir::Expr *e) {
+    LOGMAX("Adding new stuct value "+e->debug());
+    list[name] = e;
+    return list;
+}
+
+ir::Expr *Scanner::parseStruct(ir::IR *type, std::map<std::string, ir::Expr *> values) {
+    LOGMAX("Parsing struct literal");
+    auto t = llvm::dyn_cast<ir::TypeDecl>(type);
+    if(!t) {
+        diags.report(llvmloc2Src(), diag::ERR_TYPE_NOT_STRUCT, type->getName());
+    }
+    if(!t->getDecl() || !llvm::isa<ir::StructDecl>(t->getDecl())) {
+        diags.report(llvmloc2Src(), diag::ERR_TYPE_NOT_STRUCT, type->getName());
+    }
+    // This cast is checked above
+    auto sdt = llvm::dyn_cast<ir::StructDecl>(t->getDecl());
+    return new ir::StructLiteral(llvmloc2Src(), sdt, t, values);
+}
+
 ir::IR *Scanner::parseExtType(std::string name, bool isMaybe) {
     LOGMAX("Parsing external type");
     auto t = new ir::TypeDecl(currentIR, llvmloc2Src(), name);
@@ -914,6 +941,14 @@ static bool isUnknownType(ir::Expr *e) {
     else if(auto s = llvm::dyn_cast<ir::MatrixLiteral>(e)) {
         for(auto a : s->getValue()) {
             if(isUnknownType(a)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    else if(auto s = llvm::dyn_cast<ir::StructLiteral>(e)) {
+        for(auto [_, v] : s->getValues()) {
+            if(isUnknownType(v)) {
                 return true;
             }
         }

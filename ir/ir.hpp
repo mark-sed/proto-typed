@@ -18,6 +18,7 @@
 #include "llvm/ADT/APFloat.h"
 #include "llvm/IR/IRBuilder.h"
 #include <vector>
+#include <map>
 #include <sstream>
 #include <unordered_set>
 
@@ -75,6 +76,7 @@ enum ExprKind {
     EX_FLOAT,
     EX_STRING,
     EX_MATRIX,
+    EX_STRUCT,
     EX_NONE,
     EX_VAR,
     EX_FUN_CALL,
@@ -625,6 +627,35 @@ public:
         return e->getKind() == ExprKind::EX_MATRIX;
     }
     std::string debug() const override { return "("+type->getName()+")["+block2List(value)+"]"; }
+};
+
+/**
+ * Struct literal
+ */
+class StructLiteral : public Expr {
+private:
+    SourceInfo loc;
+    StructDecl *decl;
+    std::map<std::string, ir::Expr *> values;
+public:
+    StructLiteral(SourceInfo loc, StructDecl *decl, TypeDecl *type, std::map<std::string, ir::Expr *> &values)
+              : Expr(ExprKind::EX_STRUCT, type, true),
+                loc(loc),
+                decl(decl),
+                values(values) {
+    }
+
+    std::map<std::string, ir::Expr *> getValues() { return values; }
+    static bool classof(const Expr *e) {
+        return e->getKind() == ExprKind::EX_STRUCT;
+    }
+    std::string debug() const override {
+        std::stringstream ss;
+        for(auto [k, v] : values) {
+            ss << "." << k << "=" << v->debug() << ", ";
+        }
+        return decl->getName()+"{"+ss.str()+"}";
+    }
 };
 
 /**
