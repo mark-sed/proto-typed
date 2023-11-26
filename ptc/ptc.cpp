@@ -309,7 +309,8 @@ int main(int argc, char *argv[]) {
         LOG1("Skipping resolver because of found errors");
     }
 
-    // Codegen (generate in reverse order of imports)
+    // Codegen (generate in reverse order of imports), but have ptlib be first
+    std::rotate(modulesToCompile.begin(), modulesToCompile.end()-1, modulesToCompile.end());
     for(auto mii = modulesToCompile.rbegin(); mii != modulesToCompile.rend(); ++mii) {
         auto mi = *mii;
         const auto &fileName = mi->getPath();

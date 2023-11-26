@@ -153,6 +153,10 @@ void Scanner::init() {
             else if(auto v = llvm::dyn_cast<ir::VarDecl>(d)) {
                 currScope->insert(v);
             }
+            else if(auto v = llvm::dyn_cast<ir::StructDecl>(d)) {
+                auto t = new ir::TypeDecl(v->getEnclosingIR(), v->getLocation(), v->getName(), v);
+                currScope->insert(t);
+            }
         }
     }
 }
@@ -847,6 +851,7 @@ std::vector<ir::IR *> Scanner::parseStmtBodyAdd(std::vector<ir::IR *> &body, ir:
 ir::IR *Scanner::parseStruct(std::string name, std::vector<ir::IR *> body) {
     LOGMAX("Parsing struct "+name);
     auto structDecl = new ir::StructDecl(currentIR, llvmloc2Src(), name, body);
+    structDecl->setLibType(lib);
     auto structType = new ir::TypeDecl(currentIR, llvmloc2Src(), name, structDecl);
     for(auto b = body.begin(), end = body.end(); b != end; ++b) {
         auto e = *b;

@@ -270,11 +270,13 @@ class StructDecl : public IR {
 private:
     std::vector<ir::IR *> elements;
     bool zero_init;
+    bool libType;
 public:
     StructDecl(IR *enclosing_ir, SourceInfo loc, std::string name, std::vector<ir::IR *> elements)
             : IR(IRKind::IR_STRUCT_DECL, enclosing_ir, loc, name),
               elements(elements),
-              zero_init(true) {
+              zero_init(true),
+              libType(false) {
         for(auto v: elements) {
             // zero_init is set only if no element has assigned value
             // and all the struct elements are also zero_init
@@ -296,6 +298,8 @@ public:
     std::string debug() const override { return "struct "+name+" {\n"+block2String(elements)+"}"; }
     std::vector<ir::IR *> getElements() { return elements; }
     bool is_zero_init() { return zero_init; }
+    bool isLibType() { return libType; }
+    void setLibType(bool b) { libType = b; }
 };
 
 /**

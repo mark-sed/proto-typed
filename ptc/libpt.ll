@@ -10,6 +10,7 @@ target triple = "x86_64-pc-linux-gnu"
 %string.6 = type { i8*, i32, i32, i32 }
 %string.8 = type { i8*, i32, i32, i32 }
 %string.10 = type { i8*, i32, i32, i32 }
+%string.12 = type { i8*, i32, i32, i32 }
 %matrix = type { i8*, i32, i32, i32 }
 
 @0 = private global i8* getelementptr inbounds ([3 x i8], [3 x i8]* @1, i32 0, i32 0)
@@ -48,6 +49,10 @@ target triple = "x86_64-pc-linux-gnu"
 @29 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
 @30 = private global i8* getelementptr inbounds ([1 x i8], [1 x i8]* @31, i32 0, i32 0)
 @31 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@32 = private global i8* getelementptr inbounds ([1 x i8], [1 x i8]* @33, i32 0, i32 0)
+@33 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@34 = private global i8* getelementptr inbounds ([1 x i8], [1 x i8]* @35, i32 0, i32 0)
+@35 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
 
 declare i32 @printf(i8*, i8*, ...)
 
@@ -302,6 +307,10 @@ for.cond:                                         ; preds = %for.next, %entry
   %15 = icmp slt i64 %12, %14
   br i1 %15, label %for.body, label %for.after
 
+range.posstep:                                    ; No predecessors!
+
+range.negstep:                                    ; No predecessors!
+
 for.body:                                         ; preds = %for.cond
   %16 = call i8* @llvm.stacksave()
   %17 = alloca %string.8, align 8
@@ -393,6 +402,10 @@ for.cond:                                         ; preds = %for.next, %entry
   %15 = icmp slt i64 %12, %14
   br i1 %15, label %for.body, label %for.after
 
+range.posstep:                                    ; No predecessors!
+
+range.negstep:                                    ; No predecessors!
+
 for.body:                                         ; preds = %for.cond
   %16 = call i8* @llvm.stacksave()
   %17 = alloca %string.10, align 8
@@ -452,6 +465,88 @@ if.else:                                          ; preds = %for.body
 
 if.after:                                         ; preds = %if.else, %if.body
   br label %for.next
+}
+
+define %string.12 @reverse_string(%string.12 %s) {
+entry:
+  %0 = alloca %string.12, align 8
+  store %string.12 %s, %string.12* %0, align 8
+  %1 = alloca %string.12, align 8
+  %2 = alloca %string.12, align 8
+  %3 = load i8*, i8** @32, align 8
+  call void bitcast (void (%string.0*, i8*)* @string_Create_Init to void (%string.12*, i8*)*)(%string.12* %2, i8* %3)
+  %4 = load %string.12, %string.12* %2, align 8
+  %5 = alloca %string.12, align 8
+  store %string.12 %4, %string.12* %5, align 8
+  %6 = alloca i64, align 8
+  %7 = alloca i64, align 8
+  %8 = load %string.12, %string.12* %0, align 8
+  %9 = call i64 @length_string(%string.12 %8)
+  %10 = sub nsw i64 %9, 1
+  store i64 %10, i64* %6, align 8
+  %11 = icmp sge i64 -1, %10
+  br i1 %11, label %range.step.pos, label %range.step.neg
+
+range.step.pos:                                   ; preds = %entry
+  store i64 1, i64* %7, align 8
+  br label %range.step.end
+
+range.step.neg:                                   ; preds = %entry
+  store i64 -1, i64* %7, align 8
+  br label %range.step.end
+
+range.step.end:                                   ; preds = %range.step.neg, %range.step.pos
+  %12 = alloca i64, align 8
+  store i64 0, i64* %12, align 8
+  br label %for.cond
+
+for.cond:                                         ; preds = %for.next, %range.step.end
+  %13 = load i64, i64* %6, align 8
+  %14 = load i64, i64* %7, align 8
+  %15 = icmp sgt i64 %14, 0
+  br i1 %15, label %range.posstep, label %range.negstep
+
+range.posstep:                                    ; preds = %for.cond
+  %16 = icmp slt i64 %13, -1
+  br i1 %16, label %for.body, label %for.after
+
+range.negstep:                                    ; preds = %for.cond
+  %17 = icmp sgt i64 %13, -1
+  br i1 %17, label %for.body, label %for.after
+
+for.body:                                         ; preds = %range.negstep, %range.posstep
+  %18 = call i8* @llvm.stacksave()
+  %19 = load i64, i64* %12, align 8
+  store i64 %13, i64* %12, align 8
+  %20 = load %string.12, %string.12* %5, align 8
+  %21 = load %string.12, %string.12* %5, align 8
+  %22 = load %string.12, %string.12* %0, align 8
+  %23 = load i64, i64* %12, align 8
+  %24 = alloca %string.12, align 8
+  %25 = load i8*, i8** @34, align 8
+  call void bitcast (void (%string.0*, i8*)* @string_Create_Init to void (%string.12*, i8*)*)(%string.12* %24, i8* %25)
+  %26 = load %string.12, %string.12* %24, align 8
+  %27 = extractvalue %string.12 %22, 0
+  %28 = getelementptr i8, i8* %27, i64 %23
+  %29 = load i8, i8* %28, align 1
+  call void bitcast (void (%string*, i8)* @string_Add_Char to void (%string.12*, i8)*)(%string.12* %24, i8 %29)
+  %30 = load %string.12, %string.12* %24, align 8
+  %31 = alloca %string.12, align 8
+  call void bitcast (void (%string.8*, %string.8, %string.8)* @string_Add_Str to void (%string.12*, %string.12, %string.12)*)(%string.12* %31, %string.12 %21, %string.12 %30)
+  %32 = load %string.12, %string.12* %31, align 8
+  store %string.12 %32, %string.12* %5, align 8
+  br label %for.next
+
+for.next:                                         ; preds = %for.body
+  %33 = load i64, i64* %7, align 8
+  %34 = add i64 %13, %33
+  store i64 %34, i64* %6, align 8
+  call void @llvm.stackrestore(i8* %18)
+  br label %for.cond
+
+for.after:                                        ; preds = %range.negstep, %range.posstep
+  %35 = load %string.12, %string.12* %5, align 8
+  ret %string.12 %35
 }
 
 define void @_entry() {

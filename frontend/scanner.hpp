@@ -38,6 +38,7 @@ std::string encodeFunction(std::string name, std::vector<ir::Expr *> params, boo
 class Scanner : public yyFlexLexer {
 private:
     ptc::Parser::semantic_type *yylval = nullptr;
+    std::vector<ir::StructDecl *> libStructs;
     std::vector<ir::IR *> decls;
 
     ir::IR *currentIR;

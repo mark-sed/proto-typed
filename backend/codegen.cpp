@@ -113,8 +113,13 @@ llvm::Type *cg::CodeGen::convertType(ir::TypeDecl *t) {
     }
     else if(t->getDecl()) {
         if(auto *v = llvm::dyn_cast<ir::StructDecl>(t->getDecl())) {
-            std::string manName = mangleName(v);
-            llvmT = userTypes[manName].first;
+            if(!v->isLibType()) {
+                std::string manName = mangleName(v);
+                llvmT = userTypes[manName].first;
+            }
+            else {
+                llvmT = userTypes[v->getName()].first;
+            }
         }
     }
 
@@ -450,6 +455,7 @@ llvm::Value *cg::CGModule::readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMa
 }
 
 llvm::Value *cg::CGFunction::readLocalVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe) {
+    LOGMAX("Read local var: "+decl->debug());
     // TODO: Checks for type
     LOGMAX("Read var "+decl->debug());
     auto val = locals.find(decl);
@@ -493,6 +499,7 @@ llvm::Value *cg::CGFunction::readLocalVar(llvm::BasicBlock *BB, ir::IR *decl, bo
 }
 
 llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe) {
+    LOGMAX("Read var: "+decl->debug());
     if(auto *v = llvm::dyn_cast<ir::VarDecl>(decl)) {
         if(v->getEnclosingIR()->getKind() == ir::IRKind::IR_MODULE_DECL) {
             if(v->getType()->isMaybe() && !asMaybe) {
@@ -524,6 +531,7 @@ llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl, bool as
 }
 
 llvm::Value *cg::CGFunction::readExtVar(cg::CGModule *mod, ir::IR *decl, bool asMaybe) {
+    LOGMAX("Read external var: "+decl->debug());
     if(auto *v = llvm::dyn_cast<ir::VarDecl>(decl)) {
         if(v->getEnclosingIR()->getKind() == ir::IRKind::IR_MODULE_DECL) {
             if(!mod) {
@@ -1973,7 +1981,13 @@ void cg::CGModule::defineStruct(ir::StructDecl *decl) {
     for(auto elem: decl->getElements()) {
         structElements.push_back(mapType(elem));
     }
-    std::string name = mangleName(decl);
+    std::string name;
+    if(!decl->isLibType()) {
+        name = mangleName(decl);
+    }
+    else {
+        name = decl->getName();
+    }
     auto tp = llvm::StructType::create(getLLVMCtx(), structElements, name);
 
     llvm::Constant *init;
@@ -2056,6 +2070,9 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                                                 nullptr,
                                                 v->getName());
                 globals[v] = vPtr;
+            }
+            else if(auto v = llvm::dyn_cast<ir::StructDecl>(d)) {
+                defineStruct(v);
             }
         }
     }
@@ -2169,10 +2186,11 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                     }
                     else {
                         // struct
-                        v->setInitializer(userTypes[mangleName(var->getType()->getDecl())].second);
                         // TODO: Handle nested structs
                         // Initialize all strings
                         if(auto struDecl = llvm::dyn_cast<ir::StructDecl>(var->getType()->getDecl())) {
+                            std::string struName = struDecl->isLibType() ? struDecl->getName() : mangleName(struDecl);
+                            v->setInitializer(userTypes[struName].second);
                             int index = 0;
                             for(auto e: struDecl->getElements()) {
                                 if(auto eVar = llvm::dyn_cast<ir::VarDecl>(e)) {

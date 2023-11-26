@@ -58,6 +58,8 @@ public:
         }
         return keys;
     }
+
+    llvm::StringMap<ir::IR *> getSymbols() { return symbols; }
 };
 
 }
