@@ -796,7 +796,7 @@ llvm::Value *cg::CGFunction::getElementIndex(std::vector<llvm::Value *> &indices
                 llvar = cgm.getGlobals(var->getVar());
             }
             else if(v->getEnclosingIR() == fun) {
-                llvar = currDef[currBB].defs[var->getVar()];
+                llvar = readVar(currBB, var->getVar());
                 if(auto r = llvm::dyn_cast<llvm::LoadInst>(llvar))
                     llvar = r->getOperand(0);
             }
@@ -807,11 +807,13 @@ llvm::Value *cg::CGFunction::getElementIndex(std::vector<llvm::Value *> &indices
         else if(auto v = llvm::dyn_cast<ir::FormalParamDecl>(var->getVar())) {
             if(v->isByReference()) {
                 llvar = formalParams[v];
+                if(auto r = llvm::dyn_cast<llvm::LoadInst>(llvar))
+                    llvar = r->getOperand(0);
             }
             else {
-                llvar = builder.CreateAlloca(mapType(strucType));
-                // TODO: Check correctness, possibly call read
-                builder.CreateStore(currDef[currBB].defs[var->getVar()], llvar);
+                auto llvarval = readVar(currBB, var->getVar());
+                if(auto r = llvm::dyn_cast<llvm::LoadInst>(llvarval))
+                    llvar = r->getOperand(0);
             }
         }
         else {

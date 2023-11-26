@@ -50,3 +50,19 @@ T t
 t = T{.a = 4, .f=4.25, .b = true, .g="hi"}
 
 print(t.a ++ " " ++ t.b ++ " " ++ t.f ++ " " ++ t.g ++ "\n")
+
+
+void foo(T t) {
+    t.a = 49
+    print(t.a as string)
+}
+
+foo(t)
+
+void bar() {
+    T t
+    t.g = "f\n"
+    print(t.g)
+}
+
+bar()
