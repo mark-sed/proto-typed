@@ -209,6 +209,7 @@ public:
     llvm::LLVMContext &getLLVMCtx() { return llvmMod->getContext(); }
     llvm::Module *getLLVMMod() { return llvmMod; }
     ir::ModuleDecl *getModuleDecl() { return mod; }
+    llvm::Constant *getTypeDefaultValue(ir::TypeDecl *t);
 
     /**
      * Generates llvm type for passed in structure and

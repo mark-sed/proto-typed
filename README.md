@@ -118,7 +118,7 @@ Proto-typed offers simple types and user defined structures. These types can the
 
 All variables are initialized to their default value if not initialized explicitly.
 
-There are in fact 2 groups of types, the first does not require runtime initialization (`int`, `float`, `bool` and value `none`) and the second, which required runtime initialization (`string`, maybe type including `any`, arrays and `struct`).
+There are in fact 2 groups of types, the first - primitive - does not require runtime initialization (`int`, `float`, `bool` and value `none`) and the second - composite - which requires runtime initialization (`string`, maybe type including `any`, arrays and `struct`).
 
 ### Int
 

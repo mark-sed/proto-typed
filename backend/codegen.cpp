@@ -35,6 +35,11 @@ using namespace ptc::cg;
 llvm::cl::OptionCategory CodeGenerationCat("Code Generation Options", "");
 static llvm::cl::opt<bool> cgNoMain("no-main", llvm::cl::desc("Does not generate main function for passed in program"), llvm::cl::init(false), llvm::cl::cat(CodeGenerationCat));
 
+bool isPrimitiveType(ir::TypeDecl *t) {
+    auto tn = t->getName();
+    return tn == INT_CSTR || tn == BOOL_CSTR || tn == FLOAT_CSTR;
+}
+
 cg::CGModule::CGModule(llvm::Module *llvmMod, ir::ModuleDecl *ptlibMod) : cg::CodeGen(llvmMod->getContext(), *this, ptlibMod), llvmMod(llvmMod), mainMod(false) {
     ptlibLoader = new PTLib(this, llvmMod, ctx);
 }
@@ -732,16 +737,28 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
                     break;
                 }
             }
-
-            auto emV = emitExpr(ival);
+            llvm::Value *emV = nullptr;
+            if(!ival) {
+                if(isPrimitiveType(evar->getType())) {
+                    emV = cgm.getTypeDefaultValue(evar->getType());
+                }
+                else if(evar->getType()->getName() == STRING_CSTR) {
+                    std::string s = "";
+                    ir::StringLiteral *empt = new ir::StringLiteral(evar->getLocation(), s, evar->getType());
+                    emV = emitExpr(empt);
+                }
+                else {
+                    llvm::report_fatal_error("Struct nested intializer is not yet implemented");
+                }
+            } else {
+                emV = emitExpr(ival);
+            }
             llvm::Value *zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(cgm.getLLVMCtx()), 0);
             llvm::Value *index = llvm::ConstantInt::get(llvm::Type::getInt32Ty(cgm.getLLVMCtx()), i);
-
             auto elemPtr = builder.CreateGEP(mapType(tp), sPtr, {zero, index});
             builder.CreateStore(emV, elemPtr);
             ++i;
         }
-
         return builder.CreateLoad(mapType(tp), sPtr);
     }
     // TODO: Other ones
@@ -780,6 +797,8 @@ llvm::Value *cg::CGFunction::getElementIndex(std::vector<llvm::Value *> &indices
             }
             else if(v->getEnclosingIR() == fun) {
                 llvar = currDef[currBB].defs[var->getVar()];
+                if(auto r = llvm::dyn_cast<llvm::LoadInst>(llvar))
+                    llvar = r->getOperand(0);
             }
             else {
                 llvm::report_fatal_error("Unknown variable scope");
@@ -1950,14 +1969,8 @@ void cg::CGFunction::emitStmt(ir::VarDecl *stmt) {
     }
     else {
         auto ty = stmt->getType()->getName();
-        if(ty == INT_CSTR) {
-            v = llvm::ConstantInt::get(int64T, 0, true);
-        }
-        else if(ty == BOOL_CSTR) {
-            v = llvm::ConstantInt::getFalse(int1T);
-        }
-        else if(ty == FLOAT_CSTR) {
-            v = llvm::ConstantFP::get(floatT, 0.0);
+        if(isPrimitiveType(stmt->getType())) {
+            v = cgm.getTypeDefaultValue(stmt->getType());
         }
         else if(ty == STRING_CSTR) {
             std::string s = "";
@@ -1968,7 +1981,14 @@ void cg::CGFunction::emitStmt(ir::VarDecl *stmt) {
             llvm::report_fatal_error("Local matrix intializer not yet implemented");
         }
         else {
-            llvm::report_fatal_error("Local struct intializer not yet implemented");
+            auto t = llvm::dyn_cast<ir::TypeDecl>(stmt->getType());
+            auto strTd = llvm::dyn_cast<ir::StructDecl>(t->getDecl());
+            if(!strTd) {
+                llvm::report_fatal_error("Unknown type in local variable initializer");
+            }
+            auto inits = std::map<std::string, ir::Expr *>{};
+            ir::StructLiteral *empt = new ir::StructLiteral(stmt->getLocation(), strTd, t, inits);
+            v = emitExpr(empt);
         }
     }
     writeVar(currBB, stmt, v);
@@ -2009,6 +2029,29 @@ void cg::CGFunction::emit(std::vector<ir::IR *> stmts) {
     }
 }
 
+llvm::Constant *cg::CGModule::getTypeDefaultValue(ir::TypeDecl *t) {
+    auto ty = t->getName();
+    if(ty == INT_CSTR) {
+        return llvm::ConstantInt::get(int64T, 0, true);
+    }
+    else if(ty == BOOL_CSTR) {
+        return llvm::ConstantInt::getFalse(int1T);
+    }
+    else if(ty == FLOAT_CSTR) {
+        return llvm::ConstantFP::get(floatT, 0.0);
+    }
+    else if(ty == STRING_CSTR) {
+        return llvm::ConstantAggregateZero::get(stringT);
+    }
+    else if(t->isMatrix()) {
+        return llvm::ConstantAggregateZero::get(matrixT);
+    }
+    else {
+        llvm::report_fatal_error("Unknown type for default initializer");
+    }
+    return nullptr;
+}
+
 llvm::SmallVector<llvm::Constant *> cg::CGModule::getStructValsInit(ir::StructDecl *decl, std::map<std::string, ir::Expr *> inits) {
     llvm::SmallVector<llvm::Constant *> vals;
     for(auto e : decl->getElements()) {
@@ -2045,14 +2088,8 @@ llvm::SmallVector<llvm::Constant *> cg::CGModule::getStructValsInit(ir::StructDe
         }
         else {
             auto ty = evar->getType()->getName();
-            if(ty == INT_CSTR) {
-                vals.push_back(llvm::ConstantInt::get(int64T, 0, true));
-            }
-            else if(ty == BOOL_CSTR) {
-                vals.push_back(llvm::ConstantInt::getFalse(int1T));
-            }
-            else if(ty == FLOAT_CSTR) {
-                vals.push_back(llvm::ConstantFP::get(floatT, 0.0));
+            if(isPrimitiveType(evar->getType())) {
+                vals.push_back(getTypeDefaultValue(evar->getType()));
             }
             else if(ty == STRING_CSTR) {
                 // Initialization is handeled when new instance is created
@@ -2202,30 +2239,22 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                     llvm::report_fatal_error("Global variable initializer is not a constant");
                 }
             }
-            else if(!value || !llvm::isa<ir::NoneLiteral>(value)){ //if(utils::isOneOf(var->getType()->getName(), {FLOAT_CSTR, INT_CSTR, BOOL_CSTR, STRING_CSTR})) {
+            else if(!value || !llvm::isa<ir::NoneLiteral>(value)){
                 if(var->getType()->isMaybe()) {
                     auto ptt = llvm::dyn_cast<llvm::PointerType>(mapType(var->getType()));
                     v->setInitializer(llvm::ConstantPointerNull::get(ptt));
                 }
                 else {
                     auto ty = var->getType()->getName();
-                    if(ty == INT_CSTR) {
-                        v->setInitializer(llvm::ConstantInt::get(int64T, 0, true));
-                    }
-                    else if(ty == BOOL_CSTR) {
-                        v->setInitializer(llvm::ConstantInt::getFalse(int1T));
-                    }
-                    else if(ty == FLOAT_CSTR) {
-                        v->setInitializer(llvm::ConstantFP::get(floatT, 0.0));
+                    if(isPrimitiveType(var->getType())) {
+                        v->setInitializer(getTypeDefaultValue(var->getType()));
                     }
                     else if(ty == STRING_CSTR) {
-                        auto init = llvm::ConstantAggregateZero::get(stringT);
-                        v->setInitializer(init);
+                        v->setInitializer(getTypeDefaultValue(var->getType()));
                         stringsToInit.push_back(std::make_pair(v, str_empty));
                     }
                     else if(var->getType()->isMatrix()) {
-                        auto init = llvm::ConstantAggregateZero::get(matrixT);
-                        v->setInitializer(init);
+                        v->setInitializer(getTypeDefaultValue(var->getType()));
                         matricesToInit.push_back(std::make_pair(v, nullptr));
                     }
                     else {
