@@ -191,6 +191,8 @@ private:
     bool mainMod;
 
     PTLib *ptlibLoader;
+
+    llvm::SmallVector<llvm::Constant *> getStructValsInit(ir::StructDecl *decl, std::map<std::string, ir::Expr *> inits);
 protected:
     virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) override;
     virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe=false) override;

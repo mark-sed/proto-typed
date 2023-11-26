@@ -51,16 +51,15 @@ done
 
 set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
 
-FAILED_TESTS=()
+FAILED_TESTS=""
 INDEX=0
 C_OFF='\033[0m'
 C_RED='\033[0;31m'
 C_GREEN='\033[0;32m'
 
 function failed {
-    FAILED_TESTS+=("$1")
+    FAILED_TESTS+=" $1"
     printf "${C_RED}FAIL${C_OFF}: $1: $2\n"
-    
 }
 
 function run {
@@ -193,44 +192,45 @@ function test_structs {
 hello
 -99
 true
-40.5\n" "structs"
+40.5
+4 true 4.25 hi\n" "structs"
 }
 
 function test_modules {
     expect_pass "modules.pt" "modules2.o" "modules"
-    expect_out_eq "42\ntrue\n0.2\nhi\n2\n-99\n10\n0\nIn _entry\n"
+    expect_out_eq "42\ntrue\n0.2\nhi\n2\n-99\n10\n0\nIn _entry\n" "modules"
 }
 
 function test_empty {
     expect_pass "empty.pt" "empty"
-    expect_out_eq ""
+    expect_out_eq "" "empty"
 }
 
 function test_arrays {
     expect_pass "arrays.pt" "arrays"
-    expect_out_eq "43 44 45 \n3 2 1 false true true 0 1.5 2.6 \nLet's find out \n"
+    expect_out_eq "43 44 45 \n3 2 1 false true true 0 1.5 2.6 \nLet's find out \n" "arrays"
 }
 
 function test_statements {
     expect_pass "statements.pt" "statements"
-    expect_out_eq "3 2 1 4\n0 1 2 3 \n5 4 3 2 \n10 7 4 1 \na b c \n-4 -2 0 \nhi there\n"
+    expect_out_eq "3 2 1 4\n0 1 2 3 \n5 4 3 2 \n10 7 4 1 \na b c \n-4 -2 0 \nhi there\n" "statements"
 }
 
 function test_casting {
     expect_pass "casting.pt" "casting"
     expect_out_eq "String\n42\n0.5\ntrue\nString\n42\n0.5\ntrue
-false\nfalse\ntrue\ntrue\n4\ntrue\n0\nfalse\n11110\n"
+false\nfalse\ntrue\ntrue\n4\ntrue\n0\nfalse\n11110\n" "casting"
 }
 
 function test_floats {
     expect_pass "floats.pt" "floats"
-    expect_out_eq "true\ntrue\nfalse\ntrue\nfalse\n"
+    expect_out_eq "true\ntrue\nfalse\ntrue\nfalse\n" "floats"
 }
 
 function test_ptlib_strings {
     expect_pass "ptlib_strings.pt" "ptlib_strings"
     expect_out_eq "HELLO THERE 32\ner sfd 43 ]}{\trp;[]+455\n55\n33\n108\nd*?\n94
-keram\n"
+keram\n" "ptlib_strings"
 }
 
 # Expect fail tests
@@ -263,8 +263,16 @@ TEST_AMOUNT=$(declare -F | grep "test_" | wc -l)
 start_time=`date +%s`
 run_all_tests
 if [[ ${#FAILED_TESTS[@]} -ne 0 ]]; then
-    UNQ_TST=($(printf "%s\n" "${FAILED_TESTS[@]}" | sort -u | tr '\n' ' '))
-    printf "${C_RED}FAILED${C_OFF}: ${#UNQ_TST[@]} test(s) did not pass\n"
+    UNQ_TST=""
+    failedam=0
+    for i in $FAILED_TESTS; do
+        if ! [[ ${UNQ_TST} =~ $i ]]
+        then
+            UNQ_TST+=" $i"
+            ((++failedam))
+        fi
+    done
+    printf "${C_RED}FAILED${C_OFF}: ${failedam} test(s) did not pass\n"
     printf "Failed tests:\n"
     for t in $UNQ_TST; do
         printf "\t${t}\n"

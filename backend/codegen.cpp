@@ -711,6 +711,39 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
         llvm::report_fatal_error("Unknown external symbol IR");
         return nullptr;
     }
+    case ir::ExprKind::EX_STRUCT:
+    {
+        auto *decl = llvm::dyn_cast<ir::StructLiteral>(e);
+        auto struDecl = decl->getDecl();
+        auto tp = decl->getType();
+
+        auto sPtr = builder.CreateAlloca(mapType(tp));
+
+        int i = 0;
+        for(auto elem : struDecl->getElements()) {
+            auto evar = llvm::dyn_cast<ir::VarDecl>(elem);
+            if(evar->getType()->isMaybe()) {
+                llvm::report_fatal_error("Struct literal maybe types are not yet implemented");
+            }
+            auto ival = evar->getInitValue();
+            for(auto [k, v] : decl->getValues()) {
+                if(k == evar->getName()) {
+                    ival = v;
+                    break;
+                }
+            }
+
+            auto emV = emitExpr(ival);
+            llvm::Value *zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(cgm.getLLVMCtx()), 0);
+            llvm::Value *index = llvm::ConstantInt::get(llvm::Type::getInt32Ty(cgm.getLLVMCtx()), i);
+
+            auto elemPtr = builder.CreateGEP(mapType(tp), sPtr, {zero, index});
+            builder.CreateStore(emV, elemPtr);
+            ++i;
+        }
+
+        return builder.CreateLoad(mapType(tp), sPtr);
+    }
     // TODO: Other ones
     default:
         llvm::report_fatal_error(("Unimplemented expression kind in code generation "+e->debug()).c_str());
@@ -1976,6 +2009,64 @@ void cg::CGFunction::emit(std::vector<ir::IR *> stmts) {
     }
 }
 
+llvm::SmallVector<llvm::Constant *> cg::CGModule::getStructValsInit(ir::StructDecl *decl, std::map<std::string, ir::Expr *> inits) {
+    llvm::SmallVector<llvm::Constant *> vals;
+    for(auto e : decl->getElements()) {
+        auto evar = llvm::dyn_cast<ir::VarDecl>(e);
+        if(evar->getType()->isMaybe()) {
+            llvm::report_fatal_error("Struct maybe types are not yet implemented");
+        }
+        auto ival = evar->getInitValue();
+        for(auto [k, v] : inits) {
+            if(k == evar->getName()) {
+                ival = v;
+                break;
+            }
+        }
+        if(ival) {
+            if(auto vcast = llvm::dyn_cast<ir::IntLiteral>(ival)) {
+                vals.push_back(llvm::ConstantInt::get(ctx, vcast->getValue()));
+            }
+            else if(auto vcast = llvm::dyn_cast<ir::BoolLiteral>(ival)) {
+                vals.push_back(llvm::ConstantInt::getBool(int1T, vcast->getValue()));
+            }
+            else if(auto vcast = llvm::dyn_cast<ir::FloatLiteral>(ival)) {
+                vals.push_back(llvm::ConstantFP::get(ctx, vcast->getValue()));
+            }
+            else if(llvm::dyn_cast<ir::StringLiteral>(ival)) {
+                // Initialization is handeled when new instance is created
+                auto init = llvm::ConstantAggregateZero::get(stringT);
+                vals.push_back(init);
+            }
+            else {
+                // TODO: Handle structs
+                llvm::report_fatal_error("Struct element initializer is not a constant");
+            }
+        }
+        else {
+            auto ty = evar->getType()->getName();
+            if(ty == INT_CSTR) {
+                vals.push_back(llvm::ConstantInt::get(int64T, 0, true));
+            }
+            else if(ty == BOOL_CSTR) {
+                vals.push_back(llvm::ConstantInt::getFalse(int1T));
+            }
+            else if(ty == FLOAT_CSTR) {
+                vals.push_back(llvm::ConstantFP::get(floatT, 0.0));
+            }
+            else if(ty == STRING_CSTR) {
+                // Initialization is handeled when new instance is created
+                auto init = llvm::ConstantAggregateZero::get(stringT);
+                vals.push_back(init);
+            }
+            else {
+                llvm::report_fatal_error("Struct nested intializer is not yet implemented");
+            }
+        }
+    }
+    return vals;
+}
+
 void cg::CGModule::defineStruct(ir::StructDecl *decl) {
     std::vector<llvm::Type*> structElements;
     for(auto elem: decl->getElements()) {
@@ -1996,54 +2087,7 @@ void cg::CGModule::defineStruct(ir::StructDecl *decl) {
         init = llvm::ConstantAggregateZero::get(tp);
     }
     else {
-        llvm::SmallVector<llvm::Constant *> vals; //{ llvm::ConstantInt::get(builder.getInt32Ty(), 0, true) };
-        for(auto e : decl->getElements()) {
-            auto evar = llvm::dyn_cast<ir::VarDecl>(e);
-            if(evar->getType()->isMaybe()) {
-                llvm::report_fatal_error("Struct maybe types are not yet implemented");
-            }
-            if(auto ival = evar->getInitValue()) {
-                if(auto vcast = llvm::dyn_cast<ir::IntLiteral>(ival)) {
-                    vals.push_back(llvm::ConstantInt::get(ctx, vcast->getValue()));
-                }
-                else if(auto vcast = llvm::dyn_cast<ir::BoolLiteral>(ival)) {
-                    vals.push_back(llvm::ConstantInt::getBool(int1T, vcast->getValue()));
-                }
-                else if(auto vcast = llvm::dyn_cast<ir::FloatLiteral>(ival)) {
-                    vals.push_back(llvm::ConstantFP::get(ctx, vcast->getValue()));
-                }
-                else if(llvm::dyn_cast<ir::StringLiteral>(ival)) {
-                    // Initialization is handeled when new instance is created
-                    auto init = llvm::ConstantAggregateZero::get(stringT);
-                    vals.push_back(init);
-                }
-                else {
-                    // TODO: Handle structs
-                    llvm::report_fatal_error("Struct element initializer is not a constant");
-                }
-            }
-            else {
-                auto ty = evar->getType()->getName();
-                if(ty == INT_CSTR) {
-                    vals.push_back(llvm::ConstantInt::get(int64T, 0, true));
-                }
-                else if(ty == BOOL_CSTR) {
-                    vals.push_back(llvm::ConstantInt::getFalse(int1T));
-                }
-                else if(ty == FLOAT_CSTR) {
-                    vals.push_back(llvm::ConstantFP::get(floatT, 0.0));
-                }
-                else if(ty == STRING_CSTR) {
-                    // Initialization is handeled when new instance is created
-                    auto init = llvm::ConstantAggregateZero::get(stringT);
-                    vals.push_back(init);
-                }
-                else {
-                    llvm::report_fatal_error("Struct nested intializer is not yet implemented");
-                }
-            }
-        }
-        init = llvm::ConstantStruct::get(tp, vals);
+        init = llvm::ConstantStruct::get(tp, getStructValsInit(decl, std::map<std::string, ir::Expr*>{}));
     }
 
     userTypes[name] = std::make_pair(tp, init);

@@ -643,7 +643,7 @@ expr_none : NONE            { $$ = scanner->parseNone(); }
           ;
 
 // Struct expression
-expr_struct : ID struct_val         { $$ = scanner->parseStruct(scanner->sym_lookup($1, true, true), $2); }
+expr_struct : ID struct_val         { $$ = scanner->parseStruct(scanner->sym_lookup($1, false, true), $2); }
             | EXT_ID struct_val     { $$ = scanner->parseStruct(scanner->parseExtType($1, false), $2); }
             | LPAR expr_struct RPAR { $$ = $2; }
             ;

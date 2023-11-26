@@ -646,6 +646,7 @@ public:
     }
 
     std::map<std::string, ir::Expr *> getValues() { return values; }
+    StructDecl *getDecl() { return decl; }
     static bool classof(const Expr *e) {
         return e->getKind() == ExprKind::EX_STRUCT;
     }

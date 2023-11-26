@@ -38,3 +38,15 @@ print(y.hello++"\n") // hello
 print(y.a++"\n") // -99
 print(y.b++"\n") // true
 print(y.g++"\n") // 40.5
+
+struct T {
+    int a
+    bool b
+    float f
+    string g
+}
+
+T t 
+t = T{.a = 4, .f=4.25, .b = true, .g="hi"}
+
+print(t.a ++ " " ++ t.b ++ " " ++ t.f ++ " " ++ t.g ++ "\n")

@@ -2857,7 +2857,7 @@ namespace  ptc  {
 
   case 304: // expr_struct: "identifier" struct_val
 #line 646 "frontend/parser.yy"
-                                    { yylhs.value.as < ptc::ir::Expr * > () = scanner->parseStruct(scanner->sym_lookup(yystack_[1].value.as < std::string > (), true, true), yystack_[0].value.as < std::map<std::string, ptc::ir::Expr *>  > ()); }
+                                    { yylhs.value.as < ptc::ir::Expr * > () = scanner->parseStruct(scanner->sym_lookup(yystack_[1].value.as < std::string > (), false, true), yystack_[0].value.as < std::map<std::string, ptc::ir::Expr *>  > ()); }
 #line 2862 "frontend/parser.cpp"
     break;
 
