@@ -389,7 +389,7 @@ callarglist : expr                    { $$ = scanner->parseFunCallArg($1); }
 expr : expr_mat     { $$ = $1; }
      | expr_var     { $$ = $1; }
      | expr_none    { $$ = $1; }
-     | expr_struct
+     | expr_struct  { $$ = $1; }
      | expr_int     { $$ = scanner->parseInt($1); }
      | expr_float   { $$ = scanner->parseFloat($1); }
      | expr_str     { $$ = scanner->parseString($1); }
@@ -643,8 +643,8 @@ expr_none : NONE            { $$ = scanner->parseNone(); }
           ;
 
 // Struct expression
-expr_struct : ID struct_val         { $$ = scanner->parseStruct(scanner->sym_lookup($1, false, true), $2); }
-            | EXT_ID struct_val     { $$ = scanner->parseStruct(scanner->parseExtType($1, false), $2); }
+expr_struct : ID struct_val         { $$ = scanner->parseStructLiteral(scanner->sym_lookup($1, false, true), $2); }
+            | EXT_ID struct_val     { $$ = scanner->parseExternalStructLiteral(scanner->parseExtType($1, false), $2); }
             | LPAR expr_struct RPAR { $$ = $2; }
             ;
 struct_val : LBR RBR                { $$ = std::map<std::string, ptc::ir::Expr*>{}; }

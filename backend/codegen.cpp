@@ -761,7 +761,6 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
         }
         return builder.CreateLoad(mapType(tp), sPtr);
     }
-    // TODO: Other ones
     default:
         llvm::report_fatal_error(("Unimplemented expression kind in code generation "+e->debug()).c_str());
         return nullptr;

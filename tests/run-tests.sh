@@ -194,7 +194,7 @@ hello
 true
 40.5
 4 true 4.25 hi
-49f\n" "structs"
+49f\n3.14\n" "structs"
 }
 
 function test_modules {

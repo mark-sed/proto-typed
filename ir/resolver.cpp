@@ -293,7 +293,10 @@ void ExternalSymbolResolver::resolve(ir::Expr *expr, ir::SourceInfo loc) {
             expr->setType(s->getType());
             e->setExtIR(s);
         }
-        // TODO: implement other
+        else if(auto s = llvm::dyn_cast<ir::TypeDecl>(symb)) {
+            expr->setType(s);
+            e->setExtIR(s);
+        }
         else {
             llvm::report_fatal_error("UNIMPLEMENTED OTHER IRS");
         }
@@ -355,6 +358,54 @@ void ExternalSymbolResolver::resolve(ir::Expr *expr, ir::SourceInfo loc) {
     else if(auto e = llvm::dyn_cast<ir::StructLiteral>(expr)) {
         for(auto [_, v]: e->getValues()) {
             resolve(v, loc);
+        }
+
+        if(e->getType()->isUnresolved()) {
+            LOGMAX("Resolving structLiteral type "+e->debug());
+            auto er = e->getType()->getExternalIR();
+            ModuleInfo *symbMod = getModule(er->getModuleName());
+            if(!symbMod) {
+                diags.report(loc, diag::ERR_UNKNOWN_MODULE, er->getModuleName());
+            }
+            auto symb = symbMod->getScanner()->globalScope->lookup(er->getSymbolName());
+            if(!symb) {
+                diags.report(loc, diag::ERR_UNDEFINED_EXT_VAR, er->getSymbolName(), er->getModuleName());
+            }
+
+            er->setModDecl(symbMod->getModule());
+            if(auto s = llvm::dyn_cast<ir::TypeDecl>(symb)) {
+                e->setType(s);
+                e->setDecl(llvm::dyn_cast<ir::StructDecl>(s->getDecl()));
+            }
+            else {
+                llvm::report_fatal_error("Unknown IR in struct literal");
+            }
+        }
+
+        auto t = e->getType();
+        if(!t) {
+            diags.report(loc, diag::ERR_TYPE_NOT_STRUCT, t->getName());
+        }
+        if(!t->getDecl() || !llvm::isa<ir::StructDecl>(t->getDecl())) {
+            diags.report(loc, diag::ERR_TYPE_NOT_STRUCT, t->getName());
+        }
+        // This cast is checked above
+        auto sdt = llvm::dyn_cast<ir::StructDecl>(t->getDecl());
+        // Check key correctness
+        for(auto [k, v] : e->getValues()) {
+            ir::VarDecl *elemD = nullptr;
+            for(auto el : sdt->getElements()) {
+                if(el->getName() == k) {
+                    elemD = llvm::dyn_cast<ir::VarDecl>(el);
+                    break;
+                }
+            }
+            if(!elemD) {
+                diags.report(loc, diag::ERR_HAS_NO_MEMBER, "struct "+t->getName(), k);
+                continue;
+            } else if(elemD->getType()->getName() != v->getType()->getName()) {
+                diags.report(loc, diag::ERR_INCORRECT_ASSIGNMENT, elemD->getType()->getName(), v->getType()->getName());
+            }
         }
     }
     else if(auto e = llvm::dyn_cast<ir::Range>(expr)) {

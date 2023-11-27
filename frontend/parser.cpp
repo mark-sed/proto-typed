@@ -1753,7 +1753,7 @@ namespace  ptc  {
 
   case 98: // expr: expr_struct
 #line 392 "frontend/parser.yy"
-       { yylhs.value.as < ptc::ir::Expr * > () = yystack_[0].value.as < ptc::ir::Expr * > (); }
+                    { yylhs.value.as < ptc::ir::Expr * > () = yystack_[0].value.as < ptc::ir::Expr * > (); }
 #line 1758 "frontend/parser.cpp"
     break;
 
@@ -2857,13 +2857,13 @@ namespace  ptc  {
 
   case 304: // expr_struct: "identifier" struct_val
 #line 646 "frontend/parser.yy"
-                                    { yylhs.value.as < ptc::ir::Expr * > () = scanner->parseStruct(scanner->sym_lookup(yystack_[1].value.as < std::string > (), false, true), yystack_[0].value.as < std::map<std::string, ptc::ir::Expr *>  > ()); }
+                                    { yylhs.value.as < ptc::ir::Expr * > () = scanner->parseStructLiteral(scanner->sym_lookup(yystack_[1].value.as < std::string > (), false, true), yystack_[0].value.as < std::map<std::string, ptc::ir::Expr *>  > ()); }
 #line 2862 "frontend/parser.cpp"
     break;
 
   case 305: // expr_struct: "external identifier" struct_val
 #line 647 "frontend/parser.yy"
-                                    { yylhs.value.as < ptc::ir::Expr * > () = scanner->parseStruct(scanner->parseExtType(yystack_[1].value.as < std::string > (), false), yystack_[0].value.as < std::map<std::string, ptc::ir::Expr *>  > ()); }
+                                    { yylhs.value.as < ptc::ir::Expr * > () = scanner->parseExternalStructLiteral(scanner->parseExtType(yystack_[1].value.as < std::string > (), false), yystack_[0].value.as < std::map<std::string, ptc::ir::Expr *>  > ()); }
 #line 2868 "frontend/parser.cpp"
     break;
 

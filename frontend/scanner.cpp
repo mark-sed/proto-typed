@@ -701,7 +701,13 @@ std::map<std::string, ir::Expr *> Scanner::parseStructVals(std::map<std::string,
     return list;
 }
 
-ir::Expr *Scanner::parseStruct(ir::IR *type, std::map<std::string, ir::Expr *> values) {
+ir::Expr *Scanner::parseExternalStructLiteral(ir::IR *type, std::map<std::string, ir::Expr *> values) {
+    LOGMAX("Parsing external struct literal");
+    auto t = llvm::dyn_cast<ir::TypeDecl>(type);
+    return new ir::StructLiteral(llvmloc2Src(), nullptr, t, values);
+}
+
+ir::Expr *Scanner::parseStructLiteral(ir::IR *type, std::map<std::string, ir::Expr *> values) {
     LOGMAX("Parsing struct literal");
     auto t = llvm::dyn_cast<ir::TypeDecl>(type);
     if(!t) {
@@ -712,6 +718,22 @@ ir::Expr *Scanner::parseStruct(ir::IR *type, std::map<std::string, ir::Expr *> v
     }
     // This cast is checked above
     auto sdt = llvm::dyn_cast<ir::StructDecl>(t->getDecl());
+    // Check key correctness
+    for(auto [k, v] : values) {
+        ir::VarDecl *elemD = nullptr;
+        for(auto e : sdt->getElements()) {
+            if(e->getName() == k) {
+                elemD = llvm::dyn_cast<ir::VarDecl>(e);
+                break;
+            }
+        }
+        if(!elemD) {
+            diags.report(llvmloc2Src(), diag::ERR_HAS_NO_MEMBER, "struct "+sdt->getName(), k);
+            continue;
+        } else if(elemD->getType()->getName() != v->getType()->getName()) {
+            diags.report(llvmloc2Src(), diag::ERR_INCORRECT_ASSIGNMENT, elemD->getType()->getName(), v->getType()->getName());
+        }
+    }
     return new ir::StructLiteral(llvmloc2Src(), sdt, t, values);
 }
 

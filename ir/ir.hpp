@@ -652,6 +652,7 @@ public:
 
     std::map<std::string, ir::Expr *> getValues() { return values; }
     StructDecl *getDecl() { return decl; }
+    void setDecl(StructDecl *d) { decl=d; }
     static bool classof(const Expr *e) {
         return e->getKind() == ExprKind::EX_STRUCT;
     }
@@ -660,7 +661,7 @@ public:
         for(auto [k, v] : values) {
             ss << "." << k << "=" << v->debug() << ", ";
         }
-        return decl->getName()+"{"+ss.str()+"}";
+        return type->getName()+"{"+ss.str()+"}";
     }
 };
 

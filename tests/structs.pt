@@ -66,3 +66,10 @@ void bar() {
 }
 
 bar()
+
+void baz(T t) {
+    print(t.f as string)
+}
+
+baz(T{.f=3.14})
+print("\n")
