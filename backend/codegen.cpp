@@ -1988,7 +1988,7 @@ void cg::CGFunction::emitStmt(ir::VarDecl *stmt) {
                 llvm::report_fatal_error("Unknown type in local variable initializer");
             }
             auto inits = std::map<std::string, ir::Expr *>{};
-            ir::StructLiteral *empt = new ir::StructLiteral(stmt->getLocation(), strTd, t, inits);
+            ir::StructLiteral *empt = new ir::StructLiteral(stmt->getLocation(), t, inits);
             v = emitExpr(empt);
         }
     }

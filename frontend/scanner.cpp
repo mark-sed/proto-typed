@@ -704,7 +704,7 @@ std::map<std::string, ir::Expr *> Scanner::parseStructVals(std::map<std::string,
 ir::Expr *Scanner::parseExternalStructLiteral(ir::IR *type, std::map<std::string, ir::Expr *> values) {
     LOGMAX("Parsing external struct literal");
     auto t = llvm::dyn_cast<ir::TypeDecl>(type);
-    return new ir::StructLiteral(llvmloc2Src(), nullptr, t, values);
+    return new ir::StructLiteral(llvmloc2Src(), t, values);
 }
 
 ir::Expr *Scanner::parseStructLiteral(ir::IR *type, std::map<std::string, ir::Expr *> values) {
@@ -734,7 +734,7 @@ ir::Expr *Scanner::parseStructLiteral(ir::IR *type, std::map<std::string, ir::Ex
             diags.report(llvmloc2Src(), diag::ERR_INCORRECT_ASSIGNMENT, elemD->getType()->getName(), v->getType()->getName());
         }
     }
-    return new ir::StructLiteral(llvmloc2Src(), sdt, t, values);
+    return new ir::StructLiteral(llvmloc2Src(), t, values);
 }
 
 ir::IR *Scanner::parseExtType(std::string name, bool isMaybe) {

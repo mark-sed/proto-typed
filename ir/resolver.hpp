@@ -71,6 +71,8 @@ private:
     void resolve(std::vector<ir::IR *> body);
     void resolve(ir::IR *body);
     void resolve(ir::Expr *expr, ir::SourceInfo loc);
+    void resolveType(ir::Expr **expr, ir::SourceInfo loc);
+    ir::TypeDecl *resolveType(ir::TypeDecl *t, ir::SourceInfo loc);
 
     ModuleInfo *getModule(std::string name);
 public:

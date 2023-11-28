@@ -207,6 +207,12 @@ void ExternalSymbolResolver::resolve(ir::IR *i) {
             resolve(stmt->getValue(), stmt->getLocation());
     }
     else if(auto *stmt = llvm::dyn_cast<ir::FunctionDecl>(i)) {
+        if(stmt->getReturnType()->isUnresolved()) {
+            stmt->setReturnType(resolveType(stmt->getReturnType(), stmt->getLocation()));
+        }
+        for(auto p : stmt->getParams()) {
+            resolve(p);
+        }
         resolve(stmt->getDecl());
     }
     else if(auto *stmt = llvm::dyn_cast<ir::WhileStmt>(i)) {
@@ -256,6 +262,11 @@ void ExternalSymbolResolver::resolve(ir::IR *i) {
             e->setType(stmt->getType());
         }   
     }
+    else if(auto *stmt = llvm::dyn_cast<ir::FormalParamDecl>(i)) {
+        if(stmt->getType()->isUnresolved()) {
+            stmt->setType(resolveType(stmt->getType(), stmt->getLocation()));
+        }
+    }
 }
 
 void ExternalSymbolResolver::resolve(std::vector<ir::IR *> body) {
@@ -273,7 +284,40 @@ ModuleInfo *ExternalSymbolResolver::getModule(std::string name) {
     return nullptr;
 }
 
+void ExternalSymbolResolver::resolveType(ir::Expr **expr, ir::SourceInfo loc) {
+    ir::Expr *e = *expr;
+    ir::TypeDecl *t = e->getType();
+    if(t->isUnresolved()) {
+        e->setType(resolveType(t, loc));
+    }
+}
+
+ir::TypeDecl *ExternalSymbolResolver::resolveType(ir::TypeDecl *t, ir::SourceInfo loc) {
+    if(t->isUnresolved()) {
+        LOGMAX("Resolving type "+t->debug());
+        auto er = t->getExternalIR();
+        ModuleInfo *symbMod = getModule(er->getModuleName());
+        if(!symbMod) {
+            diags.report(loc, diag::ERR_UNKNOWN_MODULE, er->getModuleName());
+        }
+        auto symb = symbMod->getScanner()->globalScope->lookup(er->getSymbolName());
+        if(!symb) {
+            diags.report(loc, diag::ERR_UNDEFINED_EXT_TYPE, t->getName());
+        }
+
+        er->setModDecl(symbMod->getModule());
+        if(auto s = llvm::dyn_cast<ir::TypeDecl>(symb)) {
+            return s;
+        }
+        else {
+            diags.report(loc, diag::ERR_NOT_A_TYPE, t->getName());
+        }
+    }
+    return t;
+}
+
 void ExternalSymbolResolver::resolve(ir::Expr *expr, ir::SourceInfo loc) {
+    resolveType(&expr, loc);
     if(auto e = llvm::dyn_cast<ir::ExternalSymbolAccess>(expr)) {
         LOGMAX("Resolving external symbol "+e->debug());
         ModuleInfo *symbMod = getModule(e->getModuleName());
@@ -360,28 +404,6 @@ void ExternalSymbolResolver::resolve(ir::Expr *expr, ir::SourceInfo loc) {
             resolve(v, loc);
         }
 
-        if(e->getType()->isUnresolved()) {
-            LOGMAX("Resolving structLiteral type "+e->debug());
-            auto er = e->getType()->getExternalIR();
-            ModuleInfo *symbMod = getModule(er->getModuleName());
-            if(!symbMod) {
-                diags.report(loc, diag::ERR_UNKNOWN_MODULE, er->getModuleName());
-            }
-            auto symb = symbMod->getScanner()->globalScope->lookup(er->getSymbolName());
-            if(!symb) {
-                diags.report(loc, diag::ERR_UNDEFINED_EXT_VAR, er->getSymbolName(), er->getModuleName());
-            }
-
-            er->setModDecl(symbMod->getModule());
-            if(auto s = llvm::dyn_cast<ir::TypeDecl>(symb)) {
-                e->setType(s);
-                e->setDecl(llvm::dyn_cast<ir::StructDecl>(s->getDecl()));
-            }
-            else {
-                llvm::report_fatal_error("Unknown IR in struct literal");
-            }
-        }
-
         auto t = e->getType();
         if(!t) {
             diags.report(loc, diag::ERR_TYPE_NOT_STRUCT, t->getName());
@@ -419,28 +441,11 @@ void ExternalSymbolResolver::resolve(ir::Expr *expr, ir::SourceInfo loc) {
         if(auto stmt = llvm::dyn_cast<ir::VarDecl>(e->getVar())) {
             auto stmtT = stmt->getType();
             if(stmtT->isUnresolved()) {
-                LOGMAX("Resolving external VarAccess "+e->debug());
-                ModuleInfo *symbMod = getModule(stmtT->getExternalIR()->getModuleName());
-                if(!symbMod) {
-                    diags.report(loc, diag::ERR_UNKNOWN_MODULE, stmtT->getExternalIR()->getModuleName());
-                }
-
-                auto symb = symbMod->getScanner()->globalScope->lookup(stmtT->getExternalIR()->getSymbolName());
-                if(!symb) {
-                    diags.report(loc, diag::ERR_UNDEFINED_EXT_TYPE, stmtT->getExternalIR()->getSymbolName(), stmtT->getExternalIR()->getModuleName());
-                }
-
-                if(auto smt = llvm::dyn_cast<ir::TypeDecl>(symb)) {
-                    stmt->setType(smt);
-                }
-                else {
-                    diags.report(loc, diag::ERR_NOT_A_TYPE, stmtT->getName());
-                }
+                stmt->setType(resolveType(stmtT, stmt->getLocation()));
             }
-            else if(e->getType()->isUnresolved()) {
+            if(e->getType()->isUnresolved()) {
                 LOGMAX("Resolving varaccess type "+e->debug());
                 e->setType(stmt->getType());
-                e->getType()->setUnresolved(false);
             }
         }
     }

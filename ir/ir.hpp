@@ -341,6 +341,7 @@ public:
              byReference(byReference) {}
     
     TypeDecl *getType() { return td; }
+    void setType(TypeDecl *t) { td = t; }
     bool isByReference() { return byReference; }
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_FORMAL_PARAM_DECL;
@@ -393,6 +394,7 @@ public:
     
     std::string getOGName() { return og_name; }
     TypeDecl *getReturnType() { return returnType; }
+    void setReturnType(TypeDecl *t) { returnType = t; }
     std::vector<FormalParamDecl *> getParams() { return params; }
     std::vector<ir::IR *> getDecl() { return decls; }
     void setDecl(std::vector<ir::IR *> d) { decls = d; }
@@ -640,19 +642,20 @@ public:
 class StructLiteral : public Expr {
 private:
     SourceInfo loc;
-    StructDecl *decl;
     std::map<std::string, ir::Expr *> values;
 public:
-    StructLiteral(SourceInfo loc, StructDecl *decl, TypeDecl *type, std::map<std::string, ir::Expr *> &values)
+    StructLiteral(SourceInfo loc, TypeDecl *type, std::map<std::string, ir::Expr *> &values)
               : Expr(ExprKind::EX_STRUCT, type, true),
                 loc(loc),
-                decl(decl),
                 values(values) {
     }
 
     std::map<std::string, ir::Expr *> getValues() { return values; }
-    StructDecl *getDecl() { return decl; }
-    void setDecl(StructDecl *d) { decl=d; }
+    StructDecl *getDecl() { 
+        if(auto stdc = llvm::dyn_cast<ir::StructDecl>(type->getDecl()))
+            return stdc; 
+        return nullptr;
+    }
     static bool classof(const Expr *e) {
         return e->getKind() == ExprKind::EX_STRUCT;
     }
