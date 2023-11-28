@@ -120,10 +120,10 @@ function testnum {
 
 function run_test {
     let "INDEX=INDEX+1"
-    failed_am=${#FAILED_TESTS[@]}
+    failed_am=${#FAILED_TESTS}
     printf "$(testnum) ${1}: Running\n"
     test_"$1"
-    failed_now=${#FAILED_TESTS[@]}
+    failed_now=${#FAILED_TESTS}
     if [[ $failed_now -eq $failed_am ]]; then
         printf "$(testnum) ${1}: ${C_GREEN}OK${C_OFF}\n"
     else
