@@ -74,14 +74,14 @@ public:
     std::string moduleName;
     std::string fileName;
     ir::ModuleDecl *ptlibMod;
-    std::string srcCode;
+    std::vector<std::string> srcCode;
     bool lib;
     Scope *globalScope;
     unsigned long parseByte;
     unsigned long lastNl;
     unsigned long preLastNl;
 
-    Scanner(Diagnostics &diags, std::string srcCode, std::string moduleName, std::string fileName, ir::ModuleDecl *ptlibMod, bool lib=false);
+    Scanner(Diagnostics &diags, std::vector<std::string> srcCode, std::string moduleName, std::string fileName, ir::ModuleDecl *ptlibMod, bool lib=false);
     ~Scanner();
 
     /**
@@ -92,32 +92,7 @@ public:
     virtual int yylex(ptc::Parser::semantic_type *const lval,
                       ptc::Parser::location_type *location);
 
-    ir::SourceInfo llvmloc2Src() {
-        const unsigned long LINE_LEN_PRE = 100; // Max length of line to be displayed, but will be cut at first \n
-        const unsigned long LINE_LEN_POST = 20;
-
-        // TODO: Optimize
-        unsigned long strt = 0;
-        if(parseByte > LINE_LEN_PRE) {
-            strt = parseByte - LINE_LEN_PRE;
-        }
-        unsigned long end = parseByte + LINE_LEN_POST;
-        if(end > srcCode.size()) {
-            end = srcCode.size();
-        }
-        for(unsigned long i = strt; i < parseByte; ++i) {
-            if(srcCode[i] == '\n')
-                strt = i+1;
-        }
-        for(unsigned long i = end; i > parseByte; --i) {
-            if(srcCode[i] == '\n')
-                end = i;
-        }
-
-        std::string currLine = srcCode.substr(strt, end-strt);
-
-        return ir::SourceInfo(fileName, llvmloc->begin.line, llvmloc->begin.column, llvmloc->end.line, llvmloc->end.column, currLine);
-    }
+    ir::SourceInfo llvmloc2Src();
 
     /**
      * Starts parsing of the given code

@@ -76,11 +76,13 @@ public:
         llvm::SourceMgr::DiagKind kind = getDiagnosticKind(diagID);
         // llvm::SMLoc(), kind, msg
         llvm::SmallVector<std::pair<unsigned, unsigned>, 4> ColRanges;
-        ColRanges.push_back(std::make_pair(loc.l_end - loc.l_start,
-                                           loc.c_end - loc.l_end));
+        // TODO: This was making incorrect squigglies and sometimes end > start
+        //ColRanges.push_back(std::make_pair(loc.snip_start-1,
+        //                                   loc.getLStartCEnd()-1));
+        //std::string snip = std::to_string(l_start) + " |" + loc.snippet;
         auto smdiag = llvm::SMDiagnostic(srcMgr, llvm::SMLoc(), 
                                           loc.filename, loc.l_start,
-                                          loc.c_start, kind, msg, 
+                                          loc.c_start-1, kind, msg, 
                                           loc.snippet,
                                           ColRanges);
         srcMgr.PrintMessage(llvm::errs(), smdiag);

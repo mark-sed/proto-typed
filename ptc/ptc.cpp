@@ -252,8 +252,12 @@ int main(int argc, char *argv[]) {
         srcMgr.AddNewSourceBuffer(std::move(*fileOrErr), llvm::SMLoc());
 
         std::ifstream t(fileName); // Has to be done twice
-        std::string codeAsString((std::istreambuf_iterator<char>(t)),
-                                std::istreambuf_iterator<char>());
+        std::vector<std::string> codeAsString;
+        std::string tline;
+        while(std::getline(t, tline)) {
+            codeAsString.push_back(tline);
+        }
+
         std::ifstream code(fileName);
 
         std::string moduleName = std::filesystem::path(fileName).stem();

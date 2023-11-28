@@ -46,17 +46,24 @@ oct     0[Qq][0-7]+
 {ws}            { /* Ignore spaces and tabs */; }
 "/*"        	  { /* Multiline comment */
                     int c; 
+                    bool upt = false;
                     while((c = yyinput()) != 0) {
-                        if(c == '\n') {
-                            llvmloc->lines();
-                            nl();
-                        }
-                        else if(c == '*') {
-                            if((c = yyinput()) == '/')
-                                break;
-                            else
-                                unput(c);
-                        }
+                      if(c == '\n') {
+                          llvmloc->lines();
+                          nl();
+                      }
+                      else if(c == '*') {
+                          if((c = yyinput()) == '/')
+                              break;
+                          else {
+                              unput(c);
+                              upt = true;
+                          }
+                      }
+                      if(!upt) {
+                        YY_USER_ACTION
+                        upt = false;
+                      }
                     }
                 }
 "//".*          { /* Line comment */ ; }
@@ -176,6 +183,7 @@ oct     0[Qq][0-7]+
                         esc = false;
                       }
                       txt += c;
+                      YY_USER_ACTION
                   }
                   yylval->build<std::string>(txt);
                   return token::STRING;
@@ -195,6 +203,7 @@ oct     0[Qq][0-7]+
                         esc = false;
                       }
                       txt += c;
+                      YY_USER_ACTION
                   }
                   yylval->build<std::string>(escapeString(txt));
                   return token::STRING;

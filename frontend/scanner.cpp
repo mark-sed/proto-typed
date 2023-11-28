@@ -62,7 +62,32 @@ std::string ptc::encodeFunction(std::string name, std::vector<ir::Expr *> params
     }
 }
 
-Scanner::Scanner(Diagnostics &diags, std::string srcCode, std::string moduleName, std::string fileName, ir::ModuleDecl *ptlibMod, bool lib)
+ir::SourceInfo Scanner::llvmloc2Src() {
+    const long LINE_LEN_PRE = 100; // Max length of line to be displayed, but will be cut at first
+    const long LINE_LEN_POST = 20;
+
+    std::string currLine = srcCode[llvmloc->begin.line-1];
+    if(currLine.size() > LINE_LEN_PRE+LINE_LEN_POST) {
+        size_t start = 0;
+        if(llvmloc->begin.column > LINE_LEN_PRE) {
+            start = llvmloc->begin.column - LINE_LEN_PRE;
+        }
+        size_t end = llvmloc->begin.column + LINE_LEN_POST;
+        if(end > currLine.size()-1)
+            end = currLine.size()-1;
+        currLine = currLine.substr(start, end-start);
+
+        unsigned int end_c = llvmloc->end.column - start;
+        if(end_c > end) {
+            end_c = end;
+        }
+        return ir::SourceInfo(fileName, llvmloc->begin.line, llvmloc->begin.column, llvmloc->end.line, llvmloc->end.column, currLine, llvmloc->begin.column-start, end_c);
+    }
+
+    return ir::SourceInfo(fileName, llvmloc->begin.line, llvmloc->begin.column, llvmloc->end.line, llvmloc->end.column, currLine, llvmloc->begin.column, llvmloc->end.column);
+}
+
+Scanner::Scanner(Diagnostics &diags, std::vector<std::string> srcCode, std::string moduleName, std::string fileName, ir::ModuleDecl *ptlibMod, bool lib)
         : currentIR(nullptr), diags(diags), moduleName(moduleName), fileName(fileName), ptlibMod(ptlibMod), srcCode(srcCode), lib(lib), parseByte(0), lastNl(0), preLastNl(0) {
     llvmloc = new Parser::location_type();
     init();

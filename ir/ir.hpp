@@ -128,9 +128,18 @@ struct SourceInfo {
     int c_end;
     std::string filename;
     std::string snippet;
-    SourceInfo(std::string filename, int line, int start, int line_end, int c_end, std::string snippet) 
-        : l_start(line), c_start(start), l_end(line_end), c_end(c_end), filename(filename), snippet(snippet) {}
+    int snip_start;
+    int snip_end;
+    SourceInfo(std::string filename, int line, int start, int line_end, int c_end, std::string snippet, int snip_start, int snip_end) 
+        : l_start(line), c_start(start), l_end(line_end), c_end(c_end), filename(filename), snippet(snippet), snip_start(snip_start), snip_end(snip_end) {}
     SourceInfo() {}
+
+    int getLStartCEnd() {
+        if(snip_end < snip_start) {
+            return snippet.size();
+        }
+        return snip_end;
+    }
 
     // Needed to use set on this type
     bool operator< (const SourceInfo b) const {
