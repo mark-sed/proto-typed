@@ -556,7 +556,15 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
             type = this->boolType;
         break;
         case ir::OperatorKind::OP_IN:
-            // TODO: check that tr is a matrix
+            if(tr->isMatrix()) {
+                if(tr->getMatrixSize().size() != tl->getMatrixSize().size()-1 || tr->getBaseName() != tl->getBaseName()) {
+                    // TODO: Possibly specify that the left side has to have one less dimension that the right one
+                    diags.report(llvmloc2Src(), diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+                }
+            }
+            else if(tr->getName() != STRING_CSTR || tl->getName() != STRING_CSTR) {
+                diags.report(llvmloc2Src(), diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+            }
             type = this->boolType;
         break;
         case ir::OperatorKind::OP_SUBSCR:

@@ -1301,7 +1301,7 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     break;
     case ir::OperatorKind::OP_IN:
     {
-
+        llvm::report_fatal_error("IN is not yet implemented");
     }
     break;
     case ir::OperatorKind::OP_LAND:

@@ -566,13 +566,13 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          | expr_mat IN expr_mat
          | expr_int IN expr_var
          | expr_float IN expr_var
-         | expr_str IN expr_var
+         | expr_str IN expr_var    { $$ = scanner->parseInfixExpr(scanner->parseString($1), $3, ir::Operator(ir::OperatorKind::OP_IN)); }
          | expr_bool IN expr_var
          | expr_none IN expr_var
-         | expr_struct IN expr_var
+         | expr_struct IN expr_var 
          | expr_mat IN expr_var
-         | expr_var IN expr_str
-         | expr_var IN expr_var
+         | expr_var IN expr_str    { $$ = scanner->parseInfixExpr($1, scanner->parseString($3), ir::Operator(ir::OperatorKind::OP_IN)); }
+         | expr_var IN expr_var    { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_IN)); }
 
          | expr_bool LAND expr_var { $$ = scanner->parseInfixExpr(scanner->parseBool($1), $3, ir::Operator(ir::OperatorKind::OP_LAND)); }
          | expr_var LAND expr_bool { $$ = scanner->parseInfixExpr($1, scanner->parseBool($3), ir::Operator(ir::OperatorKind::OP_LAND)); }
