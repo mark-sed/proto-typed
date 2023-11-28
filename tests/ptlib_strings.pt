@@ -41,3 +41,9 @@ void test_all_chr_ord() {
 test_all_chr_ord() // 94\n
 
 print(reverse("\nmarek"))
+
+print(find("Hello 32", "o 3") ++ "\n")
+print(find("ll", "ll1") ++ "\n")
+
+print(contains("Hello", "h") ++ "\n")
+print(contains("Hello", "ll") ++ "\n")

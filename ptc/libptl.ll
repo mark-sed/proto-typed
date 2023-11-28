@@ -192,10 +192,8 @@ define fastcc i1 @string_Eq(%string %x, %string %y) {
 	; Compare lengths
 	%xlen = extractvalue %string %x, 1
 	%ylen = extractvalue %string %y, 1
-	%issamelen = icmp eq i32 %xlen, %ylen
-	br i1 %issamelen, label %samelen, label %cmpchars
-samelen:
-	ret i1 1
+	%difflen = icmp ne i32 %xlen, %ylen
+	br i1 %difflen, label %different, label %cmpchars
 cmpchars:
 	; Compare letters
 	%buffx = extractvalue %string %x, 0
