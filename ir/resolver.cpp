@@ -28,6 +28,7 @@ void UnresolvedSymbolResolver::resolve(ir::Expr * expr, ir::SourceInfo loc) {
             if(!globalScope->lookupPossibleFun(name)) {
                 // Undefined
                 diags.report(loc, diag::ERR_UNDEFINED_VAR, name);
+                return;
             }
             else {
                 std::string properName = encodeFunction(name, e->getParams());
@@ -43,6 +44,7 @@ void UnresolvedSymbolResolver::resolve(ir::Expr * expr, ir::SourceInfo loc) {
                 }
                 if(!propFIR) {
                     diags.report(loc, diag::ERR_INCORRECT_ARGS, name);
+                    return;
                 }
                 else {
                     LOGMAX("Resolved function "+name)
@@ -86,19 +88,22 @@ void UnresolvedSymbolResolver::resolve(ir::Expr * expr, ir::SourceInfo loc) {
                         //TODO: Handle and set r correctly
                         (void)fvar;
                         diags.report(loc, diag::ERR_INTERNAL, "NOT YET IMPLEMENTED Structs inside of structs access");
+                        return;
                     }
                     else {
                         diags.report(loc, diag::ERR_INTERNAL, "unknown element type in a struct");
+                        return;
                     }
                 }
                 else {
                     diags.report(loc, diag::ERR_HAS_NO_MEMBER, "struct "+struDecl->getName(), elem->getName());
+                    return;
                 }
             }
             else {
                 diags.report(loc, diag::ERR_TYPE_NOT_STRUCT, e->getLeft()->getType()->getName());
+                return;
             }
-
 
             return;
         }
@@ -112,6 +117,7 @@ void UnresolvedSymbolResolver::resolve(ir::Expr * expr, ir::SourceInfo loc) {
                 e->getRight()->getType()->getName() == UNKNOWN_CSTR) {
             if(e->getLeft()->getType()->getName() == UNKNOWN_CSTR) {
                 diags.report(loc, diag::ERR_CANNOT_INFER_TYPE, e->getLeft()->debug());
+                return;
             }
             e->getRight()->setType(e->getLeft()->getType());
         }
@@ -145,9 +151,11 @@ void UnresolvedSymbolResolver::resolve(ir::Expr * expr, ir::SourceInfo loc) {
         // TODO: Handle function pointer
         if(globalScope->lookupPossibleFun(e->getName())) {
             diags.report(loc, diag::ERR_INTERNAL, "Function pointers are not yet implemented in resolver");
+            return;
         }
         else {
             diags.report(loc, diag::ERR_UNDEFINED_VAR, e->getName());
+            return;
         }
     }
     else if(auto e = llvm::dyn_cast<ir::VarAccess>(expr)) {
@@ -241,11 +249,13 @@ void ExternalSymbolResolver::resolve(ir::IR *i) {
             ModuleInfo *symbMod = getModule(stmtT->getExternalIR()->getModuleName());
             if(!symbMod) {
                 diags.report(i->getLocation(), diag::ERR_UNKNOWN_MODULE, stmtT->getExternalIR()->getModuleName());
+                return;
             }
 
             auto symb = symbMod->getScanner()->globalScope->lookup(stmtT->getExternalIR()->getSymbolName());
             if(!symb) {
                 diags.report(i->getLocation(), diag::ERR_UNDEFINED_EXT_TYPE, stmtT->getExternalIR()->getSymbolName(), stmtT->getExternalIR()->getModuleName());
+                return;
             }
 
             if(auto smt = llvm::dyn_cast<ir::TypeDecl>(symb)) {
@@ -254,6 +264,7 @@ void ExternalSymbolResolver::resolve(ir::IR *i) {
             }
             else {
                 diags.report(i->getLocation(), diag::ERR_NOT_A_TYPE, stmtT->getName());
+                return;
             }
         } 
 
@@ -299,10 +310,12 @@ ir::TypeDecl *ExternalSymbolResolver::resolveType(ir::TypeDecl *t, ir::SourceInf
         ModuleInfo *symbMod = getModule(er->getModuleName());
         if(!symbMod) {
             diags.report(loc, diag::ERR_UNKNOWN_MODULE, er->getModuleName());
+            return t;
         }
         auto symb = symbMod->getScanner()->globalScope->lookup(er->getSymbolName());
         if(!symb) {
             diags.report(loc, diag::ERR_UNDEFINED_EXT_TYPE, t->getName());
+            return t;
         }
 
         er->setModDecl(symbMod->getModule());
@@ -311,6 +324,7 @@ ir::TypeDecl *ExternalSymbolResolver::resolveType(ir::TypeDecl *t, ir::SourceInf
         }
         else {
             diags.report(loc, diag::ERR_NOT_A_TYPE, t->getName());
+            return t;
         }
     }
     return t;
@@ -324,12 +338,14 @@ void ExternalSymbolResolver::resolve(ir::Expr *expr, ir::SourceInfo loc) {
 
         if(!symbMod) {
             diags.report(loc, diag::ERR_UNKNOWN_MODULE, e->getModuleName());
+            return;
         }
 
         // TODO: check functions some other way?
         auto symb = symbMod->getScanner()->globalScope->lookup(e->getSymbolName());
         if(!symb) {
             diags.report(loc, diag::ERR_UNDEFINED_EXT_VAR, e->getSymbolName(), e->getModuleName());
+            return;
         }
 
         e->setModDecl(symbMod->getModule());
@@ -355,10 +371,12 @@ void ExternalSymbolResolver::resolve(ir::Expr *expr, ir::SourceInfo loc) {
             ModuleInfo *symbMod = getModule(e->getExternalFun()->getModuleName());
             if(!symbMod) {
                 diags.report(loc, diag::ERR_UNKNOWN_MODULE, e->getExternalFun()->getModuleName());
+                return;
             }
             if(!symbMod->getScanner()->globalScope->lookupPossibleFun(name)) {
                 // Undefined
                 diags.report(loc, diag::ERR_UNDEFINED_VAR, name);
+                return;
             }
             else {
                 std::string properName = encodeFunction(name, e->getParams());
@@ -374,6 +392,7 @@ void ExternalSymbolResolver::resolve(ir::Expr *expr, ir::SourceInfo loc) {
                 }
                 if(!propFIR) {
                     diags.report(loc, diag::ERR_INCORRECT_ARGS, name);
+                    return;
                 }
                 else {
                     LOGMAX("Resolved external function "+name)
@@ -407,9 +426,11 @@ void ExternalSymbolResolver::resolve(ir::Expr *expr, ir::SourceInfo loc) {
         auto t = e->getType();
         if(!t) {
             diags.report(loc, diag::ERR_TYPE_NOT_STRUCT, t->getName());
+            return;
         }
         if(!t->getDecl() || !llvm::isa<ir::StructDecl>(t->getDecl())) {
             diags.report(loc, diag::ERR_TYPE_NOT_STRUCT, t->getName());
+            return;
         }
         // This cast is checked above
         auto sdt = llvm::dyn_cast<ir::StructDecl>(t->getDecl());
@@ -427,6 +448,7 @@ void ExternalSymbolResolver::resolve(ir::Expr *expr, ir::SourceInfo loc) {
                 continue;
             } else if(elemD->getType()->getName() != v->getType()->getName()) {
                 diags.report(loc, diag::ERR_INCORRECT_ASSIGNMENT, elemD->getType()->getName(), v->getType()->getName());
+                continue;
             }
         }
     }
@@ -489,6 +511,7 @@ void FunctionAnalyzer::checkReturnType(std::vector<ir::IR *> decls, int *num_fou
                             fun->getOGName(),
                             tname,
                             expected->getName());
+                return;
             }
         }
         else if(auto stmt = llvm::dyn_cast<ir::IfStatement>(decl)) {
@@ -513,9 +536,11 @@ void FunctionAnalyzer::checkReturns() {
     checkReturnType(body, &num_found, &nested_ret, rtype);
     if(rtype->getName() != VOID_CSTR && num_found == 0) {
         diags.report(fun->getLocation(), diag::ERR_MISSING_RETURN, fun->getOGName());
+        return;
     }
     else if(rtype->getName() != VOID_CSTR && num_found - nested_ret <= 0) {
         diags.report(fun->getLocation(), diag::ERR_MISSING_RETURN_IN_BRANCH, fun->getOGName());
+        return;
     }
 }
 

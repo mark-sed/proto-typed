@@ -131,6 +131,14 @@ struct SourceInfo {
     SourceInfo(std::string filename, int line, int start, int line_end, int c_end, std::string snippet) 
         : l_start(line), c_start(start), l_end(line_end), c_end(c_end), filename(filename), snippet(snippet) {}
     SourceInfo() {}
+
+    // Needed to use set on this type
+    bool operator< (const SourceInfo b) const {
+        if(l_start == b.l_start) {
+            return c_start < b.c_start;
+        }
+        return l_start < b.l_start;
+    }
 };
 
 /**

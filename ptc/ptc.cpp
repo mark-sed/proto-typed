@@ -77,7 +77,6 @@ void ptc::addModuleToCompile(std::string name, bool isMainMod) {
 }
 
 void printVersion(llvm::raw_ostream &OS) {
-    // TODO: print version
     OS << head << " " << PTC_VERSION << "\n";
     OS << "  Default target: "
         << llvm::sys::getDefaultTargetTriple() << "\n";
@@ -225,11 +224,13 @@ int main(int argc, char *argv[]) {
     LOGMAX("Adding main program to parsing");
     const char *ptcName = argv[0];
     bool parsingMain = true;
-    if(inputFiles.size() > 0) {
-        // TOOD: Disallow multiple files here
-        auto m = new ModuleInfo(*inputFiles.begin(), true);
-        m->setMainMod(true);
+    // Multiple files might be specified to set their path
+    bool first = true;
+    for(auto f: inputFiles) {
+        auto m = new ModuleInfo(f, true);
+        m->setMainMod(first);
         modulesToCompile.push_back(m);
+        first = false;
     }
 
     llvm::SourceMgr srcMgr;
@@ -244,6 +245,8 @@ int main(int argc, char *argv[]) {
         llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> fileOrErr = llvm::MemoryBuffer::getFile(fileName);
         if(std::error_code buffErr = fileOrErr.getError()) {
             llvm::WithColor::error(llvm::errs(), ptcName) << "Error reading " << fileName << ": " << buffErr.message() << "\n";
+            diags.errorFound();
+            break;
         }
 
         srcMgr.AddNewSourceBuffer(std::move(*fileOrErr), llvm::SMLoc());
@@ -279,6 +282,8 @@ int main(int argc, char *argv[]) {
             externalResolver->run();
             delete externalResolver;
         }
+    }
+    if(diags.getNumErrors() == 0) {
         // Resolver
         for(auto mii = modulesToCompile.rbegin(); mii != modulesToCompile.rend(); ++mii) {
             auto mi = *mii;
@@ -288,6 +293,8 @@ int main(int argc, char *argv[]) {
             unresolvedResolver->run();
             delete unresolvedResolver;
         }
+    }
+    if(diags.getNumErrors() == 0) {
         // Analysis
         for(auto mi: modulesToCompile) {
             auto decls = mi->getScanner()->mainModule->getDecls();
@@ -299,14 +306,15 @@ int main(int argc, char *argv[]) {
                 }
             }
         }
-
-        LOGMAX("Generated IRs after resolver:\n----------");
+    }
+    if(diags.getNumErrors() == 0) {
+        LOGMAX("Generated IRs after resolvers:\n----------");
         for(auto mi: modulesToCompile) {
             LOGMAX(mi->getScanner()->mainModule->debug());
         }
     }
     else {
-        LOG1("Skipping resolver because of found errors");
+        LOG1("Skipping resolver/s because of found errors");
     }
 
     // Codegen (generate in reverse order of imports), but have ptlib be first

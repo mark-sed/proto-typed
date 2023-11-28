@@ -24,6 +24,7 @@
 #include <ostream>
 #include <set>
 #include <cstring>
+#include <utility>
 
 namespace ptc {
 
@@ -44,6 +45,8 @@ class Diagnostics {
     static const char *getDiagnosticText(unsigned diagID);
     static llvm::SourceMgr::DiagKind getDiagnosticKind(unsigned diagID);
 
+    std::set<std::pair<ir::SourceInfo, unsigned int>> reported;
+
     llvm::SourceMgr &srcMgr;
     unsigned numErrors;
 
@@ -55,6 +58,8 @@ public:
      */
     unsigned getNumErrors() { return numErrors; }
 
+    void errorFound() { ++numErrors; }
+
     /**
      * Reports an error, warning or note in LLVM style
      * 
@@ -65,6 +70,7 @@ public:
      */
     template <typename... Args>
     void report(ir::SourceInfo loc, unsigned diagID, Args &&... arguments) {
+        if(reported.count(std::make_pair(loc, diagID)) != 0) return;
         std::string msg = llvm::formatv(getDiagnosticText(diagID),
                       std::forward<Args>(arguments)...).str();
         llvm::SourceMgr::DiagKind kind = getDiagnosticKind(diagID);
@@ -79,6 +85,7 @@ public:
                                           ColRanges);
         srcMgr.PrintMessage(llvm::errs(), smdiag);
         numErrors += (kind == llvm::SourceMgr::DK_Error);
+        reported.insert(std::make_pair(loc, diagID));
     }
 };
 
