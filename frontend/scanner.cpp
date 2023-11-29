@@ -557,7 +557,12 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
         break;
         case ir::OperatorKind::OP_IN:
             if(tr->isMatrix()) {
-                if(tr->getMatrixSize().size() != tl->getMatrixSize().size()-1 || tr->getBaseName() != tl->getBaseName()) {
+                // TODO: Handle maybe elements, its possible to check for none
+                if(tl->getName() == NONETYPE_CSTR) {
+                    // TODO: Check if ELEMENT IS Maybe (not array)
+                    diags.report(llvmloc2Src(), diag::ERR_INTERNAL, "IN for maybe (none) is not yet implemented");
+                }
+                else if(tr->getMatrixSize().size() != tl->getMatrixSize().size()+1 || tr->getBaseName() != tl->getBaseName()) {
                     // TODO: Possibly specify that the left side has to have one less dimension that the right one
                     diags.report(llvmloc2Src(), diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
                 }
