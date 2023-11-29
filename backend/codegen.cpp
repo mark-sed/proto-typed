@@ -1301,7 +1301,20 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     break;
     case ir::OperatorKind::OP_IN:
     {
-        llvm::report_fatal_error("IN is not yet implemented");
+        LOGMAX("Creating IN instruction");
+        if(left->getType() == stringT && left->getType() == right->getType()) {
+            // String
+            // Contains takes arguments the other way (x in y -> contains(y, x))
+            auto contains_str_fun = cgm.getLLVMMod()->getOrInsertFunction("contains_string_string",
+                                    llvm::FunctionType::get(int1T, {stringT, stringT}, false));
+            return builder.CreateCall(contains_str_fun, {right, left});
+        }
+        else if(e->getRight()->getType()->isMatrix()) {
+            llvm::report_fatal_error("IN is not yet implemented for arrays");
+        }
+        else {
+            llvm::report_fatal_error("IN does not supported given type");
+        }
     }
     break;
     case ir::OperatorKind::OP_LAND:

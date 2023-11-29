@@ -109,3 +109,16 @@ float aFloat = 2.0
 print((aInt ** 0.5)++"\n") // 2
 print((aFloat ** 2)++"\n") // 4
 print((aInt ** aFloat)++"\n") // 16
+
+string gs = "e"
+bool bs 
+bs = "hello" in gs
+print(bs ++ "\n")
+bs = gs in "hello"
+print(bs ++ "\n")
+bs = "" in gs
+print(bs ++ "\n")
+bs = gs in ""
+print(bs ++ "\n")
+bs = gs in gs
+print(bs ++ "\n")
