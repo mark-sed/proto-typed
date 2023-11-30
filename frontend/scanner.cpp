@@ -697,33 +697,53 @@ std::vector<ir::Expr *> Scanner::parseAddMatrixSize(std::vector<ir::Expr *> &lis
 void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT) {
     ir::TypeDecl *tPtr = t->clone();
     tPtr->setMaybe(true);
-    auto params = std::vector<ir::FormalParamDecl *>{
-        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "m", tPtr, true),
-        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", elemT, false)
-    };
     auto body = std::vector<ir::IR *> {};
-    auto funAppend = new ir::FunctionDecl(currentIR,
-                                            llvmloc2Src(),
-                                            "append_"+t->getName()+"_"+elemT->getName(),
-                                            "append",
-                                            this->voidType,
-                                            params,
-                                            body);
-    globalScope->insert(funAppend);
-    mainModule->addLibFunction(funAppend);
+    {
+        auto params = std::vector<ir::FormalParamDecl *>{
+            new ir::FormalParamDecl(currentIR, llvmloc2Src(), "m", tPtr, true),
+            new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", elemT, false)
+        };
+        auto funAppend = new ir::FunctionDecl(currentIR,
+                                                llvmloc2Src(),
+                                                "append_"+t->getName()+"_"+elemT->getName(),
+                                                "append",
+                                                this->voidType,
+                                                params,
+                                                body);
+        globalScope->insert(funAppend);
+        mainModule->addLibFunction(funAppend);
+    }
 
-    auto paramsMat = std::vector<ir::FormalParamDecl *>{
-        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "m", t, false)
-    };
-    auto funLength = new ir::FunctionDecl(currentIR,
-                                            llvmloc2Src(),
-                                            "length_"+t->getName(),
-                                            "length",
-                                            this->intType,
-                                            paramsMat,
-                                            body);
-    globalScope->insert(funLength);
-    mainModule->addLibFunction(funLength);
+    {
+        auto paramsMat = std::vector<ir::FormalParamDecl *>{
+            new ir::FormalParamDecl(currentIR, llvmloc2Src(), "m", t, false)
+        };
+        auto funLength = new ir::FunctionDecl(currentIR,
+                                                llvmloc2Src(),
+                                                "length_"+t->getName(),
+                                                "length",
+                                                this->intType,
+                                                paramsMat,
+                                                body);
+        globalScope->insert(funLength);
+        mainModule->addLibFunction(funLength);
+    }
+
+    {
+        auto params = std::vector<ir::FormalParamDecl *>{
+            new ir::FormalParamDecl(currentIR, llvmloc2Src(), "m1", t, false),
+            new ir::FormalParamDecl(currentIR, llvmloc2Src(), "m2", t, false)
+        };
+        auto fun = new ir::FunctionDecl(currentIR,
+                                                llvmloc2Src(),
+                                                "equals_"+t->getName()+"_"+t->getName(),
+                                                "equals",
+                                                this->boolType,
+                                                params,
+                                                body);
+        globalScope->insert(fun);
+        mainModule->addLibFunction(fun);
+    }
 }
 
 std::map<std::string, ir::Expr *> Scanner::parseStructVals(std::string name, ir::Expr *e) {
@@ -794,6 +814,7 @@ ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &mats
     if(auto rootDecl = llvm::dyn_cast<ir::TypeDecl>(rootType)) {
         auto elemT = rootDecl;
         auto elemName = ogName;
+        auto prevElemT = rootDecl;
         for(size_t i = 0; i < matsize.size()-1; ++i) {
             elemName += "[]";
             std::vector<ir::Expr *> elemSize;
@@ -801,6 +822,8 @@ ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &mats
                 elemSize.push_back(matsize[j]);
             }
             elemT = new ir::TypeDecl(currentIR, llvmloc2Src(), elemName, elemSize, elemT);
+            addMatrixTemplatedFunction(elemT, prevElemT);
+            prevElemT = elemT;
         }
         auto t = new ir::TypeDecl(currentIR, llvmloc2Src(), name, matsize, elemT);
 

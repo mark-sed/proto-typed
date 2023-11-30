@@ -360,6 +360,9 @@ void PTLib::stringFuncsInit() {
 }
 
 void PTLib::appendInit(std::string name, llvm::Type *mt, llvm::Type *vt) {
+    //if(llvmMod->getFunction(name))
+    //    return;
+        
     auto funType = llvm::FunctionType::get(voidT, { mt->getPointerTo(), vt }, false);
     llvm::Function *f = llvm::Function::Create(funType, 
                                             llvm::GlobalValue::PrivateLinkage,
@@ -397,6 +400,9 @@ void PTLib::appendInit(std::string name, llvm::Type *mt, llvm::Type *vt) {
 }
 
 void PTLib::length_matrixInit(std::string name, llvm::Type *mt) {
+    //if(llvmMod->getFunction(name))
+    //    return;
+
     auto funType = llvm::FunctionType::get(int64T, { mt }, false);
     llvm::Function *f = llvm::Function::Create(funType, 
                                             llvm::GlobalValue::PrivateLinkage,
@@ -407,6 +413,103 @@ void PTLib::length_matrixInit(std::string name, llvm::Type *mt) {
     llvm::Value *len32 = builder.CreateExtractValue(f->getArg(0), 1);
     auto len64 = builder.CreateSExt(len32, int64T);
     builder.CreateRet(len64);
+}
+
+void PTLib::equals_matrixInit(std::string name, llvm::Type *mt, ir::TypeDecl *vt) {
+    //if(llvmMod->getFunction(name))
+    //    return;
+
+    auto funType = llvm::FunctionType::get(int1T, { mt, mt }, false);
+    llvm::Function *f = llvm::Function::Create(funType, 
+                                            llvm::GlobalValue::PrivateLinkage,
+                                            name,
+                                            llvmMod);
+    llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+    llvm::BasicBlock *compareBB = llvm::BasicBlock::Create(ctx, "compare", f);
+    llvm::BasicBlock *loopCondBB = llvm::BasicBlock::Create(ctx, "loop.cond", f);
+    llvm::BasicBlock *loopBodyBB = llvm::BasicBlock::Create(ctx, "loop.body", f);
+    llvm::BasicBlock *loopCntBB = llvm::BasicBlock::Create(ctx, "loop.cnt", f);
+    llvm::BasicBlock *notEqBB = llvm::BasicBlock::Create(ctx, "not.eq", f);
+    llvm::BasicBlock *eqBB = llvm::BasicBlock::Create(ctx, "are.eq", f);
+    setCurrBB(bb);
+    
+    llvm::Value* zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 0);
+
+    auto length1 = builder.CreateExtractValue(f->getArg(0), 1);
+    auto length2 = builder.CreateExtractValue(f->getArg(1), 1);
+    auto sameLen = builder.CreateICmpEQ(length1, length2);
+    builder.CreateCondBr(sameLen, compareBB, notEqBB);
+
+    setCurrBB(compareBB);
+
+    auto buffer1 = builder.CreateExtractValue(f->getArg(0), 0);
+    auto buffer2 = builder.CreateExtractValue(f->getArg(1), 0);
+
+    // If not array of array, and not array of compound type,
+    // then just compare memory as the types are the same
+    // In case of any, user has to know what they are doing
+    if(vt->getDimensions() == 1) {
+        // TODO: Handle maybe
+        if(vt->getBaseName() == STRING_CSTR) {
+            // TODO:
+            builder.CreateRet(llvm::ConstantInt::get(int1T, 1));
+        }
+        else if(vt->getDecl() && llvm::isa<ir::StructDecl>(vt->getDecl())) {
+            // Struct
+            // TODO:
+            builder.CreateRet(llvm::ConstantInt::get(int1T, 1));
+        }
+        else {
+            auto memcmp_f = llvmMod->getOrInsertFunction("memcmp", 
+                                                    llvm::FunctionType::get(builder.getInt32Ty(), 
+                                                    {builder.getInt8Ty()->getPointerTo(), 
+                                                     builder.getInt8Ty()->getPointerTo(),
+                                                     int64T}, 
+                                                    false));
+
+            auto cmpIndex = builder.CreateCall(memcmp_f, {buffer1, buffer2, length1});
+            auto memEq = builder.CreateICmpEQ(cmpIndex, zero);
+            builder.CreateCondBr(memEq, eqBB, notEqBB);
+        }
+    }
+    else {
+        // If array of array, then call this method on all the subarrays
+        std::string eqSubName = "equals_"+vt->getDecl()->getName()+"_"+vt->getDecl()->getName();
+        auto eqSub_f = llvmMod->getOrInsertFunction(eqSubName, 
+                                                    llvm::FunctionType::get(int1T, {mt, mt}, false));
+        
+        auto iPtr = builder.CreateAlloca(builder.getInt32Ty());
+        builder.CreateStore(zero, iPtr);
+        builder.CreateBr(loopCondBB);
+        setCurrBB(loopCondBB);
+
+        auto i = builder.CreateLoad(builder.getInt32Ty(), iPtr);
+        auto iend = builder.CreateICmpSGE(i, length1);
+        builder.CreateCondBr(iend, eqBB, loopBodyBB);
+
+        setCurrBB(loopBodyBB);
+
+        auto casted1Ptr = builder.CreateBitCast(buffer1, mt->getPointerTo());
+        auto casted2Ptr = builder.CreateBitCast(buffer2, mt->getPointerTo());
+
+        auto casted1 = builder.CreateGEP(mt, casted1Ptr, i);
+        auto casted2 = builder.CreateGEP(mt, casted2Ptr, i);
+
+        auto rval = builder.CreateCall(eqSub_f, {casted1, casted2});
+        builder.CreateCondBr(rval, loopCntBB, notEqBB);
+
+        setCurrBB(loopCntBB);
+        auto newI = builder.CreateNSWAdd(i, llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 1));
+        builder.CreateStore(newI, iPtr);
+        builder.CreateBr(loopCondBB);
+    }
+
+    
+    setCurrBB(notEqBB);
+    builder.CreateRet(llvm::ConstantInt::get(int1T, 0));
+
+    setCurrBB(eqBB);
+    builder.CreateRet(llvm::ConstantInt::get(int1T, 1));
 }
 
 void PTLib::setupLib() {

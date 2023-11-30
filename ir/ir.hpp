@@ -20,6 +20,7 @@
 #include <vector>
 #include <map>
 #include <sstream>
+#include <algorithm>
 #include <unordered_set>
 
 #define INT_CSTR "int"
@@ -204,6 +205,7 @@ private:
     bool maybe;
     bool unresolved;
     ExternalSymbolAccess *externalIR;
+    bool structType;
 public:
     TypeDecl(IR *enclosing_ir, SourceInfo loc, std::string name, IR *decl=nullptr)
             : IR(IRKind::IR_TYPE_DECL, enclosing_ir, loc, name),
@@ -232,6 +234,9 @@ public:
         bn.erase(std::remove(bn.begin(), bn.end(), '['), bn.end());
         bn.erase(std::remove(bn.begin(), bn.end(), ']'), bn.end());
         return bn;
+    }
+    int getDimensions() {
+        return std::count_if(name.begin(), name.end(), [](char c) { return c == '['; });
     }
     bool isMatrix() { return !matrixSize.empty(); }
     bool isMaybe() { return maybe; }
