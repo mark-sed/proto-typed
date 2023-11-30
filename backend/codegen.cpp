@@ -1201,10 +1201,7 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             auto str_eq = cgm.getLLVMMod()->getOrInsertFunction("string_Eq",
                                  llvm::FunctionType::get(
                                     int1T,
-                                    {
-                                        builder.getInt8Ty()->getPointerTo(),
-                                        builder.getInt8Ty()->getPointerTo()
-                                    },
+                                    { stringT, stringT },
                                     false
                                  ));
             result = builder.CreateCall(str_eq, {left, right});

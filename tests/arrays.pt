@@ -26,3 +26,31 @@ for(string si : str_arr) {
     print(si++" ")
 }
 print("\n")
+
+int[][] l
+l = [[1, 2, 3],[4, 5, 6]]
+int[][] l2
+l2 = [[ 1, 2, 3],[4, 5, 6]]
+
+print(equals(l, l2)++"\n")
+
+l2 = [[ 1, 2, 3],[4, 1, 6]]
+print(equals(l, l2)++"\n")
+
+
+string[] ls
+ls = ["a", "b", "c"]
+string[] ls2
+ls2 = ["a", "b", "c", "d"]
+
+bool bb
+bb = equals(ls, ls2)
+print(bb ++ "\n")
+
+ls2 = ["a", "b", "c"]
+bb = equals(ls, ls2)
+print(bb ++ "\n")
+
+ls2 = ["a", "bc", "c"]
+bb = equals(ls, ls2)
+print(bb ++ "\n")

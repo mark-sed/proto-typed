@@ -210,7 +210,8 @@ function test_empty {
 
 function test_arrays {
     expect_pass "arrays.pt" "arrays"
-    expect_out_eq "43 44 45 \n3 2 1 false true true 0 1.5 2.6 \nLet's find out \n" "arrays"
+    expect_out_eq "43 44 45 \n3 2 1 false true true 0 1.5 2.6 \nLet's find out \ntrue
+false\nfalse\ntrue\nfalse\n" "arrays"
 }
 
 function test_statements {

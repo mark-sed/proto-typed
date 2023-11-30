@@ -451,8 +451,39 @@ void PTLib::equals_matrixInit(std::string name, llvm::Type *mt, ir::TypeDecl *vt
     if(vt->getDimensions() == 1) {
         // TODO: Handle maybe
         if(vt->getBaseName() == STRING_CSTR) {
-            // TODO:
-            builder.CreateRet(llvm::ConstantInt::get(int1T, 1));
+            auto str_eq = llvmMod->getOrInsertFunction("string_Eq",
+                                 llvm::FunctionType::get(
+                                    int1T, { builder.getInt8Ty()->getPointerTo(), builder.getInt8Ty()->getPointerTo() },
+                                    false
+                                 ));
+            
+            auto iPtr = builder.CreateAlloca(builder.getInt32Ty());
+            builder.CreateStore(zero, iPtr);
+            builder.CreateBr(loopCondBB);
+            setCurrBB(loopCondBB);
+
+            auto i = builder.CreateLoad(builder.getInt32Ty(), iPtr);
+            auto iend = builder.CreateICmpSGE(i, length1);
+            builder.CreateCondBr(iend, eqBB, loopBodyBB);
+
+            setCurrBB(loopBodyBB);
+
+            auto casted1Ptr = builder.CreateBitCast(buffer1, stringT->getPointerTo());
+            auto casted2Ptr = builder.CreateBitCast(buffer2, stringT->getPointerTo());
+
+            auto casted1 = builder.CreateGEP(stringT, casted1Ptr, i);
+            auto casted2 = builder.CreateGEP(stringT, casted2Ptr, i);
+
+            auto loaded1 = builder.CreateLoad(stringT, casted1);
+            auto loaded2 = builder.CreateLoad(stringT, casted2);
+
+            auto rval = builder.CreateCall(str_eq, {loaded1, loaded2});
+            builder.CreateCondBr(rval, loopCntBB, notEqBB);
+
+            setCurrBB(loopCntBB);
+            auto newI = builder.CreateNSWAdd(i, llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 1));
+            builder.CreateStore(newI, iPtr);
+            builder.CreateBr(loopCondBB);
         }
         else if(vt->getDecl() && llvm::isa<ir::StructDecl>(vt->getDecl())) {
             // Struct
@@ -467,7 +498,21 @@ void PTLib::equals_matrixInit(std::string name, llvm::Type *mt, ir::TypeDecl *vt
                                                      int64T}, 
                                                     false));
 
-            auto cmpIndex = builder.CreateCall(memcmp_f, {buffer1, buffer2, length1});
+            auto tsize = 1;
+            if(vt->getBaseName() == INT_CSTR) {
+                tsize = int64T->getPrimitiveSizeInBits()/8;
+            }
+            else if(vt->getBaseName() == BOOL_CSTR) {
+                tsize = int1T->getPrimitiveSizeInBits()/8;
+            }
+            else if(vt->getBaseName() == FLOAT_CSTR) {
+                tsize = floatT->getPrimitiveSizeInBits()/8;
+            }
+            else {
+                llvm::report_fatal_error("Unknown data type for memcmp");
+            }
+            auto byteSize = builder.CreateNSWMul(length1, llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), tsize));
+            auto cmpIndex = builder.CreateCall(memcmp_f, {buffer1, buffer2, byteSize});
             auto memEq = builder.CreateICmpEQ(cmpIndex, zero);
             builder.CreateCondBr(memEq, eqBB, notEqBB);
         }
@@ -495,7 +540,10 @@ void PTLib::equals_matrixInit(std::string name, llvm::Type *mt, ir::TypeDecl *vt
         auto casted1 = builder.CreateGEP(mt, casted1Ptr, i);
         auto casted2 = builder.CreateGEP(mt, casted2Ptr, i);
 
-        auto rval = builder.CreateCall(eqSub_f, {casted1, casted2});
+        auto loaded1 = builder.CreateLoad(matrixT, casted1);
+        auto loaded2 = builder.CreateLoad(matrixT, casted2);
+
+        auto rval = builder.CreateCall(eqSub_f, {loaded1, loaded2});
         builder.CreateCondBr(rval, loopCntBB, notEqBB);
 
         setCurrBB(loopCntBB);
