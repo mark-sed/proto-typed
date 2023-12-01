@@ -28,4 +28,5 @@ target_link_libraries(ptc
     ptcfrontend
     ptcir
     ptcbackend
+    ptcanalysis
 )

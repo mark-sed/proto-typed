@@ -12,6 +12,7 @@
 #include "logging.hpp"
 #include "codegen.hpp"
 #include "resolver.hpp"
+#include "function_analysis.hpp"
 #include "llvm/Support/InitLLVM.h"
 #include "llvm/CodeGen/CommandFlags.h"
 #include "llvm/IR/IRPrintingPasses.h"
@@ -305,7 +306,7 @@ int main(int argc, char *argv[]) {
             for(auto decl : decls) {
                 if(auto f = llvm::dyn_cast<ir::FunctionDecl>(decl)) {
                     LOG1("Running function analysis on "+f->getName());
-                    FunctionAnalyzer fcheck(f, diags);
+                    FunctionAnalysis fcheck(f, diags);
                     fcheck.run();
                 }
             }
