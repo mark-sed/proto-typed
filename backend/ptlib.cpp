@@ -360,8 +360,11 @@ void PTLib::stringFuncsInit() {
 }
 
 void PTLib::appendInit(std::string name, llvm::Type *mt, llvm::Type *vt) {
-    //if(llvmMod->getFunction(name))
-    //    return;
+    for(auto [kn, _] : generated) {
+        if(kn == name) {
+            return;
+        }
+    }
         
     auto funType = llvm::FunctionType::get(voidT, { mt->getPointerTo(), vt }, false);
     llvm::Function *f = llvm::Function::Create(funType, 
@@ -400,8 +403,11 @@ void PTLib::appendInit(std::string name, llvm::Type *mt, llvm::Type *vt) {
 }
 
 void PTLib::length_matrixInit(std::string name, llvm::Type *mt) {
-    //if(llvmMod->getFunction(name))
-    //    return;
+    for(auto [kn, _] : generated) {
+        if(kn == name) {
+            return;
+        }
+    }
 
     auto funType = llvm::FunctionType::get(int64T, { mt }, false);
     llvm::Function *f = llvm::Function::Create(funType, 
@@ -416,14 +422,19 @@ void PTLib::length_matrixInit(std::string name, llvm::Type *mt) {
 }
 
 void PTLib::equals_matrixInit(std::string name, llvm::Type *mt, ir::TypeDecl *vt) {
-    //if(llvmMod->getFunction(name))
-    //    return;
+    for(auto [kn, _] : generated) {
+        if(kn == name) {
+            return;
+        }
+    }
 
     auto funType = llvm::FunctionType::get(int1T, { mt, mt }, false);
     llvm::Function *f = llvm::Function::Create(funType, 
                                             llvm::GlobalValue::PrivateLinkage,
                                             name,
                                             llvmMod);
+    generated.push_back(std::make_pair(name, f));
+    
     llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
     llvm::BasicBlock *compareBB = llvm::BasicBlock::Create(ctx, "compare", f);
     llvm::BasicBlock *loopCondBB = llvm::BasicBlock::Create(ctx, "loop.cond", f);
@@ -520,9 +531,17 @@ void PTLib::equals_matrixInit(std::string name, llvm::Type *mt, ir::TypeDecl *vt
     else {
         // If array of array, then call this method on all the subarrays
         std::string eqSubName = "equals_"+vt->getDecl()->getName()+"_"+vt->getDecl()->getName();
-        auto eqSub_f = llvmMod->getOrInsertFunction(eqSubName, 
-                                                    llvm::FunctionType::get(int1T, {mt, mt}, false));
+        llvm::Function *eqSub_f = nullptr;
+        for(auto [kn, fin] : generated) {
+            if(kn == eqSubName) {
+                eqSub_f = fin;
+            }
+        }
         
+        if(!eqSub_f) {
+            llvm::report_fatal_error("Sub equals was not generated");
+        }
+
         auto iPtr = builder.CreateAlloca(builder.getInt32Ty());
         builder.CreateStore(zero, iPtr);
         builder.CreateBr(loopCondBB);

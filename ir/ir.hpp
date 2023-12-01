@@ -21,7 +21,6 @@
 #include <map>
 #include <sstream>
 #include <algorithm>
-#include <unordered_set>
 
 #define INT_CSTR "int"
 #define FLOAT_CSTR "float"
@@ -1083,7 +1082,7 @@ class ModuleDecl : public IR {
 private:
     std::vector<IR *> decls;
     bool main;
-    std::unordered_set<FunctionDecl *> libFunctions;
+    std::vector<FunctionDecl *> libFunctions;
     cg::CGModule *cgmodule;
 public:
     ModuleDecl(IR *enclosing_ir, SourceInfo loc, std::string name)
@@ -1100,9 +1099,9 @@ public:
     bool isMain() { return this->main; }
     ptc::cg::CGModule *getCGModule() { return cgmodule; }
     void setCGModule(cg::CGModule *cgm) { this->cgmodule = cgm; }
-    void setLibFunctions(std::unordered_set<FunctionDecl *> fs) { libFunctions = fs; }
-    std::unordered_set<FunctionDecl *> getLibFunctions() { return libFunctions; }
-    void addLibFunction(FunctionDecl *f) { libFunctions.insert(f); }
+    void setLibFunctions(std::vector<FunctionDecl *> fs) { libFunctions = fs; }
+    std::vector<FunctionDecl *> getLibFunctions() { return libFunctions; }
+    void addLibFunction(FunctionDecl *f) { libFunctions.push_back(f); }
     void prependDecl(IR *d) { decls.insert(decls.begin(), d); }
 
     static bool classof(const IR *ir) {

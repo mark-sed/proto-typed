@@ -19,6 +19,7 @@
 #include "llvm/IR/Module.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/IR/Instructions.h"
+#include <vector>
 
 namespace ptc {
 
@@ -41,6 +42,8 @@ private:
 
     llvm::IRBuilder<> builder;
     llvm::BasicBlock *currBB;
+
+    std::vector<std::pair<std::string, llvm::Function*>> generated;
 
     void setCurrBB(llvm::BasicBlock *BB) {
         currBB = BB;
