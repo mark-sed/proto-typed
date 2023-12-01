@@ -1207,7 +1207,14 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             result = builder.CreateCall(str_eq, {left, right});
         }
         else if(left->getType() == right->getType()) {
-            if(e->getLeft()->getType()->getName() == FLOAT_CSTR) {
+            // Matrix
+            if(e->getLeft()->getType()->isMatrix()) {
+                std::string eqSubName = "equals_"+e->getLeft()->getType()->getName()+"_"+e->getLeft()->getType()->getName();
+                auto eqArr_f = cgm.getLLVMMod()->getOrInsertFunction(eqSubName, 
+                                                    llvm::FunctionType::get(int1T, {left->getType(), left->getType()}, false));
+                result = builder.CreateCall(eqArr_f, {left, right});
+            }
+            else if(e->getLeft()->getType()->getName() == FLOAT_CSTR) {
                 result = builder.CreateFCmpOEQ(left, right);
             }
             else {
@@ -1246,7 +1253,20 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             result = builder.CreateNot(eqval);
         }
         else if(left->getType() == right->getType()) {
-            result = builder.CreateICmpNE(left, right);
+            // Matrix
+            if(e->getLeft()->getType()->isMatrix()) {
+                std::string eqSubName = "equals_"+e->getLeft()->getType()->getName()+"_"+e->getLeft()->getType()->getName();
+                auto eqArr_f = cgm.getLLVMMod()->getOrInsertFunction(eqSubName, 
+                                                    llvm::FunctionType::get(int1T, {left->getType(), left->getType()}, false));
+                auto areEq = builder.CreateCall(eqArr_f, {left, right});
+                result = builder.CreateNot(areEq);
+            }
+            else if(e->getLeft()->getType()->getName() == FLOAT_CSTR) {
+                result = builder.CreateFCmpONE(left, right);
+            }
+            else {
+                result = builder.CreateICmpNE(left, right);
+            }
         }
         else if(e->getLeft()->getType()->getName() == NONETYPE_CSTR && e->getRight()->getType()->isMaybe()) {
             auto ldv = llvm::dyn_cast<llvm::LoadInst>(right)->getOperand(0);

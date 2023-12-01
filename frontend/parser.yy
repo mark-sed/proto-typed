@@ -522,9 +522,9 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          | expr_var EQ expr_bool        { $$ = scanner->parseInfixExpr($1, scanner->parseBool($3), ir::Operator(ir::OperatorKind::OP_EQ)); }
          | expr_var EQ expr_none        { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_EQ)); }
          | expr_var EQ expr_struct
-         | expr_mat EQ expr_mat
-         | expr_var EQ expr_mat
-         | expr_mat EQ expr_var
+         | expr_mat EQ expr_mat         { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_EQ)); }
+         | expr_var EQ expr_mat         { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_EQ)); }
+         | expr_mat EQ expr_var         { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_EQ)); }
          | expr_var EQ expr_var         { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_EQ)); }
 
          | expr_int NEQ expr_var       { $$ = scanner->parseInfixExpr(scanner->parseInt($1), $3, ir::Operator(ir::OperatorKind::OP_NEQ)); }  
@@ -540,9 +540,9 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          | expr_var NEQ expr_bool      { $$ = scanner->parseInfixExpr($1, scanner->parseBool($3), ir::Operator(ir::OperatorKind::OP_NEQ)); }
          | expr_var NEQ expr_none      { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_NEQ)); }
          | expr_var NEQ expr_struct
-         | expr_mat NEQ expr_mat
-         | expr_var NEQ expr_mat
-         | expr_mat NEQ expr_var
+         | expr_mat NEQ expr_mat       { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_NEQ)); }
+         | expr_var NEQ expr_mat       { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_NEQ)); }
+         | expr_mat NEQ expr_var       { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_NEQ)); }
          | expr_var NEQ expr_var       { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_NEQ)); }
 
          | expr_int BAND expr_var { $$ = scanner->parseInfixExpr(scanner->parseInt($1), $3, ir::Operator(ir::OperatorKind::OP_BAND)); }

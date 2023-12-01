@@ -546,6 +546,11 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
         break;
         case ir::OperatorKind::OP_EQ:
         case ir::OperatorKind::OP_NEQ:
+            if(tl->isMatrix()) {
+                if(tl->getName() != tr->getName()) {
+                    diags.report(llvmloc2Src(), diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+                }
+            }
             type = this->boolType;
         break;
         case ir::OperatorKind::OP_LAND:
