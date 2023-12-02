@@ -755,15 +755,31 @@ void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT) {
             new ir::FormalParamDecl(currentIR, llvmloc2Src(), "m", t, false),
             new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", elemT, false)
         };
-        auto funAppend = new ir::FunctionDecl(currentIR,
+        auto fun = new ir::FunctionDecl(currentIR,
                                                 llvmloc2Src(),
                                                 "find_"+t->getName()+"_"+elemT->getName(),
                                                 "find",
                                                 this->intType,
                                                 params,
                                                 body);
-        globalScope->insert(funAppend);
-        mainModule->addLibFunction(funAppend);
+        globalScope->insert(fun);
+        mainModule->addLibFunction(fun);
+    }
+
+    {
+        auto params = std::vector<ir::FormalParamDecl *>{
+            new ir::FormalParamDecl(currentIR, llvmloc2Src(), "m", t, false),
+            new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", elemT, false)
+        };
+        auto fun = new ir::FunctionDecl(currentIR,
+                                                llvmloc2Src(),
+                                                "contains_"+t->getName()+"_"+elemT->getName(),
+                                                "contains",
+                                                this->boolType,
+                                                params,
+                                                body);
+        globalScope->insert(fun);
+        mainModule->addLibFunction(fun);
     }
 }
 

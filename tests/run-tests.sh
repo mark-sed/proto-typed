@@ -212,7 +212,7 @@ function test_arrays {
     expect_pass "arrays.pt" "arrays"
     expect_out_eq "43 44 45 \n3 2 1 false true true 0 1.5 2.6 \nLet's find out \ntrue
 true\nfalse\nfalse\nfalse\nfalse\ntrue\nfalse\nfalse\ntrue
-4\n1\n3\n-1\n5\n-1\n1\n1\n0\n-1\n-1\n1\n" "arrays"
+4\n1\n3\n-1\n5\n-1\n1\n1\n0\n-1\n-1\n1\ntrue\ntrue\ntrue\nfalse\n" "arrays"
 }
 
 function test_statements {

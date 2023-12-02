@@ -83,3 +83,12 @@ float[][] fii2
 fii2 = [[3.11, 0.0], [0.0]]
 print(find(fii2, [1.0,2.0])++"\n")
 print(find(fii2, [0.0])++"\n")
+
+print(contains(fii2, [3.11, 0.0])++"\n")
+bool bls
+bls = sii in sii2
+print(bls ++ "\n")
+bls = 1 in sii
+print(bls ++ "\n")
+bls = "ahoj" in smt
+print(bls ++ "\n")

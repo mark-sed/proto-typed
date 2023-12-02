@@ -1327,7 +1327,10 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             return builder.CreateCall(contains_str_fun, {right, left});
         }
         else if(e->getRight()->getType()->isMatrix()) {
-            llvm::report_fatal_error("IN is not yet implemented for arrays");
+            auto contains_mat_fun = cgm.getLLVMMod()->getOrInsertFunction(
+                "contains_"+e->getRight()->getType()->getName()+"_"+e->getLeft()->getType()->getName(),
+                                    llvm::FunctionType::get(int1T, {left->getType(), right->getType()}, false));
+            return builder.CreateCall(contains_mat_fun, {right, left});
         }
         else {
             llvm::report_fatal_error("IN does not supported given type");
@@ -2385,6 +2388,9 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
         }
         else if(f->getOGName() == "find") {
             ptlibLoader->find_matrixInit(f->getName(), mapType(f->getParams()[0]), mapType(f->getParams()[1]), f->getParams()[0]->getType(), f->getParams()[1]->getType());
+        }
+        else if(f->getOGName() == "contains") {
+            ptlibLoader->contains_matrixInit(f->getName(), mapType(f->getParams()[0]), mapType(f->getParams()[1]), f->getParams()[0]->getType(), f->getParams()[1]->getType());
         }
         else {
             llvm::report_fatal_error(("Missing code for function "+f->getOGName()).c_str()); 

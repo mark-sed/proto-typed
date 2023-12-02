@@ -371,6 +371,8 @@ void PTLib::appendInit(std::string name, llvm::Type *mt, llvm::Type *vt) {
                                             llvm::GlobalValue::PrivateLinkage,
                                             name,
                                             llvmMod);
+    generated.push_back(std::make_pair(name, f));
+
     llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
     setCurrBB(bb);
 
@@ -414,6 +416,8 @@ void PTLib::length_matrixInit(std::string name, llvm::Type *mt) {
                                             llvm::GlobalValue::PrivateLinkage,
                                             name,
                                             llvmMod);
+    generated.push_back(std::make_pair(name, f));
+
     llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
     setCurrBB(bb);
     llvm::Value *len32 = builder.CreateExtractValue(f->getArg(0), 1);
@@ -677,6 +681,41 @@ void PTLib::find_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, ir
     setCurrBB(returnBB);
     auto ri = builder.CreateLoad(int64T, foundIPtr);
     builder.CreateRet(ri);
+}
+
+void PTLib::contains_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, ir::TypeDecl *mtt, ir::TypeDecl *vtt) {
+    for(auto [kn, _] : generated) {
+        if(kn == name) {
+            return;
+        }
+    }
+
+    auto funType = llvm::FunctionType::get(int1T, { mt, vt }, false);
+    llvm::Function *f = llvm::Function::Create(funType, 
+                                            llvm::GlobalValue::PrivateLinkage,
+                                            name,
+                                            llvmMod);
+    generated.push_back(std::make_pair(name, f));
+
+    std::string findSubName = "find_"+mtt->getName()+"_"+vtt->getName();
+    llvm::Function *findSub_f = nullptr;
+    for(auto [kn, fin] : generated) {
+        if(kn == findSubName) {
+            findSub_f = fin;
+        }
+    }
+    
+    if(!findSub_f) {
+        llvm::report_fatal_error("Find for contains was not generated");
+    }
+
+    llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+    setCurrBB(bb);
+
+    auto rval = builder.CreateCall(findSub_f, {f->getArg(0), f->getArg(1)});
+    llvm::Value *found = builder.CreateICmpNE(rval, llvm::ConstantInt::get(int64T, -1));
+
+    builder.CreateRet(found);
 }
 
 void PTLib::setupLib() {
