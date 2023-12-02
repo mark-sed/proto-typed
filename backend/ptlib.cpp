@@ -806,6 +806,59 @@ void PTLib::slice_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, i
     builder.CreateRet(matStru);
 }
 
+void PTLib::slice2_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, ir::TypeDecl *mtt) {
+    for(auto [kn, _] : generated) {
+        if(kn == name) {
+            return;
+        }
+    }
+
+    auto funType = llvm::FunctionType::get(mt, { mt, int64T, int64T }, false);
+    llvm::Function *f = llvm::Function::Create(funType, 
+                                            llvm::GlobalValue::PrivateLinkage,
+                                            name,
+                                            llvmMod);
+    generated.push_back(std::make_pair(name, f));
+
+    std::string slice3Name = "slice_"+mtt->getName()+"_int_int_int";
+    llvm::Function *slice3_f = nullptr;
+    for(auto [kn, fin] : generated) {
+        if(kn == slice3Name) {
+            slice3_f = fin;
+        }
+    }
+    
+    if(!slice3_f) {
+        llvm::report_fatal_error("Slice3 for slice2 was not generated");
+    }
+
+    llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+    llvm::BasicBlock *smallerBB = llvm::BasicBlock::Create(ctx, "next.smaller", f);
+    llvm::BasicBlock *biggerBB = llvm::BasicBlock::Create(ctx, "next.bigger", f);
+    llvm::BasicBlock *callBB = llvm::BasicBlock::Create(ctx, "call.slice", f);
+    setCurrBB(bb);
+
+    auto nextPtr = builder.CreateAlloca(int64T);
+    auto isBigger = builder.CreateICmpSGE(f->getArg(1), f->getArg(2));
+    builder.CreateCondBr(isBigger, biggerBB, smallerBB);
+
+    setCurrBB(smallerBB);
+    auto nextAdd = builder.CreateNSWAdd(f->getArg(1), llvm::ConstantInt::get(int64T, 1, true));
+    builder.CreateStore(nextAdd, nextPtr);
+    builder.CreateBr(callBB);
+
+    setCurrBB(biggerBB);
+    auto nextSub = builder.CreateNSWSub(f->getArg(1), llvm::ConstantInt::get(int64T, 1, true));
+    builder.CreateStore(nextSub, nextPtr);
+    builder.CreateBr(callBB);
+
+    setCurrBB(callBB);
+    auto next = builder.CreateLoad(int64T, nextPtr);
+    auto rval = builder.CreateCall(slice3_f, {f->getArg(0), f->getArg(1), next, f->getArg(2)});
+
+    builder.CreateRet(rval);
+}
+
 void PTLib::setupLib() {
     print_stringInit();
     to_string_intInit();

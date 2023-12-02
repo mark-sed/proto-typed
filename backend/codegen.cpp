@@ -1729,8 +1729,24 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             }
         }
         else if(e->getLeft()->getType()->isMatrix()) {
-            auto matType = e->getLeft()->getType();
-            llvm::report_fatal_error("SLICE for matrix not yet implemented");
+            if(rng->getStep()) {
+                auto contains_mat3_fun = cgm.getLLVMMod()->getOrInsertFunction(
+                                    "slice_"+e->getLeft()->getType()->getName()+"_int_int_int",
+                                    llvm::FunctionType::get(left->getType(), {left->getType(), int64T, int64T, int64T}, false));
+                if(auto subI = llvm::dyn_cast<ir::BinaryInfixExpr>(rng->getStep())) {
+                    // Step for [1, 2..5] is 2 - 1, so take left from the SUB to get next
+                    auto next = emitExpr(subI->getLeft());
+                    result = builder.CreateCall(contains_mat3_fun, {left, start, next, end});
+                }
+                else {
+                    llvm::report_fatal_error("Step in slice is of unexpected IR type");
+                }
+            } else {
+                auto contains_mat2_fun = cgm.getLLVMMod()->getOrInsertFunction(
+                                    "slice_"+e->getLeft()->getType()->getName()+"_int_int",
+                                    llvm::FunctionType::get(left->getType(), {left->getType(), int64T, int64T}, false));
+                result = builder.CreateCall(contains_mat2_fun, {left, start, end});
+            }
         }
         else {
             llvm::report_fatal_error("SLICE does not supported given type");
@@ -2440,11 +2456,20 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
             ptlibLoader->contains_matrixInit(f->getName(), mapType(f->getParams()[0]), mapType(f->getParams()[1]), f->getParams()[0]->getType(), f->getParams()[1]->getType());
         }
         else if(f->getOGName() == "slice") {
-            ptlibLoader->slice_matrixInit(
-                f->getName(), 
-                mapType(f->getParams()[0]), 
-                mapType(f->getParams()[0]->getType()->getDecl()),
-                f->getParams()[0]->getType());
+            if(f->getParams().size() == 3) {
+                ptlibLoader->slice2_matrixInit(
+                    f->getName(), 
+                    mapType(f->getParams()[0]), 
+                    mapType(f->getParams()[0]->getType()->getDecl()),
+                    f->getParams()[0]->getType());
+            }
+            else {
+                ptlibLoader->slice_matrixInit(
+                    f->getName(), 
+                    mapType(f->getParams()[0]), 
+                    mapType(f->getParams()[0]->getType()->getDecl()),
+                    f->getParams()[0]->getType());
+            }
         }
         else {
             llvm::report_fatal_error(("Missing code for function "+f->getOGName()).c_str()); 

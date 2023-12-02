@@ -107,3 +107,23 @@ for(int i : 0..length(arrsl)) {
     }
     print("\n")
 }
+
+arrsl = aarr1[0, 3.. 6]
+
+for(int i : 0..length(arrsl)) {
+    float[] ia = arrsl[i]
+    for(float j: ia) {
+        print(j++" ")
+    }
+    print("\n")
+}
+
+arrsl = aarr1[5..3]
+
+for(int i : 0..length(arrsl)) {
+    float[] ia = arrsl[i]
+    for(float j: ia) {
+        print(j++" ")
+    }
+    print("\n")
+}
