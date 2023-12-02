@@ -181,6 +181,19 @@ string potassium_source = "\U{0001f34c}"
 
 Strings are represented as simple objects and therefore their size can be easily determined in constant time, but at the same time string's character buffer is zero terminated making it compatible with many C functions.
 
+String can be also sliced. Slicing has a form of `[start..end]` or `[start,next..end]` (range inside of `[]`):
+```c
+string dna_seqence = "a-c-c-g-t-a-t-g"
+string amino_acids = dna_seqence[0,2..length(dna_seqence)]
+```
+
+Slice can also use descending range and therefore reverse a string. Keep in mind, that end is not included in the range, but start is and therefore there needs to be some adjustments:
+```c
+string dna_seqence = "a-c-c-g-t-a-t-g"
+int l = length(dna_seqence) - 1
+string reversed_aas = dna_seqence[l, l - 2 .. -1]
+```
+
 ### Struct
 
 Structs can hold variables of any type, but cannot contain function definitions withing their scope. When referring to a struct type only the name can be used (without the `struct` keyword).
@@ -241,14 +254,14 @@ string[][] tt = [
 string center = tt[1][1]
 ```
 
-Array is also result of slicing. Slicing has a form of `[start:end]` or `[start:step:end]`, where start and end can be left out:
+Array is also result of slicing. Slicing has a form of `[start..end]` or `[start,next..end]` (range inside of `[]`):
 ```c
 float x = [0.2, 1.3, 4.5, 5.0, 0.0, 9.9, 7.1, 1.0]
-for (float i : x[1:2:6]) {
+for (float i : x[1,2..6]) {
     print(i++" ") // 1.3 5.0 9.9 
 }
 
-float y = x[:2] // [0.2, 1.3] 
+float y = x[0..2] // [0.2, 1.3] 
 ```
 
 ### Maybe
@@ -505,7 +518,7 @@ Following table contains pt operators from highest precedence to the lowest.
 | **Operator**                                                                                 | **Description**                                                  | **Associativity** |
 |----------------------------------------------------------------------------------------------|------------------------------------------------------------------|-------------------|
 | `::`                                                                                         | Module scope                                                     | none              |
-| `()`, `[]`, `[::]`                                                                           | Function call, array indexing, slicing                           | none              |
+| `()`, `[]`, `[..]`                                                                           | Function call, array indexing, slicing                           | none              |
 | `as`                                                                                         | Type casting                                                     | left              |
 | `.`                                                                                          | Structure member access                                          | left              |
 | `not`, `~`                                                                                   | Logical NOT, bitwise NOT                                         | right             |

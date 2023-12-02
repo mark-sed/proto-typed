@@ -1690,6 +1690,47 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         llvm::report_fatal_error("Incorrect or unimplemented cast");
     }
     break;
+    case ir::OperatorKind::OP_SLICE:
+    {   
+        LOGMAX("Creating SLICE instruction");
+        if(left->getType() == stringT) {
+            auto slice_string3_f = cgm.getLLVMMod()->getOrInsertFunction("slice_string_int_int_int",
+                                 llvm::FunctionType::get(
+                                    stringT,
+                                    { stringT, int64T, int64T, int64T },
+                                    false
+                                 ));
+            auto slice_string2_f = cgm.getLLVMMod()->getOrInsertFunction("slice_string_int_int",
+                                 llvm::FunctionType::get(
+                                    stringT,
+                                    { stringT, int64T, int64T },
+                                    false
+                                 ));
+            auto rng = llvm::dyn_cast<ir::Range>(e->getRight());
+            if(!rng) {
+                llvm::report_fatal_error("Slice argument is not a range");
+            }
+            auto start = emitExpr(rng->getStart());
+            auto end = emitExpr(rng->getEnd());
+            if(!rng->getStep()) {
+                result = builder.CreateCall(slice_string2_f, { left, start, end });
+            }
+            else {
+                if(auto subI = llvm::dyn_cast<ir::BinaryInfixExpr>(rng->getStep())) {
+                    // Step for [1, 2..5] is 2 - 1, so take left from the SUB to get next
+                    auto next = emitExpr(subI->getLeft());
+                    result = builder.CreateCall(slice_string3_f, { left, start, next, end });
+                }
+                else {
+                    llvm::report_fatal_error("Step in slice is of unexpected IR type");
+                }
+            }
+        }
+        else {
+            llvm::report_fatal_error("SLICE does not supported given type");
+        }
+    }
+    break;
     default: llvm::report_fatal_error("Uknown operator in code generation");
     }
     return result;

@@ -668,6 +668,14 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
             }
         }
         break;
+        case ir::OperatorKind::OP_SLICE:
+        {
+            if((!tl->isMatrix() && !utils::isOneOf(tl->getName(), {STRING_CSTR})) || !llvm::isa<ir::Range>(r)) {
+                diags.report(llvmloc2Src(), diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+            }
+            type = tl;
+        }
+        break;
         default: diags.report(llvmloc2Src(), diag::ERR_INTERNAL, "Unknown operator in an expression");
         break;
         }
@@ -906,7 +914,7 @@ static bool isIntvalExpr(ir::Expr *e) {
 }
 
 ir::Expr *Scanner::parseRange(ir::Expr *start, ir::Expr *second, ir::Expr *end) {
-    LOGMAX("Parsing range ["+start->debug()+","+second->debug()+".."+end->debug()+"]");
+    LOGMAX("Parsing range "+start->debug()+","+second->debug()+".."+end->debug());
     if(!isIntvalExpr(start)) {
         diags.report(llvmloc2Src(), diag::ERR_INCORRECT_RANGE_TYPE, "first", start->getType()->getName());
     }
@@ -920,7 +928,7 @@ ir::Expr *Scanner::parseRange(ir::Expr *start, ir::Expr *second, ir::Expr *end) 
 }
 
 ir::Expr *Scanner::parseRange(ir::Expr *start, ir::Expr *end) {
-    LOGMAX("Parsing range ["+start->debug()+".."+end->debug()+"]");
+    LOGMAX("Parsing range "+start->debug()+".."+end->debug());
     if(!isIntvalExpr(start)) {
         diags.report(llvmloc2Src(), diag::ERR_INCORRECT_RANGE_TYPE, "first", start->getType()->getName());
     }

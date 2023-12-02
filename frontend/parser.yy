@@ -216,6 +216,7 @@
 %type <ptc::ir::Expr *> set
 %type <ptc::ir::Expr *> matrix
 %type <ptc::ir::Expr *> range
+%type <ptc::ir::Expr *> slice
 %type <std::vector<ptc::ir::Expr *> > callarglist
 %type <std::vector<ptc::ir::Expr *> > matsq
 %type <std::vector<ptc::ir::Expr *> > matvals
@@ -421,10 +422,10 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          | EXT_ID AS type     { $$ = scanner->parseInfixExpr(scanner->parseVar($1, true), scanner->parseVar($3->getName(), false, llvm::dyn_cast<ptc::ir::TypeDecl>($3)->isMaybe()), ir::Operator(ir::OperatorKind::OP_AS)); }
          | expr_var AS type   { $$ = scanner->parseInfixExpr($1, scanner->parseVar($3->getName(), false, llvm::dyn_cast<ptc::ir::TypeDecl>($3)->isMaybe()), ir::Operator(ir::OperatorKind::OP_AS)); }
 
-         | expr_mat slice
-         | ID slice
-         | EXT_ID slice
-         | expr_var slice
+         | expr_mat slice   { $$ = scanner->parseInfixExpr($1, $2, ir::Operator(ir::OperatorKind::OP_SLICE)); }
+         | ID slice         { $$ = scanner->parseInfixExpr(scanner->parseVar($1), $2, ir::Operator(ir::OperatorKind::OP_SLICE)); }
+         | EXT_ID slice     { $$ = scanner->parseInfixExpr(scanner->parseVar($1, true), $2, ir::Operator(ir::OperatorKind::OP_SLICE)); }
+         | expr_var slice   { $$ = scanner->parseInfixExpr($1, $2, ir::Operator(ir::OperatorKind::OP_SLICE)); }
 
          | expr_var DOT ID         { $$ = scanner->parseInfixExpr($1, scanner->parseVar($3), ir::Operator(ir::OperatorKind::OP_ACCESS)); }
          | expr_var DOT EXT_ID     { $$ = scanner->parseInfixExpr($1, scanner->parseVar($3), ir::Operator(ir::OperatorKind::OP_ACCESS)); }
@@ -623,18 +624,8 @@ range : LPAR range RPAR                     { $$ = $2; }
 int_val : expr_int  { $$ = scanner->parseInt($1); }
         | expr_var  { $$ = $1; }
         ;
-slice : LSQ COLON RSQ
-      | LSQ int_val COLON RSQ
-      | LSQ COLON int_val RSQ
-      | LSQ int_val COLON int_val RSQ
-      | LSQ COLON COLON RSQ
-      | LSQ int_val COLON COLON RSQ
-      | LSQ COLON int_val COLON RSQ
-      | LSQ COLON COLON int_val RSQ
-      | LSQ int_val COLON int_val COLON RSQ
-      | LSQ int_val COLON COLON int_val RSQ
-      | LSQ COLON int_val COLON int_val RSQ
-      | LSQ int_val COLON int_val COLON int_val RSQ
+slice : LSQ range RSQ  { $$ = $2; }
+      //LSQ RANGE RSQ  { $$ = scanner->parseSlice(nullptr); }
       ;
 
 // None expression

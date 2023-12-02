@@ -122,3 +122,20 @@ bs = gs in ""
 print(bs ++ "\n")
 bs = gs in gs
 print(bs ++ "\n")
+
+string thiscmp = "Proto-typed compiler"
+string g11 
+g11 = thiscmp[0..6]
+print(g11)
+print(thiscmp[4,3.. -1]++"\n")
+
+void extract_aas() {
+    string dna_seqence = "a-c-c-g-t-a-t-g"
+    string amino_acids = dna_seqence[0,2..length(dna_seqence)]
+    print(amino_acids++"\n")
+    int l = length(dna_seqence) - 1
+    string reversed_aas = dna_seqence[l, l - 2 .. -1]
+    print(reversed_aas++"\n")
+}
+
+extract_aas()

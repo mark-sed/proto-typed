@@ -118,6 +118,7 @@ enum OperatorKind {
     OP_LNOT,
     OP_BNOT,
     OP_AS,
+    OP_SLICE,
     OP_UNKNOWN
 };
 
@@ -475,6 +476,7 @@ public:
         case OP_LNOT: return "!";
         case OP_BNOT: return "~";
         case OP_AS: return "as";
+        case OP_SLICE: return "[..]";
         case OP_UNKNOWN: return "unknown";
         default: return "not-listed-op";
         }
@@ -799,7 +801,7 @@ public:
 };
 
 /**
- * Access a memeber of a struct
+ * Integer sequence (range)
  */
 class Range : public Expr {
 private:
@@ -822,10 +824,31 @@ public:
     }
     std::string debug() const override { 
         if(!step)
-            return "["+start->debug()+" .. "+end->debug()+"]";
-        return "["+start->debug()+" step: "+step->debug()+" .. "+end->debug()+"]"; 
+            return start->debug()+" .. "+end->debug();
+        return start->debug()+" step: "+step->debug()+" .. "+end->debug(); 
     }
 };
+
+/**
+ * Slice for a string or matrix
+ */
+/*class Slice : public Expr {
+private:
+    Range *range;
+public:
+    Slice(Range *range, TypeDecl *type) 
+        : Expr(ExprKind::EX_SLICE, type, false),
+          range(range) {}
+
+    Range *getRange() { return range; }
+
+    static bool classof(const Expr *e) {
+        return e->getKind() == ExprKind::EX_SLICE;
+    }
+    std::string debug() const override { 
+        return "["+range->debug()+"]"; 
+    }
+};*/
 
 /**
  * Standalone expression (statement)
