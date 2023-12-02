@@ -579,6 +579,106 @@ void PTLib::equals_matrixInit(std::string name, llvm::Type *mt, ir::TypeDecl *vt
     builder.CreateRet(llvm::ConstantInt::get(int1T, 1));
 }
 
+void PTLib::find_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, ir::TypeDecl *mtt, ir::TypeDecl *vtt) {
+    for(auto [kn, _] : generated) {
+        if(kn == name) {
+            return;
+        }
+    }
+    
+    auto funType = llvm::FunctionType::get(int64T, { mt, vt }, false);
+    llvm::Function *f = llvm::Function::Create(funType, 
+                                            llvm::GlobalValue::PrivateLinkage,
+                                            name,
+                                            llvmMod);
+    generated.push_back(std::make_pair(name, f));
+    
+    llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+    llvm::BasicBlock *loopCondBB = llvm::BasicBlock::Create(ctx, "loop.cond", f);
+    llvm::BasicBlock *loopBodyBB = llvm::BasicBlock::Create(ctx, "loop.body", f);
+    llvm::BasicBlock *loopFoundBB = llvm::BasicBlock::Create(ctx, "loop.found", f);
+    llvm::BasicBlock *loopCntBB = llvm::BasicBlock::Create(ctx, "loop.cnt", f);
+    llvm::BasicBlock *returnBB = llvm::BasicBlock::Create(ctx, "f.ret", f);
+    setCurrBB(bb);
+    
+    llvm::Value* zero = llvm::ConstantInt::get(int64T, 0);
+
+    auto foundIPtr = builder.CreateAlloca(int64T);
+    builder.CreateStore(llvm::ConstantInt::get(int64T, -1), foundIPtr);
+    auto length1 = builder.CreateExtractValue(f->getArg(0), 1);
+    auto length64 = builder.CreateSExt(length1, int64T);
+    auto buffer1 = builder.CreateExtractValue(f->getArg(0), 0);
+
+    // TODO: Handle maybe
+    auto str_eq = llvmMod->getOrInsertFunction("string_Eq",
+                            llvm::FunctionType::get(
+                            int1T, { builder.getInt8Ty()->getPointerTo(), builder.getInt8Ty()->getPointerTo() },
+                            false
+                            ));
+
+    auto iPtr = builder.CreateAlloca(int64T);
+    builder.CreateStore(zero, iPtr);
+    builder.CreateBr(loopCondBB);
+    setCurrBB(loopCondBB);
+
+    auto i = builder.CreateLoad(int64T, iPtr);
+    auto iend = builder.CreateICmpSGE(i, length64);
+    builder.CreateCondBr(iend, returnBB, loopBodyBB);
+
+    setCurrBB(loopBodyBB);
+
+    auto casted1Ptr = builder.CreateBitCast(buffer1, vt->getPointerTo());
+    auto casted1 = builder.CreateGEP(vt, casted1Ptr, i);
+
+    auto loaded1 = builder.CreateLoad(vt, casted1);
+
+    llvm::Value *rval = nullptr;
+    
+    if(mtt->getDimensions() > 1) {
+        std::string eqSubName = "equals_"+mtt->getDecl()->getName()+"_"+mtt->getDecl()->getName();
+        llvm::Function *eqSub_f = nullptr;
+        for(auto [kn, fin] : generated) {
+            if(kn == eqSubName) {
+                eqSub_f = fin;
+            }
+        }
+        
+        if(!eqSub_f) {
+            llvm::report_fatal_error("Sub equals for find was not generated");
+        }
+        rval = builder.CreateCall(eqSub_f, {loaded1, f->getArg(1)});
+    }
+    else if(vtt->getDecl() && llvm::isa<ir::StructDecl>(vtt->getDecl())) {
+        // Struct
+        // TODO:
+        builder.CreateRet(llvm::ConstantInt::get(int64T, -1));
+    }
+    else if(vtt->getBaseName() == FLOAT_CSTR) {
+        rval = builder.CreateFCmpOEQ(loaded1, f->getArg(1));
+    }
+    else if(vtt->getBaseName() == STRING_CSTR) {
+        rval = builder.CreateCall(str_eq, {loaded1, f->getArg(1)});
+    }
+    else {
+        rval = builder.CreateICmpEQ(loaded1, f->getArg(1));
+    }
+    
+    builder.CreateCondBr(rval, loopFoundBB, loopCntBB);
+
+    setCurrBB(loopFoundBB);
+    builder.CreateStore(i, foundIPtr);
+    builder.CreateBr(returnBB);
+
+    setCurrBB(loopCntBB);
+    auto newI = builder.CreateNSWAdd(i, llvm::ConstantInt::get(int64T, 1));
+    builder.CreateStore(newI, iPtr);
+    builder.CreateBr(loopCondBB);
+    
+    setCurrBB(returnBB);
+    auto ri = builder.CreateLoad(int64T, foundIPtr);
+    builder.CreateRet(ri);
+}
+
 void PTLib::setupLib() {
     print_stringInit();
     to_string_intInit();
@@ -591,19 +691,5 @@ void PTLib::setupLib() {
 }
 
 void PTLib::setupExternLib() {
-    // printf
-    /*auto bytePtrTy = builder.getInt8Ty()->getPointerTo();
-    llvmMod->getOrInsertFunction("printf",
-                                 llvm::FunctionType::get(
-                                    builder.getInt32Ty(),
-                                    bytePtrTy,
-                                    true
-                                 ));
-    // puts
-    llvmMod->getOrInsertFunction("puts",
-                                 llvm::FunctionType::get(
-                                    builder.getInt32Ty(),
-                                    bytePtrTy,
-                                    false
-                                 ));*/
+    
 }

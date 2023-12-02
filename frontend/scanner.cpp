@@ -749,6 +749,22 @@ void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT) {
         globalScope->insert(fun);
         mainModule->addLibFunction(fun);
     }
+
+    {
+        auto params = std::vector<ir::FormalParamDecl *>{
+            new ir::FormalParamDecl(currentIR, llvmloc2Src(), "m", t, false),
+            new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", elemT, false)
+        };
+        auto funAppend = new ir::FunctionDecl(currentIR,
+                                                llvmloc2Src(),
+                                                "find_"+t->getName()+"_"+elemT->getName(),
+                                                "find",
+                                                this->intType,
+                                                params,
+                                                body);
+        globalScope->insert(funAppend);
+        mainModule->addLibFunction(funAppend);
+    }
 }
 
 std::map<std::string, ir::Expr *> Scanner::parseStructVals(std::string name, ir::Expr *e) {

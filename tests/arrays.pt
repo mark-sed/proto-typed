@@ -58,3 +58,28 @@ ls2 = ["a", "bc", "c"]
 bb = equals(ls, ls2)
 print(bb ++ "\n")
 print(ls != ls2 ++ "\n")
+
+string[] smt
+smt = ["hi", "there", "mister", "."]
+
+print(length(smt)++"\n")
+print(find(smt, "there")++"\n")
+print(find(smt, ".")++"\n")
+print(find(smt, "hello")++"\n")
+
+int[] sii
+sii = [1, 2, 3, 4, 5, -9]
+print(find(sii, -9)++"\n")
+print(find(sii, 9)++"\n")
+print(find(sii, 2)++"\n")
+
+int[][] sii2
+sii2 = [[1,2],sii]
+print(find(sii2, sii)++"\n")
+print(find(sii2, [1,2])++"\n")
+print(find(sii2, [1,2,3])++"\n")
+
+float[][] fii2
+fii2 = [[3.11, 0.0], [0.0]]
+print(find(fii2, [1.0,2.0])++"\n")
+print(find(fii2, [0.0])++"\n")

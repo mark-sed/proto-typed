@@ -2383,6 +2383,9 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
         else if(f->getOGName() == "equals") {
             ptlibLoader->equals_matrixInit(f->getName(), mapType(f->getParams()[0]), f->getParams()[0]->getType());
         }
+        else if(f->getOGName() == "find") {
+            ptlibLoader->find_matrixInit(f->getName(), mapType(f->getParams()[0]), mapType(f->getParams()[1]), f->getParams()[0]->getType(), f->getParams()[1]->getType());
+        }
         else {
             llvm::report_fatal_error(("Missing code for function "+f->getOGName()).c_str()); 
         }
