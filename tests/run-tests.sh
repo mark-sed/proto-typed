@@ -214,7 +214,7 @@ function test_arrays {
     expect_out_eq "43 44 45 \n3 2 1 false true true 0 1.5 2.6 \nLet's find out \ntrue
 true\nfalse\nfalse\nfalse\nfalse\ntrue\nfalse\nfalse\ntrue
 4\n1\n3\n-1\n5\n-1\n1\n1\n0\n-1\n-1\n1\ntrue\ntrue\ntrue\nfalse
-1.5 1.5 \n3.5 3.5 3.5 \n5.5 \n0.5 0.5 \n3.5 3.5 3.5 \n5.5 \n4.5 \n" "arrays"
+0.5 0.5 \n3.5 3.5 3.5 \n5.5 \n4.5 \n" "arrays"
 }
 
 function test_statements {
@@ -239,6 +239,11 @@ function test_ptlib_strings {
 keram\n4\n-1\nfalse\ntrue\nProto-otorP\n" "ptlib_strings"
 }
 
+function test_ptlib_arrays {
+    expect_pass "ptlib_arrays.pt" "ptlib_arrays"
+    expect_out_eq "sushi like I \n9 8 7 \n6 5 4 \n3 2 1 \n1.5 1.5 \n3.5 3.5 3.5 \n5.5 \n" "ptlib_arrays"
+}
+
 # Expect fail tests
 
 function test_missing_return {
@@ -259,6 +264,7 @@ function run_all_tests {
     run_test casting
     run_test floats
     run_test ptlib_strings
+    run_test ptlib_arrays
 
     # Expect fail tests
     run_test missing_return

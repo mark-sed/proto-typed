@@ -859,6 +859,45 @@ void PTLib::slice2_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, 
     builder.CreateRet(rval);
 }
 
+void PTLib::reverse_matrixInit(std::string name, llvm::Type *mt, ir::TypeDecl *mtt) {
+    for(auto [kn, _] : generated) {
+        if(kn == name) {
+            return;
+        }
+    }
+
+    auto funType = llvm::FunctionType::get(mt, { mt }, false);
+    llvm::Function *f = llvm::Function::Create(funType, 
+                                            llvm::GlobalValue::PrivateLinkage,
+                                            name,
+                                            llvmMod);
+    generated.push_back(std::make_pair(name, f));
+
+    std::string slice3Name = "slice_"+mtt->getName()+"_int_int_int";
+    llvm::Function *slice3_f = nullptr;
+    for(auto [kn, fin] : generated) {
+        if(kn == slice3Name) {
+            slice3_f = fin;
+        }
+    }
+    
+    if(!slice3_f) {
+        llvm::report_fatal_error("Slice3 for reverse was not generated");
+    }
+
+    llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+    setCurrBB(bb);
+
+    auto len = builder.CreateExtractValue(f->getArg(0), 1);
+    auto len64 = builder.CreateZExt(len, int64T);
+    auto start = builder.CreateNSWSub(len64, llvm::ConstantInt::get(int64T, 1, true));
+    auto next = builder.CreateNSWSub(len64, llvm::ConstantInt::get(int64T, 2, true));
+
+    auto rval = builder.CreateCall(slice3_f, {f->getArg(0), start, next, llvm::ConstantInt::get(int64T, -1, true)});
+
+    builder.CreateRet(rval);
+}
+
 void PTLib::setupLib() {
     print_stringInit();
     to_string_intInit();

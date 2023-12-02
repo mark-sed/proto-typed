@@ -2471,6 +2471,9 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                     f->getParams()[0]->getType());
             }
         }
+        else if(f->getOGName() == "reverse") {
+            ptlibLoader->reverse_matrixInit(f->getName(), mapType(f->getParams()[0]), f->getParams()[0]->getType());
+        }
         else {
             llvm::report_fatal_error(("Missing code for function "+f->getOGName()).c_str()); 
         }
