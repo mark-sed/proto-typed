@@ -718,6 +718,94 @@ void PTLib::contains_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt
     builder.CreateRet(found);
 }
 
+void PTLib::slice_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, ir::TypeDecl *mtt) {
+    for(auto [kn, _] : generated) {
+        if(kn == name) {
+            return;
+        }
+    }
+
+    auto funType = llvm::FunctionType::get(mt, { mt, int64T, int64T, int64T }, false);
+    llvm::Function *f = llvm::Function::Create(funType, 
+                                            llvm::GlobalValue::PrivateLinkage,
+                                            name,
+                                            llvmMod);
+    generated.push_back(std::make_pair(name, f));
+
+    std::string appSubName = "append_"+mtt->getName()+"_"+mtt->getDecl()->getName();
+    llvm::Function *appSub_f = nullptr;
+    for(auto [kn, fin] : generated) {
+        if(kn == appSubName) {
+            appSub_f = fin;
+        }
+    }
+    
+    if(!appSub_f) {
+        llvm::dbgs() << name << "---> " << appSubName << "\n";
+        llvm::report_fatal_error("Append for slice was not generated");
+    }
+
+    llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+    llvm::BasicBlock *loopCondBB = llvm::BasicBlock::Create(ctx, "loop.cond", f);
+    llvm::BasicBlock *forCondPosStepBB = llvm::BasicBlock::Create(ctx, "range.posstep", f);
+    llvm::BasicBlock *forCondNegStepBB = llvm::BasicBlock::Create(ctx, "range.negstep", f);
+    llvm::BasicBlock *forBodyBB = llvm::BasicBlock::Create(ctx, "loop.body", f);
+    llvm::BasicBlock *forAfterBB = llvm::BasicBlock::Create(ctx, "loop.after", f);
+
+    setCurrBB(bb);
+
+    auto matPtr = builder.CreateAlloca(matrixTPtr);
+    auto matobj = builder.CreateAlloca(matrixT);
+    builder.CreateStore(matobj, matPtr);
+    auto matrixCreateF = llvmMod->getOrInsertFunction("matrix_Create_Default", 
+                                                    llvm::FunctionType::get(
+                                                    voidT,
+                                                    matrixTPtr,
+                                                    false
+                                                    ));
+    builder.CreateCall(matrixCreateF, matobj);
+
+    // TODO: Dont go over bounderies
+    //auto length1 = builder.CreateExtractValue(f->getArg(0), 1);
+    //auto length64 = builder.CreateSExt(length1, int64T);
+    auto buffer1 = builder.CreateExtractValue(f->getArg(0), 0);
+
+    auto iPtr = builder.CreateAlloca(int64T);
+    builder.CreateStore(f->getArg(1), iPtr);
+    auto stepLd = builder.CreateNSWSub(f->getArg(2), f->getArg(1));
+    builder.CreateBr(loopCondBB);
+
+    setCurrBB(loopCondBB);
+    auto i = builder.CreateLoad(int64T, iPtr);
+    auto posStep = builder.CreateICmpSGT(stepLd, llvm::ConstantInt::get(int64T, 0, true));
+    builder.CreateCondBr(posStep, forCondPosStepBB, forCondNegStepBB);
+
+    setCurrBB(forCondPosStepBB);
+    auto cmpEndPos = builder.CreateICmpSLT(i, f->getArg(3));
+    builder.CreateCondBr(cmpEndPos, forBodyBB, forAfterBB);
+
+    setCurrBB(forCondNegStepBB);
+    auto cmpEndNeg = builder.CreateICmpSGT(i, f->getArg(3));
+    builder.CreateCondBr(cmpEndNeg, forBodyBB, forAfterBB);
+
+    setCurrBB(forBodyBB);
+
+    auto casted1Ptr = builder.CreateBitCast(buffer1, vt->getPointerTo());
+    auto casted1 = builder.CreateGEP(vt, casted1Ptr, i);
+
+    auto loaded1 = builder.CreateLoad(vt, casted1);
+    
+    builder.CreateCall(appSub_f, {matPtr, loaded1});
+
+    auto newI = builder.CreateNSWAdd(i, stepLd);
+    builder.CreateStore(newI, iPtr);
+    builder.CreateBr(loopCondBB);
+    
+    setCurrBB(forAfterBB);
+    auto matStru = builder.CreateLoad(matrixT, matobj);
+    builder.CreateRet(matStru);
+}
+
 void PTLib::setupLib() {
     print_stringInit();
     to_string_intInit();
