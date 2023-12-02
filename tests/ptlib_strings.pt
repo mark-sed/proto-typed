@@ -47,3 +47,8 @@ print(find("ll", "ll1") ++ "\n")
 
 print(contains("Hello", "h") ++ "\n")
 print(contains("Hello", "ll") ++ "\n")
+
+string thiscmp = "Proto-typed compiler"
+
+print(slice(thiscmp, 0, 6))
+print(slice(thiscmp, 4, 3, -1)++"\n")

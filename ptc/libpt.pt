@@ -100,6 +100,21 @@ bool contains(string s1, string s2) {
     return find(s1, s2) != -1
 }
 
+string slice(string s, int start, int end) {
+    string r
+    for(int i : start..end) {
+        r ++= s[i]
+    }
+    return r
+}
+
+string slice(string s, int start, int next, int end) {
+    string r
+    for(int i : start, next..end) {
+        r ++= s[i]
+    }
+    return r
+}
 
 /************************/
 /*--- Math functions ---*/
