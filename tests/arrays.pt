@@ -138,3 +138,7 @@ print((ts == ts2)++"\n")
 
 append(ts, T{})
 print((ts == ts2)++"\n")
+print((t in ts)++"\n")
+T t22
+print((t22 in ts)++"\n")
+print((t22 in ts2)++"\n")
