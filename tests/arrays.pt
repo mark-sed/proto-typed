@@ -142,3 +142,15 @@ print((t in ts)++"\n")
 T t22
 print((t22 in ts)++"\n")
 print((t22 in ts2)++"\n")
+
+any[] vs
+any[] us
+
+any uany = 2
+any vany = 3
+append(vs, vany)
+append(us, vany)
+print((vs == us)++"\n")
+append(vs, uany)
+append(us, vany)
+print((vs == us)++"\n")

@@ -98,3 +98,29 @@ any u4 = -0.0
 float u4f
 u4f = u4 as float
 print(u4f ++ "\n")
+
+any uany = 2
+any vany = 2
+
+if(uany == vany) {
+    print("yes\n")
+}
+else {
+    // Different pointers
+    print("no\n")
+}
+
+if(uany != vany) {
+    print("no\n")
+}
+else {
+    print("yes\n")
+}
+
+vany = uany
+if(uany == vany) {
+    print("yes\n")
+}
+else {
+    print("no\n")
+}

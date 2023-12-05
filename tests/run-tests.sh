@@ -185,7 +185,8 @@ true\n48\n6.2\nnone\ntrue\n48\n6.2\nnone\n" "maybes"
 
 function test_any {
     expect_pass "any.pt" "any"
-    expect_out_eq "hello\nhi\ntrue\n99\n5.25\n5.25\nstr\nstr\nno\n7542\n0\n8\nhi\n6\ntrue\n-0\n" "any"
+    expect_out_eq "hello\nhi\ntrue\n99\n5.25\n5.25\nstr\nstr\nno\n7542\n0\n8\nhi\n6\ntrue\n-0
+no\nno\nyes\n" "any"
 }
 
 function test_structs {
@@ -214,7 +215,8 @@ function test_arrays {
     expect_out_eq "43 44 45 \n3 2 1 false true true 0 1.5 2.6 \nLet's find out \ntrue
 true\nfalse\nfalse\nfalse\nfalse\ntrue\nfalse\nfalse\ntrue
 4\n1\n3\n-1\n5\n-1\n1\n1\n0\n-1\n-1\n1\ntrue\ntrue\ntrue\nfalse
-0.5 0.5 \n3.5 3.5 3.5 \n5.5 \n4.5 \ntrue\nfalse\ntrue\ntrue\nfalse\n" "arrays"
+0.5 0.5 \n3.5 3.5 3.5 \n5.5 \n4.5 \ntrue\nfalse\ntrue\ntrue\nfalse
+true\nfalse\n" "arrays"
 }
 
 function test_statements {

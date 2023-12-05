@@ -564,6 +564,10 @@ void PTLib::equals_matrixInit(std::string name, llvm::Type *mt, ir::TypeDecl *vt
             else if(vt->getBaseName() == FLOAT_CSTR) {
                 tsize = floatT->getPrimitiveSizeInBits()/8;
             }
+            else if(vt->getBaseName() == ANY_CSTR) {
+                llvm::DataLayout* dataLayout = new llvm::DataLayout(llvmMod);
+                tsize = dataLayout->getTypeAllocSize(builder.getInt8Ty()->getPointerTo());
+            }
             else {
                 llvm::report_fatal_error("Unknown data type for memcmp");
             }
@@ -987,7 +991,7 @@ void PTLib::equals_structInit(std::string name, llvm::Type *st, ir::TypeDecl *st
         auto el2 = builder.CreateExtractValue(f->getArg(1), index);
         llvm::Value *isEq = nullptr;
         if(auto stm = llvm::dyn_cast<ir::VarDecl>(e)) {
-            if(stm->getType()->isMaybe()) {
+            if(stm->getType()->isMaybe() && stm->getType()->getName() != ANY_CSTR) {
                 // TODO: Check if both maybe
                 el1 = builder.CreateLoad(mod->mapType(stm->getType())->getPointerElementType(), el1);
                 el2 = builder.CreateLoad(mod->mapType(stm->getType())->getPointerElementType(), el2);

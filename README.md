@@ -340,6 +340,8 @@ x = "Ca vas pas"
 print(y++"\n") // Incorrect value - string read as int
 ```
 
+Any type, unlike maybe type, is checked as an address and not a value (as it is only known to the user what type is stored there).
+
 ## Syntax
 
 Proto-typed aims for having a simple syntax, that allows good code readability and writing, as it's main purpose is prototyping and small programs. 

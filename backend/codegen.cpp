@@ -1217,6 +1217,11 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             else if(e->getLeft()->getType()->getName() == FLOAT_CSTR) {
                 result = builder.CreateFCmpOEQ(left, right);
             }
+            else if(e->getLeft()->getType()->getName() == ANY_CSTR) {
+                auto ldv = llvm::dyn_cast<llvm::LoadInst>(left)->getOperand(0);
+                auto rdv = llvm::dyn_cast<llvm::LoadInst>(right)->getOperand(0);
+                result = builder.CreateICmpEQ(ldv, rdv);
+            }
             else {
                 result = builder.CreateICmpEQ(left, right);
             }
@@ -1263,6 +1268,11 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             }
             else if(e->getLeft()->getType()->getName() == FLOAT_CSTR) {
                 result = builder.CreateFCmpONE(left, right);
+            }
+            else if(e->getLeft()->getType()->getName() == ANY_CSTR) {
+                auto ldv = llvm::dyn_cast<llvm::LoadInst>(left)->getOperand(0);
+                auto rdv = llvm::dyn_cast<llvm::LoadInst>(right)->getOperand(0);
+                result = builder.CreateICmpNE(ldv, rdv);
             }
             else {
                 result = builder.CreateICmpNE(left, right);
