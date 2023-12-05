@@ -952,6 +952,79 @@ void PTLib::reverse_matrixInit(std::string name, llvm::Type *mt, ir::TypeDecl *m
     builder.CreateRet(rval);
 }
 
+void PTLib::join_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, ir::TypeDecl *mtt) {
+    for(auto [kn, _] : generated) {
+        if(kn == name) {
+            return;
+        }
+    }
+
+    auto funType = llvm::FunctionType::get(mt, { mt, mt }, false);
+    llvm::Function *f = llvm::Function::Create(funType, 
+                                            llvm::GlobalValue::PrivateLinkage,
+                                            name,
+                                            llvmMod);
+    generated.push_back(std::make_pair(name, f));
+
+    llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+    setCurrBB(bb);
+
+    auto matPtr = builder.CreateAlloca(matrixTPtr);
+    auto matobj = builder.CreateAlloca(matrixT);
+    builder.CreateStore(matobj, matPtr);
+    auto matrixCreateF = llvmMod->getOrInsertFunction("matrix_Create_Default", 
+                                                    llvm::FunctionType::get(
+                                                    voidT,
+                                                    matrixTPtr,
+                                                    false
+                                                    ));
+    auto matrixResizeF = llvmMod->getOrInsertFunction("matrix_Resize", 
+                                                    llvm::FunctionType::get(
+                                                    voidT,
+                                                    { matrixTPtr, builder.getInt32Ty() },
+                                                    false
+                                                    ));
+    auto memcpyF = llvmMod->getOrInsertFunction("memcpy", 
+                                                    llvm::FunctionType::get(
+                                                    builder.getInt8Ty()->getPointerTo(),
+                                                    { builder.getInt8Ty()->getPointerTo(), 
+                                                        builder.getInt8Ty()->getPointerTo(),
+                                                        builder.getInt64Ty() },
+                                                    false
+                                                    ));
+    builder.CreateCall(matrixCreateF, matobj);
+
+    auto len1 = builder.CreateExtractValue(f->getArg(0), 1);
+    auto len2 = builder.CreateExtractValue(f->getArg(1), 1);
+
+    llvm::DataLayout* dataLayout = new llvm::DataLayout(llvmMod);
+    auto tsize = dataLayout->getTypeAllocSize(vt);
+
+    auto size1 = builder.CreateNSWMul(len1, llvm::ConstantInt::get(builder.getInt32Ty(), tsize, true));
+    auto size2 = builder.CreateNSWMul(len2, llvm::ConstantInt::get(builder.getInt32Ty(), tsize, true));
+
+    auto sumSize = builder.CreateNSWAdd(size1, size2);
+
+    builder.CreateCall(matrixResizeF, {matobj, sumSize});
+
+    auto buff1 = builder.CreateExtractValue(f->getArg(0), 0);
+    auto buff2 = builder.CreateExtractValue(f->getArg(1), 0);
+    auto mat = builder.CreateLoad(matrixT, matobj);
+    auto buffer = builder.CreateExtractValue(mat, 0);
+    builder.CreateCall(memcpyF, {buffer, buff1, size1});
+    auto buffBitC = builder.CreateBitCast(buffer, vt->getPointerTo());
+    auto bufferOff = builder.CreateGEP(vt, buffBitC, len1);
+    builder.CreateCall(memcpyF, {bufferOff, buff2, size2});
+
+    llvm::Value* zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 0);
+    llvm::Value* one = llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 1);
+    llvm::Value* len = builder.CreateGEP(matrixT, matobj, {zero, one});
+    auto totalLen = builder.CreateNSWAdd(len1, len2);
+    builder.CreateStore(totalLen, len);
+    auto matVal = builder.CreateLoad(matrixT, matobj);
+    builder.CreateRet(matVal);
+}
+
 void PTLib::equals_structInit(std::string name, llvm::Type *st, ir::TypeDecl *stt) {
     for(auto [kn, _] : generated) {
         if(kn == name) {

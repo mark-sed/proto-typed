@@ -244,7 +244,8 @@ keram\n4\n-1\nfalse\ntrue\nProto-otorP\n" "ptlib_strings"
 
 function test_ptlib_arrays {
     expect_pass "ptlib_arrays.pt" "ptlib_arrays"
-    expect_out_eq "sushi like I \n9 8 7 \n6 5 4 \n3 2 1 \n1.5 1.5 \n3.5 3.5 3.5 \n5.5 \n" "ptlib_arrays"
+    expect_out_eq "sushi like I \n9 8 7 \n6 5 4 \n3 2 1 \n1.5 1.5 \n3.5 3.5 3.5 \n5.5 \n3
+0 1 2 3 4 5 6 7 8 \n1 2 \n3 4 \n5 6 \n" "ptlib_arrays"
 }
 
 # Expect fail tests

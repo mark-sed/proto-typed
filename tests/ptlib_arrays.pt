@@ -37,3 +37,34 @@ for(int i : 0..length(arrsl)) {
     }
     print("\n")
 }
+
+print(length(arrsl)++"\n")
+
+int[] bjoin
+
+bjoin = [5, 6, 7, 8]
+
+int[] ajoin
+ajoin = [0, 1, 2, 3, 4]
+
+int[] cjoin
+
+cjoin = join(ajoin, bjoin)
+
+for(int i : cjoin) {
+    print(i++" ")
+}
+print("\n")
+
+int[][] djoin
+djoin = [[1, 2], [3, 4]]
+int[][] fjoin
+
+fjoin = join(djoin, [[5, 6]])
+int[] gjoin
+for(gjoin : fjoin) {
+    for(int i : gjoin) {
+        print(i++" ")
+    }
+    print("\n")
+}
