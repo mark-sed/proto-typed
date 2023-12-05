@@ -500,10 +500,51 @@ void PTLib::equals_matrixInit(std::string name, llvm::Type *mt, ir::TypeDecl *vt
             builder.CreateStore(newI, iPtr);
             builder.CreateBr(loopCondBB);
         }
-        else if(vt->getDecl() && llvm::isa<ir::StructDecl>(vt->getDecl())) {
+        else if(llvm::dyn_cast<ir::TypeDecl>(vt->getDecl()) &&
+                llvm::dyn_cast<ir::TypeDecl>(vt->getDecl())->getDecl() &&
+                llvm::isa<ir::StructDecl>(llvm::dyn_cast<ir::TypeDecl>(vt->getDecl())->getDecl())) {
             // Struct
-            // TODO:
-            builder.CreateRet(llvm::ConstantInt::get(int1T, 1));
+            auto strDc = llvm::dyn_cast<ir::StructDecl>(llvm::dyn_cast<ir::TypeDecl>(vt->getDecl())->getDecl());
+            
+            std::string eqSubName = "equals_"+strDc->getName()+"_"+strDc->getName();
+            llvm::Function *eqSub_f = nullptr;
+            for(auto [kn, fin] : generated) {
+                if(kn == eqSubName) {
+                    eqSub_f = fin;
+                }
+            }
+            
+            if(!eqSub_f) {
+                llvm::report_fatal_error("Sub struct equals was not generated");
+            }
+
+            auto iPtr = builder.CreateAlloca(builder.getInt32Ty());
+            builder.CreateStore(zero, iPtr);
+            builder.CreateBr(loopCondBB);
+            setCurrBB(loopCondBB);
+
+            auto i = builder.CreateLoad(builder.getInt32Ty(), iPtr);
+            auto iend = builder.CreateICmpSGE(i, length1);
+            builder.CreateCondBr(iend, eqBB, loopBodyBB);
+
+            setCurrBB(loopBodyBB);
+
+            auto casted1Ptr = builder.CreateBitCast(buffer1, mod->mapType(vt->getDecl())->getPointerTo());
+            auto casted2Ptr = builder.CreateBitCast(buffer2, mod->mapType(vt->getDecl())->getPointerTo());
+
+            auto casted1 = builder.CreateGEP(mod->mapType(vt->getDecl()), casted1Ptr, i);
+            auto casted2 = builder.CreateGEP(mod->mapType(vt->getDecl()), casted2Ptr, i);
+
+            auto loaded1 = builder.CreateLoad(mod->mapType(vt->getDecl()), casted1);
+            auto loaded2 = builder.CreateLoad(mod->mapType(vt->getDecl()), casted2);
+
+            auto rval = builder.CreateCall(eqSub_f, {loaded1, loaded2});
+            builder.CreateCondBr(rval, loopCntBB, notEqBB);
+
+            setCurrBB(loopCntBB);
+            auto newI = builder.CreateNSWAdd(i, llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 1));
+            builder.CreateStore(newI, iPtr);
+            builder.CreateBr(loopCondBB);
         }
         else {
             auto memcmp_f = llvmMod->getOrInsertFunction("memcmp", 
@@ -654,8 +695,18 @@ void PTLib::find_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, ir
     }
     else if(vtt->getDecl() && llvm::isa<ir::StructDecl>(vtt->getDecl())) {
         // Struct
-        // TODO:
-        builder.CreateRet(llvm::ConstantInt::get(int64T, -1));
+        std::string eqSubName = "equals_"+vtt->getDecl()->getName()+"_"+vtt->getDecl()->getName();
+        llvm::Function *eqSub_f = nullptr;
+        for(auto [kn, fin] : generated) {
+            if(kn == eqSubName) {
+                eqSub_f = fin;
+            }
+        }
+        
+        if(!eqSub_f) {
+            llvm::report_fatal_error("Sub struct equals for find was not generated");
+        }
+        rval = builder.CreateCall(eqSub_f, {loaded1, f->getArg(1)});
     }
     else if(vtt->getBaseName() == FLOAT_CSTR) {
         rval = builder.CreateFCmpOEQ(loaded1, f->getArg(1));

@@ -117,3 +117,24 @@ for(int i : 0..length(arrsl)) {
     }
     print("\n")
 }
+
+struct T {
+    int a
+    bool b
+    float f
+    string g
+}
+
+T t 
+t = T{.a = 4, .f=4.25, .b = true, .g="hi"}
+
+T[] ts
+T[] ts2
+
+append(ts, t)
+append(ts2, t)
+
+print((ts == ts2)++"\n")
+
+append(ts, T{})
+print((ts == ts2)++"\n")
