@@ -526,7 +526,7 @@ Following table contains pt operators from highest precedence to the lowest.
 | `not`, `~`                                                                                   | Logical NOT, bitwise NOT                                         | right             |
 | `**`                                                                                         | Exponentiation (returns `float`)                                 | right             |
 | `*`, `/`, `%`                                                                                | Multiplication, division, reminder                               | left              |
-| `+`, `-`                                                                                     | Addition, subtraction                                            | left              |
+| `+`, `-`                                                                                     | Addition/array join, subtraction                                 | left              |
 | `<<`, `>>`                                                                                   | Bitwise left shift, bitwise right shift                          | left              |
 | `..`                                                                                         | Range                                                            | left              |
 | `>`, `>=`, `<`, `<=`                                                                         | Bigger than, bigger than or equal, less than, less than or equal | left              |
@@ -599,6 +599,27 @@ Calls to standard library do not require any module name prefix and any of the f
     * `string to_string(int i)` - Converts int `i` to string.
     * `string to_string(float f)` - Converts float `f` to string.
     * `string to_string(bool b)` - Converts bool `b` to string.
+* __`mto_string`__ - Conversion of maybe types to string (for `none` will return "none").
+    * `string to_string(int? i)` - Converts maybe int `i` to string.
+    * `string to_string(float? f)` - Converts maybe float `f` to string.
+    * `string to_string(bool? b)` - Converts maybe bool `b` to string.
+    * `string to_string(string? s)` - Converts maybe string `s` to string. This is useful only for printing as `none` will be indistinguishable from string "none".
+* __`find`__ - Find substring.
+    * `int find(string s1, string s2)` - Returns first index of substring `s2` in string `s1` or -1 if not found.
+* __`contains`__ - Check if string contains substring (equivalent to `s2 in s1`).
+    * `bool contains(string s1, string s2)` - Returns true if string `s1` contains string s2, false otherwise.
+* __`reverse`__ - String in reverse.
+    * `string reverse(string s)` - Returns copy of string `s` reversed.
+* __`slice`__ - Slices a string (equivalent to `s[start, next..end]`). Range can be also descending for reversed string.
+    * `string slice(string s, int start, int end) ` - Slices string from index `start`, with step 1 or -1 until index `end`.
+    * `string slice(string s, int start, int next, int end) ` - Slices string from index `start`, with step `next - start` until index `end`.
+* __Case conversion__ - Conversion to uppercase.
+    * `string upper(string s)` - Returns copy of string `s` in uppercase.
+    * `string lower(string s)` - Returns copy of string `s` in lowercase.
+* __`ord`__ - Converts letter of string to its integer value.
+    * `int ord(string s)` - Converts first letter of `s` to its integer value.
+* __`chr`__ - Converts integer value to corresponding letter.
+    * `string chr(int i)` - Converts integer `i` into corresponding letter and returns it as a string.
 
 ### Array functions
 These functions are templated for any array (matrix) type, the type `T` stands for this general array type. Type `TBase` stands for the base type of `T` (e.g.: `T` might be `int[][]` and then `TBase` would be `int[]`). Type `TElem` is the base non-array type of `T` (e.g.: `T` might be `int[][]` and then `TElem` would be `int`).
@@ -607,6 +628,33 @@ These functions are templated for any array (matrix) type, the type `T` stands f
     * `void append(T a, TBase v)` - Append `v` at the end of array `a`.
 * __`length`__ - Array length.
     * `int length(T a)` - Returns the length of the array `a`. 
+* __`equals`__ - Array equality (equivalent to `a1 == a2`)
+    * `bool equals(T a1, T a2)` - Returns true if all value in `a1` are equal to those in `a2`.
+* __`find`__ - Find value in an array.
+    * `int find(T a, TElem e)` - Returns index of value `e` in array `a` or -1 if it does not exist there.
+* __`contains`__ - Check if value is present in an array (equivalent to `e in a`)
+    * `bool contains(T a, TElem e)` - Returns true if value `e` is in array `a`, false otherwise.
+* __`reverse`__ - Array in reverse.
+    * `T reverse(T a)` - Returns copy of array `a` reversed.
+* __`slice`__ - Slices an array (equivalent to `a[start, next..end]`). Range can be also descending for reversed array.
+    * `T slice(T a, int start, int end) ` - Slices array from index `start`, with step 1 or -1 until index `end`.
+    * `T slice(T a, int start, int next, int end) ` - Slices array from index `start`, with step `next - start` until index `end`.
+
+### Struct function
+These functions are templated and type `S` represent generic struct type in this case.
+* __`equals`__ - Struct equality (equivalent to `s1 == s2`)
+    * `bool equals(S s1, S s2)` - Returns true if values of all elements in `s1` are equal to those in `s2`.
+
+### Math functions
+* __Math constants__
+    * `M_PI` - Ludolph's number.
+    * `M_E`  - Euler's number.
+    * `M_PHI` - Golden ratio (`(1 + 5^0.5)/2`).
+    * `M_EGAMMA` - Euler–Mascheroni constant.
+* __Trigonometric functions__
+    * `float sin(float x)` - Sine of `x`.
+    * `float cos(float x)` - Cosine of `x`.
+    * `float tan(float x)` - Tangent of `x`.
 
 # Proto-typed compiler
 Proto-typed compiler (ptc) uses LLVM and can target any of big amount of targets LLVM can compile for. The ptc also relies on LibC. 
