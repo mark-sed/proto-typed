@@ -1207,8 +1207,8 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             result = builder.CreateCall(str_eq, {left, right});
         }
         else if(left->getType() == right->getType()) {
-            // Matrix
-            if(e->getLeft()->getType()->isMatrix()) {
+            // Matrix or struct
+            if(e->getLeft()->getType()->isMatrix() || e->getLeft()->getType()->getDecl()) {
                 std::string eqSubName = "equals_"+e->getLeft()->getType()->getName()+"_"+e->getLeft()->getType()->getName();
                 auto eqArr_f = cgm.getLLVMMod()->getOrInsertFunction(eqSubName, 
                                                     llvm::FunctionType::get(int1T, {left->getType(), left->getType()}, false));
@@ -2447,7 +2447,11 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
             ptlibLoader->length_matrixInit(f->getName(), mapType(f->getParams()[0]));
         }
         else if(f->getOGName() == "equals") {
-            ptlibLoader->equals_matrixInit(f->getName(), mapType(f->getParams()[0]), f->getParams()[0]->getType());
+            if(f->getParams()[0]->getType()->isMatrix()) {
+                ptlibLoader->equals_matrixInit(f->getName(), mapType(f->getParams()[0]), f->getParams()[0]->getType());
+            } else {
+                ptlibLoader->equals_structInit(f->getName(), mapType(f->getParams()[0]), f->getParams()[0]->getType());
+            }
         }
         else if(f->getOGName() == "find") {
             ptlibLoader->find_matrixInit(f->getName(), mapType(f->getParams()[0]), mapType(f->getParams()[1]), f->getParams()[0]->getType(), f->getParams()[1]->getType());

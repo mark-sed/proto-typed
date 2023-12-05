@@ -99,6 +99,7 @@ public:
     void appendInit(std::string name, llvm::Type *mt, llvm::Type *vt);
     void length_matrixInit(std::string name, llvm::Type *mt);
     void equals_matrixInit(std::string name, llvm::Type *mt, ir::TypeDecl *vt);
+    void equals_structInit(std::string name, llvm::Type *st, ir::TypeDecl *stt);
     void find_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, ir::TypeDecl *mtt, ir::TypeDecl *vtt);
     void contains_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, ir::TypeDecl *mtt, ir::TypeDecl *vtt);
     void slice_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, ir::TypeDecl *mtt);

@@ -741,7 +741,6 @@ void PTLib::slice_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, i
     }
     
     if(!appSub_f) {
-        llvm::dbgs() << name << "---> " << appSubName << "\n";
         llvm::report_fatal_error("Append for slice was not generated");
     }
 
@@ -896,6 +895,121 @@ void PTLib::reverse_matrixInit(std::string name, llvm::Type *mt, ir::TypeDecl *m
     auto rval = builder.CreateCall(slice3_f, {f->getArg(0), start, next, llvm::ConstantInt::get(int64T, -1, true)});
 
     builder.CreateRet(rval);
+}
+
+void PTLib::equals_structInit(std::string name, llvm::Type *st, ir::TypeDecl *stt) {
+    for(auto [kn, _] : generated) {
+        if(kn == name) {
+            return;
+        }
+    }
+
+    auto funType = llvm::FunctionType::get(int1T, { st, st }, false);
+    llvm::Function *f = llvm::Function::Create(funType, 
+                                            llvm::GlobalValue::PrivateLinkage,
+                                            name,
+                                            llvmMod);
+    generated.push_back(std::make_pair(name, f));
+
+    auto stDecl = llvm::dyn_cast<ir::StructDecl>(stt->getDecl());
+
+    llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+
+    std::vector<llvm::BasicBlock *> cmpBBs;
+    for(unsigned int i = 0; i < stDecl->getElements().size(); ++i) {
+        cmpBBs.push_back(llvm::BasicBlock::Create(ctx, "cmp."+std::to_string(i), f));
+    }
+
+    llvm::BasicBlock *notEqBB = llvm::BasicBlock::Create(ctx, "not.eq", f);
+
+    auto str_eq = llvmMod->getOrInsertFunction("string_Eq",
+                            llvm::FunctionType::get(
+                            int1T, { builder.getInt8Ty()->getPointerTo(), builder.getInt8Ty()->getPointerTo() },
+                            false
+                            ));
+
+    setCurrBB(bb);
+
+    int index = 0;
+    for(auto e : stDecl->getElements()) {
+        auto el1 = builder.CreateExtractValue(f->getArg(0), index);
+        auto el2 = builder.CreateExtractValue(f->getArg(1), index);
+        llvm::Value *isEq = nullptr;
+        if(auto stm = llvm::dyn_cast<ir::VarDecl>(e)) {
+            if(stm->getType()->isMaybe()) {
+                // TODO: Check if both maybe
+                el1 = builder.CreateLoad(mod->mapType(stm->getType())->getPointerElementType(), el1);
+                el2 = builder.CreateLoad(mod->mapType(stm->getType())->getPointerElementType(), el2);
+            }
+
+            if(stm->getType()->isMatrix()) {
+                std::string eqName = "equals_"+stm->getType()->getName()+"_"+stm->getType()->getName();
+                llvm::Function *eq_f = nullptr;
+                for(auto [kn, fin] : generated) {
+                    if(kn == eqName) {
+                        eq_f = fin;
+                    }
+                }
+                
+                if(!eq_f) {
+                    llvm::report_fatal_error("Matrix equals for struct equals was not generated");
+                }
+
+                isEq = builder.CreateCall(eq_f, {el1, el2});
+            }
+            else if(stm->getType()->getDecl()) {
+                std::string eqName = "equals_"+stm->getType()->getDecl()->getName()+"_"+stm->getType()->getDecl()->getName();
+                llvm::Function *eq_f = nullptr;
+                for(auto [kn, fin] : generated) {
+                    if(kn == eqName) {
+                        eq_f = fin;
+                    }
+                }
+                
+                if(!eq_f) {
+                    llvm::report_fatal_error("Struct equals for struct equals was not generated");
+                }
+
+                isEq = builder.CreateCall(eq_f, {el1, el2});
+            }
+            else if(stm->getType()->getName() == STRING_CSTR) {
+                isEq = builder.CreateCall(str_eq, {el1, el2});
+            }
+            else if(stm->getType()->getName() == FLOAT_CSTR) {
+                isEq = builder.CreateFCmpOEQ(el1, el2);
+            }
+            else {
+                isEq = builder.CreateICmpEQ(el1, el2);
+            }
+        }
+        else if(auto stm = llvm::dyn_cast<ir::StructDecl>(e)) {
+            std::string eqName = "equals_"+stm->getName()+"_"+stm->getName();
+            llvm::Function *eq_f = nullptr;
+            for(auto [kn, fin] : generated) {
+                if(kn == eqName) {
+                    eq_f = fin;
+                }
+            }
+            
+            if(!eq_f) {
+                llvm::report_fatal_error("Struct equals for struct equals was not generated");
+            }
+
+            isEq = builder.CreateCall(eq_f, {el1, el2});
+        }
+        else {
+            llvm::report_fatal_error("Unknown IR in struct for EQ");
+        }
+
+        builder.CreateCondBr(isEq, cmpBBs[index], notEqBB);
+        setCurrBB(cmpBBs[index]);
+
+        ++index;
+    }
+
+    builder.CreateRet(llvm::ConstantInt::get(int1T, 1, true));
+    setCurrBB(notEqBB);
+    builder.CreateRet(llvm::ConstantInt::get(int1T, 0, true));
 }
 
 void PTLib::setupLib() {

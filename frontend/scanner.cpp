@@ -707,6 +707,28 @@ std::vector<ir::Expr *> Scanner::parseAddMatrixSize(std::vector<ir::Expr *> &lis
     return list;
 }
 
+void Scanner::addStructTemplatedFunction(ir::TypeDecl *t) {
+    ir::TypeDecl *tPtr = t->clone();
+    tPtr->setMaybe(true);
+    auto stDecl = llvm::dyn_cast<ir::StructDecl>(t->getDecl());
+    auto body = std::vector<ir::IR *> {};
+    {
+        auto params = std::vector<ir::FormalParamDecl *>{
+            new ir::FormalParamDecl(currentIR, llvmloc2Src(), "s", t, false),
+            new ir::FormalParamDecl(currentIR, llvmloc2Src(), "s", t, false)
+        };
+        auto fun = new ir::FunctionDecl(currentIR,
+                                                llvmloc2Src(),
+                                                "equals_"+t->getName()+"_"+t->getName(),
+                                                "equals",
+                                                this->boolType,
+                                                params,
+                                                body);
+        globalScope->insert(fun);
+        mainModule->addLibFunction(fun);
+    }
+}
+
 void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT) {
     ir::TypeDecl *tPtr = t->clone();
     tPtr->setMaybe(true);
@@ -1076,6 +1098,7 @@ ir::IR *Scanner::parseStruct(std::string name, std::vector<ir::IR *> body) {
     if(!currScope->insert(structType)) {
         diags.report(llvmloc2Src(), diag::ERR_SYM_ALREADY_DECLARED, name);
     }
+    addStructTemplatedFunction(structType);
     return structDecl;
 }
 

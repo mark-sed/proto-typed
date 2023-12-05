@@ -68,6 +68,7 @@ private:
      * @param elemT Matrix element type
      */
     void addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT);
+    void addStructTemplatedFunction(ir::TypeDecl *t);
 public:
     Parser::location_type *llvmloc = nullptr;     ///< Current parsing location
     ir::ModuleDecl *mainModule;
