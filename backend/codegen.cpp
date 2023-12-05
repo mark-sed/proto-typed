@@ -2163,9 +2163,6 @@ llvm::SmallVector<llvm::Constant *> cg::CGModule::getStructValsInit(ir::StructDe
     llvm::SmallVector<llvm::Constant *> vals;
     for(auto e : decl->getElements()) {
         auto evar = llvm::dyn_cast<ir::VarDecl>(e);
-        if(evar->getType()->isMaybe()) {
-            llvm::report_fatal_error("Struct maybe types are not yet implemented");
-        }
         auto ival = evar->getInitValue();
         for(auto [k, v] : inits) {
             if(k == evar->getName()) {
@@ -2174,7 +2171,10 @@ llvm::SmallVector<llvm::Constant *> cg::CGModule::getStructValsInit(ir::StructDe
             }
         }
         if(ival) {
-            if(auto vcast = llvm::dyn_cast<ir::IntLiteral>(ival)) {
+            if(evar->getType()->isMaybe()) {
+                vals.push_back(llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(mapType(evar->getType()))));
+            }
+            else if(auto vcast = llvm::dyn_cast<ir::IntLiteral>(ival)) {
                 vals.push_back(llvm::ConstantInt::get(ctx, vcast->getValue()));
             }
             else if(auto vcast = llvm::dyn_cast<ir::BoolLiteral>(ival)) {
@@ -2195,7 +2195,10 @@ llvm::SmallVector<llvm::Constant *> cg::CGModule::getStructValsInit(ir::StructDe
         }
         else {
             auto ty = evar->getType()->getName();
-            if(isPrimitiveType(evar->getType())) {
+            if(evar->getType()->isMaybe()) {
+                vals.push_back(llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(mapType(evar->getType()))));
+            }
+            else if(isPrimitiveType(evar->getType())) {
                 vals.push_back(getTypeDefaultValue(evar->getType()));
             }
             else if(ty == STRING_CSTR) {
@@ -2374,12 +2377,18 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                             int index = 0;
                             for(auto e: struDecl->getElements()) {
                                 if(auto eVar = llvm::dyn_cast<ir::VarDecl>(e)) {
-                                    if(eVar->getType()->getName() == STRING_CSTR) {
-                                        if(auto val = eVar->getInitValue()) {
-                                            llvm::Value* zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), 0);
-                                            llvm::Value* stIndex = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), index);
-                                            llvm::Value *elemPtr = builder.CreateGEP(mapType(var->getType()), v, {zero, stIndex});
+                                    llvm::Value* zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), 0);
+                                    llvm::Value* stIndex = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), index);
+                                    llvm::Value *elemPtr = builder.CreateGEP(mapType(var->getType()), v, {zero, stIndex});
 
+                                    if(eVar->getType()->isMaybe()) {
+                                        // TODO:
+                                        if(eVar->getInitValue()) {
+                                            llvm::report_fatal_error("Struct maybe value initalizer is not yet implemented");
+                                        }
+                                    }
+                                    else if(eVar->getType()->getName() == STRING_CSTR) {
+                                        if(auto val = eVar->getInitValue()) {
                                             auto vcast = llvm::dyn_cast<ir::StringLiteral>(val);
                                             llvm::GlobalVariable *str_txt = new llvm::GlobalVariable(*llvmMod,
                                                                                                     builder.getInt8Ty()->getPointerTo(),
@@ -2392,9 +2401,6 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                                         }
                                         else {
                                             // Default
-                                            llvm::Value* zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), 0);
-                                            llvm::Value* stIndex = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), index);
-                                            llvm::Value *elemPtr = builder.CreateGEP(mapType(var->getType()), v, {zero, stIndex});
                                             stringsToInit.push_back(std::make_pair(elemPtr, str_empty));
                                         }
                                     }

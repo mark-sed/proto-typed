@@ -186,7 +186,7 @@ private:
     llvm::GlobalVariable *str_empty;
     std::vector<std::pair<llvm::Value *, llvm::GlobalVariable *>> stringsToInit;
     std::vector<std::pair<llvm::Value *, ir::MatrixLiteral *>> matricesToInit;
-    std::vector<std::pair<llvm::GlobalVariable *, llvm::GlobalVariable *>> maybesToInit;
+    std::vector<std::pair<llvm::Value *, llvm::GlobalVariable *>> maybesToInit;
     std::set<ir::Import *> modulesToInit;
     bool mainMod;
 
