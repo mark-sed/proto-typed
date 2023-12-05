@@ -2096,19 +2096,19 @@ namespace  ptc  {
 
   case 154: // expr_var: expr_mat "+" expr_mat
 #line 462 "frontend/parser.yy"
-           { yylhs.value.as < ptc::ir::Expr * > () = yystack_[2].value.as < ptc::ir::Expr * > (); }
+                                    { yylhs.value.as < ptc::ir::Expr * > () = scanner->parseInfixExpr(yystack_[2].value.as < ptc::ir::Expr * > (), yystack_[0].value.as < ptc::ir::Expr * > (), ir::Operator(ir::OperatorKind::OP_ADD)); }
 #line 2101 "frontend/parser.cpp"
     break;
 
   case 155: // expr_var: expr_var "+" expr_mat
 #line 463 "frontend/parser.yy"
-           { yylhs.value.as < ptc::ir::Expr * > () = yystack_[2].value.as < ptc::ir::Expr * > (); }
+                                    { yylhs.value.as < ptc::ir::Expr * > () = scanner->parseInfixExpr(yystack_[2].value.as < ptc::ir::Expr * > (), yystack_[0].value.as < ptc::ir::Expr * > (), ir::Operator(ir::OperatorKind::OP_ADD)); }
 #line 2107 "frontend/parser.cpp"
     break;
 
   case 156: // expr_var: expr_mat "+" expr_var
 #line 464 "frontend/parser.yy"
-           { yylhs.value.as < ptc::ir::Expr * > () = yystack_[2].value.as < ptc::ir::Expr * > (); }
+                                    { yylhs.value.as < ptc::ir::Expr * > () = scanner->parseInfixExpr(yystack_[2].value.as < ptc::ir::Expr * > (), yystack_[0].value.as < ptc::ir::Expr * > (), ir::Operator(ir::OperatorKind::OP_ADD)); }
 #line 2113 "frontend/parser.cpp"
     break;
 

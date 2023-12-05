@@ -494,7 +494,23 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
             }
         break;
         case ir::OperatorKind::OP_ADD:
-            // FIXME: Handle matrices
+            if(tl->getName() == tr->getName() && tl->isMatrix()) {
+                type = tl;
+            }
+            else {
+                if(!utils::isOneOf(tl->getName(), {INT_CSTR, FLOAT_CSTR}) || !utils::isOneOf(tr->getName(), {INT_CSTR, FLOAT_CSTR})) {
+                    diags.report(llvmloc2Src(), diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+                }
+                else {
+                    // TODO: Kepp this implicit conversion?
+                    // Int or Float
+                    if(tl->getName() != tr->getName()) {
+                        // One is float
+                        type = this->floatType;
+                    }
+                }
+            }
+            break;
         case ir::OperatorKind::OP_SUB:
         case ir::OperatorKind::OP_MUL:
         case ir::OperatorKind::OP_DIV:
@@ -503,6 +519,7 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
                 diags.report(llvmloc2Src(), diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
             }
             else {
+                // TODO: Kepp this implicit conversion?
                 // Int or Float
                 if(tl->getName() != tr->getName()) {
                     // One is float
@@ -710,7 +727,7 @@ std::vector<ir::Expr *> Scanner::parseAddMatrixSize(std::vector<ir::Expr *> &lis
 void Scanner::addStructTemplatedFunction(ir::TypeDecl *t) {
     ir::TypeDecl *tPtr = t->clone();
     tPtr->setMaybe(true);
-    auto stDecl = llvm::dyn_cast<ir::StructDecl>(t->getDecl());
+    //auto stDecl = llvm::dyn_cast<ir::StructDecl>(t->getDecl());
     auto body = std::vector<ir::IR *> {};
     {
         auto params = std::vector<ir::FormalParamDecl *>{

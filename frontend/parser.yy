@@ -459,9 +459,9 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          | expr_float PLUS expr_var { $$ = scanner->parseInfixExpr(scanner->parseFloat($1), $3, ir::Operator(ir::OperatorKind::OP_ADD)); }
          | expr_var PLUS expr_int   { $$ = scanner->parseInfixExpr($1, scanner->parseInt($3), ir::Operator(ir::OperatorKind::OP_ADD)); }
          | expr_var PLUS expr_float { $$ = scanner->parseInfixExpr($1, scanner->parseFloat($3), ir::Operator(ir::OperatorKind::OP_ADD)); }
-         | expr_mat PLUS expr_mat
-         | expr_var PLUS expr_mat
-         | expr_mat PLUS expr_var
+         | expr_mat PLUS expr_mat   { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_ADD)); }
+         | expr_var PLUS expr_mat   { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_ADD)); }
+         | expr_mat PLUS expr_var   { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_ADD)); }
          | expr_var PLUS expr_var   { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_ADD)); }
 
          | expr_int MINUS expr_var   { $$ = scanner->parseInfixExpr(scanner->parseInt($1), $3, ir::Operator(ir::OperatorKind::OP_SUB)); } 

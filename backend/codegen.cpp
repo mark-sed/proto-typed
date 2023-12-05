@@ -927,6 +927,12 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             auto intv = builder.CreateSIToFP(left, floatT);
             result = builder.CreateFAdd(intv, right);
         }
+        else if(e->getLeft()->getType()->isMatrix()) {
+            std::string joinFName = "join_"+e->getLeft()->getType()->getName()+"_"+e->getLeft()->getType()->getName();
+            auto join_f = cgm.getLLVMMod()->getOrInsertFunction(joinFName, 
+                                                llvm::FunctionType::get(left->getType(), {left->getType(), left->getType()}, false));
+            result = builder.CreateCall(join_f, {left, right});
+        }
         else {
             llvm::report_fatal_error("ADD does not supported given type");
         }
