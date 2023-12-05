@@ -515,9 +515,9 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          | expr_str EQ expr_var         { $$ = scanner->parseInfixExpr(scanner->parseString($1), $3, ir::Operator(ir::OperatorKind::OP_EQ)); }
          | expr_bool EQ expr_var        { $$ = scanner->parseInfixExpr(scanner->parseBool($1), $3, ir::Operator(ir::OperatorKind::OP_EQ)); }
          | expr_none EQ expr_var        { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_EQ)); }
-         | expr_struct EQ expr_struct
-         | expr_struct EQ expr_var
-         | expr_var EQ expr_struct
+         | expr_struct EQ expr_struct   { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_EQ)); }
+         | expr_struct EQ expr_var      { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_EQ)); }
+         | expr_var EQ expr_struct      { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_EQ)); }
          | expr_var EQ expr_int         { $$ = scanner->parseInfixExpr($1, scanner->parseInt($3), ir::Operator(ir::OperatorKind::OP_EQ)); }
          | expr_var EQ expr_float       { $$ = scanner->parseInfixExpr($1, scanner->parseFloat($3), ir::Operator(ir::OperatorKind::OP_EQ)); }
          | expr_var EQ expr_str         { $$ = scanner->parseInfixExpr($1, scanner->parseString($3), ir::Operator(ir::OperatorKind::OP_EQ)); }
@@ -533,9 +533,9 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          | expr_str NEQ expr_var       { $$ = scanner->parseInfixExpr(scanner->parseString($1), $3, ir::Operator(ir::OperatorKind::OP_NEQ)); }
          | expr_bool NEQ expr_var      { $$ = scanner->parseInfixExpr(scanner->parseBool($1), $3, ir::Operator(ir::OperatorKind::OP_NEQ)); }
          | expr_none NEQ expr_var      { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_NEQ)); }
-         | expr_struct NEQ expr_struct
-         | expr_struct NEQ expr_var
-         | expr_var NEQ expr_struct
+         | expr_struct NEQ expr_struct { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_NEQ)); }
+         | expr_struct NEQ expr_var    { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_NEQ)); }
+         | expr_var NEQ expr_struct    { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_NEQ)); }
          | expr_var NEQ expr_int       { $$ = scanner->parseInfixExpr($1, scanner->parseInt($3), ir::Operator(ir::OperatorKind::OP_NEQ)); }  
          | expr_var NEQ expr_float     { $$ = scanner->parseInfixExpr($1, scanner->parseFloat($3), ir::Operator(ir::OperatorKind::OP_NEQ)); }
          | expr_var NEQ expr_str       { $$ = scanner->parseInfixExpr($1, scanner->parseString($3), ir::Operator(ir::OperatorKind::OP_NEQ)); }

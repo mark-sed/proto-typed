@@ -92,3 +92,23 @@ print((b == b)++"\n")
 B b2
 b2.a.id2 = -42
 print((b2 == b)++"\n")
+
+B ggb
+ggb.a.c.u = 80
+print((ggb == ggb) ++ "\n")
+
+B ggb2
+ggb2.a.g = 1
+print((ggb == ggb2) ++ "\n")
+
+ggb.a.g = 1
+ggb2.a.c.u = 80
+print((ggb == ggb2) ++ "\n")
+
+struct U1 {
+    int a
+}
+U1 u1
+print((u1 == U1{}) ++ "\n")
+u1.a = 4
+print((u1 == U1{.a=5}) ++ "\n")
