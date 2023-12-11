@@ -2346,12 +2346,12 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                     auto init = llvm::ConstantAggregateZero::get(stringT);
                     v->setInitializer(init);
                 }
-                else if(var->getType()->isMatrix()) {
+                else if(var->getType()->isMatrix() && llvm::isa<ir::MatrixLiteral>(value)) {
                     auto init = llvm::ConstantAggregateZero::get(matrixT);
                     v->setInitializer(init);
                     matricesToInit.push_back(std::make_pair(v, llvm::dyn_cast<ir::MatrixLiteral>(value)));
                 }
-                else if(var->getType()->getDecl()) {
+                else if(!var->getType()->isMatrix() && var->getType()->getDecl()) {
                     auto init = llvm::ConstantAggregateZero::get(mapType(var->getType()));
                     v->setInitializer(init);
                     structsToInit.push_back(std::make_pair(v, llvm::dyn_cast<ir::StructLiteral>(value)));
