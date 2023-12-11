@@ -2351,6 +2351,11 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                     v->setInitializer(init);
                     matricesToInit.push_back(std::make_pair(v, llvm::dyn_cast<ir::MatrixLiteral>(value)));
                 }
+                else if(var->getType()->getDecl()) {
+                    auto init = llvm::ConstantAggregateZero::get(mapType(var->getType()));
+                    v->setInitializer(init);
+                    structsToInit.push_back(std::make_pair(v, llvm::dyn_cast<ir::StructLiteral>(value)));
+                }
                 else {
                     llvm::report_fatal_error("Global variable initializer is not a constant");
                 }
@@ -2618,6 +2623,98 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                 }
                 builder.CreateCall(matrixAppend, {mPtr, intV});
             }
+        }
+    }
+
+    // Init structs
+    for(auto [d, v]: structsToInit) {
+        auto struDecl = v->getDecl();
+        auto tp = v->getType();
+
+        int i = 0;
+        for(auto elem : struDecl->getElements()) {
+            auto evar = llvm::dyn_cast<ir::VarDecl>(elem);
+            if(evar->getType()->isMaybe()) {
+                llvm::report_fatal_error("Struct literal maybe types are not yet implemented");
+            }
+            auto ival = evar->getInitValue();
+            for(auto [k, v] : v->getValues()) {
+                if(k == evar->getName()) {
+                    ival = v;
+                    break;
+                }
+            }
+            llvm::Value *emV = nullptr;
+            if(!ival) {
+                if(isPrimitiveType(evar->getType())) {
+                    emV = getTypeDefaultValue(evar->getType());
+                }
+                else if(evar->getType()->getName() == STRING_CSTR) {
+                    auto strobj = builder.CreateAlloca(stringT);
+
+                    auto stringInitF = llvmMod->getOrInsertFunction("string_Create_Init", 
+                                                                llvm::FunctionType::get(
+                                                                    voidT,
+                                                                    {
+                                                                        stringTPtr,
+                                                                        builder.getInt8Ty()->getPointerTo()
+                                                                    },
+                                                                    false
+                                                                ));
+                    // Init string
+                    auto vloaded = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), str_empty);
+                    builder.CreateCall(stringInitF, { strobj, vloaded });
+                    emV = builder.CreateLoad(stringT, strobj);
+                }
+                else {
+                    llvm::report_fatal_error("Struct nested intializer is not yet implemented");
+                }
+            } else {
+                if(auto e = llvm::dyn_cast<ir::IntLiteral>(ival)) {
+                    emV = llvm::ConstantInt::get(int64T, e->getValue());
+                }
+                else if(auto e = llvm::dyn_cast<ir::BoolLiteral>(ival)) {
+                    emV = llvm::ConstantInt::get(int1T, e->getValue());
+                }
+                else if(auto e = llvm::dyn_cast<ir::FloatLiteral>(ival)) {
+                    emV = llvm::ConstantFP::get(floatT, e->getValue());
+                }
+                else if(llvm::isa<ir::NoneLiteral>(ival)) {
+                    emV = llvm::ConstantPointerNull::get(builder.getInt8Ty()->getPointerTo());
+                }
+                else if(auto e = llvm::dyn_cast<ir::StringLiteral>(ival)) {
+                    llvm::GlobalVariable *glv = new llvm::GlobalVariable(*llvmMod,
+                                                            builder.getInt8Ty()->getPointerTo(),
+                                                            false,
+                                                            llvm::GlobalValue::PrivateLinkage,
+                                                            nullptr);
+                    glv->setInitializer(builder.CreateGlobalStringPtr(e->getValue().c_str(), "", 0, llvmMod));
+                    
+                    auto strobj = builder.CreateAlloca(stringT);
+
+                    auto stringInitF = llvmMod->getOrInsertFunction("string_Create_Init", 
+                                                                llvm::FunctionType::get(
+                                                                    voidT,
+                                                                    {
+                                                                        stringTPtr,
+                                                                        builder.getInt8Ty()->getPointerTo()
+                                                                    },
+                                                                    false
+                                                                ));
+                    // Init string
+                    auto vloaded = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), glv);
+                    builder.CreateCall(stringInitF, { strobj, vloaded });
+                    emV = builder.CreateLoad(stringT, strobj);
+                }
+                else {
+                    llvm::report_fatal_error("Global matrix initializer has to be a constant");
+                }
+            }
+            llvm::Value *zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), 0);
+            llvm::Value *index = llvm::ConstantInt::get(llvm::Type::getInt32Ty(getLLVMCtx()), i);
+            auto elemPtr = builder.CreateGEP(mapType(tp), d, {zero, index});
+            builder.CreateStore(emV, elemPtr);
+            ++i;
         }
     }
 

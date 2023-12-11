@@ -30,6 +30,7 @@ namespace ptc{
         class Expr;
         class TypeDecl;
         class MatrixLiteral;
+        class StructLiteral;
         class StructDecl;
         class FunctionDecl;
         class BinaryInfixExpr;
@@ -186,6 +187,7 @@ private:
     llvm::GlobalVariable *str_empty;
     std::vector<std::pair<llvm::Value *, llvm::GlobalVariable *>> stringsToInit;
     std::vector<std::pair<llvm::Value *, ir::MatrixLiteral *>> matricesToInit;
+    std::vector<std::pair<llvm::Value *, ir::StructLiteral *>> structsToInit;
     std::vector<std::pair<llvm::Value *, llvm::GlobalVariable *>> maybesToInit;
     std::set<ir::Import *> modulesToInit;
     bool mainMod;
