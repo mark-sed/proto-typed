@@ -22,6 +22,7 @@ private:
     ir::FunctionDecl *fun;
     Diagnostics &diags;
 
+    void countReturns(std::vector<ir::IR *> decls, int *num_found, int *nested_ret);
     void checkReturnType(std::vector<ir::IR *> decls, int *num_found, int *nested_ret, ir::TypeDecl * expected);
 public:
     /**
