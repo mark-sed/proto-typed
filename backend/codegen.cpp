@@ -2417,6 +2417,14 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                                             stringsToInit.push_back(std::make_pair(elemPtr, str_empty));
                                         }
                                     }
+                                    else if(eVar->getType()->isMatrix()) {
+                                        if(auto val = eVar->getInitValue()) {
+                                            matricesToInit.push_back(std::make_pair(elemPtr, llvm::dyn_cast<ir::MatrixLiteral>(val)));
+                                        }
+                                        else {
+                                            matricesToInit.push_back(std::make_pair(elemPtr, nullptr));
+                                        }
+                                    }
                                 }
                                 // TODO: make this function and recursively go deeper if e is StructDecl
                                 ++index;
@@ -2628,7 +2636,7 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
         }
     }
 
-    // Init structs
+    // Init struct literals
     for(auto [d, v]: structsToInit) {
         auto struDecl = v->getDecl();
         auto tp = v->getType();
