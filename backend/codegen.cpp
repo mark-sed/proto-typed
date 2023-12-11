@@ -1203,7 +1203,7 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     case ir::OperatorKind::OP_EQ:
     {
         LOGMAX("Creating EQ instruction");
-        if(left->getType() == right->getType() && e->getLeft()->getType()->getName() == STRING_CSTR) {
+        if(e->getLeft()->getType()->getName() == e->getRight()->getType()->getName() && e->getLeft()->getType()->getName() == STRING_CSTR) {
             auto str_eq = cgm.getLLVMMod()->getOrInsertFunction("string_Eq",
                                  llvm::FunctionType::get(
                                     int1T,
@@ -1243,6 +1243,8 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             result = builder.CreateICmpEQ(ldv, tnone);
         }
         else {
+            llvm::dbgs() << *left << ", " << *right << "\n";
+            llvm::dbgs() << e->getLeft()->getType()->getName() << ", " << e->getRight()->getType()->getName() << "\n";
             llvm::report_fatal_error("EQ does not supported given type");
         }
     }

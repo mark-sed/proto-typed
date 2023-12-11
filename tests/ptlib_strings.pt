@@ -52,3 +52,5 @@ string thiscmp = "Proto-typed compiler"
 
 print(slice(thiscmp, 0, 6))
 print(slice(thiscmp, 4, 3, -1)++"\n")
+
+print((chr(ord("H")) == "H") ++ "\n")
