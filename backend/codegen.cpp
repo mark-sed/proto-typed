@@ -231,21 +231,7 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
                 builder.CreateStore(val, ptrValNew);
             }
             else {
-                // Check if any to bitcast //TODO: Remove once as is implemented 
-                /*if(val->getType() == builder.getInt8Ty()) {
-                    if(auto li = llvm::dyn_cast<llvm::LoadInst>(val)) {
-                        auto emEx = li->getOperand(0);
-                        auto casted = builder.CreateBitCast(emEx, mapType(decl)->getPointerTo());
-                        auto loaded = builder.CreateLoad(mapType(decl), casted);
-                        builder.CreateStore(loaded, locals[decl]);
-                    }
-                    else {
-                        llvm::report_fatal_error("Cannot cast any type for parameter");
-                    }
-                }
-                else {*/
-                    builder.CreateStore(val, locals[decl]);
-                //}
+                builder.CreateStore(val, locals[decl]);
             }
         }
         else {
@@ -280,17 +266,6 @@ void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Val
             }
             else {
                 auto vPtr = builder.CreateAlloca(t);
-                // Check if any to bitcast //TODO: Remove once as is implemented 
-                /*if(val->getType() == builder.getInt8Ty()) {
-                    if(auto li = llvm::dyn_cast<llvm::LoadInst>(val)) {
-                        auto emEx = li->getOperand(0);
-                        auto casted = builder.CreateBitCast(emEx, mapType(decl)->getPointerTo());
-                        val = builder.CreateLoad(mapType(decl), casted);
-                    }
-                    else {
-                        llvm::report_fatal_error("Cannot cast any type for parameter");
-                    }
-                }*/
                 builder.CreateStore(val, vPtr);
                 locals[decl] = vPtr;
             }
@@ -329,21 +304,7 @@ void cg::CGFunction::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *v
                 builder.CreateStore(val, ptrValNew);
             }
             else {
-                // Check if any to bitcast
-                /*if(val->getType() == builder.getInt8Ty()) {
-                    if(auto li = llvm::dyn_cast<llvm::LoadInst>(val)) {
-                        auto emEx = li->getOperand(0);
-                        auto casted = builder.CreateBitCast(emEx, mapType(decl)->getPointerTo());
-                        auto loaded = builder.CreateLoad(mapType(decl), casted);
-                        builder.CreateStore(loaded, cgm.getGlobals(decl));
-                    }
-                    else {
-                        llvm::report_fatal_error("Cannot cast any type for global value");
-                    }
-                }
-                else {*/
                 builder.CreateStore(val, cgm.getGlobals(decl));
-                //}
             }
         }
         else {
@@ -429,21 +390,7 @@ void cg::CGFunction::writeExtVar(CGModule *mod, ir::IR *decl, llvm::Value *val) 
                 builder.CreateStore(val, ptrValNew);
             }
             else {
-                // Check if any to bitcast
-                /*if(val->getType() == builder.getInt8Ty()) {
-                    if(auto li = llvm::dyn_cast<llvm::LoadInst>(val)) {
-                        auto emEx = li->getOperand(0);
-                        auto casted = builder.CreateBitCast(emEx, mapType(decl)->getPointerTo());
-                        auto loaded = builder.CreateLoad(mapType(decl), casted);
-                        builder.CreateStore(loaded, extVar);
-                    }
-                    else {
-                        llvm::report_fatal_error("Cannot cast any type for global value");
-                    }
-                }
-                else {*/
-                    builder.CreateStore(val, extVar);
-                //}
+                builder.CreateStore(val, extVar);
             }
         }
         else {
@@ -516,9 +463,6 @@ llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl, bool as
         else {
             return readLocalVar(BB, decl, asMaybe);
         }
-        /*else {
-            llvm::report_fatal_error("Nested functions are not supported");
-        }*/
     } else if(auto *v = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
         if(v->isByReference()) {
             if(v->getType()->isMaybe() && !asMaybe) {
@@ -1224,8 +1168,8 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
                 result = builder.CreateFCmpOEQ(left, right);
             }
             else if(e->getLeft()->getType()->getName() == ANY_CSTR) {
-                auto ldv = llvm::dyn_cast<llvm::LoadInst>(left)->getOperand(0);
-                auto rdv = llvm::dyn_cast<llvm::LoadInst>(right)->getOperand(0);
+                auto ldv = llvm::dyn_cast<llvm::Instruction>(left)->getOperand(0);
+                auto rdv = llvm::dyn_cast<llvm::Instruction>(right)->getOperand(0);
                 result = builder.CreateICmpEQ(ldv, rdv);
             }
             else {
@@ -1233,12 +1177,12 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             }
         }
         else if(e->getLeft()->getType()->getName() == NONETYPE_CSTR && e->getRight()->getType()->isMaybe()) {
-            auto ldv = llvm::dyn_cast<llvm::LoadInst>(right)->getOperand(0);
+            auto ldv = llvm::dyn_cast<llvm::Instruction>(right)->getOperand(0);
             auto tnone = llvm::ConstantPointerNull::get(right->getType()->getPointerTo());
             result = builder.CreateICmpEQ(ldv, tnone);
         }
         else if(e->getRight()->getType()->getName() == NONETYPE_CSTR && e->getLeft()->getType()->isMaybe()) {
-            auto ldv = llvm::dyn_cast<llvm::LoadInst>(left)->getOperand(0);
+            auto ldv = llvm::dyn_cast<llvm::Instruction>(left)->getOperand(0);
             auto tnone = llvm::ConstantPointerNull::get(left->getType()->getPointerTo());
             result = builder.CreateICmpEQ(ldv, tnone);
         }
@@ -1278,8 +1222,8 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
                 result = builder.CreateFCmpONE(left, right);
             }
             else if(e->getLeft()->getType()->getName() == ANY_CSTR) {
-                auto ldv = llvm::dyn_cast<llvm::LoadInst>(left)->getOperand(0);
-                auto rdv = llvm::dyn_cast<llvm::LoadInst>(right)->getOperand(0);
+                auto ldv = llvm::dyn_cast<llvm::Instruction>(left)->getOperand(0);
+                auto rdv = llvm::dyn_cast<llvm::Instruction>(right)->getOperand(0);
                 result = builder.CreateICmpNE(ldv, rdv);
             }
             else {
@@ -1287,12 +1231,12 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             }
         }
         else if(e->getLeft()->getType()->getName() == NONETYPE_CSTR && e->getRight()->getType()->isMaybe()) {
-            auto ldv = llvm::dyn_cast<llvm::LoadInst>(right)->getOperand(0);
+            auto ldv = llvm::dyn_cast<llvm::Instruction>(right)->getOperand(0);
             auto tnone = llvm::ConstantPointerNull::get(right->getType()->getPointerTo());
             result = builder.CreateICmpNE(ldv, tnone);
         }
         else if(e->getRight()->getType()->getName() == NONETYPE_CSTR && e->getLeft()->getType()->isMaybe()) {
-            auto ldv = llvm::dyn_cast<llvm::LoadInst>(left)->getOperand(0);
+            auto ldv = llvm::dyn_cast<llvm::Instruction>(left)->getOperand(0);
             auto tnone = llvm::ConstantPointerNull::get(left->getType()->getPointerTo());
             result = builder.CreateICmpNE(ldv, tnone);
         }
@@ -1451,8 +1395,8 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             }
         }
         else {
-            auto mleft = llvm::dyn_cast<llvm::LoadInst>(left)->getOperand(0);
-            mleft = llvm::dyn_cast<llvm::LoadInst>(mleft)->getOperand(0);
+            auto mleft = llvm::dyn_cast<llvm::Instruction>(left)->getOperand(0);
+            mleft = llvm::dyn_cast<llvm::Instruction>(mleft)->getOperand(0);
             if(left->getType() == int64T) {
                 lval = builder.CreateCall(to_str_mint, { mleft });
             }
@@ -1486,8 +1430,8 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             }
         }
         else {
-            auto mright = llvm::dyn_cast<llvm::LoadInst>(right)->getOperand(0);
-            mright = llvm::dyn_cast<llvm::LoadInst>(mright)->getOperand(0);
+            auto mright = llvm::dyn_cast<llvm::Instruction>(right)->getOperand(0);
+            mright = llvm::dyn_cast<llvm::Instruction>(mright)->getOperand(0);
             if(right->getType() == int64T) {
                 rval = builder.CreateCall(to_str_mint, { mright });
             }
@@ -1537,7 +1481,7 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             auto resStrIR = new ir::StringLiteral(ir::SourceInfo(), emstr, e->getLeft()->getType());
             auto resStr = emitExpr(resStrIR);
             delete resStrIR;
-            auto resStrPtr = llvm::dyn_cast<llvm::LoadInst>(resStr)->getOperand(0);
+            auto resStrPtr = llvm::dyn_cast<llvm::Instruction>(resStr)->getOperand(0);
             auto str_add = cgm.getLLVMMod()->getOrInsertFunction("string_Add_Char",
                                  llvm::FunctionType::get(
                                     voidT,
@@ -1651,8 +1595,8 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             }
         }
         else {
-            auto pleft = llvm::dyn_cast<llvm::LoadInst>(left)->getOperand(0);
-            auto mleft = llvm::dyn_cast<llvm::LoadInst>(pleft)->getOperand(0);
+            auto pleft = llvm::dyn_cast<llvm::Instruction>(left)->getOperand(0);
+            auto mleft = llvm::dyn_cast<llvm::Instruction>(pleft)->getOperand(0);
 
             // Maybe type
             if(ogType->getName() == INT_CSTR) {
@@ -1941,7 +1885,7 @@ void cg::CGFunction::emitStmt(ir::ForeachStmt *stmt) {
         stp = builder.CreateCall(stacksave);
 
         auto iLd = emitExpr(stmt->getI());
-        auto iPtr = llvm::dyn_cast<llvm::LoadInst>(iLd)->getOperand(0);
+        auto iPtr = llvm::dyn_cast<llvm::Instruction>(iLd)->getOperand(0);
         builder.CreateStore(index, iPtr);
     }
     else {
@@ -1968,7 +1912,7 @@ void cg::CGFunction::emitStmt(ir::ForeachStmt *stmt) {
             auto valptr = builder.CreateGEP(elT, casted, index);
             auto result = builder.CreateLoad(elT, valptr);
             auto iLd = emitExpr(stmt->getI());
-            auto iPtr = llvm::dyn_cast<llvm::LoadInst>(iLd)->getOperand(0);
+            auto iPtr = llvm::dyn_cast<llvm::Instruction>(iLd)->getOperand(0);
             builder.CreateStore(result, iPtr);
         }
         else {
@@ -1977,7 +1921,7 @@ void cg::CGFunction::emitStmt(ir::ForeachStmt *stmt) {
             auto resStrIR = new ir::StringLiteral(ir::SourceInfo(), emstr, stmt->getCollection()->getType());
             auto resStr = emitExpr(resStrIR);
             delete resStrIR;
-            auto resStrPtr = llvm::dyn_cast<llvm::LoadInst>(resStr)->getOperand(0);
+            auto resStrPtr = llvm::dyn_cast<llvm::Instruction>(resStr)->getOperand(0);
             auto str_add = cgm.getLLVMMod()->getOrInsertFunction("string_Add_Char",
                                     llvm::FunctionType::get(
                                     voidT,
@@ -1994,7 +1938,7 @@ void cg::CGFunction::emitStmt(ir::ForeachStmt *stmt) {
             builder.CreateCall(str_add, {resStrPtr, charextr});
             auto result = builder.CreateLoad(stringT, resStrPtr);
             auto iLd = emitExpr(stmt->getI());
-            auto iPtr = llvm::dyn_cast<llvm::LoadInst>(iLd)->getOperand(0);
+            auto iPtr = llvm::dyn_cast<llvm::Instruction>(iLd)->getOperand(0);
             builder.CreateStore(result, iPtr);
         }
     }
