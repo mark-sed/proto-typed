@@ -125,6 +125,7 @@ struct T2 {
     bool? c = true
     string? d = "ha\n"
     R? r = R{.a = 4}
+    R? r2
 }
 
 T2 t2m
@@ -140,3 +141,5 @@ print(t2m.d as string)
 R? rm
 rm = t2m.r
 print(rm.a ++ "\n")
+rm = t2m.r2
+print((rm == none) ++ "\n")

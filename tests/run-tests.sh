@@ -199,7 +199,7 @@ true
 4 true 4.25 hi
 49f\n3.14\ntrue\nfalse\ntrue\nfalse
 true\nfalse\ntrue\ntrue\nfalse
-4.05\n3-7trueha\n4\n" "structs"
+4.05\n3-7trueha\n4\ntrue\n" "structs"
 }
 
 function test_modules {
