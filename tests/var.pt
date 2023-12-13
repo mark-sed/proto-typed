@@ -1,0 +1,37 @@
+var a = 4
+var b = 2.2
+var c = "Hello"
+
+print(a ++ "\n")
+print(b ++ "\n")
+print(c ++ "\n")
+
+var e = [1]
+for(int i : e) {
+    print(i as string)
+}
+print("\n")
+
+var e2 = [true, false]
+for(bool i : e2) {
+    print(i as string)
+}
+print("\n")
+
+var e3 = [5.5, 2.2]
+for(float i : e3) {
+    print(i as string)
+}
+print("\n")
+
+var e4 = ["a", "b", "\n"]
+for(string i : e4) {
+    print(i as string)
+}
+
+struct S {
+    int a
+}
+
+var d = S{.a = -8}
+print(d.a ++ "\n")

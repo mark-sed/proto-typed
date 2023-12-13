@@ -316,8 +316,8 @@ void Scanner::leaveScope() {
 
 ir::IR *Scanner::parseVarDecl(ir::IR *type, const std::string name, ir::Expr *value) {
     if(!type) {
-        LOGMAX("Type for vardecl is nullptr");
-        return nullptr;
+        // var used
+        type = value->getType();
     }
     LOGMAX(type->getName()+" "+name);
     ir::TypeDecl *t = llvm::dyn_cast<ir::TypeDecl>(type);
