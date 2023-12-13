@@ -2642,7 +2642,7 @@ namespace  ptc  {
 
   case 242: // expr_var: expr_struct "in" expr_mat
 #line 565 "frontend/parser.yy"
-           { yylhs.value.as < ptc::ir::Expr * > () = yystack_[2].value.as < ptc::ir::Expr * > (); }
+                                   { yylhs.value.as < ptc::ir::Expr * > () = scanner->parseInfixExpr(yystack_[2].value.as < ptc::ir::Expr * > (), yystack_[0].value.as < ptc::ir::Expr * > (), ir::Operator(ir::OperatorKind::OP_IN)); }
 #line 2647 "frontend/parser.cpp"
     break;
 
@@ -2684,7 +2684,7 @@ namespace  ptc  {
 
   case 249: // expr_var: expr_struct "in" expr_var
 #line 572 "frontend/parser.yy"
-           { yylhs.value.as < ptc::ir::Expr * > () = yystack_[2].value.as < ptc::ir::Expr * > (); }
+                                   { yylhs.value.as < ptc::ir::Expr * > () = scanner->parseInfixExpr(yystack_[2].value.as < ptc::ir::Expr * > (), yystack_[0].value.as < ptc::ir::Expr * > (), ir::Operator(ir::OperatorKind::OP_IN)); }
 #line 2689 "frontend/parser.cpp"
     break;
 

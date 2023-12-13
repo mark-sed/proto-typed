@@ -143,3 +143,23 @@ rm = t2m.r
 print(rm.a ++ "\n")
 rm = t2m.r2
 print((rm == none) ++ "\n")
+
+struct StV {
+    int a = 7
+    string g = "."
+}
+
+StV[] ses
+StV valS
+append(ses, valS)
+append(ses, StV{.a = 4})
+
+print((valS in ses)++"\n")
+
+StV val2s
+val2s.g = ","
+print((val2s in ses)++"\n")
+
+print((StV{.a = 4} in ses) ++ "\n")
+print((StV{.a = 7, .g = "."} in ses) ++ "\n")
+print((StV{.a = -7, .g = "."} in ses) ++ "\n")

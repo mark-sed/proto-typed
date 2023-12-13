@@ -562,14 +562,14 @@ expr_var : ID { $$ = scanner->parseVar($1); }
          | expr_str IN expr_mat    { $$ = scanner->parseInfixExpr(scanner->parseString($1), $3, ir::Operator(ir::OperatorKind::OP_IN)); }
          | expr_bool IN expr_mat   { $$ = scanner->parseInfixExpr(scanner->parseBool($1), $3, ir::Operator(ir::OperatorKind::OP_IN)); }
          | expr_none IN expr_mat   { $$ = scanner->parseInfixExpr(scanner->parseNone(), $3, ir::Operator(ir::OperatorKind::OP_IN)); }
-         | expr_struct IN expr_mat 
+         | expr_struct IN expr_mat { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_IN)); }
          | expr_mat IN expr_mat    { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_IN)); }
          | expr_int IN expr_var    { $$ = scanner->parseInfixExpr(scanner->parseInt($1), $3, ir::Operator(ir::OperatorKind::OP_IN)); }
          | expr_float IN expr_var  { $$ = scanner->parseInfixExpr(scanner->parseFloat($1), $3, ir::Operator(ir::OperatorKind::OP_IN)); }
          | expr_str IN expr_var    { $$ = scanner->parseInfixExpr(scanner->parseString($1), $3, ir::Operator(ir::OperatorKind::OP_IN)); }
          | expr_bool IN expr_var   { $$ = scanner->parseInfixExpr(scanner->parseBool($1), $3, ir::Operator(ir::OperatorKind::OP_IN)); }
          | expr_none IN expr_var   { $$ = scanner->parseInfixExpr(scanner->parseNone(), $3, ir::Operator(ir::OperatorKind::OP_IN)); }
-         | expr_struct IN expr_var 
+         | expr_struct IN expr_var { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_IN)); }
          | expr_mat IN expr_var    { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_IN)); }
          | expr_var IN expr_str    { $$ = scanner->parseInfixExpr($1, scanner->parseString($3), ir::Operator(ir::OperatorKind::OP_IN)); }
          | expr_var IN expr_var    { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_IN)); }
