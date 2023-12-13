@@ -139,3 +139,26 @@ void extract_aas() {
 }
 
 extract_aas()
+
+int a9 
+int b9
+
+a9 = b9 = 4
+
+print(a9 ++ ", " ++ b9 ++ "\n")
+
+bool getTrue() {
+    return 1 == 1
+}
+
+struct YYY {
+    bool b
+}
+
+YYY yyy
+bool fyy = false
+bool hyy = true
+
+hyy = yyy.b = fyy = getTrue()
+
+print(hyy ++ ", " ++ yyy.b ++ ", " ++ fyy ++ "\n") 

@@ -1724,7 +1724,7 @@ namespace  ptc  {
 
   case 90: // set: expr "=" set
 #line 381 "frontend/parser.yy"
-      { yylhs.value.as < ptc::ir::Expr * > () = yystack_[2].value.as < ptc::ir::Expr * > (); }
+                          { yylhs.value.as < ptc::ir::Expr * > () = scanner->parseInfixExpr(yystack_[2].value.as < ptc::ir::Expr * > (), yystack_[0].value.as < ptc::ir::Expr * > (), ir::Operator(ir::OperatorKind::OP_ASSIGN)); }
 #line 1729 "frontend/parser.cpp"
     break;
 

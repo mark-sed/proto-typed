@@ -852,6 +852,7 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         else {
             llvm::report_fatal_error("Left hand side of an assignment is not assignable");
         }
+        result = right;
     }
     break;
     case ir::OperatorKind::OP_ADD:

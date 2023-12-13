@@ -174,7 +174,8 @@ function test_expressions {
 -1\n-43\ntrue\nfalse
 2\n0\n-1\n-616\n672\n2\n4\n16
 false\ntrue\ntrue\nfalse\ntrue\nProto-otorP
-accgtatg\ngtatgcca\n" "expressions"
+accgtatg\ngtatgcca
+4, 4\ntrue, true, true\n" "expressions"
 }
 
 function test_maybes {
@@ -223,7 +224,8 @@ true\nfalse\n0 1 2 3 4 5 6 7 8 \n1 2 \n3 4 \n5 6 \n" "arrays"
 
 function test_statements {
     expect_pass "statements.pt" "statements"
-    expect_out_eq "3 2 1 4\n0 1 2 3 \n5 4 3 2 \n10 7 4 1 \na b c \n-4 -2 0 \nhi there\n" "statements"
+    expect_out_eq "3 2 1 4\n0 1 2 3 \n5 4 3 2 \n10 7 4 1 \na b c \n-4 -2 0 \nhi there
+10\n10\n" "statements"
 }
 
 function test_casting {

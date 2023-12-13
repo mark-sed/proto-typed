@@ -378,7 +378,7 @@ set : expr SETCONCAT expr { $$ = scanner->parseInfixExpr($1, scanner->parseInfix
     | expr SETBLSHFT expr { $$ = scanner->parseInfixExpr($1, scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_BLSHFT)), ir::Operator(ir::OperatorKind::OP_ASSIGN)); }
     | expr SETBRSHFT expr { $$ = scanner->parseInfixExpr($1, scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_BRSHFT)), ir::Operator(ir::OperatorKind::OP_ASSIGN)); }
     | expr SET expr       { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_ASSIGN)); }
-    | expr SET set        
+    | expr SET set        { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_ASSIGN)); }
     ;
 
 // Function call arguments
