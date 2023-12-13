@@ -333,7 +333,6 @@ decllist : END
          ;
 declistval : type ID            { $$ = scanner->parseStructElement($1, $2, nullptr); }
            | type ID SET expr   { $$ = scanner->parseStructElement($1, $2, $4); }
-           | KWVAR ID SET expr
            ;
 
 // Function definition
@@ -606,7 +605,6 @@ matrix : LSQ RSQ                 { $$ = scanner->parseMatrix(std::vector<ptc::ir
        | LSQ END matvals RSQ     { $$ = scanner->parseMatrix($3); }
        | LSQ matvals END RSQ     { $$ = scanner->parseMatrix($2); }
        | LSQ END matvals END RSQ { $$ = scanner->parseMatrix($3); }
-       //| //TODO: [1,2..5] = [1,2,3,4,5] not [[1,2,3,4,5]]
        ;
 matvals : expr                   { $$ = scanner->parseMatrixValue($1); }
         | matvals COMMA expr     { $$ = scanner->parseAddMatrixValue($1, $3); }
@@ -616,7 +614,7 @@ matvals : expr                   { $$ = scanner->parseMatrixValue($1); }
 // Matrix expression
 expr_mat : matrix           { $$ = $1; }
          | LPAR matrix RPAR { $$ = $2; }
-         ; // TODO: Add compile time matrix simplification?
+         ;
 range : LPAR range RPAR                     { $$ = $2; }
       | int_val RANGE int_val               { $$ = scanner->parseRange($1, $3); }
       | int_val COMMA int_val RANGE int_val { $$ = scanner->parseRange($1, $3, $5); }
@@ -625,7 +623,6 @@ int_val : expr_int  { $$ = scanner->parseInt($1); }
         | expr_var  { $$ = $1; }
         ;
 slice : LSQ range RSQ  { $$ = $2; }
-      //LSQ RANGE RSQ  { $$ = scanner->parseSlice(nullptr); }
       ;
 
 // None expression
