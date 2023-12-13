@@ -168,12 +168,6 @@ llvm::Type *cg::CodeGen::mapType(ir::IR *decl) {
 }
 
 void cg::CGModule::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) {
-    /*if(llvm::dyn_cast<ir::VarDecl>(decl)) {
-        LOGMAX("Writing variable in module");
-        builder.CreateStore(val, getGlobals(decl));
-    } else {
-        llvm::report_fatal_error("Unsupported variable access");
-    }*/
     llvm::report_fatal_error("UNIMPLEMENTED module var write");
 }
 
@@ -521,23 +515,12 @@ llvm::Value *cg::CGFunction::emitFunCall(ir::FunctionCall *e) {
         if(f->getParams()[index]->isByReference()) {
             if(auto aa = llvm::dyn_cast<ir::VarAccess>(a)) {
                 if(aa->getType()->isMaybe()) {
-                    emEx = readVar(currBB, aa->getVar(), true);
-                    if(auto li = llvm::dyn_cast<llvm::LoadInst>(emEx)) {
-                        emEx = li->getOperand(0);
-                    }
-                    else {
-                        llvm::report_fatal_error("Argument in a function call cannot be passed in by a reference");
-                    }
+                    emEx = getReadValuePtr(readVar(currBB, aa->getVar(), true));
                 }
                 else {
                     emEx = builder.CreateAlloca(mapType(f->getParams()[index]->getType()));
-                    auto vLd = readVar(currBB, aa->getVar(), true);
-                    if(auto li = llvm::dyn_cast<llvm::LoadInst>(vLd)) {
-                        builder.CreateStore(li->getOperand(0), emEx);
-                    }
-                    else {
-                        llvm::report_fatal_error("Argument in a function call cannot be passed in by a reference");
-                    }
+                    auto vLd = getReadValuePtr(readVar(currBB, aa->getVar(), true));
+                    builder.CreateStore(vLd, emEx);
                 }
             }
             else {
@@ -740,8 +723,8 @@ llvm::Value *cg::CGFunction::getElementIndex(std::vector<llvm::Value *> &indices
             }
             else if(v->getEnclosingIR() == fun) {
                 llvar = readVar(currBB, var->getVar());
-                if(auto r = llvm::dyn_cast<llvm::LoadInst>(llvar))
-                    llvar = r->getOperand(0);
+                if(llvm::isa<llvm::LoadInst>(llvar))
+                    llvar = getReadValuePtr(llvar);
             }
             else {
                 llvm::report_fatal_error("Unknown variable scope");
@@ -750,13 +733,13 @@ llvm::Value *cg::CGFunction::getElementIndex(std::vector<llvm::Value *> &indices
         else if(auto v = llvm::dyn_cast<ir::FormalParamDecl>(var->getVar())) {
             if(v->isByReference()) {
                 llvar = formalParams[v];
-                if(auto r = llvm::dyn_cast<llvm::LoadInst>(llvar))
-                    llvar = r->getOperand(0);
+                if(llvm::isa<llvm::LoadInst>(llvar))
+                    llvar = getReadValuePtr(llvar);
             }
             else {
                 auto llvarval = readVar(currBB, var->getVar());
-                if(auto r = llvm::dyn_cast<llvm::LoadInst>(llvarval))
-                    llvar = r->getOperand(0);
+                if(llvm::isa<llvm::LoadInst>(llvarval))
+                    llvar = getReadValuePtr(llvarval);
             }
         }
         else {
@@ -777,6 +760,23 @@ llvm::Value *cg::CGFunction::emitStructElem(ir::BinaryInfixExpr *acc) {
 
 void cg::CGFunction::emitMemberAssignment(ir::BinaryInfixExpr *l, llvm::Value *r) {
     builder.CreateStore(r, emitStructElem(l));
+}
+
+llvm::Value *cg::CodeGen::getReadValuePtr(llvm::Value *v) {
+    // Load has pointer
+    if (llvm::isa<llvm::LoadInst>(v)) {
+        return llvm::dyn_cast<llvm::LoadInst>(v)->getOperand(0);
+    }
+
+    // Check if value is already a pointer
+    if(llvm::isa<llvm::PointerType>(v->getType())) {
+        auto rv = builder.CreateAlloca(v->getType());
+        builder.CreateStore(v, rv);
+        return rv;
+    }
+
+    llvm::report_fatal_error("Unknown typ");
+    return nullptr;
 }
 
 llvm::Value *cg::CGFunction::emitUnaryPrefixExpr(ir::UnaryPrefixExpr *e) {
@@ -818,15 +818,15 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         if(auto *var = llvm::dyn_cast<ir::VarAccess>(e->getLeft())) {
             if(auto *varDecl = llvm::dyn_cast<ir::VarDecl>(var->getVar())) {
                 if(e->getLeft()->getType()->isMaybe() && e->getRight()->getType()->isMaybe()) {
-                    if(auto r = llvm::dyn_cast<llvm::LoadInst>(right))
-                        right = r->getOperand(0);
+                    if(llvm::isa<llvm::LoadInst>(right))
+                        right = getReadValuePtr(right);
                 }
                 writeVar(currBB, varDecl, right);
             }
             else if(auto *fp = llvm::dyn_cast<ir::FormalParamDecl>(var->getVar())) {
                 if(e->getLeft()->getType()->isMaybe() && e->getRight()->getType()->isMaybe()) {
-                    if(auto r = llvm::dyn_cast<llvm::LoadInst>(right))
-                        right = r->getOperand(0);
+                    if(llvm::isa<llvm::LoadInst>(right))
+                        right = getReadValuePtr(right);
                 }
                 writeVar(currBB, fp, right);
             }
@@ -840,8 +840,8 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         else if(auto *val = llvm::dyn_cast<ir::ExternalSymbolAccess>(e->getLeft())) {
             if(auto *varDecl = llvm::dyn_cast<ir::VarDecl>(val->getExtIR())) {
                 if(e->getLeft()->getType()->isMaybe() && e->getRight()->getType()->isMaybe()) {
-                    if(auto r = llvm::dyn_cast<llvm::LoadInst>(right))
-                        right = r->getOperand(0);
+                    if(llvm::isa<llvm::LoadInst>(right))
+                        right = getReadValuePtr(right);
                 }
                 writeExtVar(val->getModDecl()->getCGModule(), varDecl, right);
             }
@@ -1380,13 +1380,13 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
                                     false
                                  ));
         if(!e->getLeft()->getType()->isMaybe()) {
-            if(left->getType() == int64T) {
+            if(e->getLeft()->getType()->getName() == INT_CSTR) {
                 lval = builder.CreateCall(to_str_int, { left });
             }
-            else if(left->getType() == floatT) {
+            else if(e->getLeft()->getType()->getName() == FLOAT_CSTR) {
                 lval = builder.CreateCall(to_str_float, { left });
             }
-            else if(left->getType() == int1T) {
+            else if(e->getLeft()->getType()->getName() == BOOL_CSTR) {
                 lval = builder.CreateCall(to_str_bool, { left });
             }
             else if(e->getLeft()->getType()->getName() == NONETYPE_CSTR) {
@@ -1395,18 +1395,28 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             }
         }
         else {
-            auto mleft = llvm::dyn_cast<llvm::Instruction>(left)->getOperand(0);
-            mleft = llvm::dyn_cast<llvm::Instruction>(mleft)->getOperand(0);
-            if(left->getType() == int64T) {
+            llvm::Value *pleft = nullptr;
+            llvm::Value *mleft = nullptr;
+            if (llvm::isa<llvm::PointerType>(left->getType())) {
+                pleft = left;
+                mleft = getReadValuePtr(left);
+            }
+            else {
+                // Extract Value
+                pleft = getReadValuePtr(left);
+                mleft = getReadValuePtr(pleft);
+            }
+            
+            if(e->getLeft()->getType()->getName() == INT_CSTR) {
                 lval = builder.CreateCall(to_str_mint, { mleft });
             }
-            else if(left->getType() == floatT) {
+            else if(e->getLeft()->getType()->getName() == FLOAT_CSTR) {
                 lval = builder.CreateCall(to_str_mfloat, { mleft });
             }
-            else if(left->getType() == int1T) {
+            else if(e->getLeft()->getType()->getName() == BOOL_CSTR) {
                 lval = builder.CreateCall(to_str_mbool, { mleft });
             }
-            else if(left->getType() == stringT) {
+            else if(e->getLeft()->getType()->getName() == STRING_CSTR) {
                 lval = builder.CreateCall(to_str_mstring, { mleft });
             }
             else {
@@ -1415,13 +1425,13 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         }
 
         if(!e->getRight()->getType()->isMaybe()) {
-            if(right->getType() == int64T) {
+            if(e->getRight()->getType()->getName() == INT_CSTR) {
                 rval = builder.CreateCall(to_str_int, { right });
             }
-            else if(right->getType() == floatT) {
+            else if(e->getRight()->getType()->getName() == FLOAT_CSTR) {
                 rval = builder.CreateCall(to_str_float, { right });
             }
-            else if(right->getType() == int1T) {
+            else if(e->getRight()->getType()->getName() == BOOL_CSTR) {
                 rval = builder.CreateCall(to_str_bool, { right });
             }
             else if(e->getRight()->getType()->getName() == NONETYPE_CSTR) {
@@ -1430,18 +1440,26 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             }
         }
         else {
-            auto mright = llvm::dyn_cast<llvm::Instruction>(right)->getOperand(0);
-            mright = llvm::dyn_cast<llvm::Instruction>(mright)->getOperand(0);
-            if(right->getType() == int64T) {
+            llvm::Value *pright = nullptr;
+            llvm::Value *mright = nullptr;
+            if (llvm::isa<llvm::PointerType>(right->getType())) {
+                mright = getReadValuePtr(right);
+            }
+            else {
+                // Extract Value
+                pright = getReadValuePtr(right);
+                mright = getReadValuePtr(pright);
+            }
+            if(e->getRight()->getType()->getName() == INT_CSTR) {
                 rval = builder.CreateCall(to_str_mint, { mright });
             }
-            else if(right->getType() == floatT) {
+            else if(e->getRight()->getType()->getName() == FLOAT_CSTR) {
                 rval = builder.CreateCall(to_str_mfloat, { mright });
             }
-            else if(right->getType() == int1T) {
+            else if(e->getRight()->getType()->getName() == BOOL_CSTR) {
                 rval = builder.CreateCall(to_str_mbool, { mright });
             }
-            else if(right->getType() == stringT) {
+            else if(e->getRight()->getType()->getName() == STRING_CSTR) {
                 rval = builder.CreateCall(to_str_mstring, { mright });
             }
             else {
@@ -1455,6 +1473,7 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     }
     break;
     case ir::OperatorKind::OP_ACCESS:
+        LOGMAX("Creating ACCESS intstruction");
         // FIXME: this creates unnecessary extract for assignment where
         // access is no the left side a.c = 4. 
         // Although it can will be removed as an unused var
@@ -1595,8 +1614,17 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             }
         }
         else {
-            auto pleft = llvm::dyn_cast<llvm::Instruction>(left)->getOperand(0);
-            auto mleft = llvm::dyn_cast<llvm::Instruction>(pleft)->getOperand(0);
+            llvm::Value *pleft = nullptr;
+            llvm::Value *mleft = nullptr;
+            if (llvm::isa<llvm::PointerType>(left->getType())) {
+                pleft = left;
+                mleft = getReadValuePtr(left);
+            }
+            else {
+                // Extract Value
+                pleft = getReadValuePtr(left);
+                mleft = getReadValuePtr(pleft);
+            }
 
             // Maybe type
             if(ogType->getName() == INT_CSTR) {
@@ -2339,9 +2367,53 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                                     llvm::Value *elemPtr = builder.CreateGEP(mapType(var->getType()), v, {zero, stIndex});
 
                                     if(eVar->getType()->isMaybe()) {
-                                        // TODO:
-                                        if(eVar->getInitValue()) {
-                                            llvm::report_fatal_error("Struct maybe value initalizer is not yet implemented");
+                                        auto nonMaybeType = eVar->getType()->clone();
+                                        nonMaybeType->setMaybe(false);
+
+                                        if(eVar->getInitValue() && eVar->getInitValue()->getType()->getName() != NONETYPE_CSTR) {
+                                            auto struMbyVal = new llvm::GlobalVariable(*llvmMod,
+                                                                        mapType(nonMaybeType),
+                                                                        false,
+                                                                        llvm::GlobalValue::PrivateLinkage,
+                                                                        nullptr);
+                                            
+                                            // Set struMbyVal to InitValue
+                                            if(auto vcast = llvm::dyn_cast<ir::IntLiteral>(eVar->getInitValue())) {
+                                                struMbyVal->setInitializer(llvm::ConstantInt::get(ctx, vcast->getValue()));
+                                            }
+                                            else if(auto vcast = llvm::dyn_cast<ir::BoolLiteral>(eVar->getInitValue())) {
+                                                struMbyVal->setInitializer(llvm::ConstantInt::getBool(int1T, vcast->getValue()));
+                                            }
+                                            else if(auto vcast = llvm::dyn_cast<ir::FloatLiteral>(eVar->getInitValue())) {
+                                                struMbyVal->setInitializer(llvm::ConstantFP::get(ctx, vcast->getValue()));
+                                            }
+                                            else if(auto vcast = llvm::dyn_cast<ir::StringLiteral>(eVar->getInitValue())) {
+                                                llvm::GlobalVariable *str_txt = new llvm::GlobalVariable(*llvmMod,
+                                                                                        builder.getInt8Ty()->getPointerTo(),
+                                                                                        false,
+                                                                                        llvm::GlobalValue::PrivateLinkage,
+                                                                                        nullptr);
+                                                str_txt->setInitializer(builder.CreateGlobalStringPtr(vcast->getValue().c_str(), "", 0, llvmMod));
+                                                stringsToInit.push_back(std::make_pair(struMbyVal, str_txt));
+                                                auto init = llvm::ConstantAggregateZero::get(stringT);
+                                                struMbyVal->setInitializer(init);
+                                            }
+                                            // TODO: uncomment and check correctness once maybe arrays are added
+                                            /*else if(var->getType()->isMatrix() && llvm::isa<ir::MatrixLiteral>(eVar->getInitValue())) {
+                                                auto init = llvm::ConstantAggregateZero::get(matrixT);
+                                                struMbyVal->setInitializer(init);
+                                                matricesToInit.push_back(std::make_pair(struMbyVal, llvm::dyn_cast<ir::MatrixLiteral>(eVar->getInitValue())));
+                                            }*/
+                                            else if(!var->getType()->isMatrix() && var->getType()->getDecl()) {
+                                                auto init = llvm::ConstantAggregateZero::get(mapType(var->getType()));
+                                                struMbyVal->setInitializer(init);
+                                                structsToInit.push_back(std::make_pair(struMbyVal, llvm::dyn_cast<ir::StructLiteral>(eVar->getInitValue())));
+                                            }
+                                            else {
+                                                llvm::report_fatal_error("Global variable initializer is not a constant");
+                                            }
+                                                
+                                            maybesToInit.push_back(std::make_pair(elemPtr, struMbyVal));
                                         }
                                     }
                                     else if(eVar->getType()->getName() == STRING_CSTR) {

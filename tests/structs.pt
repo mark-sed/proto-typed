@@ -112,3 +112,31 @@ U1 u1
 print((u1 == U1{}) ++ "\n")
 u1.a = 4
 print((u1 == U1{.a=5}) ++ "\n")
+
+struct R {
+    int a
+}
+
+struct T2 {
+    float? b2 = 4.05
+    float? b1 = 3.05
+    float? b = 3.0
+    int? a = -7
+    bool? c = true
+    string? d = "ha\n"
+    R? r = R{.a = 4}
+}
+
+T2 t2m
+float? g 
+g = t2m.b
+
+print(t2m.b2 ++ "\n")
+print(g as string)
+print(t2m.a as string)
+print(t2m.c as string)
+print(t2m.d as string)
+
+R? rm
+rm = t2m.r
+print(rm.a ++ "\n")

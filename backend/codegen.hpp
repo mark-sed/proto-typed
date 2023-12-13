@@ -144,6 +144,8 @@ public:
     llvm::StructType *matrixT;
     llvm::PointerType *matrixTPtr;
 
+    llvm::Value *getReadValuePtr(llvm::Value *v);
+
     /**
      * Maps PT type to llvm type
      * Unlike convertType, this can also accept variable declarations
