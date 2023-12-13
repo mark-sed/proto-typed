@@ -359,8 +359,9 @@ vardecl : type ID { $$ = scanner->parseVarDecl($1, $2); }
 
 // Definition
 vardef : type ID SET expr        { $$ = scanner->parseVarDecl($1, $2, $4); }
-       | KWCONST ID SET expr
        | KWVAR ID SET expr       { $$ = scanner->parseVarDecl(nullptr, $2, $4); }
+       //| type KWCONST ID SET expr
+       //| KWVAR KWCONST ID SET expr
        ;
 
 // Assignment and compound assignment

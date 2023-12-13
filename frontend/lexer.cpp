@@ -1293,22 +1293,30 @@ YY_RULE_SETUP
 #line 223 "frontend/lexer.ll"
 { /* Binary Integer (long) */
                   // atol can be used since syntactical analysis was done here
-                  yylval->emplace<long>(std::strtol(&(yytext[2]), nullptr, 2));
+                  if(yytext[0] == '-') {
+                    yylval->emplace<long>(-std::strtol(&(yytext[3]), nullptr, 2));
+                  } else {
+                    yylval->emplace<long>(std::strtol(&(yytext[2]), nullptr, 2));
+                  }
                   return token::INT;
                 }
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 228 "frontend/lexer.ll"
+#line 232 "frontend/lexer.ll"
 { /* Octal Integer (long) */
                   // atol can be used since syntactical analysis was done here
-                  yylval->emplace<long>(std::strtol(&(yytext[2]), nullptr, 8));
+                  if(yytext[0] == '-') {
+                    yylval->emplace<long>(-std::strtol(&(yytext[3]), nullptr, 8));
+                  } else {
+                    yylval->emplace<long>(std::strtol(&(yytext[2]), nullptr, 8));
+                  }
                   return token::INT;
                 }
 	YY_BREAK
 case 83:
 YY_RULE_SETUP
-#line 233 "frontend/lexer.ll"
+#line 241 "frontend/lexer.ll"
 {   // Float in scientific notation
                   yylval->build<double>(std::stod(yytext)); 
                   return token::FLOAT;
@@ -1316,7 +1324,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 84:
 YY_RULE_SETUP
-#line 237 "frontend/lexer.ll"
+#line 245 "frontend/lexer.ll"
 {   // Float
                   yylval->build<double>(std::stod(yytext)); 
                   return token::FLOAT;
@@ -1324,7 +1332,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
-#line 241 "frontend/lexer.ll"
+#line 249 "frontend/lexer.ll"
 {
                     yylval->build<std::string>(yytext);
                     return token::EXT_ID;
@@ -1332,7 +1340,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 86:
 YY_RULE_SETUP
-#line 245 "frontend/lexer.ll"
+#line 253 "frontend/lexer.ll"
 {
                     yylval->build<std::string>(yytext);
                     return token::ID;
@@ -1340,17 +1348,17 @@ YY_RULE_SETUP
 	YY_BREAK
 case 87:
 YY_RULE_SETUP
-#line 249 "frontend/lexer.ll"
+#line 257 "frontend/lexer.ll"
 {
                   fatal_error(diag::ERR_UNKNOWN_TOKEN, std::string(yytext));
                 }
 	YY_BREAK
 case 88:
 YY_RULE_SETUP
-#line 252 "frontend/lexer.ll"
+#line 260 "frontend/lexer.ll"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 1354 "frontend/lexer.cpp"
+#line 1362 "frontend/lexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2322,5 +2330,5 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 252 "frontend/lexer.ll"
+#line 260 "frontend/lexer.ll"
 

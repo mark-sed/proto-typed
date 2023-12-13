@@ -254,6 +254,14 @@ function test_var {
     expect_out_eq "4\n2.2\nHello\n1\ntruefalse\n5.52.2\nab\n-8\n" "var"
 }
 
+function test_numbers {
+    expect_pass "numbers.pt" "numbers"
+    expect_out_eq "42, 42, 42, 42\n-42, -42, -42, -42
+3.14159265, 6.02214076e+23, -2.2e-07
+-3.14159265, 6.02214076e+23, 2200000000
+3, 1e-09\n" "numbers"
+}
+
 # Expect fail tests
 
 function test_missing_return {
@@ -276,6 +284,7 @@ function run_all_tests {
     run_test ptlib_strings
     run_test ptlib_arrays
     run_test var
+    run_test numbers
 
     # Expect fail tests
     run_test missing_return

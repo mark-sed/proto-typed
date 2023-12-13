@@ -1,0 +1,30 @@
+int a_dec = 42       // Decimal
+int a_bin = 0b101010 // Binary
+int a_oct = 0q52     // Octal
+int a_hex = 0x2A     // Hexadecimal
+
+print(a_dec ++ ", " ++ a_bin ++ ", " ++ a_oct ++ ", " ++ a_hex ++ "\n")
+
+int an_dec = -42       // Decimal
+int an_bin = -0b101010 // Binary
+int an_oct = -0q52     // Octal
+int an_hex = -0x2A     // Hexadecimal
+
+print(an_dec ++ ", " ++ an_bin ++ ", " ++ an_oct ++ ", " ++ an_hex ++ "\n")
+
+float not_pi = 3.14159265
+float avogardo = 6.02214076e23
+float rnd = -22e-8
+
+print(not_pi ++ ", " ++ avogardo ++ ", " ++ rnd ++ "\n")
+
+float min_not_pi = -3.14159265
+float avogardo2 = 6.02214076e+23
+float rnd2 = 22E8
+
+print(min_not_pi ++ ", " ++ avogardo2 ++ ", " ++ rnd2 ++ "\n")
+
+int? ma_bin = 0b0011
+float? mrnd2 = 0.1E-8
+
+print(ma_bin ++ ", " ++ mrnd2 ++ "\n")

@@ -221,12 +221,20 @@ oct     0[Qq][0-7]+
                 }
 [-]?{bin}       { /* Binary Integer (long) */
                   // atol can be used since syntactical analysis was done here
-                  yylval->emplace<long>(std::strtol(&(yytext[2]), nullptr, 2));
+                  if(yytext[0] == '-') {
+                    yylval->emplace<long>(-std::strtol(&(yytext[3]), nullptr, 2));
+                  } else {
+                    yylval->emplace<long>(std::strtol(&(yytext[2]), nullptr, 2));
+                  }
                   return token::INT;
                 }
 [-]?{oct}       { /* Octal Integer (long) */
                   // atol can be used since syntactical analysis was done here
-                  yylval->emplace<long>(std::strtol(&(yytext[2]), nullptr, 8));
+                  if(yytext[0] == '-') {
+                    yylval->emplace<long>(-std::strtol(&(yytext[3]), nullptr, 8));
+                  } else {
+                    yylval->emplace<long>(std::strtol(&(yytext[2]), nullptr, 8));
+                  }
                   return token::INT;
                 }
 [-]?[0-9]+\.?[0-9]+[eE][+-]?[0-9]+ {   // Float in scientific notation
