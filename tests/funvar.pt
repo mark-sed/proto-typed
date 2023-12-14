@@ -35,3 +35,11 @@ void p(int(int, bool) f, int v) {
 }
 
 p(foo, 3)
+
+void(int(int, bool), int) getP() {
+    return p
+}
+
+void(int(int, bool), int) pPtr
+pPtr = getP()
+pPtr(foo, 10)
