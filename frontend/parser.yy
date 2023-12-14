@@ -788,7 +788,6 @@ mattype : ID matsq               { $$ = scanner->parseMatrixType($1, $2); }
         | KWFLOAT KWMAYBE matsq
         | KWSTRING KWMAYBE matsq 
         | KWBOOL KWMAYBE matsq
-        | funtype KWMAYBE matsq
         ;
 matsq : LSQ RSQ                 { $$ = scanner->parseMatrixSize(scanner->parseInt(-1)); }
       //| LSQ int_val RSQ         { $$ = scanner->parseMatrixSize($2); }
@@ -802,8 +801,7 @@ type : KWINT KWMAYBE    { $$ = scanner->sym_lookup(INT_CSTR, true, true); }
      | KWSTRING KWMAYBE { $$ = scanner->sym_lookup(STRING_CSTR, true, true); }
      | KWBOOL KWMAYBE   { $$ = scanner->sym_lookup(BOOL_CSTR, true, true); }
      | ID KWMAYBE       { $$ = scanner->sym_lookup($1, true, true); }
-     | EXT_ID KWMAYBE   
-     | funtype KWMAYBE  
+     | EXT_ID KWMAYBE
      | mattype KWMAYBE  
      | KWINT            { $$ = scanner->sym_lookup(INT_CSTR, false, true); }
      | KWFLOAT          { $$ = scanner->sym_lookup(FLOAT_CSTR, false, true); }
@@ -812,7 +810,7 @@ type : KWINT KWMAYBE    { $$ = scanner->sym_lookup(INT_CSTR, true, true); }
      | KWANY            { $$ = scanner->sym_lookup(ANY_CSTR, false, true); }
      | ID               { $$ = scanner->sym_lookup($1, false, true); }
      | EXT_ID           { $$ = scanner->parseExtType($1, false); }
-     | funtype
+     | funtype          { $$ = $1; }
      | mattype          { $$ = $1; }
      ;
 

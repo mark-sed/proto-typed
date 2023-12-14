@@ -466,7 +466,7 @@ llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl, bool as
                 auto fvPtr = builder.CreateLoad(mapType(v), formalParams[v]);
                 return builder.CreateLoad(mapType(v)->getPointerElementType(), fvPtr);
             }
-            return builder.CreateLoad(mapType(v)->getNonOpaquePointerElementType(), formalParams[v]);
+            return builder.CreateLoad(mapType(v)/*->getNonOpaquePointerElementType()*/, formalParams[v]);
         }
         else {
             return readLocalVar(BB, decl, asMaybe);
@@ -569,6 +569,40 @@ llvm::Value *cg::CGFunction::emitFunCall(ir::FunctionCall *e) {
             return builder.CreateCall(funDecl, args);
         }
     } else if(auto v = e->getVar()) {
+        std::vector<llvm::Value *> args{};
+        int index = 0;
+        auto ft = llvm::dyn_cast<ir::FunTypeDecl>(v->getType());
+        for(auto a: e->getParams()) {
+            llvm::Value *emEx = nullptr;
+            if(ft->getArgTypes()[index]->isMaybe()) {
+                if(auto aa = llvm::dyn_cast<ir::VarAccess>(a)) {
+                    if(aa->getType()->isMaybe()) {
+                        emEx = getReadValuePtr(readVar(currBB, aa->getVar(), true));
+                    }
+                    else {
+                        emEx = builder.CreateAlloca(mapType(ft->getArgTypes()[index]));
+                        auto vLd = getReadValuePtr(readVar(currBB, aa->getVar(), true));
+                        builder.CreateStore(vLd, emEx);
+                    }
+                }
+                else {
+                    // Constant was passed to a maybe argument
+                    // Alloca memory and forget about it as it cannot be used
+                    emEx = builder.CreateAlloca(mapType(ft->getArgTypes()[index]));
+                    auto emExValPtr = builder.CreateAlloca(mapType(ft->getArgTypes()[index])->getPointerElementType());
+                    builder.CreateStore(emitExpr(a), emExValPtr);
+                    builder.CreateStore(emExValPtr, emEx);
+                }
+            }
+            else {
+                emEx = emitExpr(a);
+            }
+            args.push_back(emEx);
+            ++index;
+        }
+        auto rfun = readVar(currBB, v);
+        return builder.CreateCall(createFunctionType(ft), rfun, args);
+    } else if(auto v = e->getParam()) {
         std::vector<llvm::Value *> args{};
         int index = 0;
         auto ft = llvm::dyn_cast<ir::FunTypeDecl>(v->getType());

@@ -29,3 +29,9 @@ print(barF(a)++"\n"++a++"\n")
 int nma = 7
 print(barF(nma)++"\n"++nma++"\n")
 print(barF(8)++"\n")
+
+void p(int(int, bool) f, int v) {
+    print(f(v, false)++"\n");
+}
+
+p(foo, 3)

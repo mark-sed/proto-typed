@@ -906,6 +906,7 @@ class FunctionCall : public Expr {
 private:
     FunctionDecl *fun;
     VarDecl *var;
+    FormalParamDecl *param;
     UnresolvedSymbolAccess *unresF;
     ExternalSymbolAccess *extF;
     std::vector<Expr *> params;
@@ -916,6 +917,7 @@ public:
                 : Expr(ExprKind::EX_FUN_CALL, fun->getReturnType(), false),
                   fun(fun),
                   var(nullptr),
+                  param(nullptr),
                   unresF(nullptr),
                   extF(nullptr),
                   params(params),
@@ -925,6 +927,17 @@ public:
                 : Expr(ExprKind::EX_FUN_CALL, llvm::dyn_cast<ir::FunTypeDecl>(var->getType())->getReturnType(), false),
                   fun(nullptr),
                   var(var),
+                  param(nullptr),
+                  unresF(nullptr),
+                  extF(nullptr),
+                  params(params),
+                  unresolved(false),
+                  external(false) {}
+    FunctionCall(FormalParamDecl *param, std::vector<Expr *> params) 
+                : Expr(ExprKind::EX_FUN_CALL, llvm::dyn_cast<ir::FunTypeDecl>(param->getType())->getReturnType(), false),
+                  fun(nullptr),
+                  var(nullptr),
+                  param(param),
                   unresF(nullptr),
                   extF(nullptr),
                   params(params),
@@ -934,6 +947,7 @@ public:
                 : Expr(ExprKind::EX_FUN_CALL, unresF->getType(), false),
                   fun(nullptr),
                   var(nullptr),
+                  param(nullptr),
                   unresF(unresF),
                   extF(nullptr),
                   params(params),
@@ -943,6 +957,7 @@ public:
                 : Expr(ExprKind::EX_FUN_CALL, extF->getType(), false),
                   fun(nullptr),
                   var(nullptr),
+                  param(nullptr),
                   unresF(nullptr),
                   extF(extF),
                   params(params),
@@ -951,6 +966,7 @@ public:
     
     FunctionDecl *getFun() { return fun; }
     VarDecl *getVar() { return var; }
+    FormalParamDecl *getParam() { return param; }
     void setFun(FunctionDecl *f) { fun = f; }
     bool isUnresolved() { return unresolved; }
     void setUnresolved(bool s) { unresolved = s; }
@@ -965,6 +981,8 @@ public:
     std::string debug() const override {
         if(var)
             return "("+var->debug()+")"+"("+block2List(params)+")";
+        if(param)
+            return "("+param->debug()+")"+"("+block2List(params)+")";
         if(unresolved)
             return "(unresolved call)"+unresF->getName()+"("+block2List(params)+")";
         if(external)

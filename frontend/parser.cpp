@@ -3778,7 +3778,7 @@ namespace  ptc  {
 
   case 435: // type: funtype
 #line 815 "frontend/parser.yy"
-       { yylhs.value.as < ptc::ir::IR * > () = yystack_[0].value.as < ptc::ir::IR * > (); }
+                        { yylhs.value.as < ptc::ir::IR * > () = yystack_[0].value.as < ptc::ir::IR * > (); }
 #line 3783 "frontend/parser.cpp"
     break;
 

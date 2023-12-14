@@ -1289,8 +1289,15 @@ ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
             else {
                 diags.report(llvmloc2Src(), diag::ERR_NOT_CALLABLE, var->getVar()->getName());
             }
-        }
-        else {
+        }else if (auto v = llvm::dyn_cast<ir::FormalParamDecl>(var->getVar())) {
+            if(llvm::isa<ir::FunTypeDecl>(v->getType())) {
+                auto fc = new ir::FunctionCall(v, params);
+                return fc;
+            }
+            else {
+                diags.report(llvmloc2Src(), diag::ERR_NOT_CALLABLE, var->getVar()->getName());
+            }
+        } else {
             diags.report(llvmloc2Src(), diag::ERR_NOT_CALLABLE, var->getVar()->getName());
         }
     }
