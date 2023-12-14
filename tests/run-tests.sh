@@ -265,6 +265,11 @@ function test_numbers {
 3, 1e-09\n" "numbers"
 }
 
+function test_funvar {
+    expect_pass "funvar.pt" "funvar"
+    expect_out_eq "4\n-4\nnot 8\n16\ntrue\n49\ntrue\n49\ntrue\n" "funvar"
+}
+
 # Expect fail tests
 
 function test_missing_return {
@@ -288,6 +293,7 @@ function run_all_tests {
     run_test ptlib_arrays
     run_test var
     run_test numbers
+    run_test funvar
 
     # Expect fail tests
     run_test missing_return

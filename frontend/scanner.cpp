@@ -391,6 +391,20 @@ ir::Expr *Scanner::parseNone() {
     return new ir::NoneLiteral(llvmloc2Src(), noneType);
 }
 
+static std::string getFunTypeName(ir::TypeDecl *retType, std::vector<ir::IR *> argTypes) {
+    std::string tName = retType->getName() + "(";
+    bool first = true;
+    for(auto i : argTypes) {
+        if(!first) {
+            tName += ",";
+        }
+        first = false;
+        tName += i->getName();
+    }
+    tName += ")";
+    return tName;
+}
+
 ir::Expr *Scanner::parseVar(std::string v, bool external, bool maybe_type) {
     LOGMAX("Parsing a variable "+v);
     if(!external) {
@@ -402,8 +416,13 @@ ir::Expr *Scanner::parseVar(std::string v, bool external, bool maybe_type) {
             if(llvm::isa<ir::VarDecl>(var)) {
                 return new ir::VarAccess(llvm::dyn_cast<ir::VarDecl>(var));
             }
-            else if(llvm::isa<ir::FunctionDecl>(var)) {
-                return new ir::VarAccess(llvm::dyn_cast<ir::FunctionDecl>(var), this->intType);
+            else if(auto fun = llvm::dyn_cast<ir::FunctionDecl>(var)) {
+                std::vector<ir::IR *> paramTypes;
+                for(auto i : fun->getParams()) {
+                    paramTypes.push_back(llvm::dyn_cast<ir::IR>(i->getType()));
+                }
+                auto ft = new ir::FunTypeDecl(currentIR, llvmloc2Src(), getFunTypeName(fun->getReturnType(), paramTypes), fun->getReturnType(), paramTypes);
+                return new ir::VarAccess(fun, ft);
             }
             else if(llvm::isa<ir::FormalParamDecl>(var)) {
                 return new ir::VarAccess(llvm::dyn_cast<ir::FormalParamDecl>(var));
@@ -488,6 +507,21 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
                 else if(tl->isUnresolved()) {
                     type = tr;
                 }
+                /*else if(auto tlf = llvm::dyn_cast<ir::FunTypeDecl>(tl)) {
+                    if(auto vacc = llvm::dyn_cast<ir::VarAccess>(r)) {
+                        if(auto funD = llvm::dyn_cast<ir::FunctionDecl>(vacc->getVar())) {
+                            // TODO: Check if types match
+                            if()
+                            type = tl;
+                        }
+                        else {
+                            diags.report(llvmloc2Src(), diag::ERR_INCORRECT_ASSIGNMENT, tr->getName(), tlf->getName());
+                        }
+                    }
+                    else {
+                        diags.report(llvmloc2Src(), diag::ERR_INCORRECT_ASSIGNMENT, tr->getName(), tlf->getName());
+                    }
+                }*/
                 else {
                     diags.report(llvmloc2Src(), diag::ERR_INCORRECT_ASSIGNMENT, tr->getName(), tl->getName());
                 }
@@ -1065,23 +1099,19 @@ std::vector<std::string> Scanner::parseAddImportName(std::vector<std::string> &l
 
 std::vector<ir::FormalParamDecl *> Scanner::parseFunParam(ir::IR *type, std::string name) {
     LOGMAX("Creating new function param list with "+type->getName()+" "+name);
-    // TODO: Handle by reference
     auto t = llvm::dyn_cast<ir::TypeDecl>(type);
     auto fp = new ir::FormalParamDecl(currentIR, llvmloc2Src(), name, t, t->isMaybe());
     std::vector<ir::FormalParamDecl *> list{fp};
     currScope->insert(fp);
-    //this->decls.push_back(fp);
     return list;
 }
 
 std::vector<ir::FormalParamDecl *> Scanner::parseAddFunParam(std::vector<ir::FormalParamDecl *> &list, ir::IR *type, std::string name) {
     LOGMAX("Pushing new argument into function param list: "+name);
-    // TODO: Handle by reference
     auto t = llvm::dyn_cast<ir::TypeDecl>(type);
     auto fp = new ir::FormalParamDecl(currentIR, llvmloc2Src(), name, t, t->isMaybe());
     list.push_back(fp);
     currScope->insert(fp);
-    //this->decls.push_back(fp);
     return list;
 }
 
@@ -1106,6 +1136,23 @@ std::vector<ir::IR *> Scanner::parseStmtBodyAdd(std::vector<ir::IR *> &body, ir:
     LOGMAX("Adding to a statement body "+stmt->debug());
     body.push_back(stmt);
     return body;
+}
+
+ir::IR *Scanner::parseFunType(ir::IR *retType, std::vector<ir::IR *> argTypes) {
+    LOGMAX("Parsing function type");
+    return new ir::FunTypeDecl(currentIR, llvmloc2Src(), getFunTypeName(llvm::dyn_cast<ir::TypeDecl>(retType), argTypes), llvm::dyn_cast<ir::TypeDecl>(retType), argTypes);
+}
+
+std::vector<ir::IR *> Scanner::parseFunTypeList(ir::IR *type) {
+    LOGMAX("Creating list of function types");
+    std::vector<ir::IR *> list{type};
+    return list;
+}
+
+std::vector<ir::IR *> Scanner::parseFunTypeListAdd(std::vector<ir::IR *> &list, ir::IR *type) {
+    LOGMAX("Adding type to function type list "+type->debug());
+    list.push_back(type);
+    return list;
 }
 
 ir::IR *Scanner::parseStruct(std::string name, std::vector<ir::IR *> body) {
@@ -1234,6 +1281,14 @@ ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
 
             auto fc = new ir::FunctionCall(propF, params);
             return fc;
+        } else if (auto v = llvm::dyn_cast<ir::VarDecl>(var->getVar())) {
+            if(llvm::isa<ir::FunTypeDecl>(v->getType())) {
+                auto fc = new ir::FunctionCall(v, params);
+                return fc;
+            }
+            else {
+                diags.report(llvmloc2Src(), diag::ERR_NOT_CALLABLE, var->getVar()->getName());
+            }
         }
         else {
             diags.report(llvmloc2Src(), diag::ERR_NOT_CALLABLE, var->getVar()->getName());

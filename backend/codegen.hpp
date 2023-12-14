@@ -29,6 +29,7 @@ namespace ptc{
         class IR;
         class Expr;
         class TypeDecl;
+        class FunTypeDecl;
         class MatrixLiteral;
         class StructLiteral;
         class StructDecl;
@@ -129,6 +130,7 @@ protected:
     llvm::StructType *getStringIR();
 
     llvm::FunctionType *createFunctionType(ir::FunctionDecl *fun);
+    llvm::FunctionType *createFunctionType(ir::FunTypeDecl *fun);
 
     llvm::ConstantInt *stringSizeBytes;
 

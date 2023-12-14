@@ -192,6 +192,7 @@
 %type <bool> expr_bool
 
 %type <ptc::ir::IR *> type
+%type <ptc::ir::IR *> funtype
 %type <ptc::ir::IR *> mattype
 %type <ptc::ir::IR *> vardecl
 %type <ptc::ir::IR *> vardef
@@ -227,6 +228,7 @@
 %type <std::vector<ptc::ir::IR *> > else
 %type <std::vector<ptc::ir::IR *> > stmt
 %type <std::vector<ptc::ir::IR *> > decllist
+%type <std::vector<ptc::ir::IR *> > typelist
 %type <std::vector<std::string> > id_list
 %type <std::vector<ptc::ir::FormalParamDecl *> > funargs
 %type <std::vector<ptc::ir::FormalParamDecl *> > funargsnvar
@@ -338,8 +340,8 @@ declistval : type ID            { $$ = scanner->parseStructElement($1, $2, nullp
 // Function definition
 function : type fun_id LPAR RPAR block           { $$ = scanner->parseFun($1, $2, std::vector<ptc::ir::FormalParamDecl *>{}, $5); }
          | type fun_id LPAR funargs RPAR block   { $$ = scanner->parseFun($1, $2, $4, $6); }
-         | KWVOID fun_id LPAR RPAR block         { $$ = scanner->parseFun(scanner->sym_lookup("void"), $2, std::vector<ptc::ir::FormalParamDecl *>{}, $5); }
-         | KWVOID fun_id LPAR funargs RPAR block { $$ = scanner->parseFun(scanner->sym_lookup("void"), $2, $4, $6); }
+         | KWVOID fun_id LPAR RPAR block         { $$ = scanner->parseFun(scanner->sym_lookup(VOID_CSTR), $2, std::vector<ptc::ir::FormalParamDecl *>{}, $5); }
+         | KWVOID fun_id LPAR funargs RPAR block { $$ = scanner->parseFun(scanner->sym_lookup(VOID_CSTR), $2, $4, $6); }
          ;
 fun_id : ID { scanner->enterFunScope(); $$ = $1; }
        ;
@@ -764,13 +766,13 @@ expr_bool : BOOL { $$ = $1; }
           ;
 
 // Function signature (as a type)
-funtype : type LPAR typelist RPAR
-        | type LPAR RPAR
-        | KWVOID LPAR typelist RPAR
-        | KWVOID LPAR RPAR
+funtype : type LPAR typelist RPAR   { $$ = scanner->parseFunType($1, $3); }
+        | type LPAR RPAR            { $$ = scanner->parseFunType($1, std::vector<ir::IR *>{}); }
+        | KWVOID LPAR typelist RPAR { $$ = scanner->parseFunType(scanner->sym_lookup(VOID_CSTR), $3); }
+        | KWVOID LPAR RPAR          { $$ = scanner->parseFunType(scanner->sym_lookup(VOID_CSTR), std::vector<ir::IR *>{}); }
         ;
-typelist : type
-         | type COMMA typelist
+typelist : type                 { $$ = scanner->parseFunTypeList($1); }
+         | typelist COMMA type  { $$ = scanner->parseFunTypeListAdd($1, $3); }
          ;
 
 // Matrix type

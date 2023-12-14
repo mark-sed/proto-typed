@@ -679,6 +679,7 @@ namespace  ptc  {
       // function
       // vardecl
       // vardef
+      // funtype
       // mattype
       // type
       char dummy5[sizeof (ptc::ir::IR *)];
@@ -708,6 +709,7 @@ namespace  ptc  {
       // scope_body
       // else
       // decllist
+      // typelist
       char dummy10[sizeof (std::vector<ptc::ir::IR *> )];
 
       // id_list
@@ -1068,6 +1070,7 @@ namespace  ptc  {
       case symbol_kind::S_function: // function
       case symbol_kind::S_vardecl: // vardecl
       case symbol_kind::S_vardef: // vardef
+      case symbol_kind::S_funtype: // funtype
       case symbol_kind::S_mattype: // mattype
       case symbol_kind::S_type: // type
         value.move< ptc::ir::IR * > (std::move (that.value));
@@ -1102,6 +1105,7 @@ namespace  ptc  {
       case symbol_kind::S_scope_body: // scope_body
       case symbol_kind::S_else: // else
       case symbol_kind::S_decllist: // decllist
+      case symbol_kind::S_typelist: // typelist
         value.move< std::vector<ptc::ir::IR *>  > (std::move (that.value));
         break;
 
@@ -1352,6 +1356,7 @@ switch (yykind)
       case symbol_kind::S_function: // function
       case symbol_kind::S_vardecl: // vardecl
       case symbol_kind::S_vardef: // vardef
+      case symbol_kind::S_funtype: // funtype
       case symbol_kind::S_mattype: // mattype
       case symbol_kind::S_type: // type
         value.template destroy< ptc::ir::IR * > ();
@@ -1386,6 +1391,7 @@ switch (yykind)
       case symbol_kind::S_scope_body: // scope_body
       case symbol_kind::S_else: // else
       case symbol_kind::S_decllist: // decllist
+      case symbol_kind::S_typelist: // typelist
         value.template destroy< std::vector<ptc::ir::IR *>  > ();
         break;
 
@@ -3099,7 +3105,7 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 2617,     ///< Last index in yytable_.
+      yylast_ = 2614,     ///< Last index in yytable_.
       yynnts_ = 54,  ///< Number of nonterminal symbols.
       yyfinal_ = 126 ///< Termination state number.
     };
@@ -3113,7 +3119,7 @@ switch (yykind)
 
 #line 14 "frontend/parser.yy"
 } //  ptc 
-#line 3117 "frontend/parser.hpp"
+#line 3123 "frontend/parser.hpp"
 
 
 

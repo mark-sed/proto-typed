@@ -185,6 +185,7 @@ public:
     ir::IR *parseContinue();
     ir::IR *parseImports(std::vector<std::string> names);
     ir::IR *parseExtType(std::string name, bool isMaybe=false);
+    ir::IR *parseFunType(ir::IR *retType, std::vector<ir::IR *> argTypes);
     ir::Expr *parseInt(long v);
     ir::Expr *parseFloat(double v);
     ir::Expr *parseBool(bool v);
@@ -213,6 +214,8 @@ public:
     std::vector<std::string> parseAddImportName(std::vector<std::string> &list, std::string name);
     std::vector<ir::IR *> parseStmtBody(ir::IR *stmt);
     std::vector<ir::IR *> parseStmtBodyAdd(std::vector<ir::IR *> &body, ir::IR *stmt);
+    std::vector<ir::IR *> parseFunTypeList(ir::IR *type);
+    std::vector<ir::IR *> parseFunTypeListAdd(std::vector<ir::IR *> &list, ir::IR *type);
     ir::IR *parseStruct(std::string name, std::vector<ir::IR *> body);
     ir::IR *parseStructElement(ir::IR *type, const std::string name, ir::Expr *value=nullptr);
     std::vector<ir::IR *> parseAddStructElement(ir::IR *elem, std::vector<ir::IR *> body);

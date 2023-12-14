@@ -51,6 +51,7 @@ class VarAccess;
 enum IRKind {
     IR_VAR_DECL,
     IR_TYPE_DECL,
+    IR_FUN_TYPE_DECL,
     IR_STRUCT_DECL,
     IR_EXPR_STMT,
     IR_FORMAL_PARAM_DECL,
@@ -221,13 +222,20 @@ public:
               maybe(false),
               unresolved(false),
               externalIR(nullptr) {}
+    TypeDecl(IR *enclosing_ir, SourceInfo loc, std::string name, IRKind kind)
+            : IR(kind, enclosing_ir, loc, name),
+              decl(nullptr),
+              matrixSize{},
+              maybe(false),
+              unresolved(false),
+              externalIR(nullptr) {}
 
     TypeDecl *clone() {
         return new TypeDecl(*this);
     }
 
     static bool classof(const IR *ir) {
-        return ir->getKind() == IRKind::IR_TYPE_DECL;
+        return ir->getKind() == IRKind::IR_TYPE_DECL || ir->getKind() == IRKind::IR_FUN_TYPE_DECL;
     }
     std::string getBaseName() { 
         auto bn = getName(); 
@@ -263,6 +271,28 @@ public:
         }
         return n;
     }
+};
+
+/** Function type declaration */
+class FunTypeDecl : public TypeDecl {
+private:
+    TypeDecl *retType;
+    std::vector<TypeDecl *> argTypes;
+public:
+    FunTypeDecl(IR *enclosing_ir, SourceInfo loc, std::string name, TypeDecl *retType, std::vector<ir::IR *> argTypesIR)
+        : TypeDecl(enclosing_ir, loc, name, IRKind::IR_FUN_TYPE_DECL), retType(retType) {
+        for(auto i : argTypesIR) {
+            argTypes.push_back(llvm::dyn_cast<TypeDecl>(i));
+        }
+        setMaybe(true);
+    }
+
+    static bool classof(const IR *ir) {
+        return ir->getKind() == IRKind::IR_FUN_TYPE_DECL;
+    }
+
+    std::vector<TypeDecl *> getArgTypes() { return argTypes; }
+    TypeDecl *getReturnType() { return retType; }
 };
 
 /**
@@ -875,6 +905,7 @@ public:
 class FunctionCall : public Expr {
 private:
     FunctionDecl *fun;
+    VarDecl *var;
     UnresolvedSymbolAccess *unresF;
     ExternalSymbolAccess *extF;
     std::vector<Expr *> params;
@@ -884,6 +915,16 @@ public:
     FunctionCall(FunctionDecl *fun, std::vector<Expr *> params) 
                 : Expr(ExprKind::EX_FUN_CALL, fun->getReturnType(), false),
                   fun(fun),
+                  var(nullptr),
+                  unresF(nullptr),
+                  extF(nullptr),
+                  params(params),
+                  unresolved(false),
+                  external(false) {}
+    FunctionCall(VarDecl *var, std::vector<Expr *> params) 
+                : Expr(ExprKind::EX_FUN_CALL, llvm::dyn_cast<ir::FunTypeDecl>(var->getType())->getReturnType(), false),
+                  fun(nullptr),
+                  var(var),
                   unresF(nullptr),
                   extF(nullptr),
                   params(params),
@@ -892,6 +933,7 @@ public:
     FunctionCall(UnresolvedSymbolAccess *unresF, std::vector<Expr *> params)
                 : Expr(ExprKind::EX_FUN_CALL, unresF->getType(), false),
                   fun(nullptr),
+                  var(nullptr),
                   unresF(unresF),
                   extF(nullptr),
                   params(params),
@@ -900,6 +942,7 @@ public:
     FunctionCall(ExternalSymbolAccess *extF, std::vector<Expr *> params)
                 : Expr(ExprKind::EX_FUN_CALL, extF->getType(), false),
                   fun(nullptr),
+                  var(nullptr),
                   unresF(nullptr),
                   extF(extF),
                   params(params),
@@ -907,6 +950,7 @@ public:
                   external(true) {}
     
     FunctionDecl *getFun() { return fun; }
+    VarDecl *getVar() { return var; }
     void setFun(FunctionDecl *f) { fun = f; }
     bool isUnresolved() { return unresolved; }
     void setUnresolved(bool s) { unresolved = s; }
@@ -919,12 +963,15 @@ public:
         return e->getKind() == ExprKind::EX_FUN_CALL;
     }
     std::string debug() const override {
+        if(var)
+            return "("+var->debug()+")"+"("+block2List(params)+")";
         if(unresolved)
             return "(unresolved call)"+unresF->getName()+"("+block2List(params)+")";
         if(external)
             return "(external)"+extF->debug()+"("+block2List(params)+")";
-        
-        return "("+fun->getReturnType()->getName()+")"+fun->getName()+"("+block2List(params)+")";
+        if(fun)
+            return "("+fun->getReturnType()->getName()+")"+fun->getName()+"("+block2List(params)+")";
+        return "TODO:SOME_FUN_CALL";
     }
 };
 

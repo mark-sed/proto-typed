@@ -1,0 +1,31 @@
+int foo(int a, bool t) {
+    if(t) {
+        print(a ++ "\n")
+        return -1 * a
+    }
+    else {
+        print("not "++a++"\n")
+        return 2*a
+    }
+}
+
+int(int, bool) fooF
+
+fooF = foo
+
+print(fooF(4, true)++"\n");
+print(fooF(8, false)++"\n");
+
+bool(int?) barF
+
+bool bar(int? a) {
+    a = a * a
+    return true
+}
+
+barF = bar
+int? a = 7
+print(barF(a)++"\n"++a++"\n")
+int nma = 7
+print(barF(nma)++"\n"++nma++"\n")
+print(barF(8)++"\n")

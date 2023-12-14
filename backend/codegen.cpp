@@ -127,6 +127,9 @@ llvm::Type *cg::CodeGen::convertType(ir::TypeDecl *t) {
             }
         }
     }
+    else if(auto fun = llvm::dyn_cast<ir::FunTypeDecl>(t)) {
+        llvmT = createFunctionType(fun);
+    }
 
     if(!llvmT) {
         llvm::report_fatal_error("Unsupported type");
@@ -416,7 +419,7 @@ llvm::Value *cg::CGFunction::readLocalVar(llvm::BasicBlock *BB, ir::IR *decl, bo
             ptT = vrdcl->getType();
             t = mapType(ptT);
         }
-        if(ptT->isMaybe() && !asMaybe) {
+        if(ptT->isMaybe() && !asMaybe && !llvm::isa<ir::FunTypeDecl>(ptT)) {
             auto ptrV = builder.CreateLoad(t, val->second);
             return builder.CreateLoad(t->getPointerElementType(), ptrV);
         }
@@ -426,7 +429,7 @@ llvm::Value *cg::CGFunction::readLocalVar(llvm::BasicBlock *BB, ir::IR *decl, bo
         if(auto fpd = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
             auto fval = formalParams.find(fpd);
             if(fval != formalParams.end()) {
-                if(fpd->getType()->isMaybe() && !asMaybe) {
+                if(fpd->getType()->isMaybe() && !asMaybe && !llvm::isa<ir::FunTypeDecl>(fpd->getType())) {
                     auto ptrV = builder.CreateLoad(mapType(fpd->getType()), fval->second);
                     return builder.CreateLoad(mapType(fpd->getType())->getPointerElementType(), ptrV);
                 }
@@ -448,7 +451,7 @@ llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl, bool as
     LOGMAX("Read var: "+decl->debug());
     if(auto *v = llvm::dyn_cast<ir::VarDecl>(decl)) {
         if(v->getEnclosingIR()->getKind() == ir::IRKind::IR_MODULE_DECL) {
-            if(v->getType()->isMaybe() && !asMaybe) {
+            if(v->getType()->isMaybe() && !asMaybe && !llvm::isa<ir::FunTypeDecl>(v->getType())) {
                 auto ptrV = builder.CreateLoad(mapType(v), currModule.getGlobals(decl));
                 return builder.CreateLoad(mapType(v)->getPointerElementType(), ptrV);
             }
@@ -459,7 +462,7 @@ llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl, bool as
         }
     } else if(auto *v = llvm::dyn_cast<ir::FormalParamDecl>(decl)) {
         if(v->isByReference()) {
-            if(v->getType()->isMaybe() && !asMaybe) {
+            if(v->getType()->isMaybe() && !asMaybe && !llvm::isa<ir::FunTypeDecl>(v->getType())) {
                 auto fvPtr = builder.CreateLoad(mapType(v), formalParams[v]);
                 return builder.CreateLoad(mapType(v)->getPointerElementType(), fvPtr);
             }
@@ -468,6 +471,17 @@ llvm::Value *cg::CGFunction::readVar(llvm::BasicBlock *BB, ir::IR *decl, bool as
         else {
             return readLocalVar(BB, decl, asMaybe);
         }
+    } else if(auto *f = llvm::dyn_cast<ir::FunctionDecl>(decl)) {
+        llvm::Function *funDecl = cgm.getLLVMMod()->getFunction(mangleName(f));
+        if(!funDecl) {
+            // Lib functions
+            funDecl = cgm.getLLVMMod()->getFunction(f->getName());
+        }
+        if(!funDecl) {
+            auto msg = "Somehow function "+f->getOGName()+"('"+mangleName(f)+"') could not be found";
+            llvm::report_fatal_error(msg.c_str());
+        }
+        return funDecl;
     }
     llvm::report_fatal_error("Unsupported variable declaration");
     return nullptr;
@@ -489,7 +503,7 @@ llvm::Value *cg::CGFunction::readExtVar(cg::CGModule *mod, ir::IR *decl, bool as
                                                 nullptr,
                                                 mangleName(decl));
             }
-            if(v->getType()->isMaybe() && !asMaybe) {
+            if(v->getType()->isMaybe() && !asMaybe && !llvm::isa<ir::FunTypeDecl>(v->getType())) {
                 auto ptrV = builder.CreateLoad(mapType(v), vPtr);
                 return builder.CreateLoad(mapType(v)->getPointerElementType(), ptrV);
             }
@@ -507,53 +521,90 @@ llvm::Value *cg::CGFunction::emitFunCall(ir::FunctionCall *e) {
     if(e->isUnresolved()) {
         llvm::report_fatal_error("Function call was not resolved by a resolver");
     }
-    ir::FunctionDecl *f = e->getFun();
-    std::vector<llvm::Value *> args{};
-    int index = 0;
-    for(auto a: e->getParams()) {
-        llvm::Value *emEx = nullptr;
-        if(f->getParams()[index]->isByReference()) {
-            if(auto aa = llvm::dyn_cast<ir::VarAccess>(a)) {
-                if(aa->getType()->isMaybe()) {
-                    emEx = getReadValuePtr(readVar(currBB, aa->getVar(), true));
+    if(auto f = e->getFun()) {
+        std::vector<llvm::Value *> args{};
+        int index = 0;
+        for(auto a: e->getParams()) {
+            llvm::Value *emEx = nullptr;
+            if(f->getParams()[index]->isByReference()) {
+                if(auto aa = llvm::dyn_cast<ir::VarAccess>(a)) {
+                    if(aa->getType()->isMaybe()) {
+                        emEx = getReadValuePtr(readVar(currBB, aa->getVar(), true));
+                    }
+                    else {
+                        emEx = builder.CreateAlloca(mapType(f->getParams()[index]->getType()));
+                        auto vLd = getReadValuePtr(readVar(currBB, aa->getVar(), true));
+                        builder.CreateStore(vLd, emEx);
+                    }
                 }
                 else {
+                    // Constant was passed to a maybe argument
+                    // Alloca memory and forget about it as it cannot be used
                     emEx = builder.CreateAlloca(mapType(f->getParams()[index]->getType()));
-                    auto vLd = getReadValuePtr(readVar(currBB, aa->getVar(), true));
-                    builder.CreateStore(vLd, emEx);
+                    auto emExValPtr = builder.CreateAlloca(mapType(f->getParams()[index]->getType())->getPointerElementType());
+                    builder.CreateStore(emitExpr(a), emExValPtr);
+                    builder.CreateStore(emExValPtr, emEx);
                 }
             }
             else {
-                // Constant was passed to a maybe argument
-                // Alloca memory and forget about it as it cannot be used
-                emEx = builder.CreateAlloca(mapType(f->getParams()[index]->getType()));
-                auto emExValPtr = builder.CreateAlloca(mapType(f->getParams()[index]->getType())->getPointerElementType());
-                builder.CreateStore(emitExpr(a), emExValPtr);
-                builder.CreateStore(emExValPtr, emEx);
+                emEx = emitExpr(a);
             }
+            args.push_back(emEx);
+            ++index;
         }
-        else {
-            emEx = emitExpr(a);
+        // TODO: Set last arg to true is argvars
+        if(!e->isExternal()) {
+            llvm::Function *funDecl = cgm.getLLVMMod()->getFunction(mangleName(f));
+            if(!funDecl) {
+                // Lib functions
+                funDecl = cgm.getLLVMMod()->getFunction(f->getName());
+            }
+            if(!funDecl) {
+                auto msg = "Somehow function "+f->getOGName()+"('"+mangleName(f)+"') could not be found";
+                llvm::report_fatal_error(msg.c_str());
+            }
+            return builder.CreateCall(funDecl, args);
+        } else {
+            auto funDecl = cgm.getLLVMMod()->getOrInsertFunction(mangleName(e->getFun()), createFunctionType(e->getFun()));
+            return builder.CreateCall(funDecl, args);
         }
-        args.push_back(emEx);
-        ++index;
+    } else if(auto v = e->getVar()) {
+        std::vector<llvm::Value *> args{};
+        int index = 0;
+        auto ft = llvm::dyn_cast<ir::FunTypeDecl>(v->getType());
+        for(auto a: e->getParams()) {
+            llvm::Value *emEx = nullptr;
+            if(ft->getArgTypes()[index]->isMaybe()) {
+                if(auto aa = llvm::dyn_cast<ir::VarAccess>(a)) {
+                    if(aa->getType()->isMaybe()) {
+                        emEx = getReadValuePtr(readVar(currBB, aa->getVar(), true));
+                    }
+                    else {
+                        emEx = builder.CreateAlloca(mapType(ft->getArgTypes()[index]));
+                        auto vLd = getReadValuePtr(readVar(currBB, aa->getVar(), true));
+                        builder.CreateStore(vLd, emEx);
+                    }
+                }
+                else {
+                    // Constant was passed to a maybe argument
+                    // Alloca memory and forget about it as it cannot be used
+                    emEx = builder.CreateAlloca(mapType(ft->getArgTypes()[index]));
+                    auto emExValPtr = builder.CreateAlloca(mapType(ft->getArgTypes()[index])->getPointerElementType());
+                    builder.CreateStore(emitExpr(a), emExValPtr);
+                    builder.CreateStore(emExValPtr, emEx);
+                }
+            }
+            else {
+                emEx = emitExpr(a);
+            }
+            args.push_back(emEx);
+            ++index;
+        }
+        auto rfun = readVar(currBB, v);
+        return builder.CreateCall(createFunctionType(ft), rfun, args);
     }
-    // TODO: Set last arg to true is argvars
-    if(!e->isExternal()) {
-        llvm::Function *funDecl = cgm.getLLVMMod()->getFunction(mangleName(f));
-        if(!funDecl) {
-            // Lib functions
-            funDecl = cgm.getLLVMMod()->getFunction(f->getName());
-        }
-        if(!funDecl) {
-            auto msg = "Somehow function "+f->getOGName()+"('"+mangleName(f)+"') could not be found";
-            llvm::report_fatal_error(msg.c_str());
-        }
-        return builder.CreateCall(funDecl, args);
-    } else {
-        auto funDecl = cgm.getLLVMMod()->getOrInsertFunction(mangleName(e->getFun()), createFunctionType(e->getFun()));
-        return builder.CreateCall(funDecl, args);
-    }
+    llvm::report_fatal_error("Unknown type in function call");
+    return nullptr;
 }
 
 llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
@@ -567,7 +618,8 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
         if(llvm::isa<ir::TypeDecl>(decl)) {
             return nullptr;
         }
-        return readVar(currBB, decl);
+        auto v = readVar(currBB, decl);
+        return v;
     }
     case ir::ExprKind::EX_INT:
         return llvm::ConstantInt::get(int64T, llvm::dyn_cast<ir::IntLiteral>(e)->getValue());
@@ -1188,8 +1240,6 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             result = builder.CreateICmpEQ(ldv, tnone);
         }
         else {
-            llvm::dbgs() << *left << ", " << *right << "\n";
-            llvm::dbgs() << e->getLeft()->getType()->getName() << ", " << e->getRight()->getType()->getName() << "\n";
             llvm::report_fatal_error("EQ does not supported given type");
         }
     }
@@ -2226,7 +2276,6 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
 
     ptlibLoader->setupExternLib();
     ptlibLoader->setupLib();
-    //ptlibLoader->setupSourceLib(ptlibMod);
 
     // Forward declare ptlib functions
     if(mod != ptlibMod) {
@@ -2331,6 +2380,10 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                     v->setInitializer(init);
                     structsToInit.push_back(std::make_pair(v, llvm::dyn_cast<ir::StructLiteral>(value)));
                 }
+                else if(auto ft = llvm::dyn_cast<ir::FunTypeDecl>(var->getType())) {
+                    (void)ft;
+                    llvm::report_fatal_error("Function variable initializer is not yet implemented");
+                }
                 else {
                     llvm::report_fatal_error("Global variable initializer is not a constant");
                 }
@@ -2352,6 +2405,9 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                     else if(var->getType()->isMatrix()) {
                         v->setInitializer(getTypeDefaultValue(var->getType()));
                         matricesToInit.push_back(std::make_pair(v, nullptr));
+                    }
+                    else if(llvm::isa<ir::FunTypeDecl>(var->getType())) {
+                        llvm::report_fatal_error("Somehow function type is not maybe");
                     }
                     else {
                         // struct
@@ -2788,14 +2844,20 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
 }
 
 llvm::FunctionType *cg::CodeGen::createFunctionType(ir::FunctionDecl *fun) {
-    // FIXME: Handle values passed by reference
     llvm::Type *retType = mapType(fun->getReturnType());
     llvm::SmallVector<llvm::Type *> paramTypes;
     for(auto p : fun->getParams()) {
         llvm::Type *t = mapType(p);
-        if(p->getType()->isMaybe()) {
-            t = t->getPointerTo();
-        }
+        paramTypes.push_back(t);
+    }
+    return llvm::FunctionType::get(retType, paramTypes, false);
+}
+
+llvm::FunctionType *cg::CodeGen::createFunctionType(ir::FunTypeDecl *fun) {
+    llvm::Type *retType = mapType(fun->getReturnType());
+    llvm::SmallVector<llvm::Type *> paramTypes;
+    for(auto p : fun->getArgTypes()) {
+        llvm::Type *t = mapType(p);
         paramTypes.push_back(t);
     }
     return llvm::FunctionType::get(retType, paramTypes, false);
@@ -2810,9 +2872,6 @@ llvm::Function *cg::CGFunction::createFunction(ir::FunctionDecl *fun, llvm::Func
     for(auto i = f->arg_begin(); i != f->arg_end(); ++i, ++idx) {
         llvm::Argument *arg = i;
         ir::FormalParamDecl *param = fun->getParams()[idx];
-        if(param->isByReference()) {
-            // FIXME: Handle referenced params??
-        }
         arg->setName(param->getName());
     }
     return f;
