@@ -1208,7 +1208,7 @@ std::vector<ir::IR *> Scanner::parseAddStructElement(ir::IR *elem, std::vector<i
 }
 
 static bool isUnknownType(ir::Expr *e) {
-    if(llvm::isa<ir::UnresolvedSymbolAccess>(e) || llvm::isa<ir::ExternalSymbolAccess>(e)) {
+    if(e->getType()->getBaseName() == UNKNOWN_CSTR || llvm::isa<ir::UnresolvedSymbolAccess>(e) || llvm::isa<ir::ExternalSymbolAccess>(e)) {
         return true;
     }
 

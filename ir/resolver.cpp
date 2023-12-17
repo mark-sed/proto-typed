@@ -167,11 +167,14 @@ void UnresolvedSymbolResolver::resolveEmptyArray(ir::Expr *expr, ir::SourceInfo 
     // If deducted type is nullptr, then report as not inferable
     if(auto ml = llvm::dyn_cast<ir::MatrixLiteral>(expr)) {
         if(expr->getType()->getBaseName() == UNKNOWN_CSTR) {
+            LOGMAX("Resolving array "+expr->debug());
             if(!deductedType)
                 diags.report(loc, diag::ERR_CANNOT_INFER_TYPE, ml->debug());
             expr->setType(deductedType);
+            LOGMAX("Resolved array as "+expr->debug());
         }
         if(expr->getType()->getDimensions() > 1) {
+            // Go through all values and override deducted if some is set
             for(auto e : ml->getValue()) {
                 resolveEmptyArray(e, loc, llvm::dyn_cast<ir::TypeDecl>(deductedType->getDecl()));
             }
@@ -192,9 +195,7 @@ void UnresolvedSymbolResolver::resolveEmptyArrays(ir::Expr *expr, ir::SourceInfo
             diags.report(loc, diag::ERR_CANNOT_INFER_TYPE, e->debug());
         }
         if(right->getType()->isMatrix()) {
-            LOGMAX("Resolving array "+expr->debug());
             resolveEmptyArray(right, loc, llvm::dyn_cast<ir::TypeDecl>(left->getType()));
-            LOGMAX("Resolved array as "+expr->debug());
         }
     }
     else if(auto e = llvm::dyn_cast<ir::FunctionCall>(expr)) {
@@ -204,8 +205,9 @@ void UnresolvedSymbolResolver::resolveEmptyArrays(ir::Expr *expr, ir::SourceInfo
             // emit error. But it is deductiable if it contains
             // other elements e.g. [[],[1]], but [[]] is not.
             auto fun = e->getFun();
-            if(e->getParams()[i]->getType()->isMatrix()) {
+            if(llvm::isa<ir::MatrixLiteral>(e->getParams()[i])) {
                 if(!fun) {
+                    // TODO: Some cases can be handled here -> [[],[1]]
                     resolveEmptyArray(e->getParams()[i], loc, nullptr);
                 }
                 else {
@@ -246,8 +248,8 @@ void UnresolvedSymbolResolver::resolve(ir::IR* i) {
         resolve(stmt->getElseBranch());
     }
     else if(auto *stmt = llvm::dyn_cast<ir::ExprStmt>(i)) {
-        resolve(stmt->getExpr(), stmt->getLocation());
         resolveEmptyArrays(stmt->getExpr(), stmt->getLocation());
+        resolve(stmt->getExpr(), stmt->getLocation());
     }
     else if(auto *stmt = llvm::dyn_cast<ir::VarDecl>(i)) {
         if(stmt->getInitValue() && stmt->getInitValue()->getType()->getName() == UNKNOWN_CSTR) {
