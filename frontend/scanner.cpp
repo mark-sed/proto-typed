@@ -501,10 +501,10 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
                 else if(tl->getName() == ANY_CSTR) {
                     type = tl;
                 }
-                else if(tr->isUnresolved()) {
+                else if(tr->isUnresolved() || tr->getBaseName() == UNKNOWN_CSTR) {
                     type = tl;
                 }
-                else if(tl->isUnresolved()) {
+                else if(tl->isUnresolved() || tl->getBaseName() == UNKNOWN_CSTR) {
                     type = tr;
                 }
                 /*else if(auto tlf = llvm::dyn_cast<ir::FunTypeDecl>(tl)) {
@@ -781,6 +781,8 @@ void Scanner::addStructTemplatedFunction(ir::TypeDecl *t) {
 }
 
 void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT) {
+    if(t->getBaseName() == UNKNOWN_CSTR)
+        return;
     ir::TypeDecl *tPtr = t->clone();
     tPtr->setMaybe(true);
     auto body = std::vector<ir::IR *> {};
@@ -1220,6 +1222,9 @@ static bool isUnknownType(ir::Expr *e) {
         return isUnknownType(s->getExpr());
     }
     else if(auto s = llvm::dyn_cast<ir::MatrixLiteral>(e)) {
+        if(s->getType()->getBaseName() == UNKNOWN_CSTR) {
+            return false;
+        }
         for(auto a : s->getValue()) {
             if(isUnknownType(a)) {
                 return true;

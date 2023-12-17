@@ -45,6 +45,9 @@ private:
      */
     void resolve(ir::Expr *expr, ir::SourceInfo loc);
 
+    void resolveEmptyArray(ir::Expr *expr, ir::SourceInfo loc, ir::TypeDecl *deductedType);
+    void resolveEmptyArrays(ir::Expr *expr, ir::SourceInfo loc);
+
 public:
     /**
      * @param mod Module declaration

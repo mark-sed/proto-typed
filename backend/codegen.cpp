@@ -894,6 +894,7 @@ llvm::Value *cg::CGFunction::emitUnaryPrefixExpr(ir::UnaryPrefixExpr *e) {
 }
 
 llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
+    LOGMAX("Emitting infix expr "+e->debug());
     llvm::Value *left = emitExpr(e->getLeft());
     llvm::Value *right = emitExpr(e->getRight());
     llvm::Value *result = nullptr;

@@ -1,0 +1,55 @@
+int[][][] l2
+int[][] i2
+int[] i1
+
+string[][] s2
+string[] s1
+
+void print3dArr(int[][][] a) {
+    print("[")
+    for(i2 : a) {
+        print("[")
+        for(i1 : i2) {
+            print("[")
+            for(int i: i1) {
+                print(i++",")
+            }
+            print("]")
+        }
+        print("]")
+    }
+    print("]\n")
+}
+
+void print3dArr(string[][] a) {
+    print("[")
+    for(s1 : a) {
+        print("[")
+        for(string s: s1) {
+            print(s++",")
+        }
+        print("]")
+    }
+    print("]\n")
+}
+
+
+l2 = [[[ 1, 2, 3],[4, 5, 6],[]]]
+print3dArr(l2)
+
+l2 = [[[]]]
+print3dArr(l2)
+
+l2 = [[[],[]],[[],[]],[[],[]]]
+print3dArr(l2)
+
+int o = 4
+l2 = [[[1+o],[],[],[2*o,o]],[[]]]
+print3dArr(l2)
+
+s2 = [[],[],[]]
+print3dArr(s2)
+s2 = [["a"++"b"]]
+print3dArr(s2)
+s2 = [[],[],["hm", "okay"],[]]
+print3dArr(s2)

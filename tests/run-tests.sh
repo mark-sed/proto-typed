@@ -271,6 +271,17 @@ function test_funvar {
 not 3\n6\nnot 10\n20\n" "funvar"
 }
 
+function test_array_resolver {
+    expect_pass "array_resolver.pt" "array_resolver"
+    expect_out_eq "[[[1,2,3,][4,5,6,][]]]
+[[[]]]
+[[[][]][[][]][[][]]]
+[[[5,][][][8,4,]][[]]]
+[[][][]]
+[[ab,]]
+[[][][hm,okay,][]]\n" "array_resolver"
+}
+
 # Expect fail tests
 
 function test_missing_return {
@@ -295,6 +306,7 @@ function run_all_tests {
     run_test var
     run_test numbers
     run_test funvar
+    run_test array_resolver
 
     # Expect fail tests
     run_test missing_return
