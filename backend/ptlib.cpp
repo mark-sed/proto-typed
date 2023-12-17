@@ -359,6 +359,23 @@ void PTLib::stringFuncsInit() {
     }
 }
 
+void PTLib::floatFuncsInit() {
+    // bool is_nan(float)
+    {
+        auto isnanF = llvmMod->getOrInsertFunction("isnan", 
+                                                    llvm::FunctionType::get(int1T, floatT, false));
+        auto funType = llvm::FunctionType::get(int1T, { floatT }, false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "is_nan_float",
+                                                llvmMod);
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        setCurrBB(bb);
+        llvm::Value *v = builder.CreateCall(isnanF, f->getArg(0));
+        builder.CreateRet(v);
+    }
+}
+
 void PTLib::appendInit(std::string name, llvm::Type *mt, llvm::Type *vt) {
     for(auto [kn, _] : generated) {
         if(kn == name) {
@@ -1149,6 +1166,7 @@ void PTLib::setupLib() {
 
     trigonFuncsInit();
     stringFuncsInit();
+    floatFuncsInit();
 }
 
 void PTLib::setupExternLib() {

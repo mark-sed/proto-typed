@@ -252,6 +252,11 @@ function test_ptlib_arrays {
 0 1 2 3 4 5 6 7 8 \n1 2 \n3 4 \n5 6 \n" "ptlib_arrays"
 }
 
+function test_ptlib_math {
+    expect_pass "ptlib_math.pt" "ptlib_math"
+    expect_out_eq "is NaN\nis really not NaN\n" "ptlib_math"
+}
+
 function test_var {
     expect_pass "var.pt" "var"
     expect_out_eq "4\n2.2\nHello\n1\ntruefalse\n5.52.2\nab\n-8\n" "var"
@@ -303,6 +308,7 @@ function run_all_tests {
     run_test floats
     run_test ptlib_strings
     run_test ptlib_arrays
+    run_test ptlib_math
     run_test var
     run_test numbers
     run_test funvar

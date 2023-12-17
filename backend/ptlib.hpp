@@ -69,6 +69,7 @@ private:
 
     void trigonFuncsInit();
     void stringFuncsInit();
+    void floatFuncsInit();
 
 public:
     /**

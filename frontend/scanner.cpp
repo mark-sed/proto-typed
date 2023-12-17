@@ -169,6 +169,9 @@ void Scanner::init() {
     defineFun("tan_float", "tan", floatType, {
         new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", this->floatType, false)
     });
+    defineFun("is_nan_float", "is_nan", boolType, {
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", this->floatType, false)
+    });
 
     if(!lib) {
         for(auto d: ptlibMod->getDecls()) {

@@ -1,0 +1,17 @@
+float fnn 
+fnn = nan()
+
+if(is_nan(fnn)) {
+    print("is NaN\n")
+}
+else {
+    print("is not NaN\n")
+}
+
+fnn = 0.0
+if(is_nan(fnn)) {
+    print("is also NaN\n")
+}
+else {
+    print("is really not NaN\n")
+}
