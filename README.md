@@ -342,6 +342,45 @@ print(y++"\n") // Incorrect value - string read as int
 
 Any type, unlike maybe type, is checked as an address and not a value (as it is only known to the user what type is stored there).
 
+### Function type
+
+Function type is always a maybe type (the `?` is implicit, just like with any) and therefore it can hold `none`.
+
+Function type has the following syntax:
+```
+<return type>(<optional list of argument types>) <variable name>
+```
+
+For example:
+```c
+bool isBig(int? a, bool warn) {
+    if(a != none) {
+        return a > 100 
+    }
+    if(warn) print("is none")
+    return false
+}
+
+bool(int?, bool) funIsBig
+funIsBig = isBig
+
+print(funIsBig(4, false) as string)
+```
+
+Function type can also be taken as an argument:
+```c
+void err_print(string s) {
+    print("Error: "++s++"\n")
+}
+
+void report(void(string) rep_fun, string msg) {
+    rep_fun(msg)
+}
+
+report(err_print, "Oops!")
+report(print, "Never mind!")
+```
+
 ## Syntax
 
 Proto-typed aims for having a simple syntax, that allows good code readability and writing, as it's main purpose is prototyping and small programs. 

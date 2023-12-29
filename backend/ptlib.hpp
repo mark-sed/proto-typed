@@ -70,6 +70,7 @@ private:
     void trigonFuncsInit();
     void stringFuncsInit();
     void floatFuncsInit();
+    void maybeFuncsInit();
 
 public:
     /**

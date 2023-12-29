@@ -43,3 +43,31 @@ void(int(int, bool), int) getP() {
 void(int(int, bool), int) pPtr
 pPtr = getP()
 pPtr(foo, 10)
+
+bool isBig(int? a, bool warn) {
+    if(a != none) {
+        return a > 100 
+    }
+    if(warn) print("is none")
+    return false
+}
+
+bool(int?, bool) funIsBig
+funIsBig = isBig
+
+print(funIsBig(4, false) ++ "\n")
+
+bool custom_reporting = true
+
+void err_print(string s) {
+    print("Error: "++s++"\n")
+}
+
+void report(void(string) rep_fun, string msg) {
+    if(custom_reporting) rep_fun(msg)
+    else print(msg)
+}
+
+report(err_print, "Oops!")
+custom_reporting = false
+report(err_print, "Oh, no!\n")
