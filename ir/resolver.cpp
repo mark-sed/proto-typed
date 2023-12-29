@@ -221,9 +221,19 @@ void UnresolvedSymbolResolver::resolveEmptyArrays(ir::Expr *expr, ir::SourceInfo
 void UnresolvedSymbolResolver::resolve(ir::IR* i) {
     // Statements to resolve further
     if(auto *stmt = llvm::dyn_cast<ir::ReturnStmt>(i)) {
+        // Resolve parent function
+        auto parent = stmt->getEnclosingIR();
+        while(parent && !llvm::isa<ir::FunctionDecl>(parent)) {
+            parent = parent->getEnclosingIR();
+        }
+        if(!parent) { 
+            diags.report(i->getLocation(), diag::ERR_LOOSE_RETURN);
+        }
+        stmt->setParentFun(llvm::dyn_cast<ir::FunctionDecl>(parent));
         if(stmt->getValue()) {
             resolve(stmt->getValue(), stmt->getLocation());
             resolveEmptyArrays(stmt->getValue(), stmt->getLocation());
+            resolveEmptyArray(stmt->getValue(), stmt->getLocation(), stmt->getParentFun()->getReturnType());
         }
     }
     else if(auto *stmt = llvm::dyn_cast<ir::FunctionDecl>(i)) {

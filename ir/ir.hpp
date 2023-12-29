@@ -1111,11 +1111,14 @@ public:
 class ReturnStmt: public IR {
 private:
     Expr *val;
+    ir::FunctionDecl *parentFun;
 public:
     ReturnStmt(Expr *val, IR *enclosing_ir, SourceInfo loc, std::string name)
-        : IR(IRKind::IR_RETURN, enclosing_ir, loc, name), val(val) {}
+        : IR(IRKind::IR_RETURN, enclosing_ir, loc, name), val(val), parentFun(nullptr) {}
 
     Expr *getValue() { return val; }
+    ir::FunctionDecl *getParentFun() { return parentFun; }
+    void setParentFun(ir::FunctionDecl *f) { parentFun = f; }
 
     static bool classof(const IR *s) {
         return s->getKind() == IRKind::IR_RETURN;

@@ -47,6 +47,7 @@ private:
 
     void resolveEmptyArray(ir::Expr *expr, ir::SourceInfo loc, ir::TypeDecl *deductedType);
     void resolveEmptyArrays(ir::Expr *expr, ir::SourceInfo loc);
+    void resolveEmptyArrays(ir::IR *body);
 
 public:
     /**
