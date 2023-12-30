@@ -226,7 +226,7 @@ void UnresolvedSymbolResolver::resolve(ir::IR* i) {
         while(parent && !llvm::isa<ir::FunctionDecl>(parent)) {
             parent = parent->getEnclosingIR();
         }
-        if(!parent) { 
+        if(!parent) {
             diags.report(i->getLocation(), diag::ERR_LOOSE_RETURN);
         }
         stmt->setParentFun(llvm::dyn_cast<ir::FunctionDecl>(parent));

@@ -183,3 +183,26 @@ for(gjoin : fjoin) {
     }
     print("\n")
 }
+
+void localarrays() {
+    int[] a
+    for(int i : a) {
+        print(i++" ")
+    }
+    print("-\n");
+    append(a, 4)
+    append(a, 5)
+    for(int i : a) {
+        print(i++" ")
+    }
+    print("\n");
+}
+
+localarrays()
+
+int[][][] l23
+l23 = [[[1]]]
+
+for(int[][] i : l23) {
+    print(i[0][0] ++ "\n")
+}

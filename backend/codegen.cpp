@@ -2152,7 +2152,9 @@ void cg::CGFunction::emitStmt(ir::VarDecl *stmt) {
             v = emitExpr(empt);
         }
         else if(stmt->getType()->isMatrix()) {
-            llvm::report_fatal_error("Local matrix intializer not yet implemented");
+            std::vector<ir::Expr *> vals;
+            ir::MatrixLiteral *empt = new ir::MatrixLiteral(stmt->getLocation(), vals, stmt->getType());
+            v = emitExpr(empt);
         }
         else {
             auto t = llvm::dyn_cast<ir::TypeDecl>(stmt->getType());
