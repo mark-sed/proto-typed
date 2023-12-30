@@ -232,6 +232,11 @@ void UnresolvedSymbolResolver::resolve(ir::IR* i) {
         stmt->setParentFun(llvm::dyn_cast<ir::FunctionDecl>(parent));
         if(stmt->getValue()) {
             resolve(stmt->getValue(), stmt->getLocation());
+            if(auto mtx = llvm::dyn_cast<ir::MatrixLiteral>(stmt->getValue())) {
+                if(mtx->getValue().empty()) {
+                    diags.report(stmt->getLocation(), diag::ERR_INCORRECT_RET_TYPE, stmt->getParentFun()->getOGName(), stmt->getParentFun()->getReturnType()->getName(), mtx->debug());
+                }
+            }
             resolveEmptyArrays(stmt->getValue(), stmt->getLocation());
             resolveEmptyArray(stmt->getValue(), stmt->getLocation(), stmt->getParentFun()->getReturnType());
         }

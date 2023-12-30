@@ -28,11 +28,11 @@ void FunctionAnalysis::checkReturnType(std::vector<ir::IR *> decls, int *num_fou
                 }
             }
             
-            std::string tname = "void";
+            std::string tname = VOID_CSTR;
             if(stmt->getValue()) {
                 tname = stmt->getValue()->getType()->getName();
             }
-            if(tname != expected->getName()) {
+            if(tname != expected->getName() && !(expected->isMaybe() && tname == NONETYPE_CSTR)) {
                 diags.report(stmt->getLocation(), diag::ERR_INCORRECT_RET_TYPE,
                             fun->getOGName(),
                             tname,
