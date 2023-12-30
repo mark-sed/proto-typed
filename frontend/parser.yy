@@ -782,7 +782,7 @@ mattype : ID matsq               { $$ = scanner->parseMatrixType($1, $2); }
         | KWSTRING matsq         { $$ = scanner->parseMatrixType(STRING_CSTR, $2); }
         | KWBOOL matsq           { $$ = scanner->parseMatrixType(BOOL_CSTR, $2); }
         | KWANY matsq            { $$ = scanner->parseMatrixType(ANY_CSTR, $2); }
-        | funtype matsq
+        | funtype matsq          { $$ = scanner->parseMatrixType($1, $2); }
         | ID KWMAYBE matsq
         | KWINT KWMAYBE matsq
         | KWFLOAT KWMAYBE matsq

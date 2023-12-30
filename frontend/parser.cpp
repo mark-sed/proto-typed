@@ -3670,7 +3670,7 @@ namespace  ptc  {
 
   case 411: // mattype: funtype matsq
 #line 785 "frontend/parser.yy"
-          { yylhs.value.as < ptc::ir::IR * > () = yystack_[1].value.as < ptc::ir::IR * > (); }
+                                 { yylhs.value.as < ptc::ir::IR * > () = scanner->parseMatrixType(yystack_[1].value.as < ptc::ir::IR * > (), yystack_[0].value.as < std::vector<ptc::ir::Expr *>  > ()); }
 #line 3675 "frontend/parser.cpp"
     break;
 

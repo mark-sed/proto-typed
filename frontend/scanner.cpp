@@ -1024,6 +1024,37 @@ ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &mats
     return nullptr;
 }
 
+ir::IR *Scanner::parseMatrixType(ir::IR *rootType, std::vector<ir::Expr *> &matsize, bool isMaybe) {
+    auto ogName = rootType->getName();
+    std::string name = rootType->getName();
+    for(size_t i = 0; i < matsize.size(); ++i) {
+        name += "[]";
+    }
+    LOGMAX("Creating matrix function type "+name);
+    if(auto rootDecl = llvm::dyn_cast<ir::TypeDecl>(rootType)) {
+        auto elemT = rootDecl;
+        auto elemName = ogName;
+        auto prevElemT = rootDecl;
+        for(size_t i = 0; i < matsize.size()-1; ++i) {
+            elemName += "[]";
+            std::vector<ir::Expr *> elemSize;
+            for(size_t j = 0; j <= i; ++j) {
+                elemSize.push_back(matsize[j]);
+            }
+            elemT = new ir::TypeDecl(currentIR, llvmloc2Src(), elemName, elemSize, elemT);
+            addMatrixTemplatedFunction(elemT, prevElemT);
+            prevElemT = elemT;
+        }
+        auto t = new ir::TypeDecl(currentIR, llvmloc2Src(), name, matsize, elemT);
+
+        addMatrixTemplatedFunction(t, elemT);
+
+        return t;
+    }
+    diags.report(llvmloc2Src(), diag::ERR_NOT_A_TYPE, name);
+    return nullptr;
+}
+
 std::vector<ir::Expr *> Scanner::parseMatrixValue(ir::Expr *e) {
     LOGMAX("Creating new matrix with "+e->debug());
     std::vector<ir::Expr *> list{e};
