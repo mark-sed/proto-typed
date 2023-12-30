@@ -332,6 +332,10 @@ void ExternalSymbolResolver::resolve(ir::IR *i) {
             }
 
             if(auto smt = llvm::dyn_cast<ir::TypeDecl>(symb)) {
+                if(stmtT->isMaybe()) {
+                    smt = smt->clone();
+                    smt->setMaybe(true);
+                }
                 stmt->setType(smt);
                 stmt->getType()->setUnresolved(false);
             }
@@ -339,6 +343,8 @@ void ExternalSymbolResolver::resolve(ir::IR *i) {
                 diags.report(i->getLocation(), diag::ERR_NOT_A_TYPE, stmtT->getName());
                 return;
             }
+
+            LOGMAX("Resolved as "+stmt->debug());
         } 
 
         if(stmt->getInitValue() && stmt->getInitValue()->getType()->getName() == UNKNOWN_CSTR) {
@@ -393,6 +399,13 @@ ir::TypeDecl *ExternalSymbolResolver::resolveType(ir::TypeDecl *t, ir::SourceInf
 
         er->setModDecl(symbMod->getModule());
         if(auto s = llvm::dyn_cast<ir::TypeDecl>(symb)) {
+            if(t->isMaybe()) {
+                auto sClone = s->clone();
+                sClone->setMaybe(true);
+                LOGMAX("Resolved type as "+sClone->debug());
+                return sClone;
+            }
+            LOGMAX("Resolved type as "+s->debug());
             return s;
         }
         else {
@@ -477,7 +490,9 @@ void ExternalSymbolResolver::resolve(ir::Expr *expr, ir::SourceInfo loc) {
         }
     }
     else if(auto e = llvm::dyn_cast<ir::BinaryInfixExpr>(expr)) {
+        //llvm::dbgs() << "--- " << e->getLeft()->debug() << " Pre\n";
         resolve(e->getLeft(), loc);
+        //llvm::dbgs() << "--- " << e->getLeft()->debug() << " Post\n";
         resolve(e->getRight(), loc);
 
         auto newe = scanner->parseInfixExpr(e->getLeft(), e->getRight(), e->getOperator(), e->isConst());
