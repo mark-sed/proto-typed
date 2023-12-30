@@ -207,6 +207,13 @@ private:
     bool unresolved;
     ExternalSymbolAccess *externalIR;
     bool structType;
+
+    IR *getBaseIr(IR *d) {
+        if(auto t = llvm::dyn_cast<TypeDecl>(d)) {
+            if(t->getDecl()) return getBaseIr(t->getDecl());
+        }
+        return d;
+    }
 public:
     TypeDecl(IR *enclosing_ir, SourceInfo loc, std::string name, IR *decl=nullptr)
             : IR(IRKind::IR_TYPE_DECL, enclosing_ir, loc, name),
@@ -232,6 +239,11 @@ public:
 
     TypeDecl *clone() {
         return new TypeDecl(*this);
+    }
+
+    IR *getBaseDecl() {
+        if(!decl) return this;
+        return getBaseIr(decl);
     }
 
     static bool classof(const IR *ir) {

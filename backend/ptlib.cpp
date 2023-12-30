@@ -585,6 +585,10 @@ void PTLib::equals_matrixInit(std::string name, llvm::Type *mt, ir::TypeDecl *vt
                 llvm::DataLayout* dataLayout = new llvm::DataLayout(llvmMod);
                 tsize = dataLayout->getTypeAllocSize(builder.getInt8Ty()->getPointerTo());
             }
+            else if(llvm::isa<ir::FunTypeDecl>(vt->getBaseDecl())) {
+                llvm::DataLayout* dataLayout = new llvm::DataLayout(llvmMod);
+                tsize = dataLayout->getTypeAllocSize(builder.getInt8Ty()->getPointerTo());
+            }
             else {
                 llvm::report_fatal_error("Unknown data type for memcmp");
             }

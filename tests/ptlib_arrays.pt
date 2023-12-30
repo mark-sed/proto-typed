@@ -68,3 +68,29 @@ for(gjoin : fjoin) {
     }
     print("\n")
 }
+
+void p1(string s) {
+    print("p1 "++s)
+}
+
+void p2(string s) {
+    print("p2 "++s)
+}
+
+void(string)[] funs
+
+append(funs, print)
+append(funs, p1)
+append(funs, p2)
+
+for(void(string) f: funs) {
+    f("hi\n")
+}
+
+
+if(funs == funs) print("Yes\n")
+if(funs != funs) print("No")
+if(print in funs) print("its in\n")
+
+funs += funs
+print(length(funs)++"\n")
