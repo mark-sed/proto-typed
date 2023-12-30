@@ -906,6 +906,7 @@ class FunctionCall : public Expr {
 private:
     FunctionDecl *fun;
     VarDecl *var;
+    Expr *expr;
     FormalParamDecl *param;
     UnresolvedSymbolAccess *unresF;
     ExternalSymbolAccess *extF;
@@ -917,6 +918,7 @@ public:
                 : Expr(ExprKind::EX_FUN_CALL, fun->getReturnType(), false),
                   fun(fun),
                   var(nullptr),
+                  expr(nullptr),
                   param(nullptr),
                   unresF(nullptr),
                   extF(nullptr),
@@ -927,6 +929,18 @@ public:
                 : Expr(ExprKind::EX_FUN_CALL, llvm::dyn_cast<ir::FunTypeDecl>(var->getType())->getReturnType(), false),
                   fun(nullptr),
                   var(var),
+                  expr(nullptr),
+                  param(nullptr),
+                  unresF(nullptr),
+                  extF(nullptr),
+                  params(params),
+                  unresolved(false),
+                  external(false) {}
+    FunctionCall(Expr *expr, std::vector<Expr *> params) 
+                : Expr(ExprKind::EX_FUN_CALL, expr->getType(), false),
+                  fun(nullptr),
+                  var(nullptr),
+                  expr(expr),
                   param(nullptr),
                   unresF(nullptr),
                   extF(nullptr),
@@ -937,6 +951,7 @@ public:
                 : Expr(ExprKind::EX_FUN_CALL, llvm::dyn_cast<ir::FunTypeDecl>(param->getType())->getReturnType(), false),
                   fun(nullptr),
                   var(nullptr),
+                  expr(nullptr),
                   param(param),
                   unresF(nullptr),
                   extF(nullptr),
@@ -947,6 +962,7 @@ public:
                 : Expr(ExprKind::EX_FUN_CALL, unresF->getType(), false),
                   fun(nullptr),
                   var(nullptr),
+                  expr(nullptr),
                   param(nullptr),
                   unresF(unresF),
                   extF(nullptr),
@@ -957,6 +973,7 @@ public:
                 : Expr(ExprKind::EX_FUN_CALL, extF->getType(), false),
                   fun(nullptr),
                   var(nullptr),
+                  expr(nullptr),
                   param(nullptr),
                   unresF(nullptr),
                   extF(extF),
@@ -967,6 +984,7 @@ public:
     FunctionDecl *getFun() { return fun; }
     VarDecl *getVar() { return var; }
     FormalParamDecl *getParam() { return param; }
+    Expr *getExpr() { return expr; }
     void setFun(FunctionDecl *f) { fun = f; }
     bool isUnresolved() { return unresolved; }
     void setUnresolved(bool s) { unresolved = s; }
@@ -983,6 +1001,8 @@ public:
             return "("+var->debug()+")"+"("+block2List(params)+")";
         if(param)
             return "("+param->debug()+")"+"("+block2List(params)+")";
+        if(expr)
+            return "("+expr->debug()+")"+"("+block2List(params)+")";
         if(unresolved)
             return "(unresolved call)"+unresF->getName()+"("+block2List(params)+")";
         if(external)

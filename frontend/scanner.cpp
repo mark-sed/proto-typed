@@ -1316,8 +1316,11 @@ ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
         else if(auto symb = llvm::dyn_cast<ir::ExternalSymbolAccess>(fun)) {
             return new ir::FunctionCall(symb, params);
         }
+        else if(llvm::isa<ir::FunTypeDecl>(fun->getType())) {
+            return new ir::FunctionCall(fun, params);
+        }
         else {
-            diags.report(llvmloc2Src(), diag::ERR_INTERNAL, "Function call is not implemented for expressions");
+            diags.report(llvmloc2Src(), diag::ERR_NOT_CALLABLE, fun->debug());
         }
     }
     return nullptr;

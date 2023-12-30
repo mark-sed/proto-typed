@@ -71,3 +71,25 @@ void report(void(string) rep_fun, string msg) {
 report(err_print, "Oops!")
 custom_reporting = false
 report(err_print, "Oh, no!\n")
+
+int foo2(int a, bool t) {
+    if(t) {
+        print(a ++ "\n")
+        return -1 * a
+    }
+    else {
+        print("not "++a++"\n")
+        return 2*a
+    }
+}
+
+int(int, bool) foo2F
+
+foo2F = foo2
+
+print(foo2F(4, true)++"\n");
+print(foo2F(8, false)++"\n");
+
+p(foo2, 3)
+
+getP()(foo2, 10)

@@ -275,7 +275,8 @@ function test_funvar {
     expect_pass "funvar.pt" "funvar"
     expect_out_eq "4\n-4\nnot 8\n16\ntrue\n49\ntrue\n49\ntrue
 not 3\n6\nnot 10\n20\nfalse
-Error: Oops!\nOh, no!\n" "funvar"
+Error: Oops!\nOh, no!
+4\n-4\nnot 8\n16\nnot 3\n6\nnot 10\n20\n" "funvar"
 }
 
 function test_array_resolver {

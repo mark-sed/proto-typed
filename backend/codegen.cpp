@@ -637,6 +637,41 @@ llvm::Value *cg::CGFunction::emitFunCall(ir::FunctionCall *e) {
         }
         auto rfun = readVar(currBB, v);
         return builder.CreateCall(createFunctionType(ft), rfun, args);
+    } else if(auto v = e->getExpr()) {
+        // Function call on an expression
+        auto vVal = emitExpr(v);
+        std::vector<llvm::Value *> args{};
+        int index = 0;
+        auto ft = llvm::dyn_cast<ir::FunTypeDecl>(v->getType());
+        for(auto a: e->getParams()) {
+            llvm::Value *emEx = nullptr;
+            if(ft->getArgTypes()[index]->isMaybe()) {
+                if(auto aa = llvm::dyn_cast<ir::VarAccess>(a)) {
+                    if(aa->getType()->isMaybe()) {
+                        emEx = getReadValuePtr(readVar(currBB, aa->getVar(), true));
+                    }
+                    else {
+                        emEx = builder.CreateAlloca(mapType(ft->getArgTypes()[index]));
+                        auto vLd = getReadValuePtr(readVar(currBB, aa->getVar(), true));
+                        builder.CreateStore(vLd, emEx);
+                    }
+                }
+                else {
+                    // Constant was passed to a maybe argument
+                    // Alloca memory and forget about it as it cannot be used
+                    emEx = builder.CreateAlloca(mapType(ft->getArgTypes()[index]));
+                    auto emExValPtr = builder.CreateAlloca(mapType(ft->getArgTypes()[index])->getPointerElementType());
+                    builder.CreateStore(emitExpr(a), emExValPtr);
+                    builder.CreateStore(emExValPtr, emEx);
+                }
+            }
+            else {
+                emEx = emitExpr(a);
+            }
+            args.push_back(emEx);
+            ++index;
+        }
+        return builder.CreateCall(createFunctionType(ft), vVal, args);
     }
     llvm::report_fatal_error("Unknown type in function call");
     return nullptr;
