@@ -20,7 +20,6 @@ DIAG(ERR_UNDEFINED_TYPE, Error, "type ‘{0}’ is not defined.")
 DIAG(ERR_UNDEFINED_EXT_TYPE, Error, "external type ‘{0}’ is not defined.")
 DIAG(ERR_INCORRECT_ARGS, Error, "incorrect arguments in a function call to ‘{0}’")
 DIAG(ERR_INCORRECT_ARGS_DET, Error, "incorrect arguments in a function call to ‘{0}’. Expected ‘{1}’, but got ‘{2}’")
-DIAG(ERR_INTERNAL, Error, "internal error. {0}.")
 DIAG(ERR_FUNCTION_REDEFINITION, Error, "redefinition of a function ‘{0}’.")
 //DIAG(ERR_INVALID_CONVERSION, Error, "invalid conversion from ‘{0}’ to ‘{1}’.")
 DIAG(ERR_INCORRECT_ASSIGNMENT, Error, "incorrect assignment of type ‘{0}’ to ‘{1}’.")
@@ -53,6 +52,9 @@ DIAG(ERR_CANNOT_CAST_TO_MAYBE, Error, "only any type can be casted to maybe type
 DIAG(ERR_USE_CAST_FOR_ANY, Error, "incorrect assignment of type ‘{0}’ to ‘{1}’. Cast the value using ‘as’ operator.")
 DIAG(ERR_UNKNOWN_TOKEN, Error, "unknown token ‘{0}’.")
 DIAG(ERR_MISPLACED_RETURN, Error, "‘return’ can appear only inside of a function.")
+
+DIAG(ERR_INTERNAL, Error, "internal error. {0}.")
+DIAG(ERR_NOT_YET_IMPLEMENTED, Error, "Not yet implemented: {0}.")
 
 DIAG(ERR_EXPECTED, Error, "expected ‘{0}’ but found ‘{1}’.")
 //DIAG(note_module_identifier_declaration, Note, "module identifier declared here")

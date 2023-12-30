@@ -245,6 +245,11 @@ void UnresolvedSymbolResolver::resolve(ir::IR* i) {
         resolve(stmt->getBody());
     }
     else if(auto *stmt = llvm::dyn_cast<ir::ForeachStmt>(i)) {
+        if(auto mtx = llvm::dyn_cast<ir::MatrixLiteral>(stmt->getCollection())) {
+            if(mtx->getValue().empty()) {
+                diags.report(stmt->getLocation(), diag::ERR_NOT_YET_IMPLEMENTED, "Cannot infer type for empty arrays literals in for loops. If needed, use a variable");
+            }
+        }
         resolve(stmt->getI(), stmt->getLocation());
         resolveEmptyArrays(stmt->getI(), stmt->getLocation());
         resolve(stmt->getCollection(), stmt->getLocation());
