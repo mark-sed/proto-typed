@@ -107,6 +107,7 @@ public:
     void slice2_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, ir::TypeDecl *mtt);
     void reverse_matrixInit(std::string name, llvm::Type *mt, ir::TypeDecl *mtt);
     void join_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, ir::TypeDecl *mtt);
+    void remove_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt);
 };
 
 }

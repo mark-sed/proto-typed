@@ -421,6 +421,72 @@ void PTLib::appendInit(std::string name, llvm::Type *mt, llvm::Type *vt) {
     builder.CreateRetVoid();
 }
 
+void PTLib::remove_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt) {
+    for(auto [kn, _] : generated) {
+        if(kn == name) {
+            return;
+        }
+    }
+
+    auto funType = llvm::FunctionType::get(voidT, { mt->getPointerTo(), int64T }, false);
+    llvm::Function *f = llvm::Function::Create(funType, 
+                                            llvm::GlobalValue::PrivateLinkage,
+                                            name,
+                                            llvmMod);
+    generated.push_back(std::make_pair(name, f));
+
+    llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+    llvm::BasicBlock *removeStartBB = llvm::BasicBlock::Create(ctx, "remove.start", f);
+    llvm::BasicBlock *removeHeaderBB = llvm::BasicBlock::Create(ctx, "remove.header", f);
+    llvm::BasicBlock *removeLoopBB = llvm::BasicBlock::Create(ctx, "remove.loop", f);
+    llvm::BasicBlock *changeLenBB = llvm::BasicBlock::Create(ctx, "change.len", f);
+
+    llvm::Value* zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 0);
+    llvm::Value* one = llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 1);
+
+    setCurrBB(bb);
+
+    // Check if it is the last element - then just change the length
+    auto arg0 = builder.CreateLoad(mt, f->getArg(0));
+    llvm::Value* len32Ptr = builder.CreateGEP(matrixT, arg0, {zero, one});
+    auto len32 = builder.CreateLoad(builder.getInt32Ty()->getPointerTo(), len32Ptr);
+    auto len64 = builder.CreateSExt(len32, int64T);
+    auto lastI = builder.CreateNSWSub(len64, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 1));
+
+    auto isLastEl = builder.CreateICmpEQ(lastI, f->getArg(1));
+    builder.CreateCondBr(isLastEl, changeLenBB, removeStartBB);
+
+    setCurrBB(removeStartBB);
+    auto idxPtr = builder.CreateAlloca(int64T);
+    auto pos = f->getArg(1);
+    builder.CreateStore(pos, idxPtr);
+    llvm::Value* bufferPtr = builder.CreateGEP(matrixT, arg0, {zero, zero});
+    auto buffer = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), bufferPtr);
+    auto casted = builder.CreateBitCast(buffer, vt->getPointerTo());
+    builder.CreateBr(removeHeaderBB);
+
+    setCurrBB(removeHeaderBB);
+    auto idx = builder.CreateLoad(int64T, idxPtr);
+    auto isSmaller = builder.CreateICmpSLT(idx, lastI);
+    builder.CreateCondBr(isSmaller, removeLoopBB, changeLenBB);
+    setCurrBB(removeLoopBB);
+
+    auto newIdx = builder.CreateNSWAdd(idx, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 1));
+    auto valptr = builder.CreateGEP(vt, casted, idx);
+    auto valNextPtr = builder.CreateGEP(vt, casted, newIdx);
+    auto valNext = builder.CreateLoad(vt, valNextPtr);
+    builder.CreateStore(valNext, valptr);
+
+    builder.CreateStore(newIdx, idxPtr);
+    builder.CreateBr(removeHeaderBB);
+
+    setCurrBB(changeLenBB);
+    auto newLen = builder.CreateNSWSub(len32, llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 1));
+    builder.CreateStore(newLen, len32Ptr);
+
+    builder.CreateRetVoid();
+}
+
 void PTLib::length_matrixInit(std::string name, llvm::Type *mt) {
     for(auto [kn, _] : generated) {
         if(kn == name) {

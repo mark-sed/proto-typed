@@ -665,6 +665,8 @@ These functions are templated for any array (matrix) type, the type `T` stands f
 
 * __`append`__ - Append to an array.
     * `void append(T a, TBase v)` - Append `v` at the end of array `a`.
+* __`remove`__ - Remove value from an array.
+    * `void remove(T a, int index)` - Removes value of the array `a` at index `index`.
 * __`length`__ - Array length.
     * `int length(T a)` - Returns the length of the array `a`. 
 * __`equals`__ - Array equality (equivalent to `a1 == a2`)

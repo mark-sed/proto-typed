@@ -94,3 +94,27 @@ if(print in funs) print("its in\n")
 
 funs += funs
 print(length(funs)++"\n")
+
+int[] intvals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+remove(intvals, length(intvals) - 1)
+remove(intvals, length(intvals) - 1)
+remove(intvals, 0)
+remove(intvals, 1)
+
+for(int i : intvals) {
+    print(i++" ")
+}
+
+print("\n")
+
+intvals = [1,0,2,0,3,0]
+remove(intvals, 1)
+remove(intvals, 2)
+remove(intvals, 3)
+
+for(int i : intvals) {
+    print(i++" ")
+}
+
+print("\n")
