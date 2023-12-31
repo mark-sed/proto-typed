@@ -221,7 +221,7 @@ true\nfalse\nfalse\nfalse\nfalse\ntrue\nfalse\nfalse\ntrue
 4\n1\n3\n-1\n5\n-1\n1\n1\n0\n-1\n-1\n1\ntrue\ntrue\ntrue\nfalse
 0.5 0.5 \n3.5 3.5 3.5 \n5.5 \n4.5 \ntrue\nfalse\ntrue\ntrue\nfalse
 true\nfalse\n0 1 2 3 4 5 6 7 8 \n1 2 \n3 4 \n5 6 \n-
-4 5 \n1\n" "arrays"
+4 5 \n1\n1 2 3 -10 -8 6 -9 \n" "arrays"
 }
 
 function test_statements {

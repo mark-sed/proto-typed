@@ -206,3 +206,19 @@ l23 = [[[1]]]
 for(int[][] i : l23) {
     print(i[0][0] ++ "\n")
 }
+
+int[][] intvals 
+intvals = [[1, 2, 3, 4, 5, 6],[1]]
+
+intvals[0][3] = -8
+intvals[1][0] = -9
+intvals[0][3] = -10
+intvals[0][4] = -8
+
+for(int[] j: intvals) {
+    for(int i : j) {
+        print(i++" ")
+    }
+}
+
+print("\n")

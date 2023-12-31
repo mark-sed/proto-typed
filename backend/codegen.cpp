@@ -833,6 +833,10 @@ void cg::CGFunction::emitMemberAssignment(ir::BinaryInfixExpr *l, llvm::Value *r
     builder.CreateStore(r, emitStructElem(l));
 }
 
+void cg::CGFunction::emitArrayAssignment(ir::BinaryInfixExpr *l, llvm::Value *r) {
+    llvm::report_fatal_error("Unknown construct in element access");
+}
+
 llvm::Value *cg::CodeGen::getReadValuePtr(llvm::Value *v) {
     // Load has pointer
     if (llvm::isa<llvm::LoadInst>(v)) {
@@ -907,7 +911,13 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             }
         }
         else if(auto *var = llvm::dyn_cast<ir::BinaryInfixExpr>(e->getLeft())) {
-            emitMemberAssignment(var, right);
+            if(var->getOperator().getKind() == ir::OperatorKind::OP_SUBSCR) {
+                left = getReadValuePtr(left);
+                builder.CreateStore(right, left);
+            }
+            else {
+                emitMemberAssignment(var, right);
+            }
         }
         else if(auto *val = llvm::dyn_cast<ir::ExternalSymbolAccess>(e->getLeft())) {
             if(auto *varDecl = llvm::dyn_cast<ir::VarDecl>(val->getExtIR())) {
