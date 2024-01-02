@@ -273,7 +273,12 @@ public:
             n += "(unresolved type)";
         }
         if(!matrixSize.empty()) {
-            n += name + "<" + block2List(matrixSize) + ">";
+            std::string bracks = "";
+            for(auto _: matrixSize) {
+                (void)_;
+                bracks += "[]";
+            }
+            n += decl->debug() + bracks;
         }
         else {
             n += name;

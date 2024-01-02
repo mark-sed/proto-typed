@@ -3,7 +3,7 @@
  * @author Marek Sedlacek
  * @brief Prototyped standard library intrinsics
  * 
- * @copyright Copyright (c) 2023
+ * @copyright Copyright (c) 2024
  * Generates prototyped functions that need to be intrinsified
  * or that are templated.
  */
@@ -98,6 +98,7 @@ public:
      * @param vt Element type
      */
     void appendInit(std::string name, llvm::Type *mt, llvm::Type *vt);
+    void mappend_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt);
     void length_matrixInit(std::string name, llvm::Type *mt);
     void equals_matrixInit(std::string name, llvm::Type *mt, ir::TypeDecl *vt);
     void equals_structInit(std::string name, llvm::Type *st, ir::TypeDecl *stt);

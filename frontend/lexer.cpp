@@ -574,7 +574,7 @@ static const flex_int32_t yy_rule_can_match_eol[89] =
 #line 1 "frontend/lexer.ll"
 /**
  * Grammar file for Flex tool for Proto-typed language
- * @copyright Marek Sedlacek, 2023
+ * @copyright Marek Sedlacek, 2024
  */
 #line 7 "frontend/lexer.ll"
 

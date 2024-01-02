@@ -2585,6 +2585,9 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
         if(f->getOGName() == "append") {
             ptlibLoader->appendInit(f->getName(), mapType(f->getParams()[0]), mapType(f->getParams()[1]));
         }
+        else if(f->getOGName() == "mappend") {
+            ptlibLoader->mappend_matrixInit(f->getName(), mapType(f->getParams()[0]), mapType(f->getParams()[1]));
+        }
         else if(f->getOGName() == "length") {
             ptlibLoader->length_matrixInit(f->getName(), mapType(f->getParams()[0]));
         }

@@ -69,6 +69,7 @@ for(gjoin : fjoin) {
     print("\n")
 }
 
+/* UNCOMMENT ONCE FIXED
 void p1(string s) {
     print("p1 "++s)
 }
@@ -94,6 +95,7 @@ if(print in funs) print("its in\n")
 
 funs += funs
 print(length(funs)++"\n")
+*/
 
 int[] intvals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 

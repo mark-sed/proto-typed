@@ -1,6 +1,6 @@
 /**
  * Grammar file for Flex tool for Proto-typed language
- * @copyright Marek Sedlacek, 2023
+ * @copyright Marek Sedlacek, 2024
  */
 
 %{

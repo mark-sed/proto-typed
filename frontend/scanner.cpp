@@ -322,7 +322,7 @@ ir::IR *Scanner::parseVarDecl(ir::IR *type, const std::string name, ir::Expr *va
         // var used
         type = value->getType();
     }
-    LOGMAX(type->getName()+" "+name);
+    LOGMAX(type->debug()+" "+name);
     ir::TypeDecl *t = llvm::dyn_cast<ir::TypeDecl>(type);
     if(t) {
         if(value && type->getName() != value->getType()->getName() && type->getName() != ANY_CSTR && value->getType()->getName() != ANY_CSTR) {
@@ -770,13 +770,21 @@ void Scanner::addStructTemplatedFunction(ir::TypeDecl *t) {
     }
 }
 
-void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT) {
+void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemTOG) {
     if(t->getBaseName() == UNKNOWN_CSTR)
         return;
     ir::TypeDecl *tPtr = t->clone();
     tPtr->setMaybe(true);
+    auto elemT = elemTOG->clone();
+    auto elemTPtr = elemT->clone();
+    elemTPtr->setMaybe(true);
+    if(elemT->isMaybe()) {
+        elemT->setMaybe(false);
+    }
     auto body = std::vector<ir::IR *> {};
-    {
+    
+    // Append cannot be generated for non-maybe function type
+    if(!llvm::isa<ir::FunTypeDecl>(elemTOG)) {
         auto params = std::vector<ir::FormalParamDecl *>{
             new ir::FormalParamDecl(currentIR, llvmloc2Src(), "m", tPtr, true),
             new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", elemT, false)
@@ -785,6 +793,22 @@ void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemT) {
                                                 llvmloc2Src(),
                                                 "append_"+t->getName()+"_"+elemT->getName(),
                                                 "append",
+                                                this->voidType,
+                                                params,
+                                                body);
+        globalScope->insert(funAppend);
+        mainModule->addLibFunction(funAppend);
+    }
+
+    {
+        auto params = std::vector<ir::FormalParamDecl *>{
+            new ir::FormalParamDecl(currentIR, llvmloc2Src(), "m", tPtr, true),
+            new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", elemTPtr, true)
+        };
+        auto funAppend = new ir::FunctionDecl(currentIR,
+                                                llvmloc2Src(),
+                                                "mappend_"+t->getName()+"_"+elemTPtr->getName(),
+                                                "mappend",
                                                 this->voidType,
                                                 params,
                                                 body);
@@ -1009,7 +1033,7 @@ ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &mats
     for(size_t i = 0; i < matsize.size(); ++i) {
         name += "[]";
     }
-    LOGMAX("Creating matrix type "+name);
+    LOGMAX("Creating matrix type "+name+(isMaybe ? "(maybe type)" : ""));
     auto rootType = sym_lookup(name, isMaybe, true);
     if(auto rootDecl = llvm::dyn_cast<ir::TypeDecl>(rootType)) {
         if(isMaybe) {

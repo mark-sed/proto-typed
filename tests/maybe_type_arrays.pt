@@ -19,3 +19,15 @@ for(int i : marr[0..2]) {
     print(i++" ")
 }
 print("\n")
+
+marr = []
+int? noneintval = none
+int? someintval = 7
+
+mappend(marr, someintval)
+mappend(marr, noneintval)
+
+someintval = 9
+
+print(marr[0]++"\n")
+print(marr[1]++"\n")
