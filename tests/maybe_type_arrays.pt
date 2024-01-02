@@ -1,0 +1,21 @@
+int amv = 42
+int? bmv = 89
+int?[] marr
+
+append(marr, amv)
+append(marr, 8)
+append(marr, -9)
+append(marr, bmv)
+
+for(int i : marr[length(marr)..-1]) {
+    print(i++" ")
+}
+print("\n")
+
+print((amv in marr) ++ "\n")
+print((0 in marr)++"\n")
+
+for(int i : marr[0..2]) {
+    print(i++" ")
+}
+print("\n")

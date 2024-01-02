@@ -180,7 +180,7 @@ public:
     ir::IR *parseDoWhile(ir::Expr *cond, std::vector<ir::IR *> &body);
     ir::IR *parseFun(ir::IR *type, std::string name, std::vector<ir::FormalParamDecl *> params, std::vector<ir::IR *> body);
     ir::IR *parseMatrixType(std::string name, std::vector<ir::Expr *> &matsize, bool isMaybe=false);
-    ir::IR *parseMatrixType(ir::IR *rootType, std::vector<ir::Expr *> &matsize, bool isMaybe=false);
+    ir::IR *parseMatrixType(ir::IR *rootType, std::vector<ir::Expr *> &matsize);
     ir::IR *parseReturn(ir::Expr *e);
     ir::IR *parseBreak();
     ir::IR *parseContinue();

@@ -292,6 +292,12 @@ function test_array_resolver {
 [[][][hm,okay,][]]\n" "array_resolver"
 }
 
+function test_maybe_type_arrays {
+    expect_pass "maybe_type_arrays.pt" "maybe_type_arrays"
+    expect_out_eq "0 89 -9 8 42 \ntrue\nfalse
+42 8 \n" "maybe_type_arrays"
+}
+
 # Expect fail tests
 
 function test_missing_return {
@@ -318,6 +324,7 @@ function run_all_tests {
     run_test numbers
     run_test funvar
     run_test array_resolver
+    run_test maybe_type_arrays
 
     # Expect fail tests
     run_test missing_return

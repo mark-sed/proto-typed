@@ -783,11 +783,11 @@ mattype : ID matsq               { $$ = scanner->parseMatrixType($1, $2); }
         | KWBOOL matsq           { $$ = scanner->parseMatrixType(BOOL_CSTR, $2); }
         | KWANY matsq            { $$ = scanner->parseMatrixType(ANY_CSTR, $2); }
         | funtype matsq          { $$ = scanner->parseMatrixType($1, $2); }
-        | ID KWMAYBE matsq
-        | KWINT KWMAYBE matsq
-        | KWFLOAT KWMAYBE matsq
-        | KWSTRING KWMAYBE matsq 
-        | KWBOOL KWMAYBE matsq
+        | ID KWMAYBE matsq       { $$ = scanner->parseMatrixType($1, $3, true); }
+        | KWINT KWMAYBE matsq    { $$ = scanner->parseMatrixType(INT_CSTR, $3, true); }
+        | KWFLOAT KWMAYBE matsq  { $$ = scanner->parseMatrixType(FLOAT_CSTR, $3, true); }
+        | KWSTRING KWMAYBE matsq { $$ = scanner->parseMatrixType(STRING_CSTR, $3, true); }
+        | KWBOOL KWMAYBE matsq   { $$ = scanner->parseMatrixType(BOOL_CSTR, $3, true); }
         ;
 matsq : LSQ RSQ                 { $$ = scanner->parseMatrixSize(scanner->parseInt(-1)); }
       //| LSQ int_val RSQ         { $$ = scanner->parseMatrixSize($2); }

@@ -1012,6 +1012,10 @@ ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &mats
     LOGMAX("Creating matrix type "+name);
     auto rootType = sym_lookup(name, isMaybe, true);
     if(auto rootDecl = llvm::dyn_cast<ir::TypeDecl>(rootType)) {
+        if(isMaybe) {
+            rootDecl = rootDecl->clone();
+            rootDecl->setMaybe(true);
+        }
         auto elemT = rootDecl;
         auto elemName = ogName;
         auto prevElemT = rootDecl;
@@ -1035,7 +1039,7 @@ ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &mats
     return nullptr;
 }
 
-ir::IR *Scanner::parseMatrixType(ir::IR *rootType, std::vector<ir::Expr *> &matsize, bool isMaybe) {
+ir::IR *Scanner::parseMatrixType(ir::IR *rootType, std::vector<ir::Expr *> &matsize) {
     auto ogName = rootType->getName();
     std::string name = rootType->getName();
     for(size_t i = 0; i < matsize.size(); ++i) {
