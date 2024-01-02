@@ -3,7 +3,7 @@
  * @author Marek Sedlacek
  * @brief Function analysis and error reporting
  * 
- * @copyright Copyright (c) 2023
+ * @copyright Copyright (c) 2024
  */
 
 #ifndef _FUNCTION_ANALYSIS_HPP_

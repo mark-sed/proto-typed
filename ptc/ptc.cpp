@@ -4,7 +4,7 @@
  * @brief Proto-typed compiler entry point
  * @date 2023-02-27
  * 
- * @copyright Copyright (c) Marek Sedlacek, 2023
+ * @copyright Copyright (c) Marek Sedlacek, 2024
  */
 
 #include "ptc.hpp"

@@ -3,7 +3,7 @@
  * @author Marek Sedlacek
  * @brief Resolver for analysis that cannot be done in scanner
  * 
- * @copyright Copyright (c) 2023
+ * @copyright Copyright (c) 2024
  * Resolves types and does additional analysis that can be done
  * only after the whole IR is generated.
  */

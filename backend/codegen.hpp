@@ -3,7 +3,7 @@
  * @author Marek Sedlacek
  * @brief Code generation
  * 
- * @copyright Copyright (c) 2023
+ * @copyright Copyright (c) 2024
  * Code generation from IR to LLVM assembly
  */
 

@@ -4,7 +4,7 @@
  * @brief IR handling and code representation
  * @date 2023-04-20
  * 
- * @copyright Copyright (c) 2023
+ * @copyright Copyright (c) 2024
  * Internal Representation of the code
  */
 

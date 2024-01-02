@@ -4,7 +4,7 @@
  * @brief Proto-typed compiler entry point
  * @date 2023-04-20
  * 
- * @copyright Copyright (c) 2023
+ * @copyright Copyright (c) 2024
  * 
  */
 

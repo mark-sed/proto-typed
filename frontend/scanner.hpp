@@ -4,7 +4,7 @@
  * @brief Scanner and parsing driver (semantics)
  * @date 2023-04-20
  * 
- * @copyright Copyright (c) 2023
+ * @copyright Copyright (c) 2024
  * Takes care of scanning, parsing and creating
  * IR from parsed code.
  */

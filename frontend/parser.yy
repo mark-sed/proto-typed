@@ -1,6 +1,6 @@
 /**
  * Grammar file for Bison tool for Proto-typed language
- * @copyright Marek Sedlacek, 2023
+ * @copyright Marek Sedlacek, 2024
  */
 
 /* Since new constructs are used, newer version is needed */

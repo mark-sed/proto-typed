@@ -3,7 +3,7 @@
  * @author Marek Sedlacek
  * @brief Helper functions
  * 
- * @copyright Copyright (c) 2023
+ * @copyright Copyright (c) 2024
  * General helper functions
  */
 
