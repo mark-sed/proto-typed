@@ -3724,7 +3724,7 @@ namespace  ptc  {
 
   case 425: // type: mattype "?"
 #line 805 "frontend/parser.yy"
-       { yylhs.value.as < ptc::ir::IR * > () = yystack_[1].value.as < ptc::ir::IR * > (); }
+                        { yylhs.value.as < ptc::ir::IR * > () = scanner->parseMaybeMatrixType(yystack_[1].value.as < ptc::ir::IR * > ()); }
 #line 3729 "frontend/parser.cpp"
     break;
 

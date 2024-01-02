@@ -187,6 +187,7 @@ public:
     ir::IR *parseImports(std::vector<std::string> names);
     ir::IR *parseExtType(std::string name, bool isMaybe=false);
     ir::IR *parseFunType(ir::IR *retType, std::vector<ir::IR *> argTypes);
+    ir::IR *parseMaybeMatrixType(ir::IR *type);
     ir::Expr *parseInt(long v);
     ir::Expr *parseFloat(double v);
     ir::Expr *parseBool(bool v);

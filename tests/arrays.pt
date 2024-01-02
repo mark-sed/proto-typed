@@ -222,3 +222,36 @@ for(int[] j: intvals) {
 }
 
 print("\n")
+
+int[]? intmvals 
+
+void printArr() {
+    if(intmvals != none) {
+        for(int i: intmvals) {
+            print(i++" ")
+        }
+        print("\n")
+    }
+    else {
+        print("none\n")
+    }
+}
+
+void printArrArg(int[]? arr) {
+    if(arr != none) {
+        for(int i: arr) {
+            print(i++" ")
+        }
+        print("\n")
+    }
+    else {
+        print("none\n")
+    }
+}
+
+printArr()
+printArrArg(intmvals)
+printArrArg([1,2])
+intmvals = [1, 2, 3, 4, 5]
+printArr()
+printArrArg(intmvals)

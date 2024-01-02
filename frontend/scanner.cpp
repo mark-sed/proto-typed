@@ -510,21 +510,6 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
                 else if(tl->isUnresolved() || tl->getBaseName() == UNKNOWN_CSTR) {
                     type = tr;
                 }
-                /*else if(auto tlf = llvm::dyn_cast<ir::FunTypeDecl>(tl)) {
-                    if(auto vacc = llvm::dyn_cast<ir::VarAccess>(r)) {
-                        if(auto funD = llvm::dyn_cast<ir::FunctionDecl>(vacc->getVar())) {
-                            // TODO: Check if types match
-                            if()
-                            type = tl;
-                        }
-                        else {
-                            diags.report(llvmloc2Src(), diag::ERR_INCORRECT_ASSIGNMENT, tr->getName(), tlf->getName());
-                        }
-                    }
-                    else {
-                        diags.report(llvmloc2Src(), diag::ERR_INCORRECT_ASSIGNMENT, tr->getName(), tlf->getName());
-                    }
-                }*/
                 else {
                     diags.report(llvmloc2Src(), diag::ERR_INCORRECT_ASSIGNMENT, tr->getName(), tl->getName());
                 }
@@ -602,7 +587,9 @@ ir::Expr *Scanner::parseInfixExpr(ir::Expr *l, ir::Expr *r, ir::Operator op, boo
         case ir::OperatorKind::OP_NEQ:
             if(tl->isMatrix()) {
                 if(tl->getName() != tr->getName()) {
-                    diags.report(llvmloc2Src(), diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+                    if(!tl->isMaybe() || (tl->isMaybe() && tl->getName() != NONETYPE_CSTR && tr->getName() != NONETYPE_CSTR)) {
+                        diags.report(llvmloc2Src(), diag::ERR_UNSUPPORTED_OP_TYPE, op.debug(), tl->getName(), tr->getName());
+                    }
                 }
             }
             type = this->boolType;
@@ -1007,6 +994,14 @@ ir::IR *Scanner::parseExtType(std::string name, bool isMaybe) {
     t->setUnresolved(true);
     t->setExternalIR(llvm::dyn_cast<ir::ExternalSymbolAccess>(parseVar(name, true)));
     return t;
+}
+
+ir::IR *Scanner::parseMaybeMatrixType(ir::IR *type) {
+    LOGMAX("Parsing maybe matrix type");
+    ir::TypeDecl *t = llvm::dyn_cast<ir::TypeDecl>(type);
+    auto tm = t->clone();
+    tm->setMaybe(true);
+    return tm;
 }
 
 ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &matsize, bool isMaybe) {

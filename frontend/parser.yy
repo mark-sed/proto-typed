@@ -802,7 +802,7 @@ type : KWINT KWMAYBE    { $$ = scanner->sym_lookup(INT_CSTR, true, true); }
      | KWBOOL KWMAYBE   { $$ = scanner->sym_lookup(BOOL_CSTR, true, true); }
      | ID KWMAYBE       { $$ = scanner->sym_lookup($1, true, true); }
      | EXT_ID KWMAYBE   { $$ = scanner->parseExtType($1, true); }
-     | mattype KWMAYBE  
+     | mattype KWMAYBE  { $$ = scanner->parseMaybeMatrixType($1); }
      | KWINT            { $$ = scanner->sym_lookup(INT_CSTR, false, true); }
      | KWFLOAT          { $$ = scanner->sym_lookup(FLOAT_CSTR, false, true); }
      | KWSTRING         { $$ = scanner->sym_lookup(STRING_CSTR, false, true); }
