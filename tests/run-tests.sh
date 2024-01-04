@@ -294,7 +294,7 @@ function test_array_resolver {
 function test_maybe_type_arrays {
     expect_pass "maybe_type_arrays.pt" "maybe_type_arrays"
     expect_out_eq "0 89 -9 8 42 \ntrue\nfalse
-42 8 \n9\nnone\n" "maybe_type_arrays"
+42 8 \n9\nnone\ntrue\nfalse\n" "maybe_type_arrays"
 }
 
 # Expect fail tests

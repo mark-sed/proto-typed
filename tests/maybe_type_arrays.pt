@@ -31,3 +31,12 @@ someintval = 9
 
 print(marr[0]++"\n")
 print(marr[1]++"\n")
+
+int?[] marr2
+int? bsomev
+bsomev = someintval
+mappend(marr2, bsomev)
+mappend(marr2, noneintval)
+print((marr == marr2) ++ "\n")
+marr2[0] = 9
+print((marr == marr2) ++ "\n")
