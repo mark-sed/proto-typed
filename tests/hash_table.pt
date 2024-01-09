@@ -1,0 +1,64 @@
+// Simple implementation of hash table
+// Meant for testing as collisions aren't handeled
+
+int CAPACITY = 256
+
+struct htItem {
+    string key
+    int value
+    bool valid
+}
+
+int ht_hash(string key) {
+    int v = 0
+    for(string t: key) {
+        v += ord(t)
+    }
+    return v % CAPACITY
+}
+
+void ht_insert(htItem[]? table, string key, int value) {
+    htItem item = htItem{.key=key, .value=value, .valid=true}
+    int index = ht_hash(key)
+    htItem curr_item = table[index]
+
+    if(not curr_item.valid) {
+        table[index] = item
+    }
+    else {
+        print("ERROR: Collision!\n")
+    }
+}
+
+void ht_remove(htItem[]? table, string key) {
+    int index = ht_hash(key)
+    htItem item = htItem{.key="", .value=0, .valid=false}
+    table[index] = item;
+}
+
+void ht_init(htItem[]? table) {
+    htItem i;
+    for(int _ : 0..CAPACITY) {
+        append(table, i)
+    }
+}
+
+void ht_print(htItem[] table) {
+    htItem i;
+    for(i : table) {
+        if(i.valid) {
+            print(i.key ++ ": " ++ i.value ++ "\n")
+        }
+    }
+}
+
+
+htItem[] hash_table
+ht_init(hash_table)
+ht_insert(hash_table, "marek", 42)
+ht_insert(hash_table, "lukas", 1)
+ht_insert(hash_table, "matej", 1048)
+ht_insert(hash_table, "patrik", 6)
+ht_insert(hash_table, "dan", 800)
+ht_remove(hash_table, "dan")
+ht_print(hash_table)

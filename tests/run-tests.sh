@@ -297,6 +297,11 @@ function test_maybe_type_arrays {
 42 8 \n9\nnone\ntrue\nfalse\n" "maybe_type_arrays"
 }
 
+function test_hash_table {
+    expect_pass "hash_table.pt" "hash_table"
+    expect_out_eq "marek: 42\nmatej: 1048\nlukas: 1\npatrik: 6\n" "hash_table"
+}
+
 # Expect fail tests
 
 function test_missing_return {
@@ -324,6 +329,7 @@ function run_all_tests {
     run_test funvar
     run_test array_resolver
     run_test maybe_type_arrays
+    run_test hash_table
 
     # Expect fail tests
     run_test missing_return
