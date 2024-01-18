@@ -233,7 +233,8 @@ function test_statements {
 function test_casting {
     expect_pass "casting.pt" "casting"
     expect_out_eq "String\n42\n0.5\ntrue\nString\n42\n0.5\ntrue
-false\nfalse\ntrue\ntrue\n4\ntrue\n0\nfalse\n11110\n" "casting"
+false\nfalse\ntrue\ntrue\n4\ntrue\n0\nfalse\n11110
+2.42\n3.14159\n-7\n31\n2.42\n3.14159\n-7\n31\n" "casting"
 }
 
 function test_floats {
@@ -244,7 +245,8 @@ function test_floats {
 function test_ptlib_strings {
     expect_pass "ptlib_strings.pt" "ptlib_strings"
     expect_out_eq "HELLO THERE 32\ner sfd 43 ]}{\trp;[]+455\n55\n33\n108\nd*?\n94
-keram\n4\n-1\nfalse\ntrue\nProto-otorP\ntrue\n34\n42\nnone\n42\n42\nnone\n11\n-79\n" "ptlib_strings"
+keram\n4\n-1\nfalse\ntrue\nProto-otorP\ntrue\n34\n42\nnone\n42\n42\nnone\n11\n-79
+0.42\nnone\n-42\n3.14159\nnone\nnone\n" "ptlib_strings"
 }
 
 function test_ptlib_arrays {

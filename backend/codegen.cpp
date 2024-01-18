@@ -1656,6 +1656,18 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
                                     stringT->getPointerTo()->getPointerTo(),
                                     false
                                  ));
+        auto to_int_string = cgm.getLLVMMod()->getOrInsertFunction("to_int_string",
+                                 llvm::FunctionType::get(
+                                    int64T->getPointerTo(),
+                                    stringT,
+                                    false
+                                 ));
+        auto to_float_string = cgm.getLLVMMod()->getOrInsertFunction("to_float_string",
+                                 llvm::FunctionType::get(
+                                    floatT->getPointerTo(),
+                                    stringT,
+                                    false
+                                 ));
 
         if(!ogType->isMaybe()) {
             if(ogType->getName() == INT_CSTR) {
@@ -1689,6 +1701,16 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
                 }
                 if(asType->getName() == FLOAT_CSTR) {
                     return builder.CreateUIToFP(left, floatT);
+                }
+            }
+            else if(ogType->getName() == STRING_CSTR) {
+                if(asType->getName() == INT_CSTR) {
+                    auto intM = builder.CreateCall(to_int_string, { left });
+                    return builder.CreateLoad(int64T, intM);
+                }
+                if(asType->getName() == FLOAT_CSTR) {
+                    auto floatM = builder.CreateCall(to_float_string, { left });
+                    return builder.CreateLoad(floatT, floatM);
                 }
             }
         }
@@ -1742,6 +1764,14 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
             else if(ogType->getName() == STRING_CSTR) {
                 if(asType->getName() == STRING_CSTR) {
                     return builder.CreateCall(to_str_mstring, { mleft });
+                }
+                if(asType->getName() == INT_CSTR) {
+                    auto intM = builder.CreateCall(to_int_string, { left });
+                    return builder.CreateLoad(int64T, intM);
+                }
+                if(asType->getName() == FLOAT_CSTR) {
+                    auto floatM = builder.CreateCall(to_float_string, { left });
+                    return builder.CreateLoad(floatT, floatM);
                 }
             }
             else if(ogType->getName() == ANY_CSTR) {

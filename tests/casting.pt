@@ -43,3 +43,23 @@ print(b1 as float ++ "")
 print(mb1 as int as string)
 print(mb1 as float as string)
 print(b2 as int ++ "\n")
+
+string strf = "0.42"
+print(((strf as float) + 2.0) ++ "\n")
+strf = "314159e-5"
+print((strf as float) ++ "\n")
+
+string stri = "-5"
+print(((stri as int) - 2) ++ "\n")
+stri = "31"
+print((stri as int) ++ "\n")
+
+string? strmf = "0.42"
+print(((strmf as float) + 2.0) ++ "\n")
+strmf = "314159e-5"
+print((strmf as float) ++ "\n")
+
+string? strmi = "-5"
+print(((strmi as int) - 2) ++ "\n")
+strmi = "31"
+print((strmi as int) ++ "\n")
