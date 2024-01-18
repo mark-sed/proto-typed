@@ -76,6 +76,15 @@ float sum(float[] arr) {
     return sumval
 }
 
+int gcd(int a, int b) {
+    while(b != 0) {
+        int old_b = b
+        b = a % b
+        a = old_b
+    }
+    return a
+}
+
 string upper(string s) {
     string r
     for(string c : s) {

@@ -28,3 +28,11 @@ print(sum([-1,-1,-1])++"\n")
 float[] fvalsforsum = [1.0,2.5,3.3,4.1,5.0]
 print(sum(fvalsforsum)++"\n")
 print(sum([-1.0,-1.2,-1.3])++"\n")
+
+print(gcd(2, 4)++"\n")   // 2 
+print(gcd(21, 4)++"\n")  // 1
+print(gcd(42, 56)++"\n") // 14
+print(gcd(20, 0)++"\n")  // 0
+print(gcd(0, 10)++"\n")  // 10
+print(gcd(461952, 116298)++"\n") // 18
+print(gcd(24826148, 45296490)++"\n") // 526

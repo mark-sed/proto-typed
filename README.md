@@ -700,6 +700,13 @@ These functions are templated and type `S` represent generic struct type in this
     * `float sin(float x)` - Sine of `x`.
     * `float cos(float x)` - Cosine of `x`.
     * `float tan(float x)` - Tangent of `x`.
+* __`abs`__ - Absolute value.
+    * `int abs(int x)`
+    * `float abs(float x)`
+* __`sum`__ - Sum of all values in an array
+    * `int sum(int[] arr)`
+    * `float sum(float[] arr)`
+* __`int gcd(int a, int b)`__ - Greatest common divisor of `a` and `b`.
 
 # Proto-typed compiler
 Proto-typed compiler (ptc) uses LLVM and can target any of big amount of targets LLVM can compile for. The ptc also relies on LibC. 
