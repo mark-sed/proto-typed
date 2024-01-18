@@ -85,6 +85,10 @@ int gcd(int a, int b) {
     return a
 }
 
+int lcm(int a, int b) {
+    return abs(a * b) / gcd(a, b)
+}
+
 string upper(string s) {
     string r
     for(string c : s) {
