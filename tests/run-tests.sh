@@ -258,7 +258,8 @@ function test_ptlib_arrays {
 
 function test_ptlib_math {
     expect_pass "ptlib_math.pt" "ptlib_math"
-    expect_out_eq "is NaN\nis really not NaN\n" "ptlib_math"
+    expect_out_eq "is NaN\nis really not NaN\n4\n3\n4\n3e-08
+15\n-3\n15.9\n-3.5\n" "ptlib_math"
 }
 
 function test_var {

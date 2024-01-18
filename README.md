@@ -634,15 +634,19 @@ Calls to standard library do not require any module name prefix and any of the f
 ### String function
 * __`length`__ - String length.
     * `int length(string s)` - Returns the length of the string `s`.
-* __`to_string`__ - Conversion of types to string.
+* __`to_string`__ - Conversion of types to string. This is used by the `as` operator.
     * `string to_string(int i)` - Converts int `i` to string.
     * `string to_string(float f)` - Converts float `f` to string.
     * `string to_string(bool b)` - Converts bool `b` to string.
-* __`mto_string`__ - Conversion of maybe types to string (for `none` will return "none").
+* __`mto_string`__ - Conversion of maybe types to string (for `none` will return "none"). This is used by the `as` operator.
     * `string to_string(int? i)` - Converts maybe int `i` to string.
     * `string to_string(float? f)` - Converts maybe float `f` to string.
     * `string to_string(bool? b)` - Converts maybe bool `b` to string.
     * `string to_string(string? s)` - Converts maybe string `s` to string. This is useful only for printing as `none` will be indistinguishable from string "none".
+* __From string__ - Conversion from string to other types. This is used by the `as` operator, but `as` expects valid value (will ignore `none` and crash).
+    * `int? to_int(string str)` - Converts string number in base 10 and returns it as int or none if it is not an integer.
+    * `int? to_int_base(string str, int base)` - Converts string number in base `base` and returns it as int or none if it is not an integer in given base.
+    * `float? to_float(string str)` - Converts string float and returns it a float or none if it is not a float.
 * __`find`__ - Find substring.
     * `int find(string s1, string s2)` - Returns first index of substring `s2` in string `s1` or -1 if not found.
 * __`contains`__ - Check if string contains substring (equivalent to `s2 in s1`).

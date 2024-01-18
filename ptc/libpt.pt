@@ -50,6 +50,32 @@ int? to_int(string str) {
     return ret
 }
 
+int abs(int x) {
+    if(x < 0) return -x
+    return x;
+}
+
+float abs(float x) {
+    if(x < 0.0) return -x
+    return x;
+}
+
+int sum(int[] arr) {
+    int sumval = 0
+    for(int i : arr) {
+        sumval += i
+    }
+    return sumval
+}
+
+float sum(float[] arr) {
+    float sumval = 0.0
+    for(float i : arr) {
+        sumval += i
+    }
+    return sumval
+}
+
 string upper(string s) {
     string r
     for(string c : s) {
