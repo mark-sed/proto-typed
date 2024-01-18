@@ -90,8 +90,6 @@ void cg::CodeGen::init() {
     };
     matrixT = llvm::StructType::create(ctx, matrixElements, MATRIX_CSTR);
     matrixTPtr = matrixT->getPointerTo();
-
-    stringSizeBytes = llvm::ConstantInt::get(builder.getInt64Ty(), 16, true);
 }
 
 llvm::Type *cg::CodeGen::convertType(ir::TypeDecl *t) {

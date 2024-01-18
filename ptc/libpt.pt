@@ -45,6 +45,11 @@ string mto_string(string? v) {
     return a
 }
 
+int? to_int(string str) {
+    int? ret = to_int_base(str, 10)
+    return ret
+}
+
 string upper(string s) {
     string r
     for(string c : s) {

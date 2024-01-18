@@ -260,6 +260,54 @@ void PTLib::to_string_boolInit() {
     builder.CreateRet(rval);
 }
 
+void PTLib::to_int_base_string_intInit() {
+    auto funType = llvm::FunctionType::get(int64T->getPointerTo(), { stringT, int64T }, false);
+    llvm::Function *f = llvm::Function::Create(funType, 
+                                            llvm::GlobalValue::PrivateLinkage,
+                                            "to_int_base_string_int",
+                                            llvmMod);
+    llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+    llvm::BasicBlock *validbb = llvm::BasicBlock::Create(ctx, "valid", f);
+    llvm::BasicBlock *invalidbb = llvm::BasicBlock::Create(ctx, "invalid", f);
+
+    auto strtolF = llvmMod->getOrInsertFunction("strtol",
+                                llvm::FunctionType::get(
+                                int64T, {
+                                    builder.getInt8Ty()->getPointerTo(),
+                                    builder.getInt8Ty()->getPointerTo()->getPointerTo(),
+                                    builder.getInt32Ty()->getPointerTo() },
+                                false
+                                ));
+
+    auto mallocF = llvmMod->getOrInsertFunction("GC_malloc",
+                                 llvm::FunctionType::get(
+                                    builder.getInt8Ty()->getPointerTo(),
+                                    builder.getInt64Ty(),
+                                    false
+                                 ));
+
+    setCurrBB(bb);
+    auto end = builder.CreateAlloca(builder.getInt8Ty()->getPointerTo());
+    llvm::Value *cstr = builder.CreateExtractValue(f->getArg(0), 0);
+    auto parsedVal = builder.CreateCall(strtolF, {cstr, end, f->getArg(1)});
+
+    // Check is end is 0x0
+    auto endValPtr = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), end);
+    auto endVal = builder.CreateLoad(builder.getInt8Ty(), endValPtr);
+    auto isZero = builder.CreateICmpEQ(endVal, llvm::ConstantInt::get(llvm::Type::getInt8Ty(ctx), 0));
+    builder.CreateCondBr(isZero, validbb, invalidbb);
+
+    setCurrBB(validbb);
+    llvm::DataLayout* dataLayout = new llvm::DataLayout(llvmMod);
+    auto ts = dataLayout->getTypeAllocSize(int64T);
+    auto mem = builder.CreateCall(mallocF, llvm::ConstantInt::get(builder.getInt64Ty(), ts, true));
+    builder.CreateStore(parsedVal, mem);
+    builder.CreateRet(mem);
+
+    setCurrBB(invalidbb);
+    builder.CreateRet(llvm::ConstantPointerNull::get(int64T->getPointerTo()));
+}
+
 void PTLib::length_stringInit() {
     auto funType = llvm::FunctionType::get(int64T, { stringT }, false);
     llvm::Function *f = llvm::Function::Create(funType, 
@@ -1275,9 +1323,13 @@ void PTLib::equals_structInit(std::string name, llvm::Type *st, ir::TypeDecl *st
 
 void PTLib::setupLib() {
     print_stringInit();
+    
     to_string_intInit();
     to_string_floatInit();
     to_string_boolInit();
+
+    to_int_base_string_intInit();
+
     length_stringInit();
 
     trigonFuncsInit();

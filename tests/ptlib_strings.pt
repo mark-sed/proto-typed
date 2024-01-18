@@ -54,3 +54,12 @@ print(slice(thiscmp, 0, 6))
 print(slice(thiscmp, 4, 3, -1)++"\n")
 
 print((chr(ord("H")) == "H") ++ "\n")
+
+print(to_int_base("42", 8) ++ "\n")
+print(to_int_base(" 42", 10) ++ "\n")
+print(to_int_base(" ,42", 10) ++ "\n")
+print(to_int_base("42", 10) ++ "\n")
+print(to_int("42") ++ "\n")
+print(to_int_base("42", 2) ++ "\n")
+print(to_int_base("1011", 2) ++ "\n")
+print(to_int_base("-79", 10) ++ "\n")

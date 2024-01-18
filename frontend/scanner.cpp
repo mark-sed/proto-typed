@@ -130,6 +130,9 @@ void Scanner::init() {
     currScope->insert(noneType);
     currScope->insert(varargsType);
 
+    auto mintType = intType->clone();
+    mintType->setMaybe(true);
+
     // _entry
     defineFun(_ENTRY_NAME, _ENTRY_NAME, voidType, {});
     // print
@@ -146,6 +149,11 @@ void Scanner::init() {
     });
     defineFun("to_string_bool", "to_string", stringType, {
         new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", this->boolType, false)
+    });
+    // From string
+    defineFun("to_int_base_string_int", "to_int_base", mintType, {
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "str", this->stringType, false),
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "base", this->intType, false)
     });
     // length
     defineFun("length_string", "length", intType, {
