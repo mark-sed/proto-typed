@@ -132,6 +132,8 @@ void Scanner::init() {
 
     auto mintType = intType->clone();
     mintType->setMaybe(true);
+    auto mfloatType = floatType->clone();
+    mfloatType->setMaybe(true);
 
     // _entry
     defineFun(_ENTRY_NAME, _ENTRY_NAME, voidType, {});
@@ -154,6 +156,9 @@ void Scanner::init() {
     defineFun("to_int_base_string_int", "to_int_base", mintType, {
         new ir::FormalParamDecl(currentIR, llvmloc2Src(), "str", this->stringType, false),
         new ir::FormalParamDecl(currentIR, llvmloc2Src(), "base", this->intType, false)
+    });
+    defineFun("to_float_string", "to_float", mfloatType, {
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "str", this->stringType, false)
     });
     // length
     defineFun("length_string", "length", intType, {

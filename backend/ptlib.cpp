@@ -275,7 +275,7 @@ void PTLib::to_int_base_string_intInit() {
                                 int64T, {
                                     builder.getInt8Ty()->getPointerTo(),
                                     builder.getInt8Ty()->getPointerTo()->getPointerTo(),
-                                    builder.getInt32Ty()->getPointerTo() },
+                                    builder.getInt32Ty() },
                                 false
                                 ));
 
@@ -289,13 +289,17 @@ void PTLib::to_int_base_string_intInit() {
     setCurrBB(bb);
     auto end = builder.CreateAlloca(builder.getInt8Ty()->getPointerTo());
     llvm::Value *cstr = builder.CreateExtractValue(f->getArg(0), 0);
-    auto parsedVal = builder.CreateCall(strtolF, {cstr, end, f->getArg(1)});
+    auto base32 = builder.CreateTrunc(f->getArg(1), builder.getInt32Ty());
+    auto parsedVal = builder.CreateCall(strtolF, {cstr, end, base32});
 
     // Check is end is 0x0
     auto endValPtr = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), end);
     auto endVal = builder.CreateLoad(builder.getInt8Ty(), endValPtr);
-    auto isZero = builder.CreateICmpEQ(endVal, llvm::ConstantInt::get(llvm::Type::getInt8Ty(ctx), 0));
-    builder.CreateCondBr(isZero, validbb, invalidbb);
+    auto isNotZero = builder.CreateICmpNE(endVal, llvm::ConstantInt::get(llvm::Type::getInt8Ty(ctx), 0));
+    auto isStr = builder.CreateICmpEQ(endValPtr, cstr);
+    // TODO: We should also check for under and overflow
+    auto isError = builder.CreateOr(isNotZero, isStr);
+    builder.CreateCondBr(isError, invalidbb, validbb);
 
     setCurrBB(validbb);
     llvm::DataLayout* dataLayout = new llvm::DataLayout(llvmMod);
@@ -306,6 +310,57 @@ void PTLib::to_int_base_string_intInit() {
 
     setCurrBB(invalidbb);
     builder.CreateRet(llvm::ConstantPointerNull::get(int64T->getPointerTo()));
+}
+
+void PTLib::to_float_stringInit() {
+    auto funType = llvm::FunctionType::get(floatT->getPointerTo(), { stringT }, false);
+    llvm::Function *f = llvm::Function::Create(funType, 
+                                            llvm::GlobalValue::PrivateLinkage,
+                                            "to_float_string",
+                                            llvmMod);
+    llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+    llvm::BasicBlock *validbb = llvm::BasicBlock::Create(ctx, "valid", f);
+    llvm::BasicBlock *invalidbb = llvm::BasicBlock::Create(ctx, "invalid", f);
+
+    auto strtolF = llvmMod->getOrInsertFunction("strtod",
+                                llvm::FunctionType::get(
+                                floatT, {
+                                    builder.getInt8Ty()->getPointerTo(),
+                                    builder.getInt8Ty()->getPointerTo()->getPointerTo() 
+                                },
+                                false
+                                ));
+
+    auto mallocF = llvmMod->getOrInsertFunction("GC_malloc",
+                                 llvm::FunctionType::get(
+                                    builder.getInt8Ty()->getPointerTo(),
+                                    builder.getInt64Ty(),
+                                    false
+                                 ));
+
+    setCurrBB(bb);
+    auto end = builder.CreateAlloca(builder.getInt8Ty()->getPointerTo());
+    llvm::Value *cstr = builder.CreateExtractValue(f->getArg(0), 0);
+    auto parsedVal = builder.CreateCall(strtolF, {cstr, end});
+
+    // Check is end is 0x0
+    auto endValPtr = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), end);
+    auto endVal = builder.CreateLoad(builder.getInt8Ty(), endValPtr);
+    auto isNotZero = builder.CreateICmpNE(endVal, llvm::ConstantInt::get(llvm::Type::getInt8Ty(ctx), 0));
+    auto isStr = builder.CreateICmpEQ(endValPtr, cstr);
+    // TODO: We should also check for under and overflow
+    auto isError = builder.CreateOr(isNotZero, isStr);
+    builder.CreateCondBr(isError, invalidbb, validbb);
+
+    setCurrBB(validbb);
+    llvm::DataLayout* dataLayout = new llvm::DataLayout(llvmMod);
+    auto ts = dataLayout->getTypeAllocSize(floatT);
+    auto mem = builder.CreateCall(mallocF, llvm::ConstantInt::get(builder.getInt64Ty(), ts, true));
+    builder.CreateStore(parsedVal, mem);
+    builder.CreateRet(mem);
+
+    setCurrBB(invalidbb);
+    builder.CreateRet(llvm::ConstantPointerNull::get(floatT->getPointerTo()));
 }
 
 void PTLib::length_stringInit() {
@@ -1329,6 +1384,7 @@ void PTLib::setupLib() {
     to_string_boolInit();
 
     to_int_base_string_intInit();
+    to_float_stringInit();
 
     length_stringInit();
 
