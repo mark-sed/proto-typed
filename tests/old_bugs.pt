@@ -1,0 +1,137 @@
+struct T {
+    int a
+    bool b
+    float f
+    string g
+}
+
+T[] ts
+
+print((T{} in ts)++"\n")
+
+//---
+
+print((chr(72) == chr(ord("H"))) ++ "\n")
+
+//---
+
+bool b
+b = chr(ord("H")) == "H"
+print(b ++ "\n")
+
+//---
+
+int[][] l
+l = [[1, 2, 3]]
+
+int[] a
+a = l[0]
+append(a, 4)
+
+for(int i: a) {
+    print(i as string) // 4
+}
+print("\n")
+
+//---
+
+string[][][] ls
+ls = [[["a", "b", "c"]]]
+string[][][] ls2
+ls2 = [[["a", "b", "c"]]]
+
+bool bb
+bb = equals(ls, ls2)
+print(bb ++ "\n")
+
+//---
+
+string g = "Hello"
+string f = "fff"
+
+int j = 0;
+if(g[j] == f[j]) {
+    print("yes\n")
+}
+else print("no\n")
+
+//---
+
+int? az
+any bz = 4
+az = bz as int?
+az = 8
+int? cz
+cz = bz as int?
+print(cz ++ "\n")
+
+//---
+
+any ai = 4
+int a1
+a1 = ai as int
+print(ai as int as string)
+print("\n")
+
+//---
+
+int[] int_arr = [3, 2, 1]
+
+int i = 4
+for(int i : int_arr) {
+    print(i++"")
+}
+print("\n")
+
+//---
+
+void anyfun() {
+    any g
+    g = "hi\n"
+    string b = g as string
+    print(b)
+}
+
+anyfun() // hi\n
+
+//---
+
+float? mmf = 6.6
+
+print(mto_string(mmf)++"\n")
+bool? mmb = true
+string? mms = "hi"
+
+print(mto_string(mmb)++"\n")
+
+//---
+
+string? sm = none
+sm = "ff"
+string s
+s = sm
+print(s++"\n")
+
+//---
+
+void foo(int? x) {
+    x = 42
+}
+
+int? bmb
+foo(bmb)
+
+
+int bv
+bv = bmb
+print(bv++"\n")
+
+//---
+
+string ccat(string a, string b) {
+    return a ++ b
+}
+
+print(ccat("expr", " string")++"\n")
+
+//---
