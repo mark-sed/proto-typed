@@ -707,6 +707,10 @@ These functions are templated and type `S` represent generic struct type in this
     * `int sum(int[] arr)`
     * `float sum(float[] arr)`
 * __`int gcd(int a, int b)`__ - Greatest common divisor of `a` and `b`.
+* __`int lcm(int a, int b)`__ - Least common multiple of `a` and `b`.
+* __Logarithm__ - Computes logarithm.
+    * `float ln(float x)` - Natural (base e) logarithm of `x`.
+    * `float log10(float x)` - Common (base 10) logarithm of `x`.
 
 # Proto-typed compiler
 Proto-typed compiler (ptc) uses LLVM and can target any of big amount of targets LLVM can compile for. The ptc also relies on LibC. 

@@ -44,3 +44,13 @@ print(lcm(20, 0)++"\n")  // 0
 print(lcm(0, 10)++"\n")  // 0
 print(lcm(461952, 116298)++"\n") // 2984671872
 print(lcm(24826148, 45296490)++"\n") // 2137903735020
+
+print(ln(2.7)++"\n")
+print(ln(1.0)++"\n")
+print((ln(125.0)/ln(5.0))++"\n")
+print(ln(inf())++"\n")
+print(ln(nan())++"\n")
+
+print(log10(2.7)++"\n")
+print(log10(inf())++"\n")
+print(log10(nan())++"\n")

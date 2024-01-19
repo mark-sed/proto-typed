@@ -73,6 +73,7 @@ private:
     void stringFuncsInit();
     void floatFuncsInit();
     void maybeFuncsInit();
+    void logFuncsInit();
 
 public:
     /**

@@ -479,6 +479,37 @@ void PTLib::floatFuncsInit() {
     }
 }
 
+void PTLib::logFuncsInit() {
+    // float log(float)
+    {
+        auto logF = llvmMod->getOrInsertFunction("log", 
+                                                    llvm::FunctionType::get(floatT, floatT, false));
+        auto funType = llvm::FunctionType::get(floatT, { floatT }, false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "ln_float",
+                                                llvmMod);
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        setCurrBB(bb);
+        llvm::Value *v = builder.CreateCall(logF, f->getArg(0));
+        builder.CreateRet(v);
+    }
+    // float log10(float)
+    {
+        auto logF = llvmMod->getOrInsertFunction("log10", 
+                                                    llvm::FunctionType::get(floatT, floatT, false));
+        auto funType = llvm::FunctionType::get(floatT, { floatT }, false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "log10_float",
+                                                llvmMod);
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        setCurrBB(bb);
+        llvm::Value *v = builder.CreateCall(logF, f->getArg(0));
+        builder.CreateRet(v);
+    }
+}
+
 void PTLib::appendInit(std::string name, llvm::Type *mt, llvm::Type *vt) {
     for(auto [kn, _] : generated) {
         if(kn == name) {
@@ -1391,6 +1422,8 @@ void PTLib::setupLib() {
     trigonFuncsInit();
     stringFuncsInit();
     floatFuncsInit();
+
+    logFuncsInit();
 }
 
 void PTLib::setupExternLib() {
