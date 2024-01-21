@@ -7,7 +7,7 @@ function print_help {
 }
 
 PTC="ptc"
-PT="../run_pt.sh"
+PT="pt"
 OUTP_ERR=/tmp/.ptc_test_err.txt
 OUTP_STD=/tmp/.ptc_test_std.txt
 TEST_DIR=""
@@ -68,7 +68,7 @@ function run {
     do
         objf+=(${TEST_DIR}$of)
     done
-    CMD="$PT ${TEST_DIR}$1 0 $WRKDIR $objf"
+    CMD="$PT see ${TEST_DIR}$1"
     $CMD 2>$OUTP_ERR 1>$OUTP_STD
     RETCODE=$(echo $?)
     # Get output binary name

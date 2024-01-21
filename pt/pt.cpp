@@ -27,6 +27,7 @@ USAGE: pt [pt options] [command] [ptc options]
 COMMANDS:
   build [source files] [ptc options]                                    Builds an executable from given sources
   run   [source files] [ptc options] [-- [program options]]             Builds and runs an executable from given sources
+  see   [source files] [ptc options] [-- [program options]]             Builds, runs and then deletes an executable from given sources
 
 OPTIONS:
   -o <binary name>                                                      Output binary path
@@ -149,9 +150,9 @@ int main(int argc, char* argv[]) {
                 return 1; // TODO: print error msg?
             return 0;
         }
-        else if (arg == "run") {
+        else if (arg == "run" || arg == "see") {
             if (arg_i == argc-1 || (std::string(argv[arg_i+1]) == "--" && arg_i+1 == argc-1)) {
-                report_error("Command 'run' requires source file(s) to compile and run");
+                report_error("Command '"+ arg +"' requires source file(s) to compile and run");
             }
             // Additional arguments to the program can be taken after --
             std::vector<std::string> ptc_args;
@@ -194,6 +195,11 @@ int main(int argc, char* argv[]) {
                 run_cmd << " " << a;
             }
             std::system(run_cmd.str().c_str());
+
+            if(arg == "see") {
+                // Delete binary
+                std::system((std::string("rm -f ")+compile_info.out_bin).c_str());
+            }
 
             return 0;
         }
