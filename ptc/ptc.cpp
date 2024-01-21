@@ -132,7 +132,7 @@ bool emit(std::string ptcName, llvm::Module *module, llvm::TargetMachine *target
             outputFileName.append(emitLLVM ? ".ll" : ".s");
         break;
         case llvm::CGFT_ObjectFile:
-            outputFileName.append(".o");
+            outputFileName.append(".pto.o");
         break;
         case llvm::CGFT_Null:
             outputFileName.append(".null");
@@ -217,7 +217,7 @@ int main(int argc, char *argv[]) {
     // Add ptlib to parse
     // TODO: fix path to cl::opt
     LOGMAX("Adding ptlib to parsing");
-    auto ptlibModule = new ModuleInfo("ptc/libpt.pt", true);
+    auto ptlibModule = new ModuleInfo("/lib/ptc/std/libpt.pt", true);
     ptlibModule->setLib(true);
     modulesToCompile.push_back(ptlibModule);
 
@@ -344,7 +344,7 @@ int main(int argc, char *argv[]) {
                 LOGMAX("Setting cgmodule for "+fileName);
                 std::unique_ptr<llvm::Module> mainMod = CGHandle->run(mi->getScanner()->mainModule, ptlibModule->getModule(), fileName, mi->isMainMod());
                 mi->getModule()->setCGModule(CGHandle->cgm);
-                if(!emit(ptcName, mainMod.get(), target, fileName)) {
+                if(!emit(ptcName, mainMod.get(), target, mi->getName())) {
                     llvm::WithColor::error(llvm::errs(), ptcName) << "error writing output\n";
                 }
                 delete CGHandle;
