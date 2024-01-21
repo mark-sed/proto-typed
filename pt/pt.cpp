@@ -39,7 +39,6 @@ OPTIONS:
   --gc-path=<path to GC library>                                        Sets garbage collector path for linking
   --out-dir=<path to out directory>                                     Directory for building artifacts
 )";
-// TODO: Call ptc with --help
 }
 
 struct CompileInfo {
@@ -82,6 +81,15 @@ bool is_opt(std::string arg, std::string check) {
     return false;
 }
 
+void parse_set_opt(CompileInfo ci, std::string arg, std::string check, std::string example) {
+    if(arg.length() == check.length() || (arg.length() == check.length()+1 && (arg[check.length()] == '=' || std::isspace(arg[check.length()])))) {
+        report_error("Option "+check+" has to be set. E.g.: '"+example+"'");
+    }
+    if(arg[check.length()] != '=') {
+        report_unknown_opt(ci, arg);
+    }
+}
+
 int run_ptc(CompileInfo ci, std::vector<std::string> args) {
     std::stringstream cmd;
     cmd << ci.ptc_path;
@@ -110,6 +118,7 @@ int run_ptc(CompileInfo ci, std::vector<std::string> args) {
     cmd << " " << ci.out_path << "/*.pto.o";  // TODO: Change this to use specified files if multiple files passed in by the user.
     // Set output binary
     cmd << " -o " << ci.out_bin;
+    // Libs
     cmd << " -lgc -lm";
     // Remove artifacts
     cmd << " && rm -f " << ci.out_path << "/*.pto.o";
@@ -212,7 +221,12 @@ int main(int argc, char* argv[]) {
             continue;
         }
         else if (arg == "--version") {
-            // TODO
+            auto status = std::system((compile_info.ptc_path+" --version").c_str());
+
+            // Failure
+            if (status < 0 || WEXITSTATUS(status)) {
+                return 1; // TODO: print error msg?
+            }
             return 0;
         }
         else if (arg == "--pt-version") {
@@ -221,43 +235,29 @@ int main(int argc, char* argv[]) {
         }
         else if (arg == "--help" || arg == "-h") {
             print_help();
+            std::cout << std::endl;
+            auto status = std::system((compile_info.ptc_path+" --help").c_str());
+
+            // Failure
+            if (status < 0 || WEXITSTATUS(status)) {
+                return 1; // TODO: print error msg?
+            }
             return 0;
         }
         else if (arg.length() >= 10 && arg.substr(0, 10) == "--ptc-path" ) {
-            // TODO: Create function for this check
-            if(arg.length() == 10 || (arg.length() == 11 && (arg[10] == '=' || std::isspace(arg[10])))) {
-                report_error("Option --ptc-path has to be set. E.g.: '--ptc-path=/usr/bin/ptc'");
-            }
-            if(arg[10] != '=') {
-                report_unknown_opt(compile_info, arg);
-            }
+            parse_set_opt(compile_info, arg, "--ptc-path", "--ptc-path=/usr/bin/ptc");
             compile_info.ptc_path = arg.substr(11);
         }
         else if (arg.length() >= 9 && arg.substr(0, 9) == "--cc-path" ) {
-            if(arg.length() == 9 || (arg.length() == 10 && (arg[9] == '=' || std::isspace(arg[9])))) {
-                report_error("Option --cc-path has to be set. E.g.: '--cc-path=/usr/bin/clang'");
-            }
-            if(arg[9] != '=') {
-                report_unknown_opt(compile_info, arg);
-            }
+            parse_set_opt(compile_info, arg, "--cc-path", "--cc-path=/usr/bin/clang");
             compile_info.cc_path = arg.substr(10);
         }
         else if (arg.length() >= 10 && arg.substr(0, 10) == "--lib-path" ) {
-            if(arg.length() == 10 || (arg.length() == 11 && (arg[10] == '=' || std::isspace(arg[10])))) {
-                report_error("Option --gc-path has to be set. E.g.: '--gc-path=/usr/lib/ptc'");
-            }
-            if(arg[10] != '=') {
-                report_unknown_opt(compile_info, arg);
-            }
+            parse_set_opt(compile_info, arg, "--lib-path", "--lib-path=/usr/lib/ptc");
             compile_info.lib_path = arg.substr(11);
         }
         else if (arg.length() >= 9 && arg.substr(0, 9) == "--out-dir" ) {
-            if(arg.length() == 9 || (arg.length() == 10 && (arg[9] == '=' || std::isspace(arg[9])))) {
-                report_error("Option --out-dir has to be set. E.g.: '/tmp'");
-            }
-            if(arg[9] != '=') {
-                report_unknown_opt(compile_info, arg);
-            }
+            parse_set_opt(compile_info, arg, "--out-dir", "--out-dir=/tmp");
             compile_info.out_path = arg.substr(10);
         }
         else {
