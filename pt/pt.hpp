@@ -2,7 +2,6 @@
  * @file pt.hpp
  * @author Marek Sedlacek
  * @brief proto-typed - pt
- * @date 2023-04-20
  * 
  * @copyright Copyright (c) 2024
  * Manager for proto-typed compilations and executions.

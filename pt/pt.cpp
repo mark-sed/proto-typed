@@ -2,7 +2,6 @@
  * @file pt.cpp
  * @author Marek Sedlacek
  * @brief proto-typed - pt
- * @date 2023-04-20
  * 
  * @copyright Copyright (c) 2024
  * Manager for proto-typed compilations and executions.
@@ -16,9 +15,30 @@
 #include <sstream>
 #include <filesystem>
 
-/**
- * Prints help information
- */
+/** Data needed for compilation */
+struct CompileInfo {
+    std::string pt_path = "pt";
+    std::string ptc_path = "ptc";
+    std::string cc_path = "cc";
+    std::string lib_path = "/lib/ptc";
+    std::string out_path = ".";
+    std::string out_bin = "";
+};
+
+/** Debug print for CompileInfo */
+std::ostream& operator<< (std::ostream& stream, const CompileInfo& ci) {
+    stream << "Compile info:";
+    stream << "\n  - pt_path: " << ci.pt_path;
+    stream << "\n  - ptc_path: " << ci.ptc_path;
+    stream << "\n  - cc_path: " << ci.cc_path;
+    stream << "\n  - lib_path: " << ci.lib_path;
+    stream << "\n  - out_path: " << ci.out_path;
+    stream << "\n  - out_bin: " << ci.out_bin;
+    stream << "\n";
+    return stream;
+}
+
+/** Prints help information */
 void print_help() {
     std::cout << 
 R"(OVERVIEW: Proto-typed
@@ -41,39 +61,29 @@ OPTIONS:
 )";
 }
 
-struct CompileInfo {
-    std::string pt_path = "pt";
-    std::string ptc_path = "ptc";
-    std::string cc_path = "cc";
-    std::string lib_path = "/lib/ptc";
-    std::string out_path = ".";
-    std::string out_bin = "";
-};
-
-std::ostream& operator<< (std::ostream& stream, const CompileInfo& ci) {
-    stream << "Compile info:";
-    stream << "\n  - pt_path: " << ci.pt_path;
-    stream << "\n  - ptc_path: " << ci.ptc_path;
-    stream << "\n  - cc_path: " << ci.cc_path;
-    stream << "\n  - lib_path: " << ci.lib_path;
-    stream << "\n  - out_path: " << ci.out_path;
-    stream << "\n  - out_bin: " << ci.out_bin;
-    stream << "\n";
-    return stream;
-}
-
 /**
- * Prints error message and exits with error.
+ * Prints error message and exits with failure.
+ * @param msg Message to print
  */
 [[noreturn]] void report_error(std::string msg) {
     std::cerr << "pt: " << msg << "\n";
     exit(1);
 }
 
+/**
+ * Prints error with unknown option and exits with failure.
+ * @param ci Compile Info for pt_path
+ * @param opt Unknown option
+ */
 [[noreturn]] void report_unknown_opt(CompileInfo ci, std::string opt) {
     report_error("Unknown command line argument '" + opt + "'. Try: '" + ci.pt_path + " --help'");
 }
 
+/**
+ * Checks if argument prefix matches expected one.
+ * @param arg Argument to check
+ * @param check Expected prefix
+ */
 bool is_opt(std::string arg, std::string check) {
     if(arg.length() >= check.length() && arg.substr(0, check.length()) == check) {
         return true;
@@ -81,6 +91,13 @@ bool is_opt(std::string arg, std::string check) {
     return false;
 }
 
+/**
+ * Check correctness of --arg=<value> options
+ * @param ci Compile info so that report error can be used
+ * @param arg Argument to check
+ * @param check Expected value (with length already checked)
+ * @param example Example of what the value could be set to
+ */
 void parse_set_opt(CompileInfo ci, std::string arg, std::string check, std::string example) {
     if(arg.length() == check.length() || (arg.length() == check.length()+1 && (arg[check.length()] == '=' || std::isspace(arg[check.length()])))) {
         report_error("Option "+check+" has to be set. E.g.: '"+example+"'");
@@ -90,6 +107,12 @@ void parse_set_opt(CompileInfo ci, std::string arg, std::string check, std::stri
     }
 }
 
+/**
+ * Runs ptc for compilation with specified args
+ * then links it using cc.
+ * @param ci Compilation information
+ * @param args ptc arguments
+ */
 int run_ptc(CompileInfo ci, std::vector<std::string> args) {
     std::stringstream cmd;
     cmd << ci.ptc_path;
