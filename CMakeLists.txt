@@ -49,3 +49,12 @@ add_subdirectory(ir)
 add_subdirectory(ptc)
 add_subdirectory(backend)
 add_subdirectory(analysis)
+
+# pt
+set(PT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/pt)
+
+set(PT_SOURCES 
+    ${PT_SOURCE_DIR}/pt.cpp
+)
+
+add_executable(pt ${PT_SOURCES})
