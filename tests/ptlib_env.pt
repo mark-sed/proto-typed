@@ -1,0 +1,7 @@
+bool status
+status = setenv("HELLO", "there!", true)
+print(status++"\n")
+
+string s
+s = getenv("HELLO")
+print(s++"\n")

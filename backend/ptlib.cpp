@@ -438,6 +438,30 @@ void PTLib::environmentFuncsInit() {
         auto rval = builder.CreateLoad(stringT, strobj);
         builder.CreateRet(rval);
     }
+    // bool setenv(string, string, bool)
+    {
+        auto funType = llvm::FunctionType::get(int1T, { stringT, stringT, int1T }, false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "setenv_string_string_bool",
+                                                llvmMod);
+        auto setEnvF = llvmMod->getOrInsertFunction("setenv", 
+                                                    llvm::FunctionType::get(builder.getInt32Ty(), 
+                                                        {
+                                                            builder.getInt8Ty()->getPointerTo(), 
+                                                            builder.getInt8Ty()->getPointerTo(),
+                                                            builder.getInt32Ty()
+                                                        },
+                                                        false));
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        setCurrBB(bb);
+        auto name = builder.CreateExtractValue(f->getArg(0), 0);
+        auto value = builder.CreateExtractValue(f->getArg(1), 0);
+        auto overwrite = builder.CreateZExt(f->getArg(2), builder.getInt32Ty());
+        auto status = builder.CreateCall(setEnvF, {name, value, overwrite});
+        auto statusBool = builder.CreateICmpEQ(status, llvm::ConstantInt::get(builder.getInt32Ty(), 0, true));
+        builder.CreateRet(statusBool);
+    }
 }
 
 void PTLib::trigonFuncsInit() {

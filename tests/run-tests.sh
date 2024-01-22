@@ -264,6 +264,11 @@ function test_ptlib_math {
 0.9932517730102834\n0\n3\ninf\n-nan\n0.4313637641589874\ninf\n-nan\n" "ptlib_math"
 }
 
+function test_ptlib_env {
+    expect_pass "ptlib_env.pt" "ptlib_env"
+    expect_out_eq "true\nthere!\n" "ptlib_env"
+}
+
 function test_var {
     expect_pass "var.pt" "var"
     expect_out_eq "4\n2.2\nHello\n1\ntruefalse\n5.52.2\nab\n-8\n" "var"
@@ -334,6 +339,7 @@ function run_all_tests {
     run_test ptlib_strings
     run_test ptlib_arrays
     run_test ptlib_math
+    run_test ptlib_env
     run_test var
     run_test numbers
     run_test funvar

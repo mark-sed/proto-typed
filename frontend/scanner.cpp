@@ -199,6 +199,11 @@ void Scanner::init() {
     defineFun("getenv_string", "getenv", stringType, {
         new ir::FormalParamDecl(currentIR, llvmloc2Src(), "name", this->stringType, false)
     });
+    defineFun("setenv_string_string_bool", "setenv", boolType, {
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "name", this->stringType, false),
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "value", this->stringType, false),
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "overwrite", this->boolType, false)
+    });
 
     if(!lib) {
         for(auto d: ptlibMod->getDecls()) {
