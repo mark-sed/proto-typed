@@ -204,6 +204,9 @@ void Scanner::init() {
         new ir::FormalParamDecl(currentIR, llvmloc2Src(), "value", this->stringType, false),
         new ir::FormalParamDecl(currentIR, llvmloc2Src(), "overwrite", this->boolType, false)
     });
+    defineFun("exit_int", "exit", voidType, {
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "status", this->intType, false)
+    });
 
     if(!lib) {
         for(auto d: ptlibMod->getDecls()) {

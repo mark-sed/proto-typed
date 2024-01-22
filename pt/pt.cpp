@@ -226,14 +226,15 @@ int main(int argc, char* argv[]) {
             for(auto a: program_args) {
                 run_cmd << " " << a;
             }
-            std::system(run_cmd.str().c_str());
+            
+            auto ret = std::system(run_cmd.str().c_str());
 
             if(arg == "see") {
                 // Delete binary
                 std::system((std::string("rm -f ")+compile_info.out_bin).c_str());
             }
 
-            return 0;
+            return WEXITSTATUS(ret);
         }
         else if (arg == "-o") {
             if(arg_i == argc-1) {

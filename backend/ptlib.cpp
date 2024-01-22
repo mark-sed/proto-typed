@@ -462,6 +462,22 @@ void PTLib::environmentFuncsInit() {
         auto statusBool = builder.CreateICmpEQ(status, llvm::ConstantInt::get(builder.getInt32Ty(), 0, true));
         builder.CreateRet(statusBool);
     }
+    // void exit(int)
+    {
+        auto funType = llvm::FunctionType::get(voidT, int64T, false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "exit_int",
+                                                llvmMod);
+        f->addFnAttr("noreturn");
+        auto exitF = llvmMod->getOrInsertFunction("exit", 
+                                                    llvm::FunctionType::get(voidT, builder.getInt32Ty(), false));
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        setCurrBB(bb);
+        auto status = builder.CreateTrunc(f->getArg(0), builder.getInt32Ty());
+        builder.CreateCall(exitF, {status});
+        builder.CreateRetVoid();
+    }
 }
 
 void PTLib::trigonFuncsInit() {
