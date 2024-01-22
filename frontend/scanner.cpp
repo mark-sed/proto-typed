@@ -192,6 +192,11 @@ void Scanner::init() {
         new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", this->floatType, false)
     });
 
+    // Environment
+    defineFun("system_string", "system", intType, {
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "cmd", this->stringType, false)
+    });
+
     if(!lib) {
         for(auto d: ptlibMod->getDecls()) {
             if(auto v = llvm::dyn_cast<ir::FunctionDecl>(d)) {

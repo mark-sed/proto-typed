@@ -376,6 +376,25 @@ void PTLib::length_stringInit() {
     builder.CreateRet(len64);
 }
 
+void PTLib::environmentFuncsInit() {
+    // int system(string)
+    {
+        auto funType = llvm::FunctionType::get(int64T, { stringT }, false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "system_string",
+                                                llvmMod);
+        auto systemF = llvmMod->getOrInsertFunction("system", 
+                                                    llvm::FunctionType::get(builder.getInt32Ty(), builder.getInt8Ty()->getPointerTo(), false));
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        setCurrBB(bb);
+        auto cstr = builder.CreateExtractValue(f->getArg(0), 0);
+        auto status = builder.CreateCall(systemF, {cstr});
+        auto status64 = builder.CreateSExt(status, int64T);
+        builder.CreateRet(status64);
+    }
+}
+
 void PTLib::trigonFuncsInit() {
     auto funType = llvm::FunctionType::get(floatT, { floatT }, false);
     // float sin(float)
@@ -1424,6 +1443,8 @@ void PTLib::setupLib() {
     floatFuncsInit();
 
     logFuncsInit();
+    
+    environmentFuncsInit();
 }
 
 void PTLib::setupExternLib() {

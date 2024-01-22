@@ -712,6 +712,9 @@ These functions are templated and type `S` represent generic struct type in this
     * `float ln(float x)` - Natural (base e) logarithm of `x`.
     * `float log10(float x)` - Common (base 10) logarithm of `x`.
 
+### Environment functions
+* __`int system(string cmd)`__ - Calls host environment command processor with `cmd`. Return value is implementation-defined value.
+
 # Proto-typed compiler
 Proto-typed compiler (ptc) uses LLVM and can target any of big amount of targets LLVM can compile for. The ptc also relies on LibC. 
 
