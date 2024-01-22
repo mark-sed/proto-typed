@@ -196,6 +196,9 @@ void Scanner::init() {
     defineFun("system_string", "system", intType, {
         new ir::FormalParamDecl(currentIR, llvmloc2Src(), "cmd", this->stringType, false)
     });
+    defineFun("getenv_string", "getenv", stringType, {
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "name", this->stringType, false)
+    });
 
     if(!lib) {
         for(auto d: ptlibMod->getDecls()) {

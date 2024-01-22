@@ -393,6 +393,51 @@ void PTLib::environmentFuncsInit() {
         auto status64 = builder.CreateSExt(status, int64T);
         builder.CreateRet(status64);
     }
+    // string getenv(string)
+    {
+        auto funType = llvm::FunctionType::get(stringT, { stringT }, false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "getenv_string",
+                                                llvmMod);
+        auto getEnvF = llvmMod->getOrInsertFunction("getenv", 
+                                                    llvm::FunctionType::get(builder.getInt8Ty()->getPointerTo(), builder.getInt8Ty()->getPointerTo(), false));
+        auto stringInitF = llvmMod->getOrInsertFunction("string_Create_Default", 
+                                                llvm::FunctionType::get(
+                                                    voidT,
+                                                    stringTPtr,
+                                                    false
+                                                ));
+        auto stringAdd = llvmMod->getOrInsertFunction("string_Add_CStr", 
+                                                        llvm::FunctionType::get(
+                                                            voidT,
+                                                            { 
+                                                                stringTPtr,
+                                                                builder.getInt8Ty()->getPointerTo()
+                                                            },
+                                                            false
+                                                        ));
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        llvm::BasicBlock *isNullbb = llvm::BasicBlock::Create(ctx, "is.null", f);
+        llvm::BasicBlock *notNullbb = llvm::BasicBlock::Create(ctx, "not.null", f);
+        setCurrBB(bb);
+        auto cstr = builder.CreateExtractValue(f->getArg(0), 0);
+        auto strobj = builder.CreateAlloca(stringT);
+        builder.CreateCall(stringInitF, { strobj });
+        auto valuecstr = builder.CreateCall(getEnvF, {cstr});
+
+        auto retNull = builder.CreateICmpEQ(valuecstr, llvm::ConstantPointerNull::get(builder.getInt8Ty()->getPointerTo()));
+        builder.CreateCondBr(retNull, isNullbb, notNullbb);
+
+        setCurrBB(isNullbb);
+        auto rvalEmpty = builder.CreateLoad(stringT, strobj);
+        builder.CreateRet(rvalEmpty);
+
+        setCurrBB(notNullbb);
+        builder.CreateCall(stringAdd, { strobj, valuecstr });
+        auto rval = builder.CreateLoad(stringT, strobj);
+        builder.CreateRet(rval);
+    }
 }
 
 void PTLib::trigonFuncsInit() {
