@@ -207,6 +207,11 @@ void Scanner::init() {
     defineFun("exit_int", "exit", voidType, {
         new ir::FormalParamDecl(currentIR, llvmloc2Src(), "status", this->intType, false)
     });
+    defineFun("set_seed_int", "set_seed", voidType, {
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "seed", this->intType, false)
+    });
+    defineFun("rand_uint", "rand_uint", intType, {
+    });
 
     if(!lib) {
         for(auto d: ptlibMod->getDecls()) {

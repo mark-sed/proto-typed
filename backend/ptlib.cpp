@@ -480,6 +480,58 @@ void PTLib::environmentFuncsInit() {
     }
 }
 
+void PTLib::randFuncsInit() {
+    // void set_seed(int)
+    {
+        auto funType = llvm::FunctionType::get(voidT, { int64T }, false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "set_seed_int",
+                                                llvmMod);
+        auto srandF = llvmMod->getOrInsertFunction("srand", 
+                                                    llvm::FunctionType::get(voidT, builder.getInt32Ty(), false));
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        setCurrBB(bb);
+        auto seed = builder.CreateTrunc(f->getArg(0), builder.getInt32Ty());
+        builder.CreateCall(srandF, {seed});
+        builder.CreateRetVoid();
+    }
+    // float rand_float(float min, float max)
+    /*{
+        auto funType = llvm::FunctionType::get(floatT, { floatT, floatT }, false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "rand_float_float_float",
+                                                llvmMod);
+        auto randF = llvmMod->getOrInsertFunction("rand", 
+                                                    llvm::FunctionType::get(builder.getInt32Ty(), false));
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        setCurrBB(bb);
+        auto rndInt = builder.CreateCall(randF);
+        auto range = builder.CreateFSub(f->getArg(1), f->getArg(0));
+        auto divVal = builder.CreateFDiv(llvm::ConstantFP::get(floatT, llvm::ConstantFP::get(floatT, 2147483647.0)), range);
+        auto rndFlt = builder.CreateSIToFP(rndInt, floatT);
+        auto randFlt = builder.CreateFDiv(rndFlt, divVal);
+        auto 
+        builder.CreateRet();
+    }*/
+    // int rand_uint()
+    {
+        auto funType = llvm::FunctionType::get(int64T, false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "rand_uint",
+                                                llvmMod);
+        auto randF = llvmMod->getOrInsertFunction("rand", 
+                                                    llvm::FunctionType::get(builder.getInt32Ty(), false));
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        setCurrBB(bb);
+        auto rndInt = builder.CreateCall(randF);
+        auto rndInt64 = builder.CreateZExt(rndInt, int64T);
+        builder.CreateRet(rndInt64);
+    }
+}
+
 void PTLib::trigonFuncsInit() {
     auto funType = llvm::FunctionType::get(floatT, { floatT }, false);
     // float sin(float)
@@ -1530,6 +1582,7 @@ void PTLib::setupLib() {
     logFuncsInit();
     
     environmentFuncsInit();
+    randFuncsInit();
 }
 
 void PTLib::setupExternLib() {

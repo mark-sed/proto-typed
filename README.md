@@ -716,6 +716,13 @@ These functions are templated and type `S` represent generic struct type in this
 * __`int system(string cmd)`__ - Calls host environment command processor with `cmd`. Return value is implementation-defined value.
 * __`string getenv(string name)`__ - Return value of environemnt variable.
 * __`bool setenv(string name, string value, bool overwrite)`__ - Sets environment variable to passed in value.
+* __Pseudo-random number generation__ - Functions for pseudo random number generation. Seed is initialized implicitly.
+    * `void set_seed(int)` - Sets seed for generator.
+    * `int rand_int(int min, int max)` - Random integer number between `min` and `max` (including).
+    * `float rand_float(float min, float max)` - Random float number between `min` and `max` (including).
+    * `float rand_float()` - Random float between 0.0 and 1.0 (including).
+    * `bool rand_bool()` - Random boolean.
+    * `int rand_uint()` - Returns random unsigned integer.
 
 # Proto-typed compiler
 Proto-typed compiler (ptc) uses LLVM and can target any of big amount of targets LLVM can compile for. The ptc also relies on LibC. 

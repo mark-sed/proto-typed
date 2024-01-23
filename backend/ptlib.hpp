@@ -76,6 +76,7 @@ private:
     void maybeFuncsInit();
     void logFuncsInit();
     void environmentFuncsInit();
+    void randFuncsInit();
 
 public:
     /**
