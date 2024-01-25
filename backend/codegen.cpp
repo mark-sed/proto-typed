@@ -2896,9 +2896,16 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                                                 llvm::GlobalValue::ExternalLinkage,
                                                 "main",
                                                 llvmMod);
+        auto timeF = getLLVMMod()->getOrInsertFunction("timestamp", llvm::FunctionType::get(int64T, false));
+        auto set_seedF = getLLVMMod()->getOrInsertFunction("set_seed_int", llvm::FunctionType::get(voidT, int64T, false));
+
         main->setDSOLocal(true);
         llvm::BasicBlock *bb = llvm::BasicBlock::Create(getLLVMCtx(), "", main);
         setCurrBB(bb);
+
+        // initialize rng
+        auto ts = builder.CreateCall(timeF);
+        builder.CreateCall(set_seedF, ts);
 
         builder.CreateCall(init);
         auto entryFunLLVM = llvmMod->getFunction(mangleName(entryFun));
