@@ -478,6 +478,21 @@ void PTLib::environmentFuncsInit() {
         builder.CreateCall(exitF, {status});
         builder.CreateRetVoid();
     }
+    // int timestamp()
+    {
+        auto funType = llvm::FunctionType::get(int64T, false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "timestamp",
+                                                llvmMod);
+        auto timeF = llvmMod->getOrInsertFunction("time", 
+                                                    llvm::FunctionType::get(builder.getInt32Ty(), builder.getInt32Ty(), false));
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        setCurrBB(bb);
+        auto timestamp32 = builder.CreateCall(timeF, llvm::ConstantPointerNull::get(builder.getInt32Ty()->getPointerTo()));
+        auto ts64 = builder.CreateZExt(timestamp32, int64T);
+        builder.CreateRet(ts64);
+    }
 }
 
 void PTLib::randFuncsInit() {

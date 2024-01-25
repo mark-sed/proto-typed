@@ -212,6 +212,8 @@ void Scanner::init() {
     });
     defineFun("rand_uint", "rand_uint", intType, {
     });
+    defineFun("timestamp", "timestamp", intType, {
+    });
 
     if(!lib) {
         for(auto d: ptlibMod->getDecls()) {

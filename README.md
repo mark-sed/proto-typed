@@ -723,6 +723,7 @@ These functions are templated and type `S` represent generic struct type in this
     * `float rand_float()` - Random float between 0.0 and 1.0 (including).
     * `bool rand_bool()` - Random boolean.
     * `int rand_uint()` - Returns random unsigned integer.
+* __`int timestamp()`__ - Current time since epoch (timestamp).
 
 # Proto-typed compiler
 Proto-typed compiler (ptc) uses LLVM and can target any of big amount of targets LLVM can compile for. The ptc also relies on LibC. 
