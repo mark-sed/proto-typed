@@ -115,6 +115,7 @@ public:
     void reverse_matrixInit(std::string name, llvm::Type *mt, ir::TypeDecl *mtt);
     void join_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, ir::TypeDecl *mtt);
     void remove_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt);
+    void insert_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, ir::TypeDecl *mtt);
 };
 
 }
