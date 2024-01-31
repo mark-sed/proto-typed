@@ -2619,6 +2619,9 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
         else if(f->getOGName() == "insert") {
             ptlibLoader->insert_matrixInit(f->getName(), mapType(f->getParams()[0]), mapType(f->getParams()[1]), f->getParams()[0]->getType());
         }
+        else if(f->getOGName() == "minsert") {
+            ptlibLoader->minsert_matrixInit(f->getName(), mapType(f->getParams()[0]), mapType(f->getParams()[1]), f->getParams()[0]->getType());
+        }
         else if(f->getOGName() == "length") {
             ptlibLoader->length_matrixInit(f->getName(), mapType(f->getParams()[0]));
         }

@@ -669,6 +669,10 @@ These functions are templated for any array (matrix) type, the type `T` stands f
 
 * __`append`__ - Append to an array.
     * `void append(T a, TBase v)` - Append `v` at the end of array `a`.
+    * `void mappend(T a, TBase? v)` - Append _maybe_ value `v` into array `a`.
+* __`insert`__ - Insert to an array.
+    * `void insert(T a, TBase v, int index)` - Insert `v` at index `index` (from 0 to `length(a)`) into array `a`.
+    * `void minsert(T a, TBase? v, int index)` - Insert _maybe_ value `v` at index `index` (from 0 to `length(a)`) into array `a`.
 * __`remove`__ - Remove value from an array.
     * `void remove(T a, int index)` - Removes value of the array `a` at index `index`.
 * __`length`__ - Array length.

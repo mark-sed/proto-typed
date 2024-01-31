@@ -40,3 +40,20 @@ mappend(marr2, noneintval)
 print((marr == marr2) ++ "\n")
 marr2[0] = 9
 print((marr == marr2) ++ "\n")
+
+string?[] minsarr2
+minsert(minsarr2, "a", 0)
+minsert(minsarr2, "b", 1)
+minsert(minsarr2, "?", 0)
+
+print(minsarr2[0] ++ "\n")
+print(minsarr2[1] ++ "\n")
+print(minsarr2[2] ++ "\n")
+
+int?[] minsarr
+mappend(minsarr, 0)
+mappend(minsarr, 2)
+minsert(minsarr, 1, 1)
+print(minsarr[0] ++ "\n")
+print(minsarr[1] ++ "\n")
+print(minsarr[2] ++ "\n")

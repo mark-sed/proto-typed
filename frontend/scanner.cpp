@@ -1003,7 +1003,7 @@ void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemTOG)
         mainModule->addLibFunction(fun);
     }
 
-    {
+    if(!llvm::isa<ir::FunTypeDecl>(elemTOG)) {
         auto params = std::vector<ir::FormalParamDecl *>{
             new ir::FormalParamDecl(currentIR, llvmloc2Src(), "m", tPtr, true),
             new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", elemT, false),
@@ -1013,6 +1013,23 @@ void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemTOG)
                                                 llvmloc2Src(),
                                                 "insert_"+t->getName()+"_"+elemT->getName()+"_int",
                                                 "insert",
+                                                voidType,
+                                                params,
+                                                body);
+        globalScope->insert(fun);
+        mainModule->addLibFunction(fun);
+    }
+
+    {
+        auto params = std::vector<ir::FormalParamDecl *>{
+            new ir::FormalParamDecl(currentIR, llvmloc2Src(), "m", tPtr, true),
+            new ir::FormalParamDecl(currentIR, llvmloc2Src(), "v", elemTPtr, true),
+            new ir::FormalParamDecl(currentIR, llvmloc2Src(), "index", intType, false)
+        };
+        auto fun = new ir::FunctionDecl(currentIR,
+                                                llvmloc2Src(),
+                                                "minsert_"+t->getName()+"_"+elemTPtr->getName()+"_int",
+                                                "minsert",
                                                 voidType,
                                                 params,
                                                 body);

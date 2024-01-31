@@ -800,6 +800,7 @@ void PTLib::remove_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt) 
     // Check if it is the last element - then just change the length
     auto arg0 = builder.CreateLoad(mt, f->getArg(0));
     llvm::Value* len32Ptr = builder.CreateGEP(matrixT, arg0, {zero, one});
+    // FIXME: This is incorrect, but works
     auto len32 = builder.CreateLoad(builder.getInt32Ty()->getPointerTo(), len32Ptr);
     auto len64 = builder.CreateSExt(len32, int64T);
     auto lastI = builder.CreateNSWSub(len64, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 1));
@@ -1470,7 +1471,7 @@ void PTLib::insert_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, 
         }
     }
 
-    auto funType = llvm::FunctionType::get(voidT, { mt, vt, int64T}, false);
+    auto funType = llvm::FunctionType::get(voidT, { mt->getPointerTo(), vt, int64T}, false);
     llvm::Function *f = llvm::Function::Create(funType, 
                                             llvm::GlobalValue::PrivateLinkage,
                                             name,
@@ -1505,7 +1506,6 @@ void PTLib::insert_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, 
     llvm::Value* len32Ptr = builder.CreateGEP(matrixT, arg0, {zero, one});
     auto len32 = builder.CreateLoad(builder.getInt32Ty()->getPointerTo(), len32Ptr);
     auto len64 = builder.CreateSExt(len32, int64T);
-    //auto lastI = builder.CreateNSWSub(len64, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 1));
 
     // Append value (to enlarge list)
     builder.CreateCall(appSub_f, {f->getArg(0), f->getArg(1)});
@@ -1537,6 +1537,84 @@ void PTLib::insert_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, 
     setCurrBB(endBB);
     auto posIndexPtr = builder.CreateGEP(vt, casted, pos);
     builder.CreateStore(f->getArg(1), posIndexPtr);
+
+    builder.CreateRetVoid();
+}
+
+void PTLib::minsert_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, ir::TypeDecl *mtt) {
+    for(auto [kn, _] : generated) {
+        if(kn == name) {
+            return;
+        }
+    }
+
+    auto funType = llvm::FunctionType::get(voidT, { mt->getPointerTo(), vt->getPointerTo(), int64T}, false);
+    llvm::Function *f = llvm::Function::Create(funType, 
+                                            llvm::GlobalValue::PrivateLinkage,
+                                            name,
+                                            llvmMod);
+    generated.push_back(std::make_pair(name, f));
+
+    std::string appSubName = "mappend_"+mtt->getName()+"_"+mtt->getDecl()->getName();
+    llvm::Function *appSub_f = nullptr;
+    for(auto [kn, fin] : generated) {
+        if(kn == appSubName) {
+            appSub_f = fin;
+        }
+    }
+    
+    if(!appSub_f) {
+        llvm::report_fatal_error("MAppend for slice was not generated");
+    }
+
+
+    llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+    //llvm::BasicBlock *removeStartBB = llvm::BasicBlock::Create(ctx, "insert.start", f);
+    llvm::BasicBlock *headerBB = llvm::BasicBlock::Create(ctx, "insert.header", f);
+    llvm::BasicBlock *loopBB = llvm::BasicBlock::Create(ctx, "insert.loop", f);
+    llvm::BasicBlock *endBB = llvm::BasicBlock::Create(ctx, "end", f);
+
+    llvm::Value* zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 0);
+    llvm::Value* one = llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 1);
+
+    setCurrBB(bb);
+
+    auto arg0 = builder.CreateLoad(mt, f->getArg(0));
+    llvm::Value* len32Ptr = builder.CreateGEP(matrixT, arg0, {zero, one});
+    auto len32 = builder.CreateLoad(builder.getInt32Ty()->getPointerTo(), len32Ptr);
+    auto len64 = builder.CreateSExt(len32, int64T);
+
+    // Append value (to enlarge list)
+    builder.CreateCall(appSub_f, {f->getArg(0), f->getArg(1)});
+
+    //setCurrBB(removeStartBB);
+    auto idxPtr = builder.CreateAlloca(int64T);
+    auto pos = f->getArg(2);
+    builder.CreateStore(len64, idxPtr);
+    llvm::Value* bufferPtr = builder.CreateGEP(matrixT, arg0, {zero, zero});
+    auto buffer = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), bufferPtr);
+    auto casted = builder.CreateBitCast(buffer, vt->getPointerTo());
+    builder.CreateBr(headerBB);
+
+    setCurrBB(headerBB);
+    auto idx = builder.CreateLoad(int64T, idxPtr);
+    auto doLoop = builder.CreateICmpSGE(idx, pos);
+    builder.CreateCondBr(doLoop, loopBB, endBB);
+    setCurrBB(loopBB);
+
+    auto newIdx = builder.CreateNSWSub(idx, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 1));
+    auto valptr = builder.CreateGEP(vt, casted, idx);
+    auto valPrevPtr = builder.CreateGEP(vt, casted, newIdx);
+    auto valPrev = builder.CreateLoad(vt, valPrevPtr);
+    builder.CreateStore(valPrev, valptr);
+
+    builder.CreateStore(newIdx, idxPtr);
+    builder.CreateBr(headerBB);
+
+    setCurrBB(endBB);
+    auto posIndexPtr = builder.CreateGEP(vt, casted, pos);
+    auto apval = builder.CreateLoad(vt, f->getArg(1));
+    builder.CreateStore(apval, posIndexPtr);
 
     builder.CreateRetVoid();
 }
