@@ -325,6 +325,9 @@ void ExternalSymbolResolver::resolve(ir::IR *i) {
         resolve(e, stmt->getLocation());
     }
     else if(auto *stmt = llvm::dyn_cast<ir::VarDecl>(i)) {
+        if(stmt->getInitValue()) {
+            resolve(stmt->getInitValue(), stmt->getLocation());
+        }
         auto stmtT = stmt->getType();
         // Resolve type
         if(stmtT->isUnresolved()) {
