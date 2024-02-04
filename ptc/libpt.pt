@@ -46,7 +46,8 @@ string mto_string(string? v) {
 }
 
 int? to_int(string str) {
-    return to_int_base(str, 10)
+    int? ret = to_int_base(str, 10)
+    return ret
 }
 
 int abs(int x) {

@@ -2100,7 +2100,7 @@ void cg::CGFunction::emitStmt(ir::ReturnStmt *stmt) {
     }
     if(stmt->getValue()) {
         LOGMAX("Creating return with value");
-        if(stmt->getValue()->getType()->isMaybe() && !stmt->getParentFun()->getReturnType()->isMaybe()) {
+        if(stmt->getValue()->getType()->isMaybe()) {
             llvm::Value *retVal = readVar(currBB, llvm::dyn_cast<ir::VarAccess>(stmt->getValue())->getVar(), true);
             builder.CreateRet(retVal);
         }
