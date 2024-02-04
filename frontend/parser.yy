@@ -75,7 +75,7 @@
 %token <double> FLOAT "float"
 %token <std::string> STRING "string"
 %token <bool> BOOL "bool"
-%token NONE "none" // TODO: Add type
+%token NONE "none"
 
 /* Operators */
 %token LPAR "("
@@ -400,12 +400,14 @@ expr : expr_mat     { $$ = $1; }
 
 expr_var : ID { $$ = scanner->parseVar($1); }
          | EXT_ID { $$ = scanner->parseVar($1, true); }
-         | MINUS ID %prec NEG { $$ = scanner->parseInfixExpr(scanner->parseInt(0), scanner->parseVar($2), ir::Operator(ir::OperatorKind::OP_SUB)); }
-         | MINUS EXT_ID %prec NEG { $$ = scanner->parseInfixExpr(scanner->parseInt(0), scanner->parseVar($2, true), ir::Operator(ir::OperatorKind::OP_SUB)); }
+         
          | LPAR expr_var RPAR { $$ = $2; }
 
          | expr_var LPAR RPAR             { $$ = scanner->parseFunCall($1, std::vector<ptc::ir::Expr *>{}); }
          | expr_var LPAR callarglist RPAR { $$ = scanner->parseFunCall($1, $3); }
+
+         | MINUS ID %prec NEG { $$ = scanner->parseInfixExpr(scanner->parseInt(0), scanner->parseVar($2), ir::Operator(ir::OperatorKind::OP_SUB)); }
+         | MINUS EXT_ID %prec NEG { $$ = scanner->parseInfixExpr(scanner->parseInt(0), scanner->parseVar($2, true), ir::Operator(ir::OperatorKind::OP_SUB)); }
 
          | expr_str LSQ int_val RSQ { $$ = scanner->parseInfixExpr(scanner->parseString($1), $3, ir::Operator(ir::OperatorKind::OP_SUBSCR)); }
          | expr_mat LSQ int_val RSQ { $$ = scanner->parseInfixExpr($1, $3, ir::Operator(ir::OperatorKind::OP_SUBSCR)); }
