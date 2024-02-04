@@ -163,3 +163,15 @@ print((val2s in ses)++"\n")
 print((StV{.a = 4} in ses) ++ "\n")
 print((StV{.a = 7, .g = "."} in ses) ++ "\n")
 print((StV{.a = -7, .g = "."} in ses) ++ "\n")
+
+T2 tnoneR
+if(tnoneR.r2 == none) {
+    print("none\n")
+}
+if(tnoneR.r != none) {
+    print("not none\n")
+}
+tnoneR.r2 = R{.a = 8}
+if(tnoneR.r2 != none) {
+    print("not none\n")
+}

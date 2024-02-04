@@ -201,7 +201,8 @@ true
 49f\n3.14\ntrue\nfalse\ntrue\nfalse
 true\nfalse\ntrue\ntrue\nfalse
 4.05\n3-7trueha\n4\ntrue
-true\nfalse\ntrue\ntrue\nfalse\n" "structs"
+true\nfalse\ntrue\ntrue\nfalse
+none\nnot none\nnot none\n" "structs"
 }
 
 function test_modules {

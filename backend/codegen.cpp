@@ -1259,13 +1259,19 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         }
         else if(e->getLeft()->getType()->getName() == NONETYPE_CSTR && e->getRight()->getType()->isMaybe()) {
             auto ldv = llvm::dyn_cast<llvm::Instruction>(right)->getOperand(0);
-            auto tnone = llvm::ConstantPointerNull::get(right->getType()->getPointerTo());
-            result = builder.CreateICmpEQ(ldv, tnone);
+            if(llvm::isa<llvm::ExtractValueInst>(right)) {
+                // struct
+                ldv = right;
+            }
+            result = builder.CreateIsNull(ldv);
         }
         else if(e->getRight()->getType()->getName() == NONETYPE_CSTR && e->getLeft()->getType()->isMaybe()) {
             auto ldv = llvm::dyn_cast<llvm::Instruction>(left)->getOperand(0);
-            auto tnone = llvm::ConstantPointerNull::get(left->getType()->getPointerTo());
-            result = builder.CreateICmpEQ(ldv, tnone);
+            if(llvm::isa<llvm::ExtractValueInst>(left)) {
+                // struct
+                ldv = left;
+            }
+            result = builder.CreateIsNull(ldv);
         }
         else {
             llvm::report_fatal_error("EQ does not supported given type");
@@ -1311,13 +1317,19 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
         }
         else if(e->getLeft()->getType()->getName() == NONETYPE_CSTR && e->getRight()->getType()->isMaybe()) {
             auto ldv = llvm::dyn_cast<llvm::Instruction>(right)->getOperand(0);
-            auto tnone = llvm::ConstantPointerNull::get(right->getType()->getPointerTo());
-            result = builder.CreateICmpNE(ldv, tnone);
+            if(llvm::isa<llvm::ExtractValueInst>(right)) {
+                // struct
+                ldv = right;
+            }
+            result = builder.CreateIsNotNull(ldv);
         }
         else if(e->getRight()->getType()->getName() == NONETYPE_CSTR && e->getLeft()->getType()->isMaybe()) {
             auto ldv = llvm::dyn_cast<llvm::Instruction>(left)->getOperand(0);
-            auto tnone = llvm::ConstantPointerNull::get(left->getType()->getPointerTo());
-            result = builder.CreateICmpNE(ldv, tnone);
+            if(llvm::isa<llvm::ExtractValueInst>(left)) {
+                // struct
+                ldv = left;
+            }
+            result = builder.CreateIsNotNull(ldv);
         }
         else {
             llvm::report_fatal_error("NEQ does not supported given type");
