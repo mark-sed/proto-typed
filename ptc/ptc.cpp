@@ -13,6 +13,7 @@
 #include "codegen.hpp"
 #include "resolver.hpp"
 #include "function_analysis.hpp"
+#include "backend_pipeline.hpp"
 #include "llvm/Support/InitLLVM.h"
 #include "llvm/CodeGen/CommandFlags.h"
 #include "llvm/IR/IRPrintingPasses.h"
@@ -26,7 +27,7 @@
 #include "llvm/Support/ToolOutputFile.h"
 #include "llvm/Support/WithColor.h"
 #include "llvm/Support/FileSystem.h"
-//#include "llvm/AsmParser/Parser.h"
+#include "llvm/Passes/OptimizationLevel.h"
 #include <string>
 #include <sstream>
 #include <fstream>
@@ -39,6 +40,33 @@ static llvm::cl::list<std::string> inputFiles(llvm::cl::Positional, llvm::cl::de
 static llvm::cl::opt<std::string> mTriple("mtriple", llvm::cl::desc("Override target triple for module"));
 static llvm::cl::opt<bool> emitLLVM("emit-llvm", llvm::cl::desc("Emit IR code instead of assembler"), llvm::cl::init(false));
 static llvm::cl::opt<int> verboseLevel("verbose", llvm::cl::desc("Debug verbose level (1-5)"), llvm::cl::init(0));
+
+enum OptLevel {
+  O0, O1, O2, O3, Os, Oz
+};
+static llvm::cl::opt<OptLevel> OptimizationLevel(llvm::cl::desc("Optimization level:"),
+  llvm::cl::values(
+    clEnumValN(OptLevel::O0, "O0", "No optimizations."),
+    clEnumValN(OptLevel::O1, "O1", "Optimize quickly without destroying debuggability."),
+    clEnumValN(OptLevel::O2, "O2", "Optimize for fast execution as much as possible without triggering significant incremental compile time or code size growth."),
+    clEnumValN(OptLevel::O3, "O3", "Optimize for fast execution as much as possible."),
+    clEnumValN(OptLevel::Os, "Os", "Similar to O2 but tries to optimize for small code size instead of fast execution without triggering significant incremental execution time slowdowns."),
+    clEnumValN(OptLevel::Oz, "Oz", "A very specialized mode that will optimize for code size at any and all costs.")),
+  llvm::cl::init(OptLevel(OptLevel::O0)));
+
+llvm::OptimizationLevel OptLevel2LLVMOpt(OptLevel o) {
+    switch(o) {
+        case O0: return llvm::OptimizationLevel::O0;
+        case O1: return llvm::OptimizationLevel::O1;
+        case O2: return llvm::OptimizationLevel::O2;
+        case O3: return llvm::OptimizationLevel::O3;
+        case Os: return llvm::OptimizationLevel::Os;
+        case Oz: return llvm::OptimizationLevel::Oz;
+        default: 
+            llvm::report_fatal_error("Unknown optimization level selected");
+            return llvm::OptimizationLevel::O0;
+    }
+}
 
 static const char *head = "Proto-typed compiler";
 
@@ -326,6 +354,8 @@ int main(int argc, char *argv[]) {
     auto ptlPos = modulesToCompile[0];
     modulesToCompile.erase(modulesToCompile.begin());
     modulesToCompile.push_back(ptlPos);
+
+    BackendPipeline b_pipeline;
     
     for(auto mii = modulesToCompile.rbegin(); mii != modulesToCompile.rend(); ++mii) {
         auto mi = *mii;
@@ -347,6 +377,8 @@ int main(int argc, char *argv[]) {
                 if(!emit(ptcName, mainMod.get(), target, mi->getName())) {
                     llvm::WithColor::error(llvm::errs(), ptcName) << "error writing output\n";
                 }
+                if(!emitLLVM)
+                    b_pipeline.run(mainMod.get(), OptLevel2LLVMOpt(OptimizationLevel));
                 delete CGHandle;
             }
         }
