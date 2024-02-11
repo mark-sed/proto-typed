@@ -2679,6 +2679,9 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
         else if(f->getOGName() == "remove") {
             ptlibLoader->remove_matrixInit(f->getName(), mapType(f->getParams()[0]), mapType(f->getParams()[0]->getType()->getDecl()));
         }
+        else if(f->getOGName() == "sort") {
+            ptlibLoader->sort_matrixInit(f->getName(), mapType(f->getParams()[0]), mapType(f->getParams()[0]->getType()->getDecl()), mapType(f->getParams()[1]));
+        }
         else {
             llvm::report_fatal_error(("Missing code for function "+f->getOGName()).c_str()); 
         }

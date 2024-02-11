@@ -257,6 +257,14 @@ function test_ptlib_arrays {
 0,1,2,3,4,5,6,7,\n?,a,b,c,\n" "ptlib_arrays"
 }
 
+function test_ptlib_sort {
+    expect_pass "ptlib_sort.pt" "ptlib_sort"
+    expect_out_eq "[10, 20, 30, 40, 50]
+[10, 20, 30, 40, 50]\n[50, 40, 30, 20, 10]\n[]\n[0]
+[-994, -8, 0, 0, 0, 1, 1515]\n[false, false, true, true, true]
+[-5, 1, 64.5]\n[-inf, -99, -5, 1, 64.5, inf]\n" "ptlib_sort"
+}
+
 function test_ptlib_math {
     expect_pass "ptlib_math.pt" "ptlib_math"
     expect_out_eq "is NaN\nis really not NaN\n4\n3\n4\n3e-08
@@ -339,6 +347,7 @@ function run_all_tests {
     run_test floats
     run_test ptlib_strings
     run_test ptlib_arrays
+    run_test ptlib_sort
     run_test ptlib_math
     run_test ptlib_env
     run_test var

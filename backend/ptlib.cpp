@@ -1619,6 +1619,128 @@ void PTLib::minsert_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt,
     builder.CreateRetVoid();
 }
 
+
+void PTLib::sort_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, llvm::Type *cmpf) {
+    for(auto [kn, _] : generated) {
+        if(kn == name) {
+            return;
+        }
+    }
+
+    auto funType = llvm::FunctionType::get(voidT, { mt->getPointerTo(), cmpf }, false);
+    llvm::Function *f = llvm::Function::Create(funType, 
+                                            llvm::GlobalValue::PrivateLinkage,
+                                            name,
+                                            llvmMod);
+    generated.push_back(std::make_pair(name, f));
+
+    auto cmpfType = llvm::FunctionType::get(int1T, { vt, vt }, false);
+
+    llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+    llvm::BasicBlock *bbHead = llvm::BasicBlock::Create(ctx, "for.header", f);
+    llvm::BasicBlock *bbBody = llvm::BasicBlock::Create(ctx, "for.body", f);
+
+    llvm::BasicBlock *bbJHead = llvm::BasicBlock::Create(ctx, "for2.header", f);
+    llvm::BasicBlock *bbJBody = llvm::BasicBlock::Create(ctx, "for2.body", f);
+
+    llvm::BasicBlock *bbJIsLess = llvm::BasicBlock::Create(ctx, "for2.body.isLess", f);
+    llvm::BasicBlock *bbJIsLessDone = llvm::BasicBlock::Create(ctx, "for2.body.isLessDone", f);
+
+    llvm::BasicBlock *bbSwap = llvm::BasicBlock::Create(ctx, "for2.swap", f);
+    llvm::BasicBlock *bbSwapDone = llvm::BasicBlock::Create(ctx, "for2.swapDone", f);
+
+    llvm::BasicBlock *bbJDone = llvm::BasicBlock::Create(ctx, "for2.done", f);
+
+    llvm::BasicBlock *bbDone = llvm::BasicBlock::Create(ctx, "for.done", f);
+    setCurrBB(bb);
+
+    llvm::Value* zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 0);
+    llvm::Value* one = llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 1);
+
+    auto arg0 = builder.CreateLoad(mt, f->getArg(0));
+    llvm::Value* len32Ptr = builder.CreateGEP(matrixT, arg0, {zero, one});
+    auto len32 = builder.CreateLoad(builder.getInt32Ty()->getPointerTo(), len32Ptr);
+    auto len64 = builder.CreateSExt(len32, int64T);
+    auto lastIndex = builder.CreateNSWSub(len64, one);
+
+    llvm::Value* bufferPtr = builder.CreateGEP(matrixT, arg0, {zero, zero});
+    auto buffer = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), bufferPtr);
+
+    auto iPtr = builder.CreateAlloca(int64T);
+    auto jPtr = builder.CreateAlloca(int64T);
+    auto minIdxPtr = builder.CreateAlloca(int64T);
+
+    auto casted = builder.CreateBitCast(buffer, vt->getPointerTo());
+
+    builder.CreateStore(llvm::ConstantInt::get(int64T, 0), iPtr);
+    builder.CreateBr(bbHead);
+
+
+    setCurrBB(bbHead);
+    auto i = builder.CreateLoad(int64T, iPtr);
+    auto doLoop = builder.CreateICmpSLT(i, lastIndex);
+    builder.CreateCondBr(doLoop, bbBody, bbDone);
+
+    setCurrBB(bbBody);
+
+    builder.CreateStore(i, minIdxPtr);
+    auto iNext = builder.CreateNSWAdd(i, one);
+
+    builder.CreateStore(iNext, jPtr);
+    builder.CreateBr(bbJHead);
+        
+        setCurrBB(bbJHead);
+        auto j = builder.CreateLoad(int64T, jPtr);
+        auto doJLoop = builder.CreateICmpSLT(j, len64);
+        builder.CreateCondBr(doJLoop, bbJBody, bbJDone);
+
+        setCurrBB(bbJBody);
+
+        auto minIdx = builder.CreateLoad(int64T, minIdxPtr);
+        auto arrJPtr = builder.CreateGEP(vt, casted, j);
+        auto arrMinPtr = builder.CreateGEP(vt, casted, minIdx);
+        auto arrJ = builder.CreateLoad(vt, arrJPtr);
+        auto arrMin = builder.CreateLoad(vt, arrMinPtr);
+
+        // Less should not be taken as really less, user can pass in bigger
+        auto isLess = builder.CreateCall(cmpfType, f->getArg(1), { arrJ, arrMin });
+        builder.CreateCondBr(isLess, bbJIsLess, bbJIsLessDone);
+
+        setCurrBB(bbJIsLess);
+        builder.CreateStore(j, minIdxPtr);
+        builder.CreateBr(bbJIsLessDone);
+
+        setCurrBB(bbJIsLessDone);
+
+        auto jNext = builder.CreateNSWAdd(j, one);
+        builder.CreateStore(jNext, jPtr);
+        builder.CreateBr(bbJHead);
+
+    setCurrBB(bbJDone);
+
+    auto latestMinIdx = builder.CreateLoad(int64T, minIdxPtr);
+    auto doSwap = builder.CreateICmpNE(latestMinIdx, i);
+    builder.CreateCondBr(doSwap, bbSwap, bbSwapDone);
+
+    setCurrBB(bbSwap);
+    auto arrIPtr = builder.CreateGEP(vt, casted, i);
+    auto arrLatestMinPtr = builder.CreateGEP(vt, casted, latestMinIdx);
+    auto arrI = builder.CreateLoad(vt, arrIPtr);
+    auto arrLatestMin = builder.CreateLoad(vt, arrLatestMinPtr);
+    builder.CreateStore(arrI, arrLatestMinPtr);
+    builder.CreateStore(arrLatestMin, arrIPtr);
+    builder.CreateBr(bbSwapDone);
+
+    setCurrBB(bbSwapDone);
+
+    builder.CreateStore(iNext, iPtr);
+    builder.CreateBr(bbHead);
+
+    setCurrBB(bbDone);
+
+    builder.CreateRetVoid();
+}
+
 void PTLib::equals_structInit(std::string name, llvm::Type *st, ir::TypeDecl *stt) {
     for(auto [kn, _] : generated) {
         if(kn == name) {

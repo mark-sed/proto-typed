@@ -1038,6 +1038,25 @@ void Scanner::addMatrixTemplatedFunction(ir::TypeDecl *t, ir::TypeDecl *elemTOG)
         globalScope->insert(fun);
         mainModule->addLibFunction(fun);
     }
+
+    {
+        std::vector<ir::IR *> cmpparams{elemT, elemT};
+        auto cmpfun = new ir::FunTypeDecl(tPtr->getEnclosingIR(), llvmloc2Src(), getFunTypeName(boolType, cmpparams), boolType, cmpparams);
+
+        auto params = std::vector<ir::FormalParamDecl *>{
+            new ir::FormalParamDecl(currentIR, llvmloc2Src(), "m", tPtr, true),
+            new ir::FormalParamDecl(currentIR, llvmloc2Src(), "cmp", cmpfun, false)
+        };
+        auto fun = new ir::FunctionDecl(currentIR,
+                                                llvmloc2Src(),
+                                                "sort_"+t->getName()+"_"+cmpfun->getName(),
+                                                "sort",
+                                                voidType,
+                                                params,
+                                                body);
+        globalScope->insert(fun);
+        mainModule->addLibFunction(fun);
+    }
 }
 
 std::map<std::string, ir::Expr *> Scanner::parseStructVals(std::string name, ir::Expr *e) {

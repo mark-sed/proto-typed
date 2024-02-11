@@ -1,0 +1,99 @@
+bool intlt(int a, int b) {
+    return a < b;
+}
+
+bool intbt(int a, int b) {
+    return a > b;
+}
+
+void printIntArr(int[] arr) {
+    print("[")
+    bool first = true
+    for(int i : arr) {
+        if(first) {
+            first = false;
+            print(i as string)
+        }
+        else print(", "++i)
+    }
+
+    print("]\n")
+}
+
+void printBoolArr(bool[] arr) {
+    print("[")
+    bool first = true
+    for(bool i : arr) {
+        if(first) {
+            first = false;
+            print(i as string)
+        }
+        else print(", "++i)
+    }
+
+    print("]\n")
+}
+
+void printFloatArr(float[] arr) {
+    print("[")
+    bool first = true
+    for(float i : arr) {
+        if(first) {
+            first = false;
+            print(i as string)
+        }
+        else print(", "++i)
+    }
+
+    print("]\n")
+}
+
+int[] l2srt = [50, 40, 30, 20, 10]
+
+bool(int, int) cmpfun
+cmpfun = intlt
+
+
+sort(l2srt, cmpfun);
+printIntArr(l2srt)
+sort(l2srt, cmpfun);
+printIntArr(l2srt)
+
+sort(l2srt, intbt);
+printIntArr(l2srt)
+
+int[] l2srt2
+sort(l2srt2, intbt);
+printIntArr(l2srt2)
+
+append(l2srt2, 0)
+sort(l2srt2, intlt);
+printIntArr(l2srt2)
+
+l2srt2 += [-8, -994, 1515, 1, 0, 0]
+sort(l2srt2, intlt);
+printIntArr(l2srt2)
+
+
+bool boolLT(bool a, bool b) {
+    return not a
+}
+
+bool[] boolArrSrt = [true, false, false, true, true]
+sort(boolArrSrt, boolLT)
+printBoolArr(boolArrSrt)
+
+
+bool floatLT(float a, float b) {
+    return a < b
+}
+
+float[] floatArrSrt = [1.0, -5.0, 64.5]
+sort(floatArrSrt, floatLT)
+printFloatArr(floatArrSrt)
+
+append(floatArrSrt, inf())
+append(floatArrSrt, -1*inf())
+append(floatArrSrt, -99.0)
+sort(floatArrSrt, floatLT)
+printFloatArr(floatArrSrt)
