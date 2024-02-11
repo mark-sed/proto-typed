@@ -11,7 +11,7 @@ This repository contains Proto-typed Compiler (ptc) and the language definition 
 - [How to run programs](#how-to-run-programs)
   - [Download](#download)
   - [Installation from source](#installation-from-source)
-  - [Compiling and running programs](#compiling-and-running-programs)
+  - [Using pt to run programs](#Using-pt-to-run-programs-with-pt)
 - [Proto-typed Programming Language](#proto-typed-programming-language)
   - [Code examples](#code-examples)
   - [Types](#types)
@@ -21,9 +21,31 @@ This repository contains Proto-typed Compiler (ptc) and the language definition 
 - [Proto-typed Compiler](#proto-typed-compiler)
   - [Known issues](#known-issues)
 
-# How to run programs
+# How to run programs with pt
 
-Currently only the ptc compiler is available, but there are plans for tool to simplify the whole compilation and linking process.
+PT is a standalone program that can be used to compile and run proto-typed programs. Just as the language, it has a straight forward and simple design, but can be customized.
+
+It has 3 commands:
+* `build` - Build compiles the program.
+* `run` - Run compiles the program and runs it.
+* `see` - Run compiles the program, runs it and deletes the binary.
+
+Options for `pt` has to be specified before the command, for `ptc` after the command and arguments to the program after `--`.
+
+1. Create your pt program `hello.pt`:
+```
+print("Hello, World!\n")
+```
+
+2. Run the program using `pt`:
+```
+pt run hello.pt
+```
+
+This will output:
+> Hello, World!
+
+and create binary `hello`.
 
 ## Download
 
@@ -43,37 +65,24 @@ git clone https://github.com/mark-sed/proto-typed.git
 cd proto-typed
 mkdir build
 ```
-3. Run CMake:
+3. Run CMake for pt compiler:
 ```shell
 cmake -S . -B build
 cmake --build build --target ptc
 ```
-After running this inside of `build` you should find compiled proto-typed compiler named `ptc`.
 
-## Compiling and running programs
-
-__NOTE:__ This process is temporary and will be simplified in upcoming changes
-
-Keep in mind that ptc is only a compiler and not a linker and so the compilation itself will generate object file, which needs to be linked. In the current state this needs to be done by hand, but that should hopefully soon change and get done by `pt` tool.
-
-One must compile the `libptl.ll` (libpt parts written in LLVM assembly) file located in `ptc/` using LLVM's llc:
+4. (Optional) Run CMake for pt utility:
 ```shell
-llc ptc/libptl.ll -o libptl.o -filetype=obj -relocation-model=pic
+cmake --build build --target pt
 ```
 
-The proto-typed program itself can be easily compiled using `ptc` and only the file, which is the main one should be passed in, all the others imported should be in the same directory and will be found by the compiler:
-```shell
-ptc main.pt -filetype=obj -relocation-model=pic
-```
+After running this inside of `build` you should find compiled proto-typed compiler named `ptc` and compiled `pt` utility.
 
-After this you should have `libptl.o`, `main.o` and possibly all the other imported files as `*.o` in the current directory. Now they only need to be linked, but also with the grabage collector in `gc/` (don't forget to list all the imported files as well):
-```shell
-gcc -Lgc/ main.o ptlib.o ptc/libpt.o -o main.out -lm -lgc
-```
+Note that `pt` is currently available only for Linux. To have ptc and pt accessible from anywhere and everything have easy to use, you can use `install.sh` script to place all the needed files into the expected places:
 
-After this, you should see `main.out` binary, which can be run:
+5. (Optional) Setting up pt path and libs:
 ```shell
-./main.out
+sudo bash install.sh
 ```
 
 # Proto-typed Programming Language
