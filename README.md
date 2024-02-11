@@ -697,6 +697,8 @@ These functions are templated for any array (matrix) type, the type `T` stands f
 * __`slice`__ - Slices an array (equivalent to `a[start, next..end]`). Range can be also descending for reversed array.
     * `T slice(T a, int start, int end) ` - Slices array from index `start`, with step 1 or -1 until index `end`.
     * `T slice(T a, int start, int next, int end) ` - Slices array from index `start`, with step `next - start` until index `end`.
+* __`sort`__ - Sorts an array.
+    * `void sort(T a, bool(TElem, TElem) cmp)` - Sorts array `a` using comparison function `cmp`.
 
 ### Struct function
 These functions are templated and type `S` represent generic struct type in this case.
