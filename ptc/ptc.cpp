@@ -12,7 +12,7 @@
 #include "logging.hpp"
 #include "codegen.hpp"
 #include "resolver.hpp"
-#include "function_analysis.hpp"
+#include "ptc_pipeline.hpp"
 #include "llvm/Support/InitLLVM.h"
 #include "llvm/CodeGen/CommandFlags.h"
 #include "llvm/IR/IRPrintingPasses.h"
@@ -301,15 +301,9 @@ int main(int argc, char *argv[]) {
     }
     if(diags.getNumErrors() == 0) {
         // Analysis
+        PTCPipeline ptc_pipeline(diags);
         for(auto mi: modulesToCompile) {
-            auto decls = mi->getScanner()->mainModule->getDecls();
-            for(auto decl : decls) {
-                if(auto f = llvm::dyn_cast<ir::FunctionDecl>(decl)) {
-                    LOG1("Running function analysis on "+f->getName());
-                    FunctionAnalysis fcheck(f, diags);
-                    fcheck.run();
-                }
-            }
+            ptc_pipeline.run(mi->getScanner()->mainModule);
         }
     }
     if(diags.getNumErrors() == 0) {
