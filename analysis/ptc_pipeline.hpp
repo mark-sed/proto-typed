@@ -6,8 +6,8 @@
  * @copyright Copyright (c) 2024
  */
 
-#ifndef _PTC_PIPELINE_
-#define _PTC_PIPELINE_
+#ifndef _PTC_PIPELINE_HPP_
+#define _PTC_PIPELINE_HPP_
 
 #include "logging.hpp"
 #include "ir.hpp"
@@ -25,4 +25,4 @@ public:
 
 }
 
-#endif//_PTC_PIPELINE_
+#endif//_PTC_PIPELINE_HPP_

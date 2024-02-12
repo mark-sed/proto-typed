@@ -328,6 +328,7 @@ public:
     TypeDecl *getType() { return td; }
     void setType(TypeDecl *t) { this->td = t; }
     Expr *getInitValue() { return initValue; }
+    void setInitValue(Expr *v) { initValue = v; }
     static bool classof(const IR *ir) {
         return ir->getKind() == IRKind::IR_VAR_DECL;
     }
@@ -616,6 +617,7 @@ public:
     }
 
     llvm::APSInt &getValue() { return value; }
+    SourceInfo getLocation() { return loc; }
     static bool classof(const Expr *e) {
         return e->getKind() == ExprKind::EX_INT;
     }
@@ -637,6 +639,7 @@ public:
     }
 
     llvm::APFloat &getValue() { return value; }
+    SourceInfo getLocation() { return loc; }
     static bool classof(const Expr *e) {
         return e->getKind() == ExprKind::EX_FLOAT;
     }
@@ -658,6 +661,7 @@ public:
     }
 
     bool &getValue() { return value; }
+    SourceInfo getLocation() { return loc; }
     static bool classof(const Expr *e) {
         return e->getKind() == ExprKind::EX_BOOL;
     }
@@ -679,6 +683,7 @@ public:
     }
 
     std::string &getValue() { return value; }
+    SourceInfo getLocation() { return loc; }
     static bool classof(const Expr *e) {
         return e->getKind() == ExprKind::EX_STRING;
     }
@@ -700,6 +705,7 @@ public:
     }
 
     std::vector<Expr *> &getValue() { return value; }
+    SourceInfo getLocation() { return loc; }
     static bool classof(const Expr *e) {
         return e->getKind() == ExprKind::EX_MATRIX;
     }
@@ -726,6 +732,7 @@ public:
             return stdc; 
         return nullptr;
     }
+    SourceInfo getLocation() { return loc; }
     static bool classof(const Expr *e) {
         return e->getKind() == ExprKind::EX_STRUCT;
     }
@@ -750,6 +757,7 @@ public:
                 loc(loc) {
     }
 
+    SourceInfo getLocation() { return loc; }
     static bool classof(const Expr *e) {
         return e->getKind() == ExprKind::EX_NONE;
     }

@@ -326,6 +326,11 @@ function test_old_bugs {
     expect_out_eq "false\ntrue\ntrue\n1234\ntrue\nno\n8\n4\n321\nhi\n6.6\ntrue\nff\n42\nexpr string\n" "old_bugs"
 }
 
+function test_const_folding {
+    expect_pass "const_folding.pt" "const_folding"
+    expect_out_eq "42, 42\n8, 25\n" "const_folding"
+}
+
 # Expect fail tests
 
 function test_missing_return {
@@ -357,6 +362,7 @@ function run_all_tests {
     run_test maybe_type_arrays
     run_test hash_table
     run_test old_bugs
+    run_test const_folding
 
     # Expect fail tests
     run_test missing_return

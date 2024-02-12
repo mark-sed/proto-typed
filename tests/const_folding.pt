@@ -1,0 +1,9 @@
+int a = 42
+int b = a
+
+print(a++", "++b++"\n")
+
+int c = 8
+int d = 2 * c + 1 + c
+
+print(c++", "++d++"\n")

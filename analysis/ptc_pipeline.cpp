@@ -1,5 +1,6 @@
 #include "ptc_pipeline.hpp"
 #include "function_analysis.hpp"
+#include "constant_folder.hpp"
 #include "ir.hpp"
 
 using namespace ptc;
@@ -19,6 +20,11 @@ void PTCPipeline::run(ir::ModuleDecl *mod) {
             fcheck.run();
         }
     }
+
+    // Constant folding
+    ConstantFolder const_folder(mod, diags);
+    LOG1("Running constant folder");
+    const_folder.run();
 
     LOGMAX("Finished ptc pipeline");
 }
