@@ -1,5 +1,6 @@
 #include "constant_folder.hpp"
 #include "llvm/ADT/APSInt.h"
+#include "llvm/ADT/APFloat.h"
 #include <functional>
 
 using namespace ptc;
@@ -16,6 +17,39 @@ ir::Expr *transformIntExpr(ir::IntLiteral *a, ir::IntLiteral *b, std::function<l
     llvm::APInt nvI(64, f(a->getValue().getExtValue(), b->getValue().getExtValue()), true);
     llvm::APSInt nv(nvI);
     return new ir::IntLiteral(a->getLocation(), nv, a->getType());
+}
+
+ir::Expr *transformFloatExpr(ir::FloatLiteral *a, ir::FloatLiteral *b, std::function<double(double, double)> f) {
+    llvm::APFloat v(f(a->getValue().convertToDouble(), b->getValue().convertToDouble()));
+    return new ir::FloatLiteral(a->getLocation(), v, a->getType());
+}
+
+double powd(double a, double b) {
+    return pow(a, b);
+}
+
+double modd(double a, double b) {
+    return fmod(a, b);
+}
+
+long blshift(long a, long b) {
+    return a << b;
+}
+
+long brshift(long a, long b) {
+    return a >> b;
+}
+
+long band(long a, long b) {
+    return a & b;
+}
+
+long bor(long a, long b) {
+    return a | b;
+}
+
+long bxor(long a, long b) {
+    return a ^ b;
 }
 
 ir::Expr *foldExpr(ir::Expr *e) {
@@ -40,55 +74,119 @@ ir::Expr *foldExpr(ir::Expr *e) {
         auto lvFloat = llvm::dyn_cast<ir::FloatLiteral>(lv);
         auto lvBool = llvm::dyn_cast<ir::BoolLiteral>(lv);
         auto lvString = llvm::dyn_cast<ir::StringLiteral>(lv);
-        auto lvNone = llvm::dyn_cast<ir::NoneLiteral>(lv);
+        //auto lvNone = llvm::dyn_cast<ir::NoneLiteral>(lv);
 
         auto rvInt = llvm::dyn_cast<ir::IntLiteral>(rv);
         auto rvFloat = llvm::dyn_cast<ir::FloatLiteral>(rv);
         auto rvBool = llvm::dyn_cast<ir::BoolLiteral>(rv);
         auto rvString = llvm::dyn_cast<ir::StringLiteral>(rv);
-        auto rvNone = llvm::dyn_cast<ir::NoneLiteral>(rv);
+        //auto rvNone = llvm::dyn_cast<ir::NoneLiteral>(rv);
 
-        ir::Expr *newExpr = nullptr;
         switch(bie->getOperator().getKind()) {
             case ir::OperatorKind::OP_ADD: {
                 if(lvInt && rvInt) return transformIntExpr(lvInt, rvInt, std::plus<long>());
+                if(lvFloat && rvFloat) return transformFloatExpr(lvFloat, rvFloat, std::plus<double>());
             }
             break;
             case ir::OperatorKind::OP_SUB: {
                 if(lvInt && rvInt) return transformIntExpr(lvInt, rvInt, std::minus<long>());
+                if(lvFloat && rvFloat) return transformFloatExpr(lvFloat, rvFloat, std::minus<double>());
             }
             break;
             case ir::OperatorKind::OP_MUL: {
                 if(lvInt && rvInt) return transformIntExpr(lvInt, rvInt, std::multiplies<long>());
+                if(lvFloat && rvFloat) return transformFloatExpr(lvFloat, rvFloat, std::multiplies<double>());
             }
             break;
-            /*case ir::OperatorKind::OP_POW: return "**";
-            case ir::OperatorKind::OP_DIV: return "/";
-            case ir::OperatorKind::OP_MOD: return "%";
-            case ir::OperatorKind::OP_BLSHFT: return "<<";
-            case ir::OperatorKind::OP_BRSHFT: return ">>";
-            case ir::OperatorKind::OP_BT: return ">";
-            case ir::OperatorKind::OP_BEQ: return ">=";
-            case ir::OperatorKind::OP_LT: return "<";
-            case ir::OperatorKind::OP_LEQ: return "<=";
-            case ir::OperatorKind::OP_EQ: return "==";
-            case ir::OperatorKind::OP_NEQ: return "!=";
-            case ir::OperatorKind::OP_BAND: return "&";
-            case ir::OperatorKind::OP_BXOR: return "^";
-            case ir::OperatorKind::OP_BOR: return "|";
-            case ir::OperatorKind::OP_IN: return "in";
-            case ir::OperatorKind::OP_LAND: return "and";
-            case ir::OperatorKind::OP_LOR: return "or";
-            case ir::OperatorKind::OP_CONCAT: return "++";
-            case ir::OperatorKind::OP_ASSIGN: return "=";
-            case ir::OperatorKind::OP_ACCESS: return ".";
+            case ir::OperatorKind::OP_DIV: {
+                if(lvInt && rvInt) return transformIntExpr(lvInt, rvInt, std::divides<long>());
+                if(lvFloat && rvFloat) return transformFloatExpr(lvFloat, rvFloat, std::divides<double>());
+            }
+            break;
+            case ir::OperatorKind::OP_POW: {
+                if(lvFloat && rvFloat) return transformFloatExpr(lvFloat, rvFloat, powd);
+            }
+            break;
+            case ir::OperatorKind::OP_MOD: {
+                if(lvInt && rvInt) return transformIntExpr(lvInt, rvInt, std::modulus<long>());
+                if(lvFloat && rvFloat) return transformFloatExpr(lvFloat, rvFloat, modd);
+            }
+            break;
+            case ir::OperatorKind::OP_BLSHFT: {
+                if(lvInt && rvInt) return transformIntExpr(lvInt, rvInt, blshift);
+            }
+            break;
+            case ir::OperatorKind::OP_BRSHFT: {
+                if(lvInt && rvInt) return transformIntExpr(lvInt, rvInt, brshift);
+            }
+            break;
+            case ir::OperatorKind::OP_BT: {
+                if(lvInt && rvInt) return new ir::BoolLiteral(lvInt->getLocation(), (lvInt->getValue().getExtValue() > rvInt->getValue().getExtValue()), lvInt->getType());
+                if(lvFloat && rvFloat) return new ir::BoolLiteral(lvFloat->getLocation(), (lvFloat->getValue().convertToDouble() > rvFloat->getValue().convertToDouble()), lvFloat->getType());
+            }
+            break;
+            case ir::OperatorKind::OP_BEQ: {
+                if(lvInt && rvInt) return new ir::BoolLiteral(lvInt->getLocation(), (lvInt->getValue().getExtValue() >= rvInt->getValue().getExtValue()), lvInt->getType());
+                if(lvFloat && rvFloat) return new ir::BoolLiteral(lvFloat->getLocation(), (lvFloat->getValue().convertToDouble() >= rvFloat->getValue().convertToDouble()), lvFloat->getType());
+            }
+            break;
+            case ir::OperatorKind::OP_LT: {
+                if(lvInt && rvInt) return new ir::BoolLiteral(lvInt->getLocation(), (lvInt->getValue().getExtValue() < rvInt->getValue().getExtValue()), lvInt->getType());
+                if(lvFloat && rvFloat) return new ir::BoolLiteral(lvFloat->getLocation(), (lvFloat->getValue().convertToDouble() < rvFloat->getValue().convertToDouble()), lvFloat->getType());
+            }
+            break;
+            case ir::OperatorKind::OP_LEQ: {
+                if(lvInt && rvInt) return new ir::BoolLiteral(lvInt->getLocation(), (lvInt->getValue().getExtValue() <= rvInt->getValue().getExtValue()), lvInt->getType());
+                if(lvFloat && rvFloat) return new ir::BoolLiteral(lvFloat->getLocation(), (lvFloat->getValue().convertToDouble() <= rvFloat->getValue().convertToDouble()), lvFloat->getType());
+            }
+            break;
+            case ir::OperatorKind::OP_EQ: {
+                if(lvInt && rvInt) return new ir::BoolLiteral(lvInt->getLocation(), (lvInt->getValue().getExtValue() == rvInt->getValue().getExtValue()), lvInt->getType());
+                if(lvFloat && rvFloat) return new ir::BoolLiteral(lvFloat->getLocation(), (lvFloat->getValue().convertToDouble() == rvFloat->getValue().convertToDouble()), lvFloat->getType());
+                if(lvBool && rvBool) return new ir::BoolLiteral(lvBool->getLocation(), (lvBool->getValue() == rvBool->getValue()), lvBool->getType());
+                if(lvString && rvString) return new ir::BoolLiteral(lvString->getLocation(), (lvString->getValue() == rvString->getValue()), lvString->getType());
+            }
+            break;
+            case ir::OperatorKind::OP_NEQ: {
+                if(lvInt && rvInt) return new ir::BoolLiteral(lvInt->getLocation(), (lvInt->getValue().getExtValue() != rvInt->getValue().getExtValue()), lvInt->getType());
+                if(lvFloat && rvFloat) return new ir::BoolLiteral(lvFloat->getLocation(), (lvFloat->getValue().convertToDouble() != rvFloat->getValue().convertToDouble()), lvFloat->getType());
+                if(lvBool && rvBool) return new ir::BoolLiteral(lvBool->getLocation(), (lvBool->getValue() != rvBool->getValue()), lvBool->getType());
+                if(lvString && rvString) return new ir::BoolLiteral(lvString->getLocation(), (lvString->getValue() != rvString->getValue()), lvString->getType());
+            }
+            break;
+            case ir::OperatorKind::OP_BAND: {
+                if(lvInt && rvInt) return transformIntExpr(lvInt, rvInt, band);
+            }
+            break;
+            case ir::OperatorKind::OP_BXOR: {
+                if(lvInt && rvInt) return transformIntExpr(lvInt, rvInt, bxor);
+            }
+            break;
+            case ir::OperatorKind::OP_BOR: {
+                if(lvInt && rvInt) return transformIntExpr(lvInt, rvInt, bor);
+            }
+            break;
+            case ir::OperatorKind::OP_LAND: {
+                if(lvBool && rvBool) return new ir::BoolLiteral(lvBool->getLocation(), (lvBool->getValue() && rvBool->getValue()), lvBool->getType());
+            }
+            break;
+            case ir::OperatorKind::OP_LOR: {
+                if(lvBool && rvBool) return new ir::BoolLiteral(lvBool->getLocation(), (lvBool->getValue() || rvBool->getValue()), lvBool->getType());
+            }
+            break;
+            case ir::OperatorKind::OP_CONCAT: {
+                if(lvString && rvString) {
+                    std::string conc = lvString->getValue() + rvString->getValue();
+                    return new ir::StringLiteral(lvString->getLocation(), conc, lvString->getType());
+                }
+            }
+            break;
+            default: break;
+            /*case ir::OperatorKind::OP_ACCESS: return ".";
             case ir::OperatorKind::OP_SUBSCR: return "[]";
-            case ir::OperatorKind::OP_LNOT: return "!";
-            case ir::OperatorKind::OP_BNOT: return "~";
             case ir::OperatorKind::OP_AS: return "as";
             case ir::OperatorKind::OP_SLICE: return "[..]";*/
         }
-        return newExpr;
     }
 
     return nullptr;

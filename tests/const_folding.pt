@@ -4,6 +4,74 @@ int b = a
 print(a++", "++b++"\n")
 
 int c = 8
-int d = 2 * c + 1 + c
+int d = 2 * c + 1 + c / c
+int d2 = d % 10
 
-print(c++", "++d++"\n")
+print(c++", "++d++", "++d2++"\n")
+
+float e = 0.5
+float f = e + 1.0 - e * 3.0 + e / 2.0
+float g = (f + 2.5) % 2.0
+
+print(e++", "++f++", "++g++"\n")
+
+int h = 1
+int i = h << 2
+int j = i >> 1
+
+print(h++", "++i++", "++j++"\n")
+
+int ki = 41
+bool bki = ki == ki
+float kf = 0.5
+bool bkf = kf == 0.5
+bool kb = true
+bool bkb = kb == false
+string ks = "Hello"
+bool bks = ks == "Hello"
+
+print(bki++", "++bkf++", "++bkb++", "++bks++"\n")
+
+int li = 5
+float lf = 3.0
+bool lb = true
+string ls = "ptc"
+bool bli = li != 5
+bool blf = lf != 0.0
+bool blb = lb != true
+bool bls = ls != "hi"
+
+print(bli++", "++blf++", "++blb++", "++bls++"\n")
+
+int mi = 6
+float mf = 6.0
+bool lmi = mi < 7
+bool lemi = mi <= 6
+bool bmi = mi > 7
+bool bemi = mi >= 7
+bool lmf = mf < 7.0
+bool lemf = mf <= 6.0
+bool bmf = mf > 7.0
+bool bemf = mf >= 7.0 
+
+print(lmi++", "++lemi++", "++bmi++", "++bemi++"\n")
+print(lmf++", "++lemf++", "++bmf++", "++bemf++"\n")
+
+int ni = 8
+int bni1 = ni & 12
+int bni2 = bni1 | 1
+int bni3 = bni2 ^ bni2
+
+print(bni1++", "++bni2++", "++bni3++"\n")
+
+bool ob = true
+bool bob1 = ob and false
+bool bob2 = bob1 or true
+
+print(bob1++", "++bob2++"\n")
+
+string ps = "I"
+string ps2 = ps ++ " like"
+string ps3 = ps2 ++ " ptc\n"
+
+print(ps3)

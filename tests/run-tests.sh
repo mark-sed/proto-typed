@@ -328,7 +328,12 @@ function test_old_bugs {
 
 function test_const_folding {
     expect_pass "const_folding.pt" "const_folding"
-    expect_out_eq "42, 42\n8, 25\n" "const_folding"
+    expect_out_eq "42, 42\n8, 18, 8\n0.5, 0.25, 0.75\n1, 4, 2
+true, true, false, true
+false, true, false, true
+true, true, false, false
+true, true, false, false
+8, 9, 0\nfalse, true\nI like ptc\n" "const_folding"
 }
 
 # Expect fail tests
