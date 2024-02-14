@@ -333,7 +333,8 @@ true, true, false, true
 false, true, false, true
 true, true, false, false
 true, true, false, false
-8, 9, 0\nfalse, true\nI like ptc\n" "const_folding"
+8, 9, 0\nfalse, true\nI like ptc
+-1, 0\nfalse, true\n" "const_folding"
 }
 
 # Expect fail tests

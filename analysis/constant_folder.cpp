@@ -188,6 +188,21 @@ ir::Expr *foldExpr(ir::Expr *e) {
             case ir::OperatorKind::OP_SLICE: return "[..]";*/
         }
     }
+    else if(auto upe = llvm::dyn_cast<ir::UnaryPrefixExpr>(e)) {
+        auto v = foldExpr(upe->getExpr());
+        if(!v) return nullptr;
+        auto vInt = llvm::dyn_cast<ir::IntLiteral>(v);
+        auto vBool = llvm::dyn_cast<ir::BoolLiteral>(v);
+
+        if(upe->getOperator().getKind() == ir::OperatorKind::OP_BNOT && vInt) {
+            llvm::APInt nvI(64, ~(vInt->getValue().getExtValue()), true);
+            llvm::APSInt nv(nvI);
+            return new ir::IntLiteral(vInt->getLocation(), nv, vInt->getType());
+        }
+        else if(upe->getOperator().getKind() == ir::OperatorKind::OP_LNOT && vBool) {
+            return new ir::BoolLiteral(vBool->getLocation(), (!vBool->getValue()), vBool->getType());
+        }
+    }
 
     return nullptr;
 }

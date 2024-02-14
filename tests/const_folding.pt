@@ -75,3 +75,11 @@ string ps2 = ps ++ " like"
 string ps3 = ps2 ++ " ptc\n"
 
 print(ps3)
+
+int r = -1
+int r2 = ~r
+print(r++", "++r2++"\n")
+
+bool s = false
+bool s2 = not s
+print(s++", "++s2++"\n")
