@@ -303,7 +303,7 @@ int main(int argc, char *argv[]) {
         // Analysis
         PTCPipeline ptc_pipeline(diags);
         for(auto mi: modulesToCompile) {
-            ptc_pipeline.run(mi->getScanner()->mainModule);
+            ptc_pipeline.run(mi);
         }
     }
     if(diags.getNumErrors() == 0) {

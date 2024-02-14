@@ -334,7 +334,8 @@ false, true, false, true
 true, true, false, false
 true, true, false, false
 8, 9, 0\nfalse, true\nI like ptc
--1, 0\nfalse, true\n" "const_folding"
+-1, 0\nfalse, true\n1,2,3,\ntrue,false,
+1, -3, false, m, none\n" "const_folding"
 }
 
 # Expect fail tests

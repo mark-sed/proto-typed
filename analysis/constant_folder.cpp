@@ -6,6 +6,12 @@
 using namespace ptc;
 
 bool is_const_expr(ir::Expr *e) {
+    if(auto m = llvm::dyn_cast<ir::MatrixLiteral>(e)) {
+        for(auto me: m->getValue()) {
+            if(!is_const_expr(me)) return false;
+        }
+        return true;
+    }
     return llvm::isa<ir::IntLiteral>(e) ||
             llvm::isa<ir::FloatLiteral>(e) ||
             llvm::isa<ir::BoolLiteral>(e) ||
@@ -52,15 +58,47 @@ long bxor(long a, long b) {
     return a ^ b;
 }
 
-ir::Expr *foldExpr(ir::Expr *e) {
+ir::Expr *ConstantFolder::getDefaultInitValue(ir::TypeDecl *t) {
+    if(t->isMaybe()) {
+        return new ir::NoneLiteral(t->getLocation(), noneType);
+    }
+    if(t->getName() == INT_CSTR) {
+        llvm::APInt nvI(64, 0, true);
+        llvm::APSInt nv(nvI);
+        return new ir::IntLiteral(t->getLocation(), nv, t);
+    }
+    if(t->getName() == FLOAT_CSTR) {
+        return new ir::FloatLiteral(t->getLocation(), llvm::APFloat(static_cast<double>(0.0)), t);
+    }
+    if(t->getName() == BOOL_CSTR) {
+        return new ir::BoolLiteral(t->getLocation(), false, t);
+    }
+    if(t->getName() == STRING_CSTR) {
+        std::string emptystr = "";
+        return new ir::StringLiteral(t->getLocation(), emptystr, t);
+    }
+    if(t->isMatrix()) {
+        std::vector<ir::Expr *> vals;
+        return new ir::MatrixLiteral(t->getLocation(), vals, t);
+    }
+    return nullptr;
+} 
+
+ir::Expr *ConstantFolder::foldExpr(ir::Expr *e) {
     if(is_const_expr(e)) {
         return e;
     }
 
     if(auto va = llvm::dyn_cast<ir::VarAccess>(e)) {
         if(auto vd = llvm::dyn_cast<ir::VarDecl>(va->getVar())) {
-            if(vd->getInitValue() && is_const_expr(vd->getInitValue())) {
-                return vd->getInitValue();
+            if(vd->getInitValue()) {
+                if(is_const_expr(vd->getInitValue()))
+                    return vd->getInitValue();
+            }
+            else {
+                auto defInitV = getDefaultInitValue(vd->getType());
+                vd->setInitValue(defInitV);
+                return defInitV;
             }
         }
     }
@@ -86,6 +124,15 @@ ir::Expr *foldExpr(ir::Expr *e) {
             case ir::OperatorKind::OP_ADD: {
                 if(lvInt && rvInt) return transformIntExpr(lvInt, rvInt, std::plus<long>());
                 if(lvFloat && rvFloat) return transformFloatExpr(lvFloat, rvFloat, std::plus<double>());
+                
+                // Matrix join
+                auto lvArr = llvm::dyn_cast<ir::MatrixLiteral>(lv);
+                if(!lvArr) break;
+                auto rvArr = llvm::dyn_cast<ir::MatrixLiteral>(rv);
+                if(!rvArr) break;
+                // Remove empty join
+                if(rvArr->getValue().empty()) return lv;
+                if(lvArr->getValue().empty()) return rv;
             }
             break;
             case ir::OperatorKind::OP_SUB: {
@@ -209,6 +256,7 @@ ir::Expr *foldExpr(ir::Expr *e) {
 
 void ConstantFolder::run() {
     for(auto decl: mod->getDecls()) {
+        // Global vars
         if(auto vd = llvm::dyn_cast<ir::VarDecl>(decl)) {
             if(vd->getInitValue() && !is_const_expr(vd->getInitValue())) {
                 auto folded = foldExpr(vd->getInitValue());

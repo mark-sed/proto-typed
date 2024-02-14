@@ -1,6 +1,7 @@
 #include "ptc_pipeline.hpp"
 #include "function_analysis.hpp"
 #include "constant_folder.hpp"
+#include "ptc.hpp"
 #include "ir.hpp"
 
 using namespace ptc;
@@ -9,8 +10,9 @@ PTCPipeline::PTCPipeline(Diagnostics &diags) : diags(diags) {
 
 }
 
-void PTCPipeline::run(ir::ModuleDecl *mod) {
+void PTCPipeline::run(ModuleInfo *modi) {
     LOGMAX("Starting ptc pipeline");
+    auto mod = modi->getScanner()->mainModule;
 
     // Function Analysis
     for(auto decl : mod->getDecls()) {
@@ -22,7 +24,7 @@ void PTCPipeline::run(ir::ModuleDecl *mod) {
     }
 
     // Constant folding
-    ConstantFolder const_folder(mod, diags);
+    ConstantFolder const_folder(mod, modi->getScanner(), diags);
     LOG1("Running constant folder");
     const_folder.run();
 

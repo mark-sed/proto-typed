@@ -83,3 +83,31 @@ print(r++", "++r2++"\n")
 bool s = false
 bool s2 = not s
 print(s++", "++s2++"\n")
+
+int[] t = [1, 2, 3]
+int[] t2 = [] + t + []
+bool[] t3
+bool[] t4 = [true, false] + t3
+
+for(int i : t2) {
+    print(i++",")
+}
+print("\n")
+
+for(bool i : t4) {
+    print(i++",")
+}
+print("\n")
+
+int u
+int u2 = u + 1
+float u3
+float u4 = u3 - 3.0
+bool u5
+bool u6 = not u5
+string u7
+string u8 = u7 ++ "m"
+int? u9
+int? u10 = u9
+
+print(u2++", "++u4++", "++u5++", "++u8++", "++u10++"\n")

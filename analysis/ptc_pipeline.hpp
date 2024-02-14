@@ -11,6 +11,7 @@
 
 #include "logging.hpp"
 #include "ir.hpp"
+#include "ptc.hpp"
 
 namespace ptc {
 
@@ -20,7 +21,7 @@ private:
 public:
     PTCPipeline(Diagnostics &diags);
 
-    void run(ir::ModuleDecl *mod);
+    void run(ModuleInfo *modi);
 };
 
 }
