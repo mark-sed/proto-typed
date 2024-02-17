@@ -112,13 +112,11 @@ ir::Expr *ConstantFolder::foldExpr(ir::Expr *e) {
         auto lvFloat = llvm::dyn_cast<ir::FloatLiteral>(lv);
         auto lvBool = llvm::dyn_cast<ir::BoolLiteral>(lv);
         auto lvString = llvm::dyn_cast<ir::StringLiteral>(lv);
-        //auto lvNone = llvm::dyn_cast<ir::NoneLiteral>(lv);
 
         auto rvInt = llvm::dyn_cast<ir::IntLiteral>(rv);
         auto rvFloat = llvm::dyn_cast<ir::FloatLiteral>(rv);
         auto rvBool = llvm::dyn_cast<ir::BoolLiteral>(rv);
         auto rvString = llvm::dyn_cast<ir::StringLiteral>(rv);
-        //auto rvNone = llvm::dyn_cast<ir::NoneLiteral>(rv);
 
         switch(bie->getOperator().getKind()) {
             case ir::OperatorKind::OP_ADD: {

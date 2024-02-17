@@ -278,6 +278,14 @@ function test_ptlib_env {
     expect_out_eq "true\nthere!\n" "ptlib_env"
 }
 
+function test_ptlib_io {
+    expect_pass "ptlib_io.pt" "ptlib_io"
+    expect_out_eq "true\ntrue\ntrue\ntrue\ntrue\n" "ptlib_io"
+
+    # Cleanup
+    rm -f test1.txt
+}
+
 function test_var {
     expect_pass "var.pt" "var"
     expect_out_eq "4\n2.2\nHello\n1\ntruefalse\n5.52.2\nab\n-8\n" "var"
@@ -362,6 +370,7 @@ function run_all_tests {
     run_test ptlib_sort
     run_test ptlib_math
     run_test ptlib_env
+    run_test ptlib_io
     run_test var
     run_test numbers
     run_test funvar

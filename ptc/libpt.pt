@@ -228,5 +228,17 @@ bool rand_bool() {
 /**********************/
 
 struct File {
-    
+    string path
+    string mode
+    int handle
+}
+
+File open(string path, string mode) {
+    File f = File{.path=path, .mode=mode}
+    f.handle = fopen(path, mode)
+    return f
+}
+
+bool close(File f) {
+    return fclose(f.handle)
 }

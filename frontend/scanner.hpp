@@ -57,6 +57,7 @@ private:
     ir::TypeDecl *anyType;
     ir::TypeDecl *noneType;
     ir::TypeDecl *rangeType;
+    ir::TypeDecl *fileType;
     ir::TypeDecl *varargsType;
     ir::TypeDecl *unknownType;
 

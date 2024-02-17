@@ -90,6 +90,13 @@ void cg::CodeGen::init() {
     };
     matrixT = llvm::StructType::create(ctx, matrixElements, MATRIX_CSTR);
     matrixTPtr = matrixT->getPointerTo();
+
+    std::vector<llvm::Type*> fileElements{
+        stringT,
+        stringT,
+        builder.getInt64Ty()
+    };
+    fileT = llvm::StructType::create(ctx, fileElements, "File");
 }
 
 llvm::Type *cg::CodeGen::convertType(ir::TypeDecl *t) {
@@ -2348,6 +2355,7 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
 
     ptlibLoader->setupExternLib();
     ptlibLoader->setupLib();
+    ptlibLoader->IOFuncsInit(fileT);
 
     // Forward declare ptlib functions
     if(mod != ptlibMod) {

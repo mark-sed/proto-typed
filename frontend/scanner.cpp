@@ -229,6 +229,22 @@ void Scanner::init() {
             }
         }
     }
+
+    // IO
+    std::vector<ir::IR *> elements {
+        new ir::VarDecl(currentIR, llvmloc2Src(), "path", stringType),
+        new ir::VarDecl(currentIR, llvmloc2Src(), "mode", stringType),
+        new ir::VarDecl(currentIR, llvmloc2Src(), "handle", intType),
+    };
+    auto fileTypeDecl = new ir::StructDecl(currentIR, llvmloc2Src(), "File", elements);
+    fileType = new ir::TypeDecl(currentIR, llvmloc2Src(), "File", fileTypeDecl);
+    defineFun("fopen_string_string", "fopen", intType, {
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "path", this->stringType, false),
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "mode", this->stringType, false)
+    });
+    defineFun("fclose_int", "fclose", boolType, {
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "handle", intType, false)
+    });
 }
 
 void Scanner::parse(std::istream *code) {

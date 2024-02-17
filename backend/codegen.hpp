@@ -143,6 +143,7 @@ public:
     llvm::PointerType *stringTPtr;
     llvm::StructType *matrixT;
     llvm::PointerType *matrixTPtr;
+    llvm::StructType *fileT;
 
     llvm::Value *getReadValuePtr(llvm::Value *v);
 

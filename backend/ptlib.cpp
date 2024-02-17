@@ -511,25 +511,6 @@ void PTLib::randFuncsInit() {
         builder.CreateCall(srandF, {seed});
         builder.CreateRetVoid();
     }
-    // float rand_float(float min, float max)
-    /*{
-        auto funType = llvm::FunctionType::get(floatT, { floatT, floatT }, false);
-        llvm::Function *f = llvm::Function::Create(funType, 
-                                                llvm::GlobalValue::PrivateLinkage,
-                                                "rand_float_float_float",
-                                                llvmMod);
-        auto randF = llvmMod->getOrInsertFunction("rand", 
-                                                    llvm::FunctionType::get(builder.getInt32Ty(), false));
-        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
-        setCurrBB(bb);
-        auto rndInt = builder.CreateCall(randF);
-        auto range = builder.CreateFSub(f->getArg(1), f->getArg(0));
-        auto divVal = builder.CreateFDiv(llvm::ConstantFP::get(floatT, llvm::ConstantFP::get(floatT, 2147483647.0)), range);
-        auto rndFlt = builder.CreateSIToFP(rndInt, floatT);
-        auto randFlt = builder.CreateFDiv(rndFlt, divVal);
-        auto 
-        builder.CreateRet();
-    }*/
     // int rand_uint()
     {
         auto funType = llvm::FunctionType::get(int64T, false);
@@ -544,6 +525,45 @@ void PTLib::randFuncsInit() {
         auto rndInt = builder.CreateCall(randF);
         auto rndInt64 = builder.CreateZExt(rndInt, int64T);
         builder.CreateRet(rndInt64);
+    }
+}
+
+void PTLib::IOFuncsInit(llvm::Type *fileType) {
+    // int fopen(string, string)
+    {
+        auto funType = llvm::FunctionType::get(int64T, { stringT, stringT }, false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "fopen_string_string",
+                                                llvmMod);
+        auto fopenF = llvmMod->getOrInsertFunction("fopen", 
+                                                    llvm::FunctionType::get(builder.getInt8Ty()->getPointerTo(),
+                                                        { builder.getInt8Ty()->getPointerTo(),
+                                                          builder.getInt8Ty()->getPointerTo() },
+                                                        false));
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        setCurrBB(bb);
+        auto path = builder.CreateExtractValue(f->getArg(0), 0);
+        auto mode = builder.CreateExtractValue(f->getArg(1), 0);
+        auto handle = builder.CreateCall(fopenF, {path, mode});
+        builder.CreateRet(handle);
+    }
+    // void fclose(File)
+    {
+        auto funType = llvm::FunctionType::get(int1T, { int64T }, false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "fclose_int",
+                                                llvmMod);
+        auto fcloseF = llvmMod->getOrInsertFunction("fclose", 
+                                                    llvm::FunctionType::get(builder.getInt32Ty(),
+                                                        builder.getInt8Ty()->getPointerTo(),
+                                                        false));
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        setCurrBB(bb);
+        auto status = builder.CreateCall(fcloseF, f->getArg(0));
+        auto isSuccess = builder.CreateICmpEQ(status, llvm::ConstantInt::get(builder.getInt32Ty(), 0, true));
+        builder.CreateRet(isSuccess);
     }
 }
 

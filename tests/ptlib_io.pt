@@ -1,0 +1,14 @@
+File f
+f = open("test1.txt", "w")
+
+print((f.handle != 0)++"\n")
+
+print(close(f)++"\n")
+
+f = open("test1.txt", "a")
+print((f.handle != 0)++"\n")
+
+print(close(f)++"\n")
+
+f = open("testnonexistentfile.txt", "r")
+print((f.handle == 0)++"\n")

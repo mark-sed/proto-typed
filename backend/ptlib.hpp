@@ -73,7 +73,6 @@ private:
     void trigonFuncsInit();
     void stringFuncsInit();
     void floatFuncsInit();
-    void maybeFuncsInit();
     void logFuncsInit();
     void environmentFuncsInit();
     void randFuncsInit();
@@ -118,6 +117,8 @@ public:
     void insert_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, ir::TypeDecl *mtt);
     void minsert_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, ir::TypeDecl *mtt);
     void sort_matrixInit(std::string name, llvm::Type *mt, llvm::Type *vt, llvm::Type *cmpf);
+
+    void IOFuncsInit(llvm::Type *fileType);
 };
 
 }
