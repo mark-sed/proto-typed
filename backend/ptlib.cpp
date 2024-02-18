@@ -565,7 +565,7 @@ void PTLib::IOFuncsInit(llvm::Type *fileType) {
         auto isSuccess = builder.CreateICmpEQ(status, llvm::ConstantInt::get(builder.getInt32Ty(), 0, true));
         builder.CreateRet(isSuccess);
     }
-    // int getbyte(File)
+    // int fgetbyte(File)
     {
         auto funType = llvm::FunctionType::get(int64T, { fileType }, false);
         llvm::Function *f = llvm::Function::Create(funType, 
@@ -580,6 +580,20 @@ void PTLib::IOFuncsInit(llvm::Type *fileType) {
         setCurrBB(bb);
         auto handle = builder.CreateExtractValue(f->getArg(0), 2);
         auto byte = builder.CreateCall(fgetcF, handle);
+        auto byte64 = builder.CreateSExt(byte, int64T);
+        builder.CreateRet(byte64);
+    }
+    // int inputbyte()
+    {
+        auto funType = llvm::FunctionType::get(int64T, { }, false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "inputbyte",
+                                                llvmMod);
+        auto getcharF = llvmMod->getOrInsertFunction("getchar", llvm::FunctionType::get(builder.getInt32Ty(), false));
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        setCurrBB(bb);
+        auto byte = builder.CreateCall(getcharF);
         auto byte64 = builder.CreateSExt(byte, int64T);
         builder.CreateRet(byte64);
     }

@@ -744,6 +744,14 @@ These functions are templated and type `S` represent generic struct type in this
 IO works with built-in structure `File`.
 * __`File open(string path, string mode)`__ - Opens a file and returns File structure handle. `path` is the relative or absolute path to the file and mode is one of: `"r"` (read), `"w"` (write), `"a"` (append), `"r+"` (read/update), `"w+"` (write/update), `"a+"` (append/update). For binary files suffix the mode with `b` (`"rb"`). On failure File.handle will be 0.
 * __`bool close(File f)`__ - Closes opened file. On succeess returns true, false otherwise.
+* __Reading whole input__
+    * `string read(File f)` - Reads the whole file `f` and returns it as a string.
+* __Reading one character__
+    * `string getc(File f)` - Reads one character from a file and returns it as a string (the string is empty if `EOF` is reached).
+    * `string getc()` - Reads one character from stdin and returns it as a string (the string is empty if `EOF` is reached).
+* __Input__
+    * `string input()` - Reads one line from stdin.
+    * `string input(string prompt)` - Prints out `prompt` and then reads input from stdin.
 
 # Proto-typed compiler
 Proto-typed compiler (ptc) uses LLVM and can target any of big amount of targets LLVM can compile for. The ptc also relies on LibC. 

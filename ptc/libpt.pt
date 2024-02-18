@@ -262,3 +262,28 @@ string getc(File f) {
     }
     return c
 }
+
+string getc() {
+    string c = ""
+    int b = inputbyte()
+    if(b != -1) {
+        c = chr(b)
+    }
+    return c
+}
+
+string input() {
+    string txt
+    int c = inputbyte()
+    while(c != -1 and c != 10) {
+        txt ++= chr(c)
+        c = inputbyte();
+    }
+    return txt
+}
+
+string input(string prompt) {
+    print(prompt)
+    return input()
+}
+
