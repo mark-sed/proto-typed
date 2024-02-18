@@ -279,11 +279,17 @@ function test_ptlib_env {
 }
 
 function test_ptlib_io {
+    touch testinempty.txt
+    printf "Lorem Ipsum\nAnd some other stuff\n3rd line" > testin.txt
+
     expect_pass "ptlib_io.pt" "ptlib_io"
-    expect_out_eq "true\ntrue\ntrue\ntrue\ntrue\n" "ptlib_io"
+    expect_out_eq "true\ntrue\ntrue\ntrue\ntrue
+Lorem Ipsum\nAnd some other stuff\n3rd line\n0\nL\n" "ptlib_io"
 
     # Cleanup
     rm -f test1.txt
+    rm -f testinempty.txt
+    rm -f testin.txt
 }
 
 function test_var {

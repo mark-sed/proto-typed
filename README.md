@@ -740,6 +740,11 @@ These functions are templated and type `S` represent generic struct type in this
     * `int rand_uint()` - Returns random unsigned integer.
 * __`int timestamp()`__ - Current time since epoch (timestamp).
 
+### IO functions
+IO works with built-in structure `File`.
+* __`File open(string path, string mode)`__ - Opens a file and returns File structure handle. `path` is the relative or absolute path to the file and mode is one of: `"r"` (read), `"w"` (write), `"a"` (append), `"r+"` (read/update), `"w+"` (write/update), `"a+"` (append/update). For binary files suffix the mode with `b` (`"rb"`). On failure File.handle will be 0.
+* __`bool close(File f)`__ - Closes opened file. On succeess returns true, false otherwise.
+
 # Proto-typed compiler
 Proto-typed compiler (ptc) uses LLVM and can target any of big amount of targets LLVM can compile for. The ptc also relies on LibC. 
 

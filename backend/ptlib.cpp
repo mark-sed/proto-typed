@@ -565,6 +565,24 @@ void PTLib::IOFuncsInit(llvm::Type *fileType) {
         auto isSuccess = builder.CreateICmpEQ(status, llvm::ConstantInt::get(builder.getInt32Ty(), 0, true));
         builder.CreateRet(isSuccess);
     }
+    // int getbyte(File)
+    {
+        auto funType = llvm::FunctionType::get(int64T, { fileType }, false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "fgetbyte_File",
+                                                llvmMod);
+        auto fgetcF = llvmMod->getOrInsertFunction("fgetc", 
+                                                    llvm::FunctionType::get(builder.getInt32Ty(),
+                                                        builder.getInt8Ty()->getPointerTo(),
+                                                        false));
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        setCurrBB(bb);
+        auto handle = builder.CreateExtractValue(f->getArg(0), 2);
+        auto byte = builder.CreateCall(fgetcF, handle);
+        auto byte64 = builder.CreateSExt(byte, int64T);
+        builder.CreateRet(byte64);
+    }
 }
 
 void PTLib::trigonFuncsInit() {

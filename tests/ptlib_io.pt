@@ -12,3 +12,31 @@ print(close(f)++"\n")
 
 f = open("testnonexistentfile.txt", "r")
 print((f.handle == 0)++"\n")
+
+File fin
+fin = open("testin.txt", "r")
+
+string txt
+txt = read(fin)
+
+print(txt)
+print("\n")
+
+close(fin)
+
+fin = open("testinempty.txt", "r")
+
+string c
+c = getc(fin)
+
+print(length(c)++"\n")
+
+close(fin)
+
+fin = open("testin.txt", "r")
+
+c = getc(fin)
+
+print(c++"\n")
+
+close(fin)

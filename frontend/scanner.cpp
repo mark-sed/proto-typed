@@ -245,6 +245,9 @@ void Scanner::init() {
     defineFun("fclose_int", "fclose", boolType, {
         new ir::FormalParamDecl(currentIR, llvmloc2Src(), "handle", intType, false)
     });
+    defineFun("fgetbyte_File", "fgetbyte", intType, {
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "f", fileType, false)
+    });
 }
 
 void Scanner::parse(std::istream *code) {

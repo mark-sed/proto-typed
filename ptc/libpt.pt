@@ -242,3 +242,23 @@ File open(string path, string mode) {
 bool close(File f) {
     return fclose(f.handle)
 }
+
+string read(File f) {
+    string txt
+    int c = fgetbyte(f)
+    while(c != -1) {
+        chr(c) // TODO: Remove once this bug is fixed
+        txt ++= chr(c)
+        c = fgetbyte(f);
+    }
+    return txt
+}
+
+string getc(File f) {
+    string c = ""
+    int b = fgetbyte(f)
+    if(b != -1) {
+        c = chr(b)
+    }
+    return c
+}
