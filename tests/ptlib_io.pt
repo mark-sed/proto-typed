@@ -1,3 +1,14 @@
+string[] a
+
+bool first = true
+for(string a1 : args) {
+    if(first) {
+        first = false
+        continue
+    }
+    print(a1 ++ "\n")
+}
+
 File f
 f = open("test1.txt", "w")
 
