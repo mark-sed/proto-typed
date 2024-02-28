@@ -752,6 +752,8 @@ IO works with built-in structure `File`.
 * __Input__
     * `string input()` - Reads one line from stdin.
     * `string input(string prompt)` - Prints out `prompt` and then reads input from stdin.
+* __Reading command line arguments__
+    * `string[] args` - _This is a global variable, not a function_. It contains all the command line arguments passed to the program.
 
 # Proto-typed compiler
 Proto-typed compiler (ptc) uses LLVM and can target any of big amount of targets LLVM can compile for. The ptc also relies on LibC. 
