@@ -287,3 +287,8 @@ string input(string prompt) {
     return input()
 }
 
+string[] args
+
+void add_arg_to_args(string a) {
+    append(args, a)
+}

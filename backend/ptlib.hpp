@@ -68,7 +68,6 @@ private:
     void to_int_base_string_intInit();
     void to_float_stringInit();
     void length_stringInit();
-    void system_stringInit();
 
     void trigonFuncsInit();
     void stringFuncsInit();

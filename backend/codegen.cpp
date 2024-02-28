@@ -2730,7 +2730,7 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                                                         voidT,
                                                         {
                                                             stringTPtr,
-                                                            builder.getInt8Ty()->getPointerTo()->getPointerTo()
+                                                            builder.getInt8Ty()->getPointerTo()
                                                         },
                                                         false
                                                     ));
@@ -2927,14 +2927,44 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                                                 llvmMod);
         auto timeF = getLLVMMod()->getOrInsertFunction("timestamp", llvm::FunctionType::get(int64T, false));
         auto set_seedF = getLLVMMod()->getOrInsertFunction("set_seed_int", llvm::FunctionType::get(voidT, int64T, false));
+        auto addArgF = getLLVMMod()->getOrInsertFunction("add_arg_to_args_string", llvm::FunctionType::get(voidT, stringT, false));
+        auto stringInitF = getLLVMMod()->getOrInsertFunction("string_Create_Init", 
+                                llvm::FunctionType::get(voidT,{stringTPtr, builder.getInt8Ty()->getPointerTo()}, false));
 
         main->setDSOLocal(true);
         llvm::BasicBlock *bb = llvm::BasicBlock::Create(getLLVMCtx(), "", main);
+        llvm::BasicBlock *bbArgHead = llvm::BasicBlock::Create(getLLVMCtx(), "arg.head", main);
+        llvm::BasicBlock *bbArgLoop = llvm::BasicBlock::Create(getLLVMCtx(), "arg.loop", main);
+        llvm::BasicBlock *bbArgEnd = llvm::BasicBlock::Create(getLLVMCtx(), "arg.end", main);
         setCurrBB(bb);
 
         // initialize rng
         auto ts = builder.CreateCall(timeF);
         builder.CreateCall(set_seedF, ts);
+
+        // append args
+        auto iPtr = builder.CreateAlloca(builder.getInt32Ty());
+        
+        builder.CreateBr(bbArgHead);
+        setCurrBB(bbArgHead);
+
+        auto i = builder.CreateLoad(builder.getInt32Ty(), iPtr);
+        auto isBigger = builder.CreateICmpSGE(i, main->getArg(0));
+        builder.CreateCondBr(isBigger, bbArgEnd, bbArgLoop);
+ 
+        setCurrBB(bbArgLoop);
+
+        auto argStrPtr = builder.CreateAlloca(stringT);
+        auto argCStrPtr = builder.CreateGEP(builder.getInt8Ty()->getPointerTo(), main->getArg(1), {i});
+        auto argCStr = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), argCStrPtr);
+        builder.CreateCall(stringInitF, {argStrPtr, argCStr});
+        auto argStr = builder.CreateLoad(stringT, argStrPtr);
+        builder.CreateCall(addArgF, {argStr});
+        auto newI = builder.CreateNSWAdd(i, llvm::ConstantInt::get(builder.getInt32Ty(), 1, true));
+        builder.CreateStore(newI, iPtr);
+        builder.CreateBr(bbArgHead);
+
+        setCurrBB(bbArgEnd);
 
         builder.CreateCall(init);
         auto entryFunLLVM = llvmMod->getFunction(mangleName(entryFun));
