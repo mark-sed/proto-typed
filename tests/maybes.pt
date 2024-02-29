@@ -76,3 +76,30 @@ print(mto_string(mmi)++"\n")
 print(mto_string(mmf)++"\n")
 print(mto_string(mms)++"\n")
 print(mmb++"\n"++mmi++"\n"++mmf++"\n"++mms++"\n")
+
+int? a_intm = 4
+int? b_intm
+
+print(id(b_intm)++"\n")
+
+b_intm = a_intm
+
+print((id(a_intm) == id(b_intm))++"\n")
+
+int? c_intm = none
+
+print(id(c_intm)++"\n")
+
+c_intm = 4
+
+print((id(c_intm) == id(b_intm))++"\n")
+
+c_intm = b_intm
+
+print((id(c_intm) == id(a_intm))++"\n")
+
+any d_any
+
+d_any = b_intm
+
+print((id(d_any) == id(b_intm))++"\n")

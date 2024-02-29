@@ -249,6 +249,11 @@ void Scanner::init() {
         new ir::FormalParamDecl(currentIR, llvmloc2Src(), "f", fileType, false)
     });
     defineFun("inputbyte", "inputbyte", intType, {});
+
+    // id
+    defineFun("id", "id", intType, {
+        new ir::FormalParamDecl(currentIR, llvmloc2Src(), "a", anyType, true)
+    });
 }
 
 void Scanner::parse(std::istream *code) {
@@ -1464,9 +1469,9 @@ ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
                     appendix+="_"+p->getType()->getName();
                 }
                 propFIR = currScope->lookup(f->getOGName()+appendix);
-                /*if(!propFIR) {
+                if(!propFIR && f->getName() == "id") {
                     propFIR = currScope->lookup(f->getName());
-                }*/
+                }
             }
             if(!propFIR) {
                 diags.report(llvmloc2Src(), diag::ERR_INCORRECT_ARGS_DET, f->getOGName(), ir::block2List(f->getParams()), ir::block2List(params));

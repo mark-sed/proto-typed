@@ -493,6 +493,19 @@ void PTLib::environmentFuncsInit() {
         auto ts64 = builder.CreateZExt(timestamp32, int64T);
         builder.CreateRet(ts64);
     }
+    // int id(ptr)
+    {
+        auto funType = llvm::FunctionType::get(int64T, builder.getInt8Ty()->getPointerTo()->getPointerTo(), false);
+        llvm::Function *f = llvm::Function::Create(funType, 
+                                                llvm::GlobalValue::PrivateLinkage,
+                                                "id",
+                                                llvmMod);
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", f);
+        setCurrBB(bb);
+        auto loaded = builder.CreateLoad(builder.getInt8Ty()->getPointerTo(), f->getArg(0));
+        auto addr = builder.CreatePtrToInt(loaded, int64T);
+        builder.CreateRet(addr);
+    }
 }
 
 void PTLib::randFuncsInit() {
