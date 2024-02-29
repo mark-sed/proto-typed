@@ -35,10 +35,15 @@
 using namespace ptc;
 
 static llvm::codegen::RegisterCodeGenFlags cgf;
-static llvm::cl::list<std::string> inputFiles(llvm::cl::Positional, llvm::cl::desc("<input-files>"));
 static llvm::cl::opt<std::string> mTriple("mtriple", llvm::cl::desc("Override target triple for module"));
 static llvm::cl::opt<bool> emitLLVM("emit-llvm", llvm::cl::desc("Emit IR code instead of assembler"), llvm::cl::init(false));
-static llvm::cl::opt<int> verboseLevel("verbose", llvm::cl::desc("Debug verbose level (1-5)"), llvm::cl::init(0));
+
+static llvm::cl::list<std::string> inputFiles(llvm::cl::Positional, llvm::cl::desc("<input files>"));
+
+llvm::cl::OptionCategory PTCCat("PTC Specific Options", "");
+
+static llvm::cl::opt<int> verboseLevel("verbose", llvm::cl::desc("Debug verbose level (1-5)"), llvm::cl::init(0), llvm::cl::cat(PTCCat));
+static llvm::cl::opt<std::string> libptPathOpt("libpt-path", llvm::cl::desc("Sets path to libpt to be used for compilation"), llvm::cl::init("/lib/ptc/std/libpt.pt"), llvm::cl::cat(PTCCat));
 
 static const char *head = "Proto-typed compiler";
 
@@ -217,7 +222,7 @@ int main(int argc, char *argv[]) {
     // Add ptlib to parse
     // TODO: fix path to cl::opt
     LOGMAX("Adding ptlib to parsing");
-    auto ptlibModule = new ModuleInfo("/lib/ptc/std/libpt.pt", true);
+    auto ptlibModule = new ModuleInfo(libptPathOpt, true);
     ptlibModule->setLib(true);
     modulesToCompile.push_back(ptlibModule);
 
