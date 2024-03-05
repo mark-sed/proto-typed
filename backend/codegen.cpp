@@ -176,10 +176,6 @@ llvm::Type *cg::CodeGen::mapType(ir::IR *decl) {
     return convertType(llvm::cast<ir::TypeDecl>(decl));
 }
 
-void cg::CGModule::writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) {
-    llvm::report_fatal_error("UNIMPLEMENTED module var write");
-}
-
 void cg::CGFunction::writeLocalVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) {
     assert(BB && "Basic block is nullptr");
     assert(
@@ -405,9 +401,6 @@ void cg::CGFunction::writeExtVar(CGModule *mod, ir::IR *decl, llvm::Value *val) 
     }
 }
 
-llvm::Value *cg::CGModule::readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe) {
-    llvm::report_fatal_error("UNIMPLEMENTED module var read");
-}
 
 llvm::Value *cg::CGFunction::readLocalVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe) {
     LOGMAX("Read local var: "+decl->debug());
@@ -731,7 +724,7 @@ llvm::Value *cg::CGFunction::emitExpr(ir::Expr *e) {
         for(auto elem : struDecl->getElements()) {
             auto evar = llvm::dyn_cast<ir::VarDecl>(elem);
             if(evar->getType()->isMaybe()) {
-                llvm::report_fatal_error("Struct literal maybe types are not yet implemented");
+                llvm::report_fatal_error("Struct literal is somehow maybe");
             }
             auto ival = evar->getInitValue();
             for(auto [k, v] : decl->getValues()) {
@@ -855,7 +848,7 @@ llvm::Value *cg::CodeGen::getReadValuePtr(llvm::Value *v) {
         return rv;
     }
 
-    llvm::report_fatal_error("Unknown typ");
+    llvm::report_fatal_error("Unknown type for reading value");
     return nullptr;
 }
 
@@ -1573,8 +1566,8 @@ llvm::Value *cg::CGFunction::emitInfixExpr(ir::BinaryInfixExpr *e) {
     case ir::OperatorKind::OP_ACCESS:
         LOGMAX("Creating ACCESS intstruction");
         // FIXME: this creates unnecessary extract for assignment where
-        // access is no the left side a.c = 4. 
-        // Although it can will be removed as an unused var
+        // access is on the left side a.c = 4. 
+        // Although it will be removed as an unused var
         if(auto rMemAcc = llvm::dyn_cast<ir::MemberAccess>(e->getRight())) {
             result = builder.CreateExtractValue(left, rMemAcc->getIndex());
         }
@@ -2169,7 +2162,6 @@ void cg::CGFunction::emitStmt(ir::ContinueStmt *stmt) {
 }
 
 void cg::CGFunction::emitStmt(ir::Import *stmt) {
-    //llvm::report_fatal_error("Imports are not yet implemented");
 }
 
 void cg::CGFunction::emitStmt(ir::VarDecl *stmt) {
@@ -2493,6 +2485,7 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                         // struct
                         // TODO: Handle nested structs
                         // Initialize all strings
+                        assert(var->getType()->getDecl() && "Base decl is not set");
                         if(auto struDecl = llvm::dyn_cast<ir::StructDecl>(var->getType()->getDecl())) {
                             std::string struName = struDecl->isLibType() ? struDecl->getName() : mangleName(struDecl);
                             v->setInitializer(userTypes[struName].second);
@@ -2535,13 +2528,12 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
                                                 auto init = llvm::ConstantAggregateZero::get(stringT);
                                                 struMbyVal->setInitializer(init);
                                             }
-                                            // TODO: uncomment and check correctness once maybe arrays are added
-                                            /*else if(var->getType()->isMatrix() && llvm::isa<ir::MatrixLiteral>(eVar->getInitValue())) {
-                                                auto init = llvm::ConstantAggregateZero::get(matrixT);
+                                            else if(eVar->getType()->isMatrix() && llvm::isa<ir::MatrixLiteral>(eVar->getInitValue())) {
+                                                auto init = llvm::ConstantAggregateZero::get(matrixTPtr);
                                                 struMbyVal->setInitializer(init);
                                                 matricesToInit.push_back(std::make_pair(struMbyVal, llvm::dyn_cast<ir::MatrixLiteral>(eVar->getInitValue())));
-                                            }*/
-                                            else if(!var->getType()->isMatrix() && var->getType()->getDecl()) {
+                                            }
+                                            else if(!eVar->getType()->isMatrix() && eVar->getType()->getDecl()) {
                                                 auto init = llvm::ConstantAggregateZero::get(mapType(var->getType()));
                                                 struMbyVal->setInitializer(init);
                                                 structsToInit.push_back(std::make_pair(struMbyVal, llvm::dyn_cast<ir::StructLiteral>(eVar->getInitValue())));
@@ -2812,9 +2804,6 @@ void cg::CGModule::run(ir::ModuleDecl *mod) {
         int i = 0;
         for(auto elem : struDecl->getElements()) {
             auto evar = llvm::dyn_cast<ir::VarDecl>(elem);
-            if(evar->getType()->isMaybe()) {
-                llvm::report_fatal_error("Struct literal maybe types are not yet implemented");
-            }
             auto ival = evar->getInitValue();
             for(auto [k, v] : v->getValues()) {
                 if(k == evar->getName()) {

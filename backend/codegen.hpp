@@ -124,9 +124,6 @@ protected:
     llvm::DenseMap<llvm::BasicBlock *, BasicBlockDef> currDef;
     llvm::DenseMap<ir::IR *, llvm::Value *> locals;
 
-    virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) = 0;
-    virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe=false) = 0;
-
     llvm::StructType *getStringIR();
 
     llvm::FunctionType *createFunctionType(ir::FunctionDecl *fun);
@@ -198,9 +195,6 @@ private:
     PTLib *ptlibLoader;
 
     llvm::SmallVector<llvm::Constant *> getStructValsInit(ir::StructDecl *decl, std::map<std::string, ir::Expr *> inits);
-protected:
-    virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) override;
-    virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe=false) override;
 
 public:
     ir::ModuleDecl *mod;
@@ -254,9 +248,9 @@ private:
 
     llvm::Function *createFunction(ir::FunctionDecl *fun, llvm::FunctionType *funType);
 protected:
-    virtual void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val) override;
+    void writeVar(llvm::BasicBlock *BB, ir::IR *decl, llvm::Value *val);
     void writeExtVar(CGModule *mod, ir::IR *decl, llvm::Value *val);
-    virtual llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe=false) override;
+    llvm::Value *readVar(llvm::BasicBlock *BB, ir::IR *decl, bool asMaybe=false);
     llvm::Value *readExtVar(CGModule *mod, ir::IR *decl, bool asMaybe=false);
 
     llvm::Value * getElementIndex(std::vector<llvm::Value *> &indices, ir::BinaryInfixExpr *acc);

@@ -16,6 +16,8 @@ void PTCPipeline::run(ModuleInfo *modi) {
 
     // Function Analysis
     for(auto decl : mod->getDecls()) {
+        if(diags.getNumErrors() > 0) return;
+
         if(auto f = llvm::dyn_cast<ir::FunctionDecl>(decl)) {
             LOG1("Running function analysis on "+f->getName());
             FunctionAnalysis fcheck(f, diags);
@@ -27,6 +29,8 @@ void PTCPipeline::run(ModuleInfo *modi) {
     ConstantFolder const_folder(mod, modi->getScanner(), diags);
     LOG1("Running constant folder");
     const_folder.run();
+
+    if(diags.getNumErrors() > 0) return;
 
     LOGMAX("Finished ptc pipeline");
 }

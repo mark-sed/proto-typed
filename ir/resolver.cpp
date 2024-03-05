@@ -228,6 +228,7 @@ void UnresolvedSymbolResolver::resolve(ir::IR* i) {
         }
         if(!parent) {
             diags.report(i->getLocation(), diag::ERR_LOOSE_RETURN);
+            return;
         }
         stmt->setParentFun(llvm::dyn_cast<ir::FunctionDecl>(parent));
         if(stmt->getValue()) {
