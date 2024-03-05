@@ -386,7 +386,11 @@ void Scanner::leaveScope() {
 
 ir::IR *Scanner::parseVarDecl(ir::IR *type, const std::string name, ir::Expr *value) {
     if(!type) {
-        assert(value && "var did not have value");
+        if(!value && diags.getNumErrors() > 0) {
+            // Called with error value, return something so we don't crash on nullptr
+            return new ir::VarDecl(currentIR, currentIR->getLocation(), name, intType, value);
+        }
+        assert(value && "var value is not set");
         // var used
         type = value->getType();
     }
