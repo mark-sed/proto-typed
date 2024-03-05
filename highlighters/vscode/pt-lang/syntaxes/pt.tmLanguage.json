@@ -89,7 +89,7 @@
 		"control": {
 			"patterns": [{
 				"name": "keyword.control",
-				"match": "if|else|do|while|for|struct|return|break|continue\\b"
+				"match": "\\bif|else|do|while|for|struct|return|break|continue\\b"
 			}]
 		},
 		"strings": {
