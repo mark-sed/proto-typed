@@ -386,6 +386,7 @@ void Scanner::leaveScope() {
 
 ir::IR *Scanner::parseVarDecl(ir::IR *type, const std::string name, ir::Expr *value) {
     if(!type) {
+        assert(value && "var did not have value");
         // var used
         type = value->getType();
     }
@@ -410,7 +411,8 @@ ir::IR *Scanner::parseVarDecl(ir::IR *type, const std::string name, ir::Expr *va
     else {
         diags.report(type->getLocation(), diag::ERR_VARDECL_REQUIRES_TYPE);
     }
-    return nullptr;
+    // Return some value so that we don't crash later
+    return new ir::VarDecl(currentIR, type->getLocation(), name, intType, value);
 }
 
 ir::IR *Scanner::parseExprStmt(ir::Expr *e) {
@@ -504,12 +506,13 @@ ir::Expr *Scanner::parseVar(std::string v, bool external, bool maybe_type) {
             }
             else {
                 diags.report(llvmloc2Src(), diag::ERR_INTERNAL, "Only variable and function access is just yet implemented");
+                // Return some value so that we don't crash on nullptr
+                return new ir::UnresolvedSymbolAccess(v, this->unknownType);
             }
         }
         else {
             return new ir::UnresolvedSymbolAccess(v, this->unknownType);
         }
-        return nullptr;
     }
     else {
         size_t delPos = v.find(':');
@@ -1182,7 +1185,8 @@ ir::IR *Scanner::parseMatrixType(std::string name, std::vector<ir::Expr *> &mats
         return t;
     }
     diags.report(llvmloc2Src(), diag::ERR_NOT_A_TYPE, name);
-    return nullptr;
+    // Return some value so that we don't crash later with nullptr
+    return intType;
 }
 
 ir::IR *Scanner::parseMatrixType(ir::IR *rootType, std::vector<ir::Expr *> &matsize) {
@@ -1213,7 +1217,8 @@ ir::IR *Scanner::parseMatrixType(ir::IR *rootType, std::vector<ir::Expr *> &mats
         return t;
     }
     diags.report(llvmloc2Src(), diag::ERR_NOT_A_TYPE, name);
-    return nullptr;
+    // Return some value so that we don't crash later with nullptr
+    return intType;
 }
 
 std::vector<ir::Expr *> Scanner::parseMatrixValue(ir::Expr *e) {
@@ -1380,10 +1385,7 @@ ir::IR *Scanner::parseStruct(std::string name, std::vector<ir::IR *> body) {
 }
 
 ir::IR *Scanner::parseStructElement(ir::IR *type, const std::string name, ir::Expr *value) {
-    if(!type) {
-        LOGMAX("Type for vardecl is nullptr");
-        return nullptr;
-    }
+    assert(type && "Type for vardecl is nullptr");
     LOGMAX("struct element "+type->getName()+" "+name);
     ir::TypeDecl *t = llvm::dyn_cast<ir::TypeDecl>(type);
     if(t) {
@@ -1393,7 +1395,8 @@ ir::IR *Scanner::parseStructElement(ir::IR *type, const std::string name, ir::Ex
     else {
         diags.report(type->getLocation(), diag::ERR_VARDECL_REQUIRES_TYPE);
     }
-    return nullptr;
+    // Return some value so that we don't crash on nullptr
+    return new ir::VarDecl(currentIR, type->getLocation(), name, t, value);
 }
 
 std::vector<ir::IR *> Scanner::parseAddStructElement(ir::IR *elem, std::vector<ir::IR *> body) {
@@ -1442,12 +1445,8 @@ static bool isUnknownType(ir::Expr *e) {
 }
 
 ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
-    if(!fun) {
-        LOG1("Function call called with nullptr function");
-        return nullptr;
-    }
+    assert(fun && "Function call called with nullptr function");
     LOGMAX("Parsing function call "+fun->debug());
-    // TODO: Handle when calling on return value
     auto var = llvm::dyn_cast<ir::VarAccess>(fun);
     if(var) {
         if(auto f = llvm::dyn_cast<ir::FunctionDecl>(var->getVar())) {
@@ -1475,7 +1474,8 @@ ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
             }
             if(!propFIR) {
                 diags.report(llvmloc2Src(), diag::ERR_INCORRECT_ARGS_DET, f->getOGName(), ir::block2List(f->getParams()), ir::block2List(params));
-                return nullptr;
+                // Return some value so we don't crash on nullptr
+                return new ir::FunctionCall(fun, params);
             }
             auto propF = llvm::dyn_cast<ir::FunctionDecl>(propFIR);
 
@@ -1515,7 +1515,9 @@ ir::Expr *Scanner::parseFunCall(ir::Expr *fun, std::vector<ir::Expr *> params) {
             diags.report(llvmloc2Src(), diag::ERR_NOT_CALLABLE, fun->debug());
         }
     }
-    return nullptr;
+    // Return some value so we don't crash on nullptr
+    std::vector<ir::Expr *> empty_params;
+    return new ir::FunctionCall(fun, empty_params);
 }
 
 ir::IR *Scanner::parseIfStmt(ir::Expr *cond, std::vector<ir::IR *> &ifBranch, std::vector<ir::IR *> &elseBranch) {
@@ -1600,7 +1602,8 @@ ir::IR *Scanner::parseForeach(ir::IR *i, ir::Expr *collection, std::vector<ir::I
     }
     else {
         diags.report(llvmloc2Src(), diag::ERR_INCORRECT_FOR_CONSTRUCT);
-        return nullptr;
+        // Return some value so that we don't crash on nullptr
+        return new ir::ForeachStmt(currentIR, llvmloc2Src(), "for", collection, collection, body, true);
     }
 }
 

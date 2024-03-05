@@ -218,8 +218,6 @@ int main(int argc, char *argv[]) {
         exit(EXIT_SUCCESS);
     } 
 
-    // Add ptlib to parse
-    // TODO: fix path to cl::opt
     LOGMAX("Adding ptlib to parsing");
     auto ptlibModule = new ModuleInfo(libptPathOpt, true);
     ptlibModule->setLib(true);
