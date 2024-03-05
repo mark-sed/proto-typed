@@ -1,0 +1,9 @@
+void foo() {
+    for(string a: "aas") {
+        if(a == "a") {
+            void m() {
+
+            }
+        }
+    }
+}

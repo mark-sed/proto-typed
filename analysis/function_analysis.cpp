@@ -116,6 +116,37 @@ void FunctionAnalysis::checkReturns() {
     }
 }
 
+void FunctionAnalysis::checkIfContainsFunction(ir::IR *decl) {
+    if(!decl) return;
+
+    if(auto *stmt = llvm::dyn_cast<ir::FunctionDecl>(decl)) {
+        diags.report(stmt->getLocation(), diag::ERR_NESTED_FUNCTIONS);
+        return;
+    }
+    else if(auto *stmt = llvm::dyn_cast<ir::WhileStmt>(decl)) {
+        checkIfContainsFunction(stmt->getBody());
+    }
+    else if(auto *stmt = llvm::dyn_cast<ir::ForeachStmt>(decl)) {
+        checkIfContainsFunction(stmt->getBody());
+    }
+    else if(auto *stmt = llvm::dyn_cast<ir::IfStatement>(decl)) {
+        checkIfContainsFunction(stmt->getIfBranch());
+        checkIfContainsFunction(stmt->getElseBranch());
+    }
+}
+
+void FunctionAnalysis::checkIfContainsFunction(std::vector<ir::IR *> decls) {
+    // Function might not be a top level, check anywhere
+    for(auto decl: decls) {
+        checkIfContainsFunction(decl);
+    }
+}
+
+void FunctionAnalysis::checkNestedFunctions() {
+    checkIfContainsFunction(fun->getDecl());
+}
+
 void FunctionAnalysis::run() {
+    checkNestedFunctions();
     checkReturns();
 }

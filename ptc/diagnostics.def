@@ -52,6 +52,7 @@ DIAG(ERR_CANNOT_CAST_TO_MAYBE, Error, "only any type can be casted to maybe type
 DIAG(ERR_USE_CAST_FOR_ANY, Error, "incorrect assignment of type ‘{0}’ to ‘{1}’. Cast the value using ‘as’ operator.")
 DIAG(ERR_UNKNOWN_TOKEN, Error, "unknown token ‘{0}’.")
 DIAG(ERR_MISPLACED_RETURN, Error, "‘return’ can appear only inside of a function.")
+DIAG(ERR_NESTED_FUNCTIONS, Error, "Nested functions are not allowed.")
 
 DIAG(ERR_INTERNAL, Error, "internal error. {0}.")
 DIAG(ERR_NOT_YET_IMPLEMENTED, Error, "Not yet implemented: {0}.")

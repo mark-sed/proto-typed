@@ -24,6 +24,9 @@ private:
 
     void countReturns(std::vector<ir::IR *> decls, int *num_found, int *nested_ret);
     void checkReturnType(std::vector<ir::IR *> decls, int *num_found, int *nested_ret, ir::TypeDecl * expected);
+
+    void checkIfContainsFunction(std::vector<ir::IR *> decls);
+    void checkIfContainsFunction(ir::IR *decl);
 public:
     /**
      * @param fun Function to analyse
@@ -37,6 +40,11 @@ public:
      * If all the paths contains return and if their types are correct
      */
     void checkReturns();
+
+    /**
+     * Checks if user has not defined a function inside of a function
+     */
+    void checkNestedFunctions();
 
     /**
      * Runs the whole function analysis pipeline

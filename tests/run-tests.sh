@@ -356,7 +356,11 @@ true, true, false, false
 # Expect fail tests
 
 function test_missing_return {
-    expect_fail "missing_return.pt" "Missing return in a flow path in a function ‘miss’" "missing_return"
+    expect_fail "xfails/missing_return.pt" "Missing return in a flow path in a function ‘miss’" "missing_return"
+}
+
+function test_nested_fun {
+    expect_fail "xfails/nested_fun.pt" "Nested functions are not allowed." "nested_fun"
 }
 
 function run_all_tests {
@@ -389,6 +393,7 @@ function run_all_tests {
 
     # Expect fail tests
     run_test missing_return
+    run_test nested_fun
 }
 
 # Count all functions starting with test_ 
