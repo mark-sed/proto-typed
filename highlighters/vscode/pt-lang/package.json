@@ -1,0 +1,25 @@
+{
+  "name": "pt-lang",
+  "displayName": "Proto-typed Language",
+  "description": "Syntax highlightning for Proto-typed language",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.87.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "pt",
+      "aliases": ["Proto-typed", "pt"],
+      "extensions": [".pt",".proto-typed"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "pt",
+      "scopeName": "source.pt",
+      "path": "./syntaxes/pt.tmLanguage.json"
+    }]
+  }
+}

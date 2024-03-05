@@ -1,0 +1,108 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Proto-typed",
+	"patterns": [
+		{
+			"include": "#comments"
+		},
+		{
+			"include": "#constant"
+		},
+		{
+			"include": "#numbers"
+		},
+		{
+			"include": "#type-primitive"
+		},
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#control"
+		},
+		{
+			"include": "#operators"
+		},
+		{
+			"include": "#strings"
+		}
+	],
+	"repository": {
+		"comments": {
+			"patterns": [{
+				"captures": {
+					"0": {
+						"name": "punctuation.definition.comment.pt"
+					}
+				},
+				"begin": "//",
+				"name": "comment.block.empty.pt",
+				"end": "\\n"
+			},
+			{
+				"captures": {
+					"0": {
+						"name": "punctuation.definition.comment.pt"
+					}
+				},
+				"begin": "/\\*",
+				"name": "comment.block.empty.pt",
+				"end": "\\*/"
+			}
+			]
+		},
+		"constant": {
+			"match": "\\b(true|false|none)\\b",
+			"name": "constant.language.pt "
+		},
+		"operators": {
+			"patterns": [{
+				"match": "!=|<=|>=|==|<|>|=>",
+				"name": "keyword.operator.comparison.pt"
+			},
+			{
+				"match": "\\+=|-=|\\*=|/=|//=|%=|\\^=|\\+\\+=|=|\\|=|&=|\\*\\*=",
+				"name": "keyword.operator.assignment.pt"
+			},
+			{
+				"match": "\\*|\\+|-|/|%|\\.\\.|::|>>|<<|\\*\\*",
+				"name": "keyword.operator.pt"
+			}
+		]
+		},
+		"type-primitive": {
+			"name": "support.type.primitive.pt",
+			"match": "\\b(string|int|float|bool|void|any|\\?)\\b"
+		},
+		"numbers": {
+			"patterns": [{
+				"name": "constant.numeric.pt",
+				"match": "(-?[0-9]+)"
+			}]
+		},
+		"keywords": {
+			"patterns": [{
+				"match": "\\b(import|as|in|or|and|not|\\||&|~|\\^)\\b",
+				"name": "keyword.other"
+			}]
+		},
+		"control": {
+			"patterns": [{
+				"name": "keyword.control",
+				"match": "if|else|do|while|for|struct|return|break|continue\\b"
+			}]
+		},
+		"strings": {
+			"name": "string.quoted.double.pt",
+			"begin": "\"|r\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.pt",
+					"match": "\\\\."
+				}
+			]
+		}
+	},
+	"scopeName": "source.pt"
+}
