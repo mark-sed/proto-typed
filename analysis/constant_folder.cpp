@@ -92,7 +92,7 @@ ir::Expr *ConstantFolder::foldExpr(ir::Expr *e) {
     if(auto va = llvm::dyn_cast<ir::VarAccess>(e)) {
         if(auto vd = llvm::dyn_cast<ir::VarDecl>(va->getVar())) {
             if(vd->getInitValue()) {
-                if(is_const_expr(vd->getInitValue()))
+                if(is_const_expr(vd->getInitValue()) && !vd->getType()->isMaybe())
                     return vd->getInitValue();
             }
             else {
