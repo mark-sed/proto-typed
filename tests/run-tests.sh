@@ -336,6 +336,16 @@ function test_hash_table {
     expect_out_eq "marek: 42\nmatej: 1048\nlukas: 1\npatrik: 6\n" "hash_table"
 }
 
+function test_decimal {
+    expect_pass "decimal.pt" "decimal"
+    expect_out_eq "314159265/100000000 = 3.14159265
+-2099114855/700000000 = -2.998735507142857\n100000000/700000000 = 0.1428571428571428
+-2099114855/700000000 = -2.998735507142857\n419822971/-140000000 = -2.998735507142857
+1/8 = 0.125\n1/8 = 0.125\n105975/7488 = 14.15264423076923\n785/96 = 8.177083333333334
+8/125 = 0.064\n8/125 = 0.064\n8/3 = 2.666666666666667
+true\ntrue\nfalse\ntrue\nfalse\ntrue\n" "decimal"
+}
+
 function test_old_bugs {
     expect_pass "old_bugs.pt" "old_bugs"
     expect_out_eq "false\ntrue\ntrue\n1234\ntrue\nno\n8\n4\n321\nhi\n6.6\ntrue\nff\n42\nexpr string\n" "old_bugs"
@@ -388,6 +398,7 @@ function run_all_tests {
     run_test array_resolver
     run_test maybe_type_arrays
     run_test hash_table
+    run_test decimal
     run_test old_bugs
     run_test const_folding
 

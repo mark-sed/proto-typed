@@ -1,0 +1,165 @@
+// Decimal fixed point arithmetic module
+
+struct Decimal {
+    int num = 0 // numerator
+    int den = 1 // denumerator
+}
+
+Decimal decimal(int whole, int fraction) {
+    Decimal d
+    float fnumdig = log10(fraction as float) + 1.0
+    int numdig = fnumdig as int
+    d.den = (10 ** numdig) as int
+    d.num = whole * d.den + fraction
+    return d
+}
+
+Decimal fract(int numerator, int denumerator) {
+    return Decimal{.num = numerator, .den=denumerator}
+}
+
+Decimal add(Decimal a, Decimal b) {
+    int common_den = lcm(a.den, b.den)
+    int a_mult = common_den / a.den
+    int b_mult = common_den / b.den
+    return Decimal{.num=(a_mult*a.num + b_mult*b.num), .den=common_den}
+}
+
+Decimal sub(Decimal a, Decimal b) {
+    int common_den = lcm(a.den, b.den)
+    int a_mult = common_den / a.den
+    int b_mult = common_den / b.den
+    return Decimal{.num=(a_mult*a.num - b_mult*b.num), .den=common_den}
+}
+
+Decimal mul(Decimal a, Decimal b) {
+    return Decimal{.num=a.num*b.num, .den=a.den*b.den}
+}
+
+Decimal div(Decimal a, Decimal b) {
+    return Decimal{.num=a.num*b.den, .den=a.den*b.num}
+}
+
+Decimal exp(Decimal a, int b) {
+    return Decimal{.num=(a.num**b) as int, .den=(a.den**b) as int}
+}
+
+Decimal exp(Decimal a, Decimal b) {
+    int num = ((a.num ** b.num) ** (1.0/b.den)) as int
+    int den = ((a.den ** b.num) ** (1.0/b.den)) as int
+    return Decimal{.num=num, .den=den}
+}
+
+Decimal simplify(Decimal d) {
+    int divisor = gcd(d.num, d.den)
+    if(divisor == 1) return d
+    return Decimal{.num=d.num/divisor, .den=d.den/divisor}
+}
+
+bool isneg(Decimal d) {
+    bool numn = d.num < 0
+    bool denn = d.den < 0
+    return (numn and not denn) or (denn and not numn)
+}
+
+bool ispos(Decimal d) {
+    return not isneg(d)
+}
+
+bool eq(Decimal a, Decimal b) {
+    return simplify(a) == simplify(b)
+}
+
+bool gt(Decimal a, Decimal b) {
+    Decimal diff = sub(a, b)
+    return ispos(diff) and not (diff.num == 0)
+}
+
+bool lt(Decimal a, Decimal b) {
+    return gt(b, a)
+}
+
+bool gte(Decimal a, Decimal b) {
+    Decimal diff = sub(a, b)
+    return ispos(diff)
+}
+
+bool lte(Decimal a, Decimal b) {
+    return gte(b, a)  
+}
+
+string to_string(Decimal d) {
+    return d.num ++ "/" ++ d.den
+}
+
+float to_float(Decimal d) {
+    return (d.num as float) / (d.den as float)
+}
+
+
+//-------
+
+void test() {
+    Decimal d
+    d = decimal(3, 14159265)
+    print(to_string(d)++" = "++to_float(d)++"\n")
+
+    Decimal d2
+    d2 = fract(1, 7)
+    d2 = sub(d2, d)
+    print(to_string(d2)++" = "++to_float(d2)++"\n")
+
+    Decimal res
+    res = add(d, d2)
+    print(to_string(res)++" = ")
+    print(to_float(res)++"\n")
+
+    res = sub(res, d)
+    print(to_string(res)++" = ")
+    print(to_float(res)++"\n")
+
+    res = simplify(res)
+    print(to_string(res)++" = ")
+    print(to_float(res)++"\n")
+
+    d = fract(1, 4)
+    d2 = fract(1, 2)
+    res = mul(d, d2)
+    print(to_string(res)++" = ")
+    print(to_float(res)++"\n")
+
+    d = fract(1, 4)
+    d2 = fract(1, 2)
+    res = mul(d, d2)
+    print(to_string(res)++" = ")
+    print(to_float(res)++"\n")
+
+    d = fract(785, 96)
+    d2 = fract(135, 78)
+    res = mul(d, d2)
+    print(to_string(res)++" = ")
+    print(to_float(res)++"\n")
+
+    res = div(res, d2)
+    res = simplify(res)
+    print(to_string(res)++" = "++to_float(res)++"\n")
+
+    res = exp(fract(2, 5), 3)
+    print(to_string(res)++" = "++to_float(res)++"\n")
+    res = exp(fract(2, 5), fract(3, 1))
+    print(to_string(res)++" = "++to_float(res)++"\n")
+
+    res = exp(fract(27, 8), fract(2, 3))
+    print(to_string(res)++" = "++to_float(res)++"\n")
+
+    print(eq(res, Decimal{.num=24, .den=9})++"\n")
+
+    print(isneg(fract(-2, 1))++"\n")
+    print(isneg(fract(-2, -1))++"\n")
+    print(isneg(fract(2, -1))++"\n")
+    print(isneg(fract(2, 1))++"\n")
+
+    print(gt(fract(3, 5), fract(1, 2)) ++ "\n")
+}
+
+test()
