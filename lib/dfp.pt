@@ -1,0 +1,159 @@
+/**
+ * Decimal floating point arithmetic module
+ * @author Marek Sedlacek
+ * @copyright Copyright (c) 2024 
+ *
+ * Example usage:
+ * ```
+ * Decimal a
+ * a = decimal(3, 14159265) // 3.14159265
+ *
+ * Decimal b
+ * b = fract(1, 7) // 1/7
+ * b = sub(a, b)
+ * print(to_string(d2) ++ " = " ++ to_float(d2) ++ "\n")
+ * ``` 
+ */
+
+// TODO: Handle NaNs
+// TODO: Handle Inf
+// TODO: Handle exceptions (division by zero)
+
+/** Holds decimal value */
+struct Decimal {
+    int num = 0 /// numerator
+    int den = 1 /// denumerator
+}
+
+/**
+ * Converts value passed in as a whole part and fractional part
+ * E.g.: 4.2 should be converted using decimal(4,2) 
+ *
+ * @param whole Whole part of the value
+ * @param fraction Fractional part of the value
+ * @return Passed in values as a decimal
+ */
+Decimal decimal(int whole, int fraction) {
+    Decimal d
+    float fnumdig = log10(fraction as float) + 1.0
+    int numdig = fnumdig as int
+    d.den = (10 ** numdig) as int
+    d.num = whole * d.den + fraction
+    return d
+}
+
+/**
+ * Converts value passed in as a numerator and denumerator
+ * E.g.: 4.2 should be converted using fract(42, 10) 
+ * E.g.: 1/7 should be converted using fract(1, 7)
+ *
+ * @param numerator Numerator
+ * @param denumerator Denumerator
+ * @return Passed in values as a decimal
+ */
+Decimal fract(int numerator, int denumerator) {
+    return Decimal{.num = numerator, .den=denumerator}
+}
+
+/** Adds 2 decimals */
+Decimal add(Decimal a, Decimal b) {
+    int common_den = lcm(a.den, b.den)
+    int a_mult = common_den / a.den
+    int b_mult = common_den / b.den
+    return Decimal{.num=(a_mult*a.num + b_mult*b.num), .den=common_den}
+}
+
+/** Subtracts 2 decimals */
+Decimal sub(Decimal a, Decimal b) {
+    int common_den = lcm(a.den, b.den)
+    int a_mult = common_den / a.den
+    int b_mult = common_den / b.den
+    return Decimal{.num=(a_mult*a.num - b_mult*b.num), .den=common_den}
+}
+
+/** Multiplies 2 decimals */
+Decimal mul(Decimal a, Decimal b) {
+    return Decimal{.num=a.num*b.num, .den=a.den*b.den}
+}
+
+/** Divides 2 decimals */
+Decimal div(Decimal a, Decimal b) {
+    return Decimal{.num=a.num*b.den, .den=a.den*b.num}
+}
+
+/** Exponentiation of a decimal to an integer value */
+Decimal exp(Decimal a, int b) {
+    return Decimal{.num=(a.num**b) as int, .den=(a.den**b) as int}
+}
+
+/** 
+ * Exponentiation of a decimal to a decimal value
+ * @warning This function uses floating point arithmetic,
+ *          which might cause rounding errors. It is recommended
+ *          to avoid using this function as to not lose precision.
+ */
+Decimal exp(Decimal a, Decimal b) {
+    int num = ((a.num ** b.num) ** (1.0/b.den)) as int
+    int den = ((a.den ** b.num) ** (1.0/b.den)) as int
+    return Decimal{.num=num, .den=den}
+}
+
+/** 
+ * Simplifies decimal value.
+ * Useful for pretty print or comparison.
+ * E.g.: simplify on 2/6 will return 1/3
+ */
+Decimal simplify(Decimal d) {
+    int divisor = gcd(d.num, d.den)
+    if(divisor == 1) return d
+    return Decimal{.num=d.num/divisor, .den=d.den/divisor}
+}
+
+/** @return true if d is negative value, false otherwise */
+bool isneg(Decimal d) {
+    bool numn = d.num < 0
+    bool denn = d.den < 0
+    return (numn and not denn) or (denn and not numn)
+}
+
+/** @return true if d is positive value or 0, false otherwise */
+bool ispos(Decimal d) {
+    return not isneg(d)
+}
+
+/** @return true if a is equal to b, false otherwise */
+bool eq(Decimal a, Decimal b) {
+    return simplify(a) == simplify(b)
+}
+
+/** @return true if a is greater than b, false otherwise */
+bool gt(Decimal a, Decimal b) {
+    Decimal diff = sub(a, b)
+    return ispos(diff) and not (diff.num == 0)
+}
+
+/** @return true if a is less than b, false otherwise */
+bool lt(Decimal a, Decimal b) {
+    return gt(b, a)
+}
+
+/** @return true if a is greater than or equal to b, false otherwise */
+bool gte(Decimal a, Decimal b) {
+    Decimal diff = sub(a, b)
+    return ispos(diff)
+}
+
+/** @return true if a is less than or equal to b, false otherwise */
+bool lte(Decimal a, Decimal b) {
+    return gte(b, a)  
+}
+
+/** Converts d to a string in fractional form */
+string to_string(Decimal d) {
+    return d.num ++ "/" ++ d.den
+}
+
+/** Converts d to a float (this might result in loss of precision) */
+float to_float(Decimal d) {
+    return (d.num as float) / (d.den as float)
+}

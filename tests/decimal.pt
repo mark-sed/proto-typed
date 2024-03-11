@@ -163,3 +163,71 @@ void test() {
 }
 
 test()
+
+/* TODO: Change to this once dfp import works
+import dfp
+
+void test() {
+    dfp::Decimal d
+    d = dfp::decimal(3, 14159265)
+    print(dfp::to_string(d)++" = "++dfp::to_float(d)++"\n")
+
+    dfp::Decimal d2
+    d2 = dfp::fract(1, 7)
+    d2 = dfp::sub(d2, d)
+    print(dfp::to_string(d2)++" = "++dfp::to_float(d2)++"\n")
+
+    dfp::Decimal res
+    res = dfp::add(d, d2)
+    print(dfp::to_string(res)++" = ")
+    print(dfp::to_float(res)++"\n")
+
+    res = dfp::sub(res, d)
+    print(dfp::to_string(res)++" = ")
+    print(dfp::to_float(res)++"\n")
+
+    res = dfp::simplify(res)
+    print(dfp::to_string(res)++" = ")
+    print(dfp::to_float(res)++"\n")
+
+    d = dfp::fract(1, 4)
+    d2 = dfp::fract(1, 2)
+    res = dfp::mul(d, d2)
+    print(dfp::to_string(res)++" = ")
+    print(dfp::to_float(res)++"\n")
+
+    d = dfp::fract(1, 4)
+    d2 = dfp::fract(1, 2)
+    res = dfp::mul(d, d2)
+    print(dfp::to_string(res)++" = ")
+    print(dfp::to_float(res)++"\n")
+
+    d = dfp::fract(785, 96)
+    d2 = dfp::fract(135, 78)
+    res = dfp::mul(d, d2)
+    print(dfp::to_string(res)++" = ")
+    print(dfp::to_float(res)++"\n")
+
+    res = dfp::div(res, d2)
+    res = dfp::simplify(res)
+    print(dfp::to_string(res)++" = "++dfp::to_float(res)++"\n")
+
+    res = dfp::exp(dfp::fract(2, 5), 3)
+    print(dfp::to_string(res)++" = "++dfp::to_float(res)++"\n")
+    res = dfp::exp(dfp::fract(2, 5), dfp::fract(3, 1))
+    print(dfp::to_string(res)++" = "++dfp::to_float(res)++"\n")
+
+    res = dfp::exp(dfp::fract(27, 8), dfp::fract(2, 3))
+    print(dfp::to_string(res)++" = "++dfp::to_float(res)++"\n")
+
+    print(dfp::eq(res, dfp::Decimal{.num=24, .den=9})++"\n")
+
+    print(dfp::isneg(dfp::fract(-2, 1))++"\n")
+    print(dfp::isneg(dfp::fract(-2, -1))++"\n")
+    print(dfp::isneg(dfp::fract(2, -1))++"\n")
+    print(dfp::isneg(dfp::fract(2, 1))++"\n")
+
+    print(dfp::gt(dfp::fract(3, 5), dfp::fract(1, 2)) ++ "\n")
+}
+
+test()*/
