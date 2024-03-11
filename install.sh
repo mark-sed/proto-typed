@@ -11,8 +11,6 @@ rm -rf ${GC_PATH}
 
 cp -r gc ${GC_PATH}
 cp -r lib ${STD_PATH}
-cp ptc/libptl.o ${STD_PATH}/libptl.o
-cp ptc/libpt.pt ${STD_PATH}/libpt.pt
 
 rm -f /bin/ptc
 chmod +x build/ptc/ptc
