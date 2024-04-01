@@ -7,8 +7,8 @@ As the name suggests, proto-typed was designed for writing prototypes and short 
 This repository contains Proto-typed Compiler (ptc) and the language definition in textual form.
 
 #### Table of contents
-- [Proto-typed Project](#proto-typed-project)
-- [How to run programs](#how-to-run-programs)
+- [Proto-typed Project](#proto-typed)
+- [How to run programs](#how-to-run-programs-with-pt)
   - [Download](#download)
   - [Installation from source](#installation-from-source)
   - [Using pt to run programs](#Using-pt-to-run-programs-with-pt)
