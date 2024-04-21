@@ -209,17 +209,17 @@ oct     0[Qq][0-7]+
                   return token::STRING;
                 }
 
-[-]?[0-9]+      { /* Integer (long) */
+[0-9]+      { /* Integer (long) */
                   // atol can be used since syntactical analysis was done here
                   yylval->emplace<long>(atol(yytext));
                   return token::INT;
                 }
-[-]?{hex}       { /* Hex Integer (long) */
+{hex}       { /* Hex Integer (long) */
                   // atol can be used since syntactical analysis was done here
                   yylval->emplace<long>(std::strtol(yytext, nullptr, 16));
                   return token::INT;
                 }
-[-]?{bin}       { /* Binary Integer (long) */
+{bin}       { /* Binary Integer (long) */
                   // atol can be used since syntactical analysis was done here
                   if(yytext[0] == '-') {
                     yylval->emplace<long>(-std::strtol(&(yytext[3]), nullptr, 2));
@@ -228,7 +228,7 @@ oct     0[Qq][0-7]+
                   }
                   return token::INT;
                 }
-[-]?{oct}       { /* Octal Integer (long) */
+{oct}       { /* Octal Integer (long) */
                   // atol can be used since syntactical analysis was done here
                   if(yytext[0] == '-') {
                     yylval->emplace<long>(-std::strtol(&(yytext[3]), nullptr, 8));
@@ -237,11 +237,11 @@ oct     0[Qq][0-7]+
                   }
                   return token::INT;
                 }
-[-]?[0-9]+\.?[0-9]+[eE][+-]?[0-9]+ {   // Float in scientific notation
+[0-9]+\.?[0-9]+[eE][+-]?[0-9]+ {   // Float in scientific notation
                   yylval->build<double>(std::stod(yytext)); 
                   return token::FLOAT;
                 }
-[-]?[0-9]+\.[0-9]+ {   // Float
+[0-9]+\.[0-9]+ {   // Float
                   yylval->build<double>(std::stod(yytext)); 
                   return token::FLOAT;
                 }

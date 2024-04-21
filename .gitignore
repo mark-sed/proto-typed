@@ -36,3 +36,4 @@
 build/
 examples/
 ptc/libpt.ll
+.vscode/
